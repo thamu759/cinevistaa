@@ -1,0 +1,2477 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { 
+  Play, Pause, Plus, Search, Star, User, Film, Tv, 
+  ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
+  Edit3, Globe, Share2, Sparkles, Check, Info, Lock, Mail, Eye, EyeOff, Shield,
+  Users, Send, Volume2, VolumeX, Maximize, List
+} from 'lucide-react';
+import {
+  fetchMovies,
+  fetchMovieById,
+  addMovieReview,
+  registerUser,
+  loginUser,
+  fetchCurrentUser,
+  fetchCommunityThreads,
+  createCommunityThread,
+  createCommunityReply,
+  proxyImageUrl,
+  fetchUserProfile,
+  updateUserProfile,
+  fetchPublicUsers,
+  followUser,
+  unfollowUser,
+  getLists,
+  createList,
+  addMovieToList,
+  removeMovieFromList,
+  deleteList,
+  fetchLeaderboard,
+  curateMovie
+} from './api';
+import AdminPanel from './components/AdminPanel';
+import Modal from './components/Modal';
+
+export default function App() {
+  // App Navigation & Router State
+  const [activeView, setActiveView] = useState('home'); // 'home', 'movie-details', 'profile'
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
+  
+  // API Data State
+  const [movies, setMovies] = useState([]);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Filter State (for the movie grid only)
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [sortOption, setSortOption] = useState('rating');
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+
+  // Real User Auth State
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authTab, setAuthTab] = useState('login'); // 'login' or 'register'
+  const [authFormData, setAuthFormData] = useState({ username: '', email: '', password: '' });
+  const [authError, setAuthError] = useState('');
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSessionVerified, setIsSessionVerified] = useState(false);
+
+  // Search Overlay State (IMDb-style, decoupled from grid)
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef(null);
+  const searchOverlayRef = useRef(null);
+
+  // Phase 8 Community Forum State
+  const [communityThreads, setCommunityThreads] = useState([]);
+  const [isCommunityLoading, setIsCommunityLoading] = useState(false);
+  const [communityError, setCommunityError] = useState('');
+  const [newThreadData, setNewThreadData] = useState({
+    title: '',
+    body: '',
+    tag: 'General'
+  });
+  const [replyDrafts, setReplyDrafts] = useState({});
+
+  // Modals Toggles
+  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [showCurateModal, setShowCurateModal] = useState(false);
+  const [curationMovies, setCurationMovies] = useState([]);
+  const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
+  const playerRef = useRef(null);
+  const playerContainerRef = useRef(null);
+  const progressIntervalRef = useRef(null);
+
+  const getYoutubeVideoId = (url) => {
+    if (!url) return null;
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /^([a-zA-Z0-9_-]{11})$/
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  };
+
+  const formatTime = (s) => {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // Initialize YouTube player when modal opens
+  useEffect(() => {
+    if (!showTrailer || !selectedMovie?.trailerUrl) return;
+    const videoId = getYoutubeVideoId(selectedMovie.trailerUrl);
+    if (!videoId) return;
+
+    let player = playerRef.current;
+    if (player && typeof player.destroy === 'function') {
+      player.destroy();
+      playerRef.current = null;
+    }
+
+    const initPlayer = () => {
+      if (!window.YT || !window.YT.Player) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const first = document.getElementsByTagName('script')[0];
+        first.parentNode.insertBefore(tag, first);
+        window.onYouTubeIframeAPIReady = () => {
+          createPlayer();
+        };
+      } else {
+        createPlayer();
+      }
+    };
+
+    const createPlayer = () => {
+      const container = playerContainerRef.current;
+      if (!container) return;
+      container.innerHTML = '<div id="yt-player" style="position:absolute;top:0;left:0;width:100%;height:100%"></div>';
+      playerRef.current = new window.YT.Player('yt-player', {
+        videoId,
+        playerVars: {
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          iv_load_policy: 3,
+          autoplay: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: (e) => {
+            setTrailerPlayer(prev => ({ ...prev, duration: e.target.getDuration(), playing: true }));
+            e.target.playVideo();
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = setInterval(() => {
+              if (e.target && e.target.getCurrentTime) {
+                setTrailerPlayer(prev => ({ ...prev, currentTime: e.target.getCurrentTime() }));
+              }
+            }, 250);
+          },
+          onStateChange: (e) => {
+            setTrailerPlayer(prev => ({ ...prev, playing: e.data === window.YT.PlayerState.PLAYING, currentTime: e.target.getCurrentTime() }));
+            if (e.data === window.YT.PlayerState.ENDED) {
+              if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            }
+          }
+        }
+      });
+    };
+
+    initPlayer();
+
+    return () => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+    };
+  }, [showTrailer, selectedMovie?.trailerUrl]);
+
+  const togglePlay = () => {
+    const p = playerRef.current;
+    if (!p || !p.getPlayerState) return;
+    if (p.getPlayerState() === window.YT.PlayerState.PLAYING) {
+      p.pauseVideo();
+    } else {
+      p.playVideo();
+    }
+  };
+
+  const seekTo = (e) => {
+    const p = playerRef.current;
+    if (!p || !p.seekTo) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = x / rect.width;
+    p.seekTo(pct * trailerPlayer.duration);
+  };
+
+  const setVolume = (e) => {
+    const p = playerRef.current;
+    if (!p || !p.setVolume) return;
+    const v = parseInt(e.target.value);
+    p.setVolume(v);
+    setTrailerPlayer(prev => ({ ...prev, volume: v }));
+  };
+
+  const toggleFullscreen = () => {
+    const el = playerContainerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  };
+
+  // Local Watchlist State (Persisted in LocalStorage)
+  const [watchlist, setWatchlist] = useState(() => {
+    const saved = localStorage.getItem('mc_watchlist');
+    return saved ? JSON.parse(saved) : ['dune-part-two', 'the-batman'];
+  });
+
+  // User Profile Custom Info (Simulated Login)
+  const [userProfile] = useState({
+    name: "Julian Vane",
+    role: "Gold Critic",
+    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+    bio: "Searching for the perfect frame in a world of digital noise.",
+    followers: "3.8k",
+    accuracy: "92%",
+    listsCount: 12
+  });
+
+  const [profileData, setProfileData] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editBio, setEditBio] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [profileLoadError, setProfileLoadError] = useState('');
+
+  // Actor view state
+  const [selectedActor, setSelectedActor] = useState(null);
+
+  // User Lists state
+  const [userLists, setUserLists] = useState([]);
+  const [allLists, setAllLists] = useState([]);
+  const [showCreateList, setShowCreateList] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [newListDesc, setNewListDesc] = useState('');
+
+  // Leaderboard state
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [selectedListDetail, setSelectedListDetail] = useState(null);
+
+  // Form State - Write Review
+  const [newReviewData, setNewReviewData] = useState({
+    user: userProfile.name,
+    role: userProfile.role,
+    rating: 8, // out of 10
+    text: ''
+  });
+
+  // Sync Watchlist to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('mc_watchlist', JSON.stringify(watchlist));
+  }, [watchlist]);
+
+  // Fetch profile data and all users when showing profile
+  useEffect(() => {
+    if (activeView !== 'profile') return;
+    if (currentUser) {
+      fetchUserProfile(currentUser.username)
+        .then(data => setProfileData(data))
+        .catch(() => setProfileLoadError('Failed to load profile'));
+    }
+    fetchPublicUsers()
+      .then(data => setAllUsers(data))
+      .catch(() => {});
+  }, [activeView, currentUser]);
+
+  const handleSaveProfile = async () => {
+    try {
+      const updated = await updateUserProfile({ bio: editBio, avatarUrl: editAvatar, email: editEmail });
+      setProfileData(updated);
+      setCurrentUser(prev => prev ? { ...prev, avatarUrl: updated.avatarUrl, email: updated.email } : prev);
+      setEditingProfile(false);
+    } catch (err) {
+      setProfileLoadError(err.message);
+    }
+  };
+
+  const handleFollow = async (username) => {
+    try {
+      await followUser(username);
+      setAllUsers(prev => prev.map(u => u.username === username ? { ...u, followers: [...(u.followers || []), currentUser?.username] } : u));
+      if (profileData) setProfileData(prev => ({ ...prev, following: [...(prev.following || []), username] }));
+    } catch (err) {}
+  };
+
+  const handleUnfollow = async (username) => {
+    try {
+      await unfollowUser(username);
+      setAllUsers(prev => prev.map(u => u.username === username ? { ...u, followers: (u.followers || []).filter(f => f !== currentUser?.username) } : u));
+      if (profileData) setProfileData(prev => ({ ...prev, following: (prev.following || []).filter(f => f !== username) }));
+    } catch (err) {}
+  };
+
+  // ─── ACTOR ───
+  const handleViewActor = (actorName) => {
+    setSelectedActor(actorName);
+    setActiveView('actor');
+  };
+
+  // ─── LISTS ───
+  const loadUserLists = async () => {
+    try {
+      const data = await getLists(currentUser?.username);
+      setUserLists(data);
+    } catch (e) {}
+  };
+  const loadAllLists = async () => {
+    try {
+      const data = await getLists();
+      setAllLists(data);
+    } catch (e) {}
+  };
+  const handleCreateList = async () => {
+    if (!newListName.trim() || !currentUser) return;
+    try {
+      await createList({ name: newListName.trim(), description: newListDesc.trim() });
+      setNewListName('');
+      setNewListDesc('');
+      setShowCreateList(false);
+      loadUserLists();
+      loadAllLists();
+    } catch (e) {}
+  };
+
+  // ─── CURATION ───
+  const handleCurate = async (movieId, data) => {
+    try {
+      const updated = await curateMovie(movieId, data);
+      setMovies(prev => prev.map(m => m.id === movieId ? { ...m, ...updated } : m));
+    } catch (e) {}
+  };
+
+  // ─── LEADERBOARD ───
+  const loadLeaderboard = async () => {
+    try {
+      const data = await fetchLeaderboard();
+      setLeaderboard(data);
+    } catch (e) {}
+  };
+
+  // Debounce + live search for overlay results
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const data = await fetchMovies({ search: searchQuery.trim() });
+        setSearchResults(data);
+      } catch (err) {
+        console.error('Search failed:', err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Close search overlay on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        searchOverlayRef.current &&
+        !searchOverlayRef.current.contains(e.target) &&
+        !e.target.closest('.search-trigger')
+      ) {
+        setIsSearchOpen(false);
+      }
+    };
+    if (isSearchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearchOpen]);
+
+  // Focus search input when overlay opens
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
+
+  // Handle search result click
+  const handleSearchResultClick = (movieId) => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    handleViewMovie(movieId);
+  };
+
+  // Toggle search overlay
+  const toggleSearch = () => {
+    setIsSearchOpen(prev => !prev);
+    if (isSearchOpen) {
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  };
+
+  // Fetch Movies on genre/sort changes (search is decoupled)
+  const loadMoviesList = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchMovies({
+        genre: selectedGenre,
+        sort: sortOption
+      });
+      setMovies(data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load movies. Make sure backend is running!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMoviesList();
+  }, [selectedGenre, sortOption]);
+
+  const loadCommunityThreads = useCallback(async () => {
+    setIsCommunityLoading(true);
+    setCommunityError('');
+    try {
+      const threads = await fetchCommunityThreads();
+      setCommunityThreads(threads);
+    } catch (err) {
+      console.error(err);
+      setCommunityError('Failed to load community discussions. Make sure backend is running!');
+    } finally {
+      setIsCommunityLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCommunityThreads();
+  }, [loadCommunityThreads]);
+
+  // Derive heroMovies list from current movies
+  const heroMovies = movies.length > 0 
+    ? (movies.filter(m => m.isHero || m.rating >= 4.5).length > 0
+        ? movies.filter(m => m.isHero || m.rating >= 4.5)
+        : movies.slice(0, 4))
+    : [];
+
+  // Reset index if out of range when list changes
+  useEffect(() => {
+    if (currentHeroIndex >= heroMovies.length && heroMovies.length > 0) {
+      setCurrentHeroIndex(0);
+    }
+  }, [heroMovies.length, currentHeroIndex]);
+
+  // Auto-play the hero carousel (rotate slides every 6.5 seconds)
+  useEffect(() => {
+    if (heroMovies.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+    }, 6500);
+    return () => clearInterval(interval);
+  }, [heroMovies.length]);
+
+  // Fetch detailed movie info when selected
+  useEffect(() => {
+    if (selectedMovieId) {
+      const loadMovieDetails = async () => {
+        try {
+          const data = await fetchMovieById(selectedMovieId);
+          setSelectedMovie(data);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      loadMovieDetails();
+    } else {
+      setSelectedMovie(null);
+    }
+  }, [selectedMovieId]);
+
+  // Verify auth session token on mount
+  useEffect(() => {
+    const token = localStorage.getItem('mc_token');
+    if (token) {
+      const verifySession = async () => {
+        setIsSessionVerified(false);
+        try {
+          const user = await fetchCurrentUser(token);
+          setCurrentUser(user);
+        } catch (err) {
+          console.warn("Session token expired, clearing...", err);
+          localStorage.removeItem('mc_token');
+        } finally {
+          setIsSessionVerified(true);
+        }
+      };
+      verifySession();
+    } else {
+      setIsSessionVerified(true);
+    }
+  }, []);
+
+  const getRouteFromPath = (pathname) => {
+    const path = pathname.replace(/\/+$/, '') || '/';
+    if (path === '/') return { view: 'home' };
+    if (path === '/admin') return { view: 'admin' };
+    if (path === '/profile') return { view: 'profile' };
+    if (path === '/community') return { view: 'community' };
+    if (path === '/new-releases') return { view: 'new-releases' };
+    if (path === '/watchlist') return { view: 'watchlist' };
+    if (path === '/coming-soon') return { view: 'coming-soon' };
+    if (path === '/leaderboard') return { view: 'leaderboard' };
+    if (path === '/lists') return { view: 'lists' };
+    const movieMatch = path.match(/^\/movie\/(.+)$/);
+    if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
+    return { view: 'home' };
+  };
+
+  const pathForView = (view, movieId) => {
+    if (view === 'admin') return '/admin';
+    if (view === 'profile') return '/profile';
+    if (view === 'community') return '/community';
+    if (view === 'new-releases') return '/new-releases';
+    if (view === 'watchlist') return '/watchlist';
+    if (view === 'coming-soon') return '/coming-soon';
+    if (view === 'leaderboard') return '/leaderboard';
+    if (view === 'lists') return '/lists';
+    if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
+    return '/';
+  };
+
+  const navigateTo = (view, options = {}) => {
+    const { movieId, replace = false } = options;
+    const nextPath = pathForView(view, movieId);
+    if (replace) {
+      window.history.replaceState(null, '', nextPath);
+    } else {
+      window.history.pushState(null, '', nextPath);
+    }
+    setActiveView(view);
+    if (view === 'movie-details') {
+      setSelectedMovieId(movieId);
+    } else {
+      setSelectedMovieId(null);
+    }
+  };
+
+  useEffect(() => {
+    const { view, movieId } = getRouteFromPath(window.location.pathname);
+    if (view === 'movie-details' && movieId) {
+      setSelectedMovieId(movieId);
+    }
+    setActiveView(view);
+
+    const handlePopState = () => {
+      const { view: newView, movieId: newMovieId } = getRouteFromPath(window.location.pathname);
+      setActiveView(newView);
+      if (newView === 'movie-details') {
+        setSelectedMovieId(newMovieId);
+      } else {
+        setSelectedMovieId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (!isSessionVerified || activeView !== 'admin') return;
+    if (!currentUser || currentUser.role !== 'admin') {
+      navigateTo('home', { replace: true });
+    }
+  }, [activeView, currentUser, isSessionVerified]);
+
+  // Scoped helper to switch auth tab and clear form inputs
+  const setTabAndClearForm = (tab) => {
+    setAuthTab(tab);
+    setAuthError('');
+    setIsAuthLoading(false);
+    setShowPassword(false);
+    setAuthFormData({ username: '', email: '', password: '' });
+  };
+
+  // Handle Login and Register Submit
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setIsAuthLoading(true);
+    try {
+      if (authTab === 'login') {
+        const user = await loginUser(authFormData.username, authFormData.password);
+        localStorage.setItem('mc_token', user.token);
+        setCurrentUser(user);
+        setIsAuthModalOpen(false);
+        setAuthFormData({ username: '', email: '', password: '' });
+      } else {
+        const user = await registerUser(
+          authFormData.username,
+          authFormData.email,
+          authFormData.password
+        );
+        localStorage.setItem('mc_token', user.token);
+        setCurrentUser(user);
+        setIsAuthModalOpen(false);
+        setAuthFormData({ username: '', email: '', password: '' });
+      }
+    } catch (err) {
+      setAuthError(err.message || 'Authentication failed. Please check credentials.');
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('mc_token');
+    setCurrentUser(null);
+    setActiveView('home');
+  };
+
+  // Toggle watchlist item
+  const handleViewMovie = (movieId) => {
+    navigateTo('movie-details', { movieId });
+  };
+
+  const handleToggleWatchlist = (movieId, e) => {
+    if (e) e.stopPropagation();
+    setWatchlist(prev => 
+      prev.includes(movieId) ? prev.filter(id => id !== movieId) : [...prev, movieId]
+    );
+  };
+
+  // Submit review form
+  const handleCreateReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!newReviewData.text) return;
+
+    const reviewPayload = {
+      ...newReviewData,
+      user: currentUser ? currentUser.username : "Anonymous",
+      role: currentUser ? currentUser.role : "Cinema Enthusiast",
+      avatarUrl: currentUser ? currentUser.avatarUrl : ""
+    };
+
+    try {
+      const updatedMovie = await addMovieReview(selectedMovie.id, reviewPayload);
+      setSelectedMovie(updatedMovie);
+      setIsWriteReviewOpen(false);
+      // Reset review form
+      setNewReviewData({
+        user: currentUser ? currentUser.username : "Anonymous",
+        role: currentUser ? currentUser.role : "Cinema Enthusiast",
+        rating: 8,
+        text: ''
+      });
+      // Refresh global movie list to sync ratings
+      loadMoviesList();
+    } catch (err) {
+      alert(err.message || "Failed to post review");
+    }
+  };
+
+  // Optimistic upvote review comment
+  const handleUpvoteReview = (reviewId) => {
+    if (!selectedMovie) return;
+    
+    const updatedReviews = selectedMovie.reviews.map(rev => {
+      if (rev.id === reviewId) {
+        return { ...rev, likes: (rev.likes || 0) + 1 };
+      }
+      return rev;
+    });
+
+    setSelectedMovie({
+      ...selectedMovie,
+      reviews: updatedReviews
+    });
+  };
+
+  const handleCreateThreadSubmit = async (e) => {
+    e.preventDefault();
+    if (!newThreadData.title.trim() || !newThreadData.body.trim()) return;
+
+    try {
+      const createdThread = await createCommunityThread(newThreadData);
+      setCommunityThreads(prev => [createdThread, ...prev]);
+      setNewThreadData({ title: '', body: '', tag: 'General' });
+    } catch (err) {
+      alert(err.message || "Failed to start discussion");
+    }
+  };
+
+  const handleCreateReplySubmit = async (threadId, e) => {
+    e.preventDefault();
+    const body = replyDrafts[threadId]?.trim();
+    if (!body) return;
+
+    try {
+      const updatedThread = await createCommunityReply(threadId, { body });
+      setCommunityThreads(prev => prev.map(thread => thread.id === threadId ? updatedThread : thread));
+      setReplyDrafts(prev => ({ ...prev, [threadId]: '' }));
+    } catch (err) {
+      alert(err.message || "Failed to post reply");
+    }
+  };
+
+  // Staff Picks categories
+  const featuredStaffPick = movies.find(m => m.isStaffPick && m.staffPickType === 'featured') || movies.find(m => m.isStaffPick);
+  const gridStaffPicks = movies.filter(m => m.isStaffPick && m.staffPickType === 'grid').slice(0, 3);
+
+  // Profile recent reviews count helper
+  const profileReviews = movies.flatMap(m => 
+    m.reviews
+      .filter(r => r.user === userProfile.name)
+      .map(r => ({ ...r, movieTitle: m.title, moviePoster: m.posterUrl, movieId: m.id }))
+  );
+
+  return (
+    <div className="app-container">
+      {/* NAVIGATION HEADER */}
+      <div className="navbar-container">
+        <nav className="navbar">
+          <div className="logo" onClick={() => { setActiveView('home'); setSelectedMovieId(null); }}>
+            Midnight <span>Cinema</span>
+          </div>
+          <div className="nav-links">
+            <a 
+              className={`nav-link ${activeView === 'home' ? 'active' : ''}`}
+              href="/"
+              onClick={(e) => { e.preventDefault(); setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
+            >
+              Movies
+            </a>
+
+            <a 
+              className={`nav-link ${activeView === 'watchlist' ? 'active' : ''}`}
+              href="/watchlist"
+              onClick={(e) => { e.preventDefault(); navigateTo('watchlist'); }}
+            >
+              Watchlist
+            </a>
+
+            <a 
+              className={`nav-link ${activeView === 'coming-soon' ? 'active' : ''}`}
+              href="/coming-soon"
+              onClick={(e) => { e.preventDefault(); navigateTo('coming-soon'); }}
+            >
+              Coming Soon
+            </a>
+
+            <a 
+              className={`nav-link ${activeView === 'leaderboard' ? 'active' : ''}`}
+              href="/leaderboard"
+              onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); }}
+            >
+              Top Critics
+            </a>
+
+            {currentUser && currentUser.role === 'admin' && (
+              <a 
+                className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}
+                href="/admin"
+                onClick={(e) => { e.preventDefault(); navigateTo('admin'); }}
+                style={{ color: 'var(--color-accent-gold)', fontWeight: '600' }}
+              >
+                Admin Control
+              </a>
+            )}
+          </div>
+          <div className="nav-actions">
+            <button className="search-trigger" onClick={toggleSearch} aria-label="Search">
+              <Search size={20} />
+            </button>
+            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setActiveView('profile'); } }}>
+              <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-avatar-circle" />
+              {currentUser && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: '0.5rem', fontWeight: 500 }} className="profile-nav-name">{currentUser.username}</span>}
+            </button>
+          </div>
+        </nav>
+
+        {/* IMDb-Style Expandable Search Overlay */}
+        <div className={`search-overlay ${isSearchOpen ? 'search-overlay--open' : ''}`} ref={searchOverlayRef}>
+          <div className="search-overlay-inner">
+            <div className="search-overlay-input-wrapper">
+              <Search size={18} className="search-overlay-icon" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="search-overlay-input"
+                placeholder="Search movies, directors, genres..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsSearchOpen(false);
+                    setSearchQuery('');
+                    setSearchResults([]);
+                  }
+                }}
+              />
+              {searchQuery && (
+                <button className="search-overlay-clear" onClick={() => { setSearchQuery(''); searchInputRef.current?.focus(); }}>
+                  <X size={16} />
+                </button>
+              )}
+              <button className="search-overlay-close" onClick={() => { setIsSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Live Search Results Dropdown */}
+            {searchQuery.trim() && (
+              <div className="search-results-dropdown">
+                {isSearching ? (
+                  <div className="search-results-loading">
+                    <div className="search-spinner"></div>
+                    <span>Searching...</span>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="search-results-empty">
+                    <Film size={24} />
+                    <p>No results found for "{searchQuery}"</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="search-results-header">
+                      <span>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found</span>
+                    </div>
+                    <div className="search-results-list">
+                      {searchResults.slice(0, 8).map(movie => (
+                        <div
+                          key={movie.id}
+                          className="search-result-item"
+                          onClick={() => handleSearchResultClick(movie.id)}
+                        >
+                           <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="search-result-poster" loading="lazy" />
+                          <div className="search-result-info">
+                            <h4 className="search-result-title">{movie.title}</h4>
+                            <div className="search-result-meta">
+                              <span className="search-result-year">{movie.releaseYear}</span>
+                              <span className="search-result-genre">{movie.genre}</span>
+                            </div>
+                            <div className="search-result-rating">
+                              <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                              <span>{movie.rating.toFixed(1)}</span>
+                            </div>
+                          </div>
+                          <ChevronRight size={16} className="search-result-arrow" />
+                        </div>
+                      ))}
+                    </div>
+                    {searchResults.length > 8 && (
+                      <div className="search-results-footer">
+                        <span>Showing 8 of {searchResults.length} results</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* RENDER ACTIVE VIEW */}
+      <div className="fade-in">
+        {activeView === 'home' && (
+          <div className="main-content">
+            {/* HERO CAROUSEL */}
+            {heroMovies.length > 0 && (
+              <header className="hero">
+                {heroMovies.map((movie, index) => {
+                  const isActive = index === currentHeroIndex;
+                  return (
+                    <div 
+                      key={movie.id} 
+                      className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
+                    >
+                      <div 
+                        className="hero-backdrop" 
+                        style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
+                      />
+                      <div className="hero-content">
+                        <div className="hero-rating-badge">
+                          <span className="hero-tag-fav">FEATURED</span>
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                        </div>
+                        <h1 className="hero-title">{movie.title}</h1>
+                        <p className="hero-description">{movie.description}</p>
+                        <div className="hero-actions">
+                          <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
+                            <Play size={16} fill="black" /> Watch Trailer
+                          </button>
+                          <button 
+                            className="btn-secondary" 
+                            onClick={(e) => handleToggleWatchlist(movie.id, e)}
+                          >
+                            {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
+                            {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Left Arrow */}
+                {heroMovies.length > 1 && (
+                  <button 
+                    className="hero-nav-btn hero-nav-btn--left"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length) % heroMovies.length);
+                    }}
+                    aria-label="Previous slide"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+
+                {/* Right Arrow */}
+                {heroMovies.length > 1 && (
+                  <button 
+                    className="hero-nav-btn hero-nav-btn--right"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+                    }}
+                    aria-label="Next slide"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+
+                {/* Indicator Dots */}
+                {heroMovies.length > 1 && (
+                  <div className="hero-indicators">
+                    {heroMovies.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`hero-indicator-dot ${index === currentHeroIndex ? 'hero-indicator-dot--active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentHeroIndex(index);
+                        }}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </header>
+            )}
+
+            {/* NEW RELEASES — horizontal slider of top-rated movies */}
+            <section className="movies-section" style={{ marginTop: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                <div>
+                  <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Now Playing</p>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>New Releases</h2>
+                </div>
+                <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('new-releases'); }}>
+                  View All
+                </button>
+              </div>
+              {(() => {
+                const sortedByDate = [...movies].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 10);
+                if (sortedByDate.length === 0) return null;
+                return (
+                  <div className="movie-grid-horizontal">
+                    {sortedByDate.map(movie => (
+                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                       <div className="movie-card-poster-wrapper">
+                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                          <div className="movie-card-rating">
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span>{movie.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <div className="movie-card-info">
+                          <h3 className="movie-card-title">{movie.title}</h3>
+                          <div className="movie-card-genre-tags">
+                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                              <span key={tag} className="genre-tag">{tag.trim()}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </section>
+
+            {/* FILTER & EXPLORER CONTROLS */}
+            <div className="explorer-header" style={{ justifyContent: 'flex-end' }}>
+              <div className="explorer-filters">
+                <select 
+                  className="filter-select"
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
+                >
+                  <option value="">All Genres</option>
+                  <option value="Tamil">Tamil Cinema</option>
+                  <option value="Action">Action</option>
+                  <option value="Crime">Crime</option>
+                  <option value="Drama">Drama</option>
+                  <option value="Thriller">Thriller</option>
+                  <option value="Romance">Romance</option>
+                  <option value="Adventure">Adventure</option>
+                </select>
+                <select 
+                  className="sort-select"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="popular">Popularity</option>
+                  <option value="rating">New Releases</option>
+                  <option value="latest">Latest Release</option>
+                </select>
+              </div>
+            </div>
+
+            {/* WEEKLY CHARTS (Movie Grid) */}
+            <section className="movies-section">
+              <p className="section-meta">Weekly Charts</p>
+              <h2 className="section-title">Top Rated Cinevistaa</h2>
+              
+              {isLoading ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  Loading cinematic records...
+                </div>
+              ) : error ? (
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-accent-gold)' }}>
+                  <Info size={24} style={{ marginBottom: '1rem' }} />
+                  <p>{error}</p>
+                </div>
+              ) : movies.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  No cinematic entries match your search criteria.
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {movies.map(movie => (
+                    <div 
+                      key={movie.id} 
+                      className="movie-card"
+                      onClick={() => handleViewMovie(movie.id)}
+                    >
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* CURATED SELECTION (Staff Picks) */}
+            {featuredStaffPick && (
+              <section className="staff-picks-section">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div>
+                    <p className="section-meta">Curated Selection</p>
+                    <h2 className="section-title">Staff Picks</h2>
+                  </div>
+                  {currentUser && currentUser.role === 'admin' && (
+                    <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.85rem' }} onClick={() => setShowCurateModal(true)}>
+                      <Edit3 size={13} /> Curate
+                    </button>
+                  )}
+                </div>
+                <div className="staff-picks-layout">
+                  {/* Left Side: Featured Large Pick */}
+                  <div 
+                    className="featured-pick-card"
+                    onClick={() => handleViewMovie(featuredStaffPick.id)}
+                  >
+                    <div 
+                      className="featured-pick-backdrop"
+                      style={{ backgroundImage: `url(${proxyImageUrl(featuredStaffPick.backdropUrl, 'original')})` }}
+                    />
+                    <div className="featured-pick-content">
+                      <span className="featured-pick-meta">- Home Discovery -</span>
+                      <h3 className="featured-pick-title">{featuredStaffPick.title}</h3>
+                      <p className="featured-pick-desc">{featuredStaffPick.description}</p>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Grid of 3 smaller cards */}
+                  <div className="picks-grid-layout">
+                    {gridStaffPicks.length > 0 ? (
+                      gridStaffPicks.map(pick => (
+                        <div 
+                          key={pick.id} 
+                          className="picks-grid-card"
+                          onClick={() => handleViewMovie(pick.id)}
+                          style={{ height: '160px' }}
+                        >
+                          <div 
+                            className="picks-grid-backdrop"
+                            style={{ backgroundImage: `url(${proxyImageUrl(pick.posterUrl, 'w500')})` }}
+                          />
+                          <div className="picks-grid-content">
+                            <span className="picks-grid-meta">{pick.genre}</span>
+                            <h4 className="picks-grid-title">{pick.title}</h4>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      // Fallback if no specific picks grid are seeded
+                      movies.slice(2, 5).map(pick => (
+                        <div 
+                          key={pick.id} 
+                          className="picks-grid-card"
+                          onClick={() => handleViewMovie(pick.id)}
+                          style={{ height: '160px' }}
+                        >
+                          <div 
+                            className="picks-grid-backdrop"
+                            style={{ backgroundImage: `url(${proxyImageUrl(pick.posterUrl, 'w500')})` }}
+                          />
+                          <div className="picks-grid-content">
+                            <span className="picks-grid-meta">{pick.genre}</span>
+                            <h4 className="picks-grid-title">{pick.title}</h4>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* NEWSLETTER */}
+            <section className="newsletter-section glass-panel">
+              <h2 className="newsletter-title">Join the inner circle</h2>
+              <p className="newsletter-text">
+                Get early access to premieres, exclusive critic reviews, and invitations to private screening events.
+              </p>
+              <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert("Welcome to the inner circle!"); }}>
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit">Subscribe</button>
+              </form>
+            </section>
+          </div>
+        )}
+
+        {/* NEW RELEASES VIEW */}
+        {activeView === 'new-releases' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Highest Rated</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>The best of the best, ranked by critic and audience scores.</p>
+            </div>
+            {movies.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>No movies found.</div>
+            ) : (
+              <div className="movie-grid">
+                {[...movies].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).map(movie => (
+                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                       <div className="movie-card-poster-wrapper">
+                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                      <div className="movie-card-rating">
+                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        <span>{(movie.rating || 0).toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <div className="movie-card-info">
+                      <h3 className="movie-card-title">{movie.title}</h3>
+                      <div className="movie-card-genre-tags">
+                        {movie.genre && movie.genre.split('/').map(tag => (
+                          <span key={tag} className="genre-tag">{tag.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* WATCHLIST VIEW */}
+        {activeView === 'watchlist' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Your Collection</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Watchlist</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Movies you've saved to watch later.</p>
+            </div>
+            {(() => {
+              const watchlistMovies = movies.filter(m => watchlist.includes(m.id));
+              return watchlistMovies.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  <p style={{ marginBottom: '0.5rem' }}>Your watchlist is empty.</p>
+                  <p style={{ fontSize: '0.85rem' }}>Browse movies and add them to your watchlist to see them here.</p>
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {watchlistMovies.map(movie => (
+                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{(movie.rating || 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre && movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* COMING SOON VIEW */}
+        {activeView === 'coming-soon' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Upcoming Releases</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Coming Soon</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Anticipated films marked as upcoming releases.</p>
+            </div>
+            {(() => {
+              const upcoming = movies.filter(m => m.isUpcoming);
+              return upcoming.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  <p style={{ marginBottom: '0.5rem' }}>No upcoming releases scheduled.</p>
+                  <p style={{ fontSize: '0.85rem' }}>Check back later for new additions.</p>
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {upcoming.map(movie => (
+                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{(movie.rating || 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
+                          {movie.genre && movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* ACTOR VIEW */}
+        {activeView === 'actor' && selectedActor && (
+          <div className="main-content">
+            <div className="page-header">
+              <button className="btn-secondary" onClick={() => { setSelectedActor(null); navigateTo('home'); }} style={{ marginBottom: '1rem' }}>
+                <ChevronLeft size={16} /> Back to Movies
+              </button>
+              <p className="section-meta">Filmography</p>
+              <h2 className="section-title">{selectedActor}</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                Movies featuring this cast member
+              </p>
+            </div>
+            {(() => {
+              const actorMovies = movies.filter(m =>
+                m.cast && m.cast.some(c => c.name === selectedActor)
+              );
+              return actorMovies.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  <p>No movies found for this actor.</p>
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {actorMovies.map(movie => (
+                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{(movie.rating || 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
+                          {movie.genre && movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* MOVIE DETAILS VIEW */}
+        {activeView === 'movie-details' && selectedMovie && (
+          <div className="slide-up">
+            {/* Backdrop & Blurred Cover background */}
+            <div className="movie-details-backdrop-container">
+              <div 
+                className="movie-details-backdrop"
+                style={{ backgroundImage: `url(${proxyImageUrl(selectedMovie.backdropUrl, 'original')})` }}
+              />
+              <div className="movie-details-backdrop-overlay" />
+            </div>
+
+            {/* Movie Info & Poster Grid */}
+            <div className="main-content" style={{ position: 'relative' }}>
+              <div className="details-wrapper">
+                {/* Left Side: Poster with gold ring shadow */}
+                <div className="details-poster-box">
+                  <img src={proxyImageUrl(selectedMovie.posterUrl, 'original')} alt={selectedMovie.title} className="details-poster-img" />
+                </div>
+
+                {/* Right Side Content Info */}
+                <div className="details-main-info">
+                  <div className="details-tags-row">
+                    <span className="genre-tag" style={{ background: 'rgba(251, 191, 36, 0.12)', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-accent-gold)' }}>
+                      {selectedMovie.genre}
+                    </span>
+                    <span className="genre-tag">{selectedMovie.runtime}</span>
+                  </div>
+                  
+                  <h1 className="details-title">{selectedMovie.title}</h1>
+                  
+                  {/* Critic and Audience Scores Dial meters */}
+                  <div className="details-scores-row">
+                    <div className="score-dial-container">
+                      <div className="dial-circle-wrapper">
+                        <svg className="dial-svg">
+                          <circle className="dial-bg" cx="30" cy="30" r="26" />
+                          <circle 
+                            className="dial-progress" 
+                            cx="30" 
+                            cy="30" 
+                            r="26" 
+                            strokeDasharray={2 * Math.PI * 26}
+                            strokeDashoffset={2 * Math.PI * 26 * (1 - selectedMovie.criticScore / 10)}
+                          />
+                        </svg>
+                        <span className="dial-text">{selectedMovie.criticScore.toFixed(1)}</span>
+                      </div>
+                      <span className="score-dial-lbl">Critic<br/>Score</span>
+                    </div>
+
+                    <div className="score-dial-container">
+                      <div className="dial-circle-wrapper">
+                        <svg className="dial-svg">
+                          <circle className="dial-bg" cx="30" cy="30" r="26" />
+                          <circle 
+                            className="dial-progress" 
+                            cx="30" 
+                            cy="30" 
+                            r="26" 
+                            strokeDasharray={2 * Math.PI * 26}
+                            strokeDashoffset={2 * Math.PI * 26 * (1 - selectedMovie.audienceScore / 100)}
+                            style={{ stroke: 'rgba(255, 255, 255, 0.7)' }}
+                          />
+                        </svg>
+                        <span className="dial-text">{selectedMovie.audienceScore}%</span>
+                      </div>
+                      <span className="score-dial-lbl">Audience<br/>Score</span>
+                    </div>
+                  </div>
+
+                  <div className="hero-actions" style={{ marginTop: '0.5rem' }}>
+                    <button className="btn-primary" onClick={() => setShowTrailer(true)}>
+                      <Play size={16} fill="black" /> Watch Trailer
+                    </button>
+                    <button 
+                      className="btn-secondary" 
+                      onClick={(e) => handleToggleWatchlist(selectedMovie.id, e)}
+                    >
+                      {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
+                      {watchlist.includes(selectedMovie.id) ? 'Watchlist Added' : 'Add to Watchlist'}
+                    </button>
+                    {currentUser && userLists.length > 0 && (
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <button className="btn-secondary" onClick={() => loadUserLists()}>
+                          <List size={16} /> Add to List
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lower Section: Details panels */}
+              <div className="details-layout-content">
+                
+                {/* Left Panel: Synopsis & Cast */}
+                <div className="details-left-panel">
+                  <div>
+                    <h3 className="details-section-title">Synopsis</h3>
+                    <p className="synopsis-text">{selectedMovie.description}</p>
+                  </div>
+
+                  {selectedMovie.cast && selectedMovie.cast.length > 0 && (
+                    <div>
+                      <h3 className="details-section-title">Cast & Crew</h3>
+                      <p className="details-section-subtitle">Meet the people bringing the story to life, on screen and behind the camera.</p>
+                      <div className="cast-grid">
+                        {selectedMovie.cast.map((member, i) => (
+                          <div key={i} className="cast-member-card" onClick={() => handleViewActor(member.name)} style={{ cursor: 'pointer' }}>
+                            <div className="cast-avatar-box">
+                              <img src={member.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"} alt={member.name} className="cast-avatar-img" />
+                            </div>
+                            <div>
+                              <p className="cast-name">{member.name}</p>
+                              <p className="cast-role">as {member.role}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Panel: Technical details */}
+                <div className="details-right-panel">
+                  <div className="tech-details-box glass-panel">
+                    <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-accent-gold)', marginBottom: '1.25rem' }}>
+                      Film Details
+                    </h4>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Director</span>
+                      <span className="tech-val">{selectedMovie.director}</span>
+                    </div>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Writer</span>
+                      <span className="tech-val">{selectedMovie.writer}</span>
+                    </div>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Studio</span>
+                      <span className="tech-val">{selectedMovie.studio}</span>
+                    </div>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Release Date</span>
+                      <span className="tech-val">{selectedMovie.releaseDate}</span>
+                    </div>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Language</span>
+                      <span className="tech-val">{selectedMovie.language}</span>
+                    </div>
+                    <div className="tech-row">
+                      <span className="tech-lbl">Where to Watch</span>
+                      <div className="tech-val">
+                        <div className="where-to-watch-row">
+                          <span className="watch-icon"><Tv size={12} /></span>
+                          <span className="watch-icon"><Film size={12} /></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reviews section */}
+              <section className="community-reviews-section">
+                <div className="reviews-section-header">
+                  <div>
+                    <h2>Community Reviews</h2>
+                    <p>Based on {selectedMovie.reviews?.length || 0} user ratings</p>
+                  </div>
+                  <button className="btn-primary" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setIsWriteReviewOpen(true); } }}>
+                    <Edit3 size={16} /> Write a Review
+                  </button>
+                </div>
+
+                {/* Reviews List */}
+                <div className="user-reviews-list">
+                  {selectedMovie.reviews && selectedMovie.reviews.length > 0 ? (
+                    selectedMovie.reviews.map(review => (
+                      <div key={review.id} className="user-review-card glass-panel">
+                        <div className="review-card-header">
+                          <div className="reviewer-info">
+                            <img 
+                              src={review.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"} 
+                              alt="user" 
+                              className="reviewer-avatar" 
+                            />
+                            <div className="reviewer-meta">
+                              <h4 className="review-user-name">{review.user}</h4>
+                              <p>{review.role} • {review.timestamp}</p>
+                            </div>
+                          </div>
+                          <span className="review-score-badge">★ {review.rating.toFixed(1)}/10</span>
+                        </div>
+                        <p className="review-text">"{review.text}"</p>
+                        <div className="review-actions-bar">
+                          <button className="review-action-btn" onClick={() => handleUpvoteReview(review.id)}>
+                            <ThumbsUp /> <span>{review.likes || 0}</span>
+                          </button>
+                          <button className="review-action-btn" onClick={() => { setActiveView('community'); setSelectedMovieId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                            <MessageSquare /> <span>{review.comments || 0}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
+                      No reviews submitted for this film yet. Be the first to criticize!
+                    </div>
+                  )}
+                </div>
+
+                <div className="load-more-btn-container">
+                  <button className="btn-secondary" onClick={() => alert("All reviews loaded")}>
+                    LOAD ALL REVIEWS
+                  </button>
+                </div>
+              </section>
+
+              {/* SIMILAR MOVIES */}
+              {(() => {
+                const similar = movies.filter(m =>
+                  m.id !== selectedMovie.id &&
+                  m.genre &&
+                  selectedMovie.genre &&
+                  m.genre.split('/').some(g => selectedMovie.genre.split('/').includes(g))
+                ).slice(0, 6);
+                if (similar.length === 0) return null;
+                return (
+                  <section style={{ marginTop: '3rem' }}>
+                    <h2 className="section-title" style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>Similar Movies</h2>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                      Films sharing the same genre
+                    </p>
+                    <div className="movie-grid">
+                      {similar.map(movie => (
+                        <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                       <div className="movie-card-poster-wrapper">
+                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                            <div className="movie-card-rating">
+                              <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                              <span>{(movie.rating || 0).toFixed(1)}</span>
+                            </div>
+                          </div>
+                          <div className="movie-card-info">
+                            <h3 className="movie-card-title">{movie.title}</h3>
+                            <div className="movie-card-genre-tags">
+                              <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
+                              {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                                <span key={tag} className="genre-tag">{tag.trim()}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })()}
+
+            </div>
+          </div>
+        )}
+
+        {/* PROFILE VIEW */}
+        {activeView === 'profile' && (
+          <div className="main-content profile-view slide-up">
+            
+            {/* Header info box */}
+            <div className="profile-card glass-panel">
+              <div className="profile-main-row">
+                <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-info-avatar" />
+                <div className="profile-bio-box">
+                  <span className="profile-badge-gold">{currentUser ? currentUser.role : userProfile.role}</span>
+                  <h1 className="profile-name">{currentUser ? currentUser.username : userProfile.name}</h1>
+                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'Midnight Film Critic') : userProfile.bio}"</p>
+                  {currentUser && profileData && (
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.followers || []).length}</strong> followers</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.following || []).length}</strong> following</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {currentUser && (
+                    <button className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }} onClick={() => { setEditingProfile(true); setEditBio(profileData?.bio || ''); setEditAvatar(currentUser.avatarUrl || ''); setEditEmail(profileData?.email || ''); }}>
+                      EDIT PROFILE
+                    </button>
+                  )}
+                  {currentUser ? (
+                    <button className="btn-secondary" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={handleLogout}>
+                      LOGOUT
+                    </button>
+                  ) : (
+                    <button className="btn-secondary" onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); }}>
+                      LOG IN / REGISTER
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Stats values */}
+              <div className="profile-stats-grid">
+                <div className="stat-box glass-panel">
+                  <span className="stat-val">{profileReviews.length + 1}</span>
+                  <span className="stat-lbl">Reviews Written</span>
+                </div>
+                <div className="stat-box glass-panel">
+                  <span className="stat-val">{profileData ? (profileData.followers || []).length : userProfile.followers}</span>
+                  <span className="stat-lbl">Followers</span>
+                </div>
+                <div className="stat-box glass-panel">
+                  <span className="stat-val">{userProfile.accuracy}</span>
+                  <span className="stat-lbl">Critique Accuracy</span>
+                </div>
+                <div className="stat-box glass-panel">
+                  <span className="stat-val">{userProfile.listsCount}</span>
+                  <span className="stat-lbl">Lists Curated</span>
+                </div>
+              </div>
+            </div>
+
+            {/* All Users / Follow */}
+            {currentUser && allUsers.length > 0 && (
+              <section style={{ marginTop: '2rem' }}>
+                <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Critics to Follow</h2>
+                <div className="profile-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))' }}>
+                  {allUsers.filter(u => u.username !== currentUser.username).map(u => (
+                    <div key={u.username} className="stat-box glass-panel" style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+                        <img src={u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150'} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.username}</p>
+                          <p style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{(u.followers || []).length} followers</p>
+                        </div>
+                      </div>
+                      {(profileData?.following || []).includes(u.username) ? (
+                        <button className="btn-secondary" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }} onClick={() => handleUnfollow(u.username)}>Following</button>
+                      ) : (
+                        <button className="btn-primary" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }} onClick={() => handleFollow(u.username)}>Follow</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Watchlist */}
+            <section className="movies-section" style={{ marginTop: '2.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.5rem' }}>My Watchlist</h2>
+                <span className="critique-movie-link" onClick={() => alert("Already viewing all records")}>View All <ChevronRight size={12} /></span>
+              </div>
+
+              {watchlist.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }} className="glass-panel">
+                  Your Watchlist is empty. Browse movies and click '+ Add to Watchlist' to save entries.
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {movies.filter(m => watchlist.includes(m.id)).map(movie => (
+                    <div 
+                      key={movie.id} 
+                      className="movie-card"
+                      onClick={() => handleViewMovie(movie.id)}
+                    >
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Recent reviews written by this user */}
+            <section style={{ marginTop: '3.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Recent Reviews</h2>
+              
+              <div className="user-reviews-list">
+                {/* Default pre-seeded review of this user */}
+                <div className="user-review-card glass-panel" style={{ display: 'flex', gap: '1.5rem' }}>
+                  <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=150" alt="movie" style={{ width: '80px', height: '110px', objectFit: 'cover', borderRadius: '6px' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', cursor: 'pointer' }} onClick={() => handleViewMovie('interstellar')}>Interstellar</h3>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Written on: Oct 28, 2023</span>
+                      </div>
+                      <span className="review-score-badge">★ 8.0/10</span>
+                    </div>
+                    <p style={{ marginTop: '0.75rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                      "Nolan weaves a brilliant narrative that balances hard space science with profound human emotion. The visual effects remain awe-inspiring a decade later."
+                    </p>
+                  </div>
+                </div>
+
+                {/* Dynamically entered user reviews */}
+                {profileReviews.map((rev, idx) => (
+                  <div key={idx} className="user-review-card glass-panel" style={{ display: 'flex', gap: '1.5rem' }}>
+                    <img src={rev.moviePoster} alt="movie" style={{ width: '80px', height: '110px', objectFit: 'cover', borderRadius: '6px' }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1.1rem', cursor: 'pointer' }} onClick={() => handleViewMovie(rev.movieId)}>{rev.movieTitle}</h3>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Written: Just now</span>
+                        </div>
+                        <span className="review-score-badge">★ {rev.rating.toFixed(1)}/10</span>
+                      </div>
+                      <p style={{ marginTop: '0.75rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                        "{rev.text}"
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="load-more-btn-container">
+                <button className="btn-secondary" onClick={() => alert("All user reviews loaded")}>
+                  LOAD OLDER REVIEWS
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* LEADERBOARD VIEW */}
+        {activeView === 'leaderboard' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Top Critics</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Critic Leaderboard</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                Most active reviewers ranked by reviews and ratings
+              </p>
+            </div>
+            {leaderboard.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <p style={{ marginBottom: '0.5rem' }}>No critics found yet.</p>
+                <p style={{ fontSize: '0.85rem' }}>Reviews need to be submitted first.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {leaderboard.map((critic, index) => (
+                  <div key={critic.username} className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: index < 3 ? 'var(--color-accent-gold)' : 'var(--color-text-muted)', minWidth: '2rem', textAlign: 'center' }}>
+                      #{index + 1}
+                    </div>
+                    <img
+                      src={critic.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=80"}
+                      alt={critic.username}
+                      style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{critic.username}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                        {critic.bio || 'Midnight Film Critic'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-accent-gold)' }}>{(critic.avgRating || 0).toFixed(1)}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{critic.reviewCount} reviews</div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textAlign: 'right', minWidth: '4rem' }}>
+                      <Users size={14} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />
+                      {critic.followerCount || 0}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LISTS VIEW */}
+        {activeView === 'lists' && (
+          <div className="main-content">
+            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <p className="section-meta">Curated Collections</p>
+                <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>User Lists</h2>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                  Movie lists created by the community
+                </p>
+              </div>
+              {currentUser && (
+                <button className="btn-primary" onClick={() => setShowCreateList(true)}>
+                  <Plus size={16} /> New List
+                </button>
+              )}
+            </div>
+
+            {showCreateList && (
+              <div className="glass-panel" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
+                <h3 style={{ marginBottom: '1rem' }}>Create New List</h3>
+                <input
+                  type="text"
+                  placeholder="List name"
+                  value={newListName}
+                  onChange={e => setNewListName(e.target.value)}
+                  style={{ width: '100%', marginBottom: '0.75rem' }}
+                  className="auth-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Description (optional)"
+                  value={newListDesc}
+                  onChange={e => setNewListDesc(e.target.value)}
+                  style={{ width: '100%', marginBottom: '1rem' }}
+                  className="auth-input"
+                />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="btn-primary" onClick={handleCreateList}>Create</button>
+                  <button className="btn-secondary" onClick={() => { setShowCreateList(false); setNewListName(''); setNewListDesc(''); }}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {allLists.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <p>No lists created yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {allLists.map(list => {
+                  const listMovies = movies.filter(m => list.movieIds.includes(m.id));
+                  return (
+                    <div key={list.id} className="glass-panel" style={{ padding: '1rem 1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{list.name}</h3>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                            by <strong>{list.createdBy}</strong> &middot; {list.movieIds.length} movies
+                          </p>
+                          {list.description && (
+                            <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>{list.description}</p>
+                          )}
+                        </div>
+                        {currentUser && list.createdBy === currentUser.username && (
+                          <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }} onClick={() => handleDeleteList(list.id)}>
+                            <X size={14} /> Delete
+                          </button>
+                        )}
+                      </div>
+                      {listMovies.length > 0 && (
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                          {listMovies.slice(0, 5).map(m => (
+                            <div key={m.id} style={{ width: '80px', cursor: 'pointer' }} onClick={() => handleViewMovie(m.id)}>
+                              <img src={proxyImageUrl(m.posterUrl, 'w185')} alt={m.title} style={{ width: '100%', borderRadius: '4px' }} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* COMMUNITY FORUM VIEW */}
+        {activeView === 'community' && (
+          <div className="main-content community-view slide-up">
+            <section className="community-hero-band">
+              <div>
+                <p className="section-meta">Phase 8 Community</p>
+                <h1 className="community-title">Midnight Forum</h1>
+                <p className="community-subtitle">
+                  Open film discussions, recommendations, and critic notes from the Midnight Cinema room.
+                </p>
+              </div>
+              <div className="community-hero-stats">
+                <div>
+                  <span>{communityThreads.length}</span>
+                  <small>Threads</small>
+                </div>
+                <div>
+                  <span>{communityThreads.reduce((sum, thread) => sum + thread.replies.length, 0)}</span>
+                  <small>Replies</small>
+                </div>
+              </div>
+            </section>
+
+            <section className="community-layout">
+              <form className="community-compose glass-panel" onSubmit={handleCreateThreadSubmit}>
+                <div className="community-compose-header">
+                  <div>
+                    <p className="section-meta">Start a Thread</p>
+                    <h2>New Discussion</h2>
+                  </div>
+                  <Users size={20} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Thread Title</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="What should the room talk about?"
+                    value={newThreadData.title}
+                    onChange={(e) => setNewThreadData({ ...newThreadData, title: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Category</label>
+                  <select
+                    className="filter-select community-select"
+                    value={newThreadData.tag}
+                    onChange={(e) => setNewThreadData({ ...newThreadData, tag: e.target.value })}
+                  >
+                    <option value="General">General</option>
+                    <option value="Recommendations">Recommendations</option>
+                    <option value="Reviews">Reviews</option>
+                    <option value="Sound Design">Sound Design</option>
+                    <option value="Cinematography">Cinematography</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Discussion Text</label>
+                  <textarea
+                    className="form-textarea"
+                    placeholder="Share a take, ask for recommendations, or open a debate..."
+                    value={newThreadData.body}
+                    onChange={(e) => setNewThreadData({ ...newThreadData, body: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="btn-primary community-submit">
+                  <Send size={16} />
+                  Publish Thread
+                </button>
+              </form>
+
+              <div className="community-thread-list">
+                {isCommunityLoading ? (
+                  <div className="community-empty glass-panel">Loading community discussions...</div>
+                ) : communityError ? (
+                  <div className="community-empty glass-panel">{communityError}</div>
+                ) : communityThreads.length === 0 ? (
+                  <div className="community-empty glass-panel">No discussions yet. Start the first one.</div>
+                ) : (
+                  communityThreads.map(thread => (
+                    <article key={thread.id} className="community-thread glass-panel">
+                      <div className="community-thread-header">
+                        <img src={thread.avatarUrl} alt={thread.author} className="reviewer-avatar" />
+                        <div>
+                          <div className="community-thread-meta">
+                            <span>{thread.author}</span>
+                            <small>{thread.role} • {thread.timestamp}</small>
+                          </div>
+                          <h2>{thread.title}</h2>
+                        </div>
+                        <span className="community-tag">{thread.tag}</span>
+                      </div>
+
+                      <p className="community-thread-body">{thread.body}</p>
+
+                      <div className="community-thread-actions">
+                        <span><ThumbsUp size={14} /> {thread.likes || 0}</span>
+                        <span><MessageSquare size={14} /> {thread.replies.length}</span>
+                      </div>
+
+                      {thread.replies.length > 0 && (
+                        <div className="community-replies">
+                          {thread.replies.slice(-3).map(reply => (
+                            <div key={reply.id} className="community-reply">
+                              <strong>{reply.author}</strong>
+                              <span>{reply.body}</span>
+                              <small>{reply.timestamp}</small>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <form className="community-reply-form" onSubmit={(e) => handleCreateReplySubmit(thread.id, e)}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Write a reply..."
+                          value={replyDrafts[thread.id] || ''}
+                          onChange={(e) => setReplyDrafts(prev => ({ ...prev, [thread.id]: e.target.value }))}
+                        />
+                        <button type="submit" className="btn-secondary">
+                          <Send size={14} />
+                        </button>
+                      </form>
+                    </article>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ADMIN CONTROL PANEL VIEW */}
+        {activeView === 'admin' && currentUser && currentUser.role === 'admin' && (
+          <AdminPanel currentUser={currentUser} />
+        )}
+      </div>
+
+      {/* FOOTER SECTION */}
+      <footer className="footer-container">
+        <div className="footer">
+          <div className="footer-brand">
+            <h3 className="footer-brand-title">Midnight <span>Cinema</span></h3>
+            <p className="footer-brand-desc">
+              Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
+            </p>
+          </div>
+          <div className="footer-column">
+            <span className="footer-column-title">Explore</span>
+            <ul className="footer-links">
+              <li><a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }}>All Movies</a></li>
+              <li><a href="/leaderboard" onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); }}>Top Critics</a></li>
+              <li><a href="/lists" onClick={(e) => { e.preventDefault(); loadAllLists(); navigateTo('lists'); }}>Lists</a></li>
+              <li><a href="/profile" onClick={(e) => { e.preventDefault(); navigateTo('profile'); }}>Critic Board</a></li>
+              <li><a href="/community" onClick={(e) => { e.preventDefault(); navigateTo('community'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Community Forum</a></li>
+            </ul>
+          </div>
+          <div className="footer-column">
+            <span className="footer-column-title">Legal</span>
+            <ul className="footer-links">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy Details"); }}>Privacy Policy</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Terms and Conditions"); }}>Terms of Service</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Cookie Policy"); }}>Cookie Policy</a></li>
+            </ul>
+          </div>
+          <div className="footer-column">
+            <span className="footer-column-title">Connect</span>
+            <ul className="footer-links">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Newsletter signed!"); }}>Newsletter</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@midnightcinema.com"); }}>Contact Support</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} Midnight Cinema. All rights reserved.</span>
+          <div className="footer-socials">
+            <a href="#" className="footer-social-link"><Globe size={16} /></a>
+            <a href="#" className="footer-social-link"><Share2 size={16} /></a>
+          </div>
+        </div>
+      </footer>
+
+      {/* MODAL - WRITE REVIEW */}
+      <Modal isOpen={isWriteReviewOpen && !!selectedMovie} onClose={() => setIsWriteReviewOpen(false)} width="520px">
+        <div style={{ padding: '0.25rem 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(251, 191, 36, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <Edit3 size={22} style={{ color: 'var(--color-accent-gold)' }} />
+            </div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Write a Review</h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>for <strong>{selectedMovie?.title}</strong></p>
+          </div>
+
+          <form onSubmit={handleCreateReviewSubmit}>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label" style={{ textAlign: 'center', display: 'block', marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+                Your Rating: <strong style={{ color: 'var(--color-accent-gold)', fontSize: '1.1rem' }}>{newReviewData.rating}</strong>/10
+              </label>
+              <div className="star-rating-input-row" style={{ justifyContent: 'center', gap: '0.35rem' }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((starNum) => (
+                  <button
+                    key={starNum} type="button"
+                    className={`star-input-btn ${newReviewData.rating >= starNum ? 'active' : ''}`}
+                    onClick={() => setNewReviewData({ ...newReviewData, rating: starNum })}>
+                    <Star size={22} fill={newReviewData.rating >= starNum ? 'var(--color-accent-gold)' : 'none'} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Your Review</label>
+              <textarea className="form-textarea" placeholder="Share your critical perspective on this film..."
+                value={newReviewData.text} onChange={(e) => setNewReviewData({ ...newReviewData, text: e.target.value })}
+                required style={{ minHeight: '120px', borderRadius: '12px' }} />
+            </div>
+
+            <div className="form-actions-row" style={{ gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button type="button" className="btn-secondary" onClick={() => setIsWriteReviewOpen(false)}
+                style={{ padding: '0.7rem 1.25rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary"
+                style={{ padding: '0.7rem 1.5rem', fontSize: '0.85rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Send size={14} /> Submit Review
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+
+
+      {/* TRAILER MODAL POPUP */}
+      <Modal isOpen={showTrailer} onClose={() => setShowTrailer(false)} width="800px">
+        <div style={{ padding: '0.25rem 0' }}>
+          <div className="trailer-header-info" style={{ padding: '0 0.25rem 0.75rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{selectedMovie?.title}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{selectedMovie?.trailerChannelName || 'YouTube'}</span>
+              <span style={{ fontSize: '0.6rem', color: 'rgba(148,163,184,0.4)' }}>·</span>
+              <span style={{ fontSize: '0.68rem', color: 'var(--color-accent-gold)', fontWeight: 600 }}>Official Trailer</span>
+            </div>
+          </div>
+          {selectedMovie?.trailerUrl ? (
+            <div
+              ref={playerContainerRef}
+              className="trailer-player-wrapper"
+              style={{ position: 'relative', paddingBottom: '56.25%', borderRadius: '12px', overflow: 'hidden', background: '#000', cursor: 'pointer' }}
+            >
+              {/* progress bar (top edge) */}
+              <div
+                onClick={seekTo}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.1)', zIndex: 10, cursor: 'pointer' }}
+              >
+                <div style={{ width: `${trailerPlayer.duration ? (trailerPlayer.currentTime / trailerPlayer.duration) * 100 : 0}%`, height: '100%', background: 'var(--color-accent-gold)', transition: 'width 0.1s linear' }} />
+              </div>
+              {/* custom controls overlay */}
+              <div className="trailer-controls-overlay" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.6rem 0.75rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', zIndex: 10, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button onClick={togglePlay} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.2rem', display: 'flex' }}>
+                  {trailerPlayer.playing ? <Pause size={18} fill="#fff" /> : <Play size={18} fill="#fff" />}
+                </button>
+                {/* progress bar */}
+                <div
+                  onClick={seekTo}
+                  style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', cursor: 'pointer', position: 'relative' }}
+                >
+                  <div style={{ width: `${trailerPlayer.duration ? (trailerPlayer.currentTime / trailerPlayer.duration) * 100 : 0}%`, height: '100%', background: '#fff', borderRadius: '2px', transition: 'width 0.1s linear' }} />
+                </div>
+                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums', minWidth: '55px' }}>
+                  {formatTime(trailerPlayer.currentTime)} / {formatTime(trailerPlayer.duration)}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Volume2 size={14} color="rgba(255,255,255,0.7)" />
+                  <input type="range" min="0" max="100" value={trailerPlayer.volume}
+                    onChange={setVolume}
+                    style={{ width: '50px', height: '3px', accentColor: '#fff', cursor: 'pointer' }}
+                  />
+                </div>
+                <button onClick={toggleFullscreen} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.2rem', display: 'flex' }}>
+                  <Maximize size={14} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
+              <p style={{ marginBottom: '0.5rem' }}>No trailer available for this film.</p>
+              <p style={{ fontSize: '0.85rem' }}>Add a YouTube link in the admin panel.</p>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* CURATE STAFF PICKS MODAL */}
+      <Modal isOpen={showCurateModal} onClose={() => setShowCurateModal(false)} title="Curate Staff Picks" width="640px">
+        <div>
+          <div style={{ marginBottom: '1rem' }}>
+            <input
+              className="admin-input"
+              placeholder="Search movies..."
+              onChange={e => {
+                const q = e.target.value.toLowerCase();
+                setCurationMovies(q ? movies.filter(m => m.title.toLowerCase().includes(q)) : []);
+              }}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {(curationMovies.length > 0 ? curationMovies : movies).slice(0, 30).map(movie => (
+              <div key={movie.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem' }}>
+                <img src={proxyImageUrl(movie.posterUrl, 'w92')} alt="" style={{ width: '36px', height: '54px', borderRadius: '4px', objectFit: 'cover' }} />
+                <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600 }}>{movie.title}</div>
+                <span
+                  onClick={() => handleCurate(movie.id, { isStaffPick: !movie.isStaffPick, staffPickType: movie.isStaffPick ? '' : 'grid' })}
+                  style={{ fontSize: '0.7rem', cursor: 'pointer', padding: '0.2rem 0.5rem', borderRadius: '4px', background: movie.isStaffPick ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: movie.isStaffPick ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(255,255,255,0.06)', color: movie.isStaffPick ? '#a5b4fc' : 'var(--color-text-muted)' }}>
+                  {movie.isStaffPick ? 'Staff Pick ✓' : 'Add Pick'}
+                </span>
+                {movie.isStaffPick && (
+                  <select value={movie.staffPickType || 'grid'} onChange={e => handleCurate(movie.id, { staffPickType: e.target.value })}
+                    style={{ fontSize: '0.65rem', padding: '0.15rem 0.3rem', borderRadius: '4px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8' }}
+                    onClick={e => e.stopPropagation()}>
+                    <option value="grid">Grid</option>
+                    <option value="featured">Featured</option>
+                  </select>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      {/* PROFILE EDIT MODAL */}
+      <Modal isOpen={editingProfile} onClose={() => setEditingProfile(false)} width="480px">
+        <div style={{ padding: '0.5rem 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Edit Profile</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label className="admin-label">Bio</label>
+              <textarea className="admin-textarea" rows={3} value={editBio} onChange={e => setEditBio(e.target.value)} placeholder="Tell other critics about yourself..." />
+            </div>
+            <div>
+              <label className="admin-label">Avatar URL</label>
+              <input className="admin-input" value={editAvatar} onChange={e => setEditAvatar(e.target.value)} placeholder="https://..." />
+            </div>
+            <div>
+              <label className="admin-label">Email</label>
+              <input className="admin-input" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="email@example.com" />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }} onClick={() => setEditingProfile(false)}>Cancel</button>
+            <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }} onClick={handleSaveProfile}>Save Changes</button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* MODAL - LOGIN / REGISTER */}
+      {isAuthModalOpen && (
+        <div className="modal-overlay" onClick={() => { if (!isAuthLoading) { setIsAuthModalOpen(false); setAuthError(''); } }}>
+          <div className="modal-content-panel auth-card-premium" style={{ maxWidth: '400px', padding: '1.75rem' }} onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', zIndex: 10 }} onClick={() => { setIsAuthModalOpen(false); setAuthError(''); }} disabled={isAuthLoading}>
+              <X size={18} />
+            </button>
+
+            {/* Cinematic badge and header */}
+            <div className="auth-header-ticket">
+              <div className="auth-badge-premium">
+                <Sparkles size={11} fill="var(--color-accent-gold)" />
+                <span>Midnight Critic Circle</span>
+              </div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
+                {authTab === 'login' ? 'Pass Verification' : 'Critic Enrollment'}
+              </h2>
+              <span className="auth-logo-sub">Access premium ratings and cast review logs</span>
+            </div>
+
+            {/* Premium Sliding Capsule Tabs */}
+            <div className="auth-capsule-tabs">
+              <button 
+                type="button" 
+                className={`auth-capsule-tab ${authTab === 'login' ? 'auth-capsule-tab--active' : ''}`}
+                onClick={() => { if (!isAuthLoading) setTabAndClearForm('login'); }}
+                disabled={isAuthLoading}
+              >
+                <Lock size={12} /> Sign In
+              </button>
+              <button 
+                type="button" 
+                className={`auth-capsule-tab ${authTab === 'register' ? 'auth-capsule-tab--active' : ''}`}
+                onClick={() => { if (!isAuthLoading) setTabAndClearForm('register'); }}
+                disabled={isAuthLoading}
+              >
+                <User size={12} /> Register
+              </button>
+            </div>
+
+            <form onSubmit={handleAuthSubmit}>
+              <div className="modal-body" style={{ padding: '0 0.25rem' }}>
+                {authError && (
+                  <div className="auth-error-box" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#f87171',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    marginBottom: '1rem',
+                    lineHeight: 1.4
+                  }}>
+                    <Info size={14} style={{ flexShrink: 0 }} />
+                    <span>{authError}</span>
+                  </div>
+                )}
+
+                <div className="auth-field-wrapper">
+                  <User size={16} className="auth-field-icon" />
+                  <input 
+                    type="text" 
+                    className="auth-field-input" 
+                    placeholder="Username"
+                    value={authFormData.username}
+                    onChange={(e) => setAuthFormData({ ...authFormData, username: e.target.value })}
+                    required 
+                    disabled={isAuthLoading}
+                  />
+                </div>
+
+                {authTab === 'register' && (
+                  <div className="auth-field-wrapper">
+                    <Mail size={16} className="auth-field-icon" />
+                    <input 
+                      type="email" 
+                      className="auth-field-input" 
+                      placeholder="Email Address"
+                      value={authFormData.email || ''}
+                      onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
+                      required={authTab === 'register'} 
+                      disabled={isAuthLoading}
+                    />
+                  </div>
+                )}
+
+                <div className="auth-field-wrapper" style={{ position: 'relative' }}>
+                  <Lock size={16} className="auth-field-icon" />
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    className="auth-field-input" 
+                    placeholder="Password"
+                    value={authFormData.password}
+                    onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
+                    required 
+                    disabled={isAuthLoading}
+                  />
+                  <button
+                    type="button"
+                    style={{
+                      position: 'absolute',
+                      right: '1rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--color-text-muted)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0,
+                      zIndex: 10
+                    }}
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isAuthLoading}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+
+                {authTab === 'register' && (
+                  <div className="auth-password-strength" style={{
+                    fontSize: '0.75rem',
+                    color: authFormData.password.length >= 6 ? 'var(--color-accent-gold)' : 'var(--color-text-muted)',
+                    marginTop: '-0.75rem',
+                    marginBottom: '1.25rem',
+                    paddingLeft: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    transition: 'color 0.3s ease'
+                  }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: authFormData.password.length >= 6 ? 'var(--color-accent-gold)' : '#475569',
+                      boxShadow: authFormData.password.length >= 6 ? '0 0 8px var(--color-accent-gold)' : 'none',
+                      transition: 'all 0.3s ease'
+                    }} />
+                    <span>{authFormData.password.length >= 6 ? 'Valid passkey strength' : 'Passkey must be 6+ characters'}</span>
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  className="btn-primary btn-auth-submit"
+                  disabled={isAuthLoading}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    opacity: isAuthLoading ? 0.8 : 1
+                  }}
+                >
+                  {isAuthLoading ? (
+                    <>
+                      <span className="auth-spinner" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield size={14} />
+                      <span>{authTab === 'login' ? 'Verify pass' : 'Enlist as Critic'}</span>
+                    </>
+                  )}
+                </button>
+
+                <p className="auth-footer-toggle">
+                  {authTab === 'login' ? "New critic in town?" : "Already verified?"}
+                  <span 
+                    onClick={() => { if (!isAuthLoading) setTabAndClearForm(authTab === 'login' ? 'register' : 'login'); }}
+                  >
+                    {authTab === 'login' ? 'Request Pass' : 'Sign In'}
+                  </span>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

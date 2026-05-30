@@ -1,0 +1,392 @@
+{
+  "movies": [
+    {
+      "id": "vikram-2022",
+      "title": "Vikram",
+      "description": "A black-ops squad investigates a string of masked killings and uncovers a narcotics network tied to a feared underground kingpin. Lokesh Kanagaraj builds a hard-edged action thriller around Kamal Haasan's comeback performance.",
+      "rating": 8.4,
+      "criticScore": 8.4,
+      "audienceScore": 92,
+      "genre": "Tamil / Action / Crime / Thriller",
+      "releaseYear": 2022,
+      "runtime": "2h 55m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Raaj Kamal Films International",
+      "releaseDate": "June 3, 2022",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/774UV1aCURb4s4JfEFg3IEMu5Zj.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/dkIX4dSMuVqjfrPGunBJUR7K3LQ.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Kamal Haasan",
+          "role": "Karnan / Vikram",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/xqnKeA127YoXfjDPjPKIJF8Kd2C.jpg"
+        },
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Sandhanam",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Fahadh Faasil",
+          "role": "Amar",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-vikram-1",
+          "user": "Arun Prakash",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+          "role": "Tamil Cinema Critic",
+          "rating": 9,
+          "text": "A thunderous theatrical experience with razor-sharp staging, a roaring Anirudh score, and a superb Kamal Haasan presence.",
+          "timestamp": "2h ago",
+          "likes": 1420,
+          "comments": 68
+        }
+      ],
+      "tmdbId": 743563
+    },
+    {
+      "id": "jai-bhim",
+      "title": "Jai Bhim",
+      "description": "A crusading lawyer fights for an Irular tribal woman after her husband disappears from police custody. The film blends legal drama with a forceful indictment of caste violence and institutional abuse.",
+      "rating": 8.7,
+      "criticScore": 9.1,
+      "audienceScore": 94,
+      "genre": "Tamil / Crime / Drama / Legal",
+      "releaseYear": 2021,
+      "runtime": "2h 44m",
+      "director": "T. J. Gnanavel",
+      "writer": "T. J. Gnanavel",
+      "studio": "2D Entertainment",
+      "releaseDate": "November 2, 2021",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/ehybiOtBUtrMkmtB39zQEtq1Jie.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/40lmQ5vzKJhj5k7i0hvZuglneyj.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Suriya",
+          "role": "Advocate Chandru",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/hIFXv3gIjlNS78gJmaguEOxvfPH.jpg"
+        },
+        {
+          "name": "Lijomol Jose",
+          "role": "Sengeni",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/vXFBgF6NMON7L4RzZ6B35lOVYOu.jpg"
+        },
+        {
+          "name": "Manikandan",
+          "role": "Rajakannu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/x54nrbLPVxUaStUt5I2om0WuE6j.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 855400
+    },
+    {
+      "id": "kaithi",
+      "title": "Kaithi",
+      "description": "An ex-prisoner on his way to meet his daughter is pulled into a desperate overnight mission to save poisoned police officers from a ruthless drug syndicate.",
+      "rating": 8.4,
+      "criticScore": 8.5,
+      "audienceScore": 90,
+      "genre": "Tamil / Action / Crime / Thriller",
+      "releaseYear": 2019,
+      "runtime": "2h 25m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Dream Warrior Pictures",
+      "releaseDate": "October 25, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/mxvOvom5zKRp4WPURKrhjoatt4P.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/seTFDq1iKyJ6YHr7HePbC20DMsy.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Karthi",
+          "role": "Dilli",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
+        },
+        {
+          "name": "Narain",
+          "role": "Bejoy",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/d0ApUGeFuGXpBkODIc6eLbBkb7B.jpg"
+        },
+        {
+          "name": "Arjun Das",
+          "role": "Anbu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/20RDzfTjpfRHxLYBfnIYXs7vcri.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 587030,
+      "trailerUrl": "https://youtu.be/g79CvhHaj5I?si=Em8wcq6-86J58Qzj",
+      "trailerChannelName": "Dream Warrior Pictures"
+    },
+    {
+      "id": "super-deluxe",
+      "title": "Super Deluxe",
+      "description": "Interlocking stories of desire, shame, faith, and absurd fate collide across one wild day in Chennai. Thiagarajan Kumararaja's film is playful, strange, and deeply humane.",
+      "rating": 8.2,
+      "criticScore": 8.8,
+      "audienceScore": 86,
+      "genre": "Tamil / Comedy / Crime / Drama",
+      "releaseYear": 2019,
+      "runtime": "2h 56m",
+      "director": "Thiagarajan Kumararaja",
+      "writer": "Thiagarajan Kumararaja",
+      "studio": "Tyler Durden and Kino Fist",
+      "releaseDate": "March 29, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/rTsYDdFWyw87CTk4YgJO6nYmVcJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/trBGubNu0WWBGQMLxMBOJe4DylV.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "cast": [
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Shilpa",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Fahadh Faasil",
+          "role": "Mugil",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
+        },
+        {
+          "name": "Samantha",
+          "role": "Vaembu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/iGQ0AT1bNULlrJwSOGSRqLDSfGG.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 432011
+    },
+    {
+      "id": "asuran",
+      "title": "Asuran",
+      "description": "A farmer from an oppressed community goes on the run with his son after a violent land dispute explodes. Vetrimaaran turns Poomani's Vekkai into a searing revenge drama.",
+      "rating": 8.4,
+      "criticScore": 8.7,
+      "audienceScore": 89,
+      "genre": "Tamil / Action / Drama",
+      "releaseYear": 2019,
+      "runtime": "2h 21m",
+      "director": "Vetrimaaran",
+      "writer": "Vetrimaaran",
+      "studio": "V Creations",
+      "releaseDate": "October 4, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/Elnp3XrAlMM30dil8rbL7D9XeP.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/oxl1w7sICYDJfaD9PM06HfPUmOi.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Dhanush",
+          "role": "Sivasaami",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
+        },
+        {
+          "name": "Manju Warrier",
+          "role": "Pachaiyamma",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7u1WgUHnwIW9mtL6aTdo1cRXmCM.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 576928
+    },
+    {
+      "id": "karnan",
+      "title": "Karnan",
+      "description": "A fiery young man from a neglected village rises against systems that deny his people dignity, mobility, and justice. Mari Selvaraj crafts a mythic rural protest drama.",
+      "rating": 8,
+      "criticScore": 8.3,
+      "audienceScore": 84,
+      "genre": "Tamil / Action / Drama",
+      "releaseYear": 2021,
+      "runtime": "2h 38m",
+      "director": "Mari Selvaraj",
+      "writer": "Mari Selvaraj",
+      "studio": "V Creations",
+      "releaseDate": "April 9, 2021",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/z5SxDcVWa9nokynVqBHb2IKk78J.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/t4BafoETA8JKbB9x5cbqEA5gLMU.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Dhanush",
+          "role": "Karnan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
+        },
+        {
+          "name": "Lal",
+          "role": "Yeman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/ds3eeWA56YFeeuWP6WUs1ok58FK.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 680652
+    },
+    {
+      "id": "96-2018",
+      "title": "96",
+      "description": "A school reunion brings two former classmates face to face with an unfinished love story. C. Prem Kumar's romance is gentle, restrained, and quietly devastating.",
+      "rating": 8.5,
+      "criticScore": 8.6,
+      "audienceScore": 88,
+      "genre": "Tamil / Drama / Romance",
+      "releaseYear": 2018,
+      "runtime": "2h 38m",
+      "director": "C. Prem Kumar",
+      "writer": "C. Prem Kumar",
+      "studio": "Madras Enterprises",
+      "releaseDate": "October 4, 2018",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/nrVloCa2hCFOztRF1DZU2jnWIiQ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/qzu94AvnZ1az30sTUuibx2bXpfs.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Ram",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Trisha",
+          "role": "Jaanu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 441717
+    },
+    {
+      "id": "ponniyin-selvan-1",
+      "title": "Ponniyin Selvan 1",
+      "description": "Vandiyadevan travels across the Chola kingdom carrying secret messages as a royal succession conspiracy threatens the empire. Mani Ratnam adapts Kalki's epic with a sprawling ensemble.",
+      "rating": 7.6,
+      "criticScore": 8,
+      "audienceScore": 78,
+      "genre": "Tamil / Action / Adventure / Drama",
+      "releaseYear": 2022,
+      "runtime": "2h 47m",
+      "director": "Mani Ratnam",
+      "writer": "Mani Ratnam",
+      "studio": "Madras Talkies",
+      "releaseDate": "September 30, 2022",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/zSNyZUeqDdii0doQ9970E90kCkb.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/nrVpYaBw0kqm2ySiwbxo33LnRkr.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vikram",
+          "role": "Aditha Karikalan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/c171LQMyHtULZC0RmuIHiiFDOjv.jpg"
+        },
+        {
+          "name": "Karthi",
+          "role": "Vandiyadevan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
+        },
+        {
+          "name": "Trisha",
+          "role": "Kundavai",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/jfeAV0VeAQhKONzIv1UEYbklJGn.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 660046
+    },
+    {
+      "title": "Master",
+      "description": "An alcoholic professor is sent to a juvenile school, where he clashes with a gangster, who uses the children of the school for criminal activities.",
+      "genre": "Drama",
+      "releaseYear": 2021,
+      "runtime": "2h",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Unknown Writer",
+      "studio": "Indie",
+      "releaseDate": "2021-01-13",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/wjbOlovDadOdPKkSAMohLCjbIsc.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/x1I63Mm5KU2DXjL4HdBy6JaGTms.jpg",
+      "rating": 10,
+      "criticScore": 10,
+      "audienceScore": 100,
+      "id": "master",
+      "reviews": [],
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [],
+      "tmdbId": 626392,
+      "trailerUrl": "https://youtu.be/UTiXQcrLlv4?si=WpuAeMfLkEsPZJwM"
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@gmail.com",
+      "passwordHash": "a0358583e86ad2642f2cdf1b1065afd0d609ea97d0c0c6d0d41dd1a77022b165e7ab915a87643a8457d73575653efea0b61b8ad4520a8edfabf9a917ea991de9",
+      "salt": "845067aefd8a36cf5b5b033c366bf202",
+      "role": "admin",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+      "token": "a3dd2d54c372eeefc6131dd24ee808fa7995d9618295fd618ac265f5c29188d8"
+    }
+  ],
+  "communityThreads": [
+    {
+      "id": "thread-dune-soundscape",
+      "title": "Dune: Part Two sound design still feels unreal",
+      "body": "That first thumper sequence is the kind of theater moment people remember for years. Curious how everyone ranks it against Blade Runner 2049.",
+      "tag": "Sound Design",
+      "author": "Elena Vane",
+      "role": "Reviewer",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+      "timestamp": "2h ago",
+      "likes": 34,
+      "replies": [
+        {
+          "id": "reply-dune-1",
+          "author": "Julian Vane",
+          "body": "The mix has that rare pressure without becoming muddy. IMAX carried it beautifully.",
+          "timestamp": "1h ago"
+        }
+      ]
+    },
+    {
+      "id": "thread-modern-noir",
+      "title": "Best modern noir entries after The Batman?",
+      "body": "Looking for slow-burn detective films with strong visual language. Bonus points for rain, neon, and morally exhausted leads.",
+      "tag": "Recommendations",
+      "author": "Marcus Vale",
+      "role": "Cinema Enthusiast",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+      "timestamp": "5h ago",
+      "likes": 21,
+      "replies": []
+    }
+  ]
+}
