@@ -106,14 +106,22 @@ export const handler = async (event) => {
       const { users } = getDb();
       const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
       if (!user || user.passwordHash !== hashPwd(password, user.salt || '')) return r({ error: 'Invalid credentials' }, 401);
-      return r({
-        user: { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio },
-        token: makeToken(user),
-      });
+      const token = makeToken(user);
+      return r({ username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token });
     }
 
     if (parts[0] === 'auth' && parts[1] === 'register' && m === 'POST') {
-      return r({ error: 'Registration not available on this site. Use local server.' }, 400);
+      const { username, email, password } = JSON.parse(event.body || '{}');
+      if (!username || !password) return r({ error: 'Username and password required' }, 400);
+      const db = getDb();
+      if (db.users.find(u => u.username.toLowerCase() === username.toLowerCase())) return r({ error: 'Username already taken' }, 409);
+      const salt = crypto.randomBytes(16).toString('hex');
+      const passwordHash = hashPwd(password, salt);
+      const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=blue,green,purple,orange&textColor=ffffff`;
+      const newUser = { username, email: email || '', passwordHash, salt, role: 'Cinema Enthusiast', avatarUrl, token: '', createdAt: new Date().toISOString() };
+      db.users.push(newUser);
+      const token = makeToken(newUser);
+      return r({ username: newUser.username, email: newUser.email, role: newUser.role, avatarUrl: newUser.avatarUrl, token }, 201);
     }
 
     if (parts[0] === 'auth' && parts[1] === 'me' && m === 'GET') {
