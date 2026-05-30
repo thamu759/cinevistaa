@@ -114,7 +114,6 @@ export const handler = async (event) => {
       const { username, email, password } = JSON.parse(event.body || '{}');
       if (!username || !password) return r({ error: 'Username and password required' }, 400);
       const db = getDb();
-      if (db.users.find(u => u.username.toLowerCase() === username.toLowerCase())) return r({ error: 'Username already taken' }, 409);
       const salt = crypto.randomBytes(16).toString('hex');
       const passwordHash = hashPwd(password, salt);
       const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=blue,green,purple,orange&textColor=ffffff`;
