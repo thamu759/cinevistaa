@@ -29,6 +29,8 @@ import {
   fetchLeaderboard,
   curateMovie
 } from './api';
+// Import API utilities for enhanced error handling
+import { retryAsync, generateErrorMessage } from './utils/apiUtils';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
 
@@ -37,11 +39,12 @@ export default function App() {
   const [activeView, setActiveView] = useState('home'); // 'home', 'movie-details', 'profile'
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   
-  // API Data State
-  const [movies, setMovies] = useState([]);
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+   // API Data State
+   const [movies, setMovies] = useState([]);
+   const [selectedMovie, setSelectedMovie] = useState(null);
+   const [isLoading, setIsLoading] = useState(false);
+   const [error, setError] = useState(null);
+   const [lastError, setLastError] = useState(null);
 
   // Filter State (for the movie grid only)
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -77,15 +80,25 @@ export default function App() {
   });
   const [replyDrafts, setReplyDrafts] = useState({});
 
-  // Modals Toggles
-  const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
-  const [showTrailer, setShowTrailer] = useState(false);
-  const [showCurateModal, setShowCurateModal] = useState(false);
-  const [curationMovies, setCurationMovies] = useState([]);
-  const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
-  const playerRef = useRef(null);
-  const playerContainerRef = useRef(null);
-  const progressIntervalRef = useRef(null);
+   // Modals Toggles
+   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
+   const [showTrailer, setShowTrailer] = useState(false);
+   const [showCurateModal, setShowCurateModal] = useState(false);
+   const [curationMovies, setCurationMovies] = useState([]);
+   const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
+   const [trailerAutoplayPreference, setTrailerAutoplayPreference] = useState(() => {
+     // Load from localStorage or default to true (autoplay on)
+     const saved = localStorage.getItem('mc_trailer_autoplay');
+     return saved !== null ? saved === 'true' : true;
+   });
+   
+   // Save preference to localStorage whenever it changes
+   useEffect(() => {
+     localStorage.setItem('mc_trailer_autoplay', trailerAutoplayPreference);
+   }, [trailerAutoplayPreference]);
+   const playerRef = useRef(null);
+   const playerContainerRef = useRef(null);
+   const progressIntervalRef = useRef(null);
 
   const getYoutubeVideoId = (url) => {
     if (!url) return null;
@@ -137,17 +150,17 @@ export default function App() {
       const container = playerContainerRef.current;
       if (!container) return;
       container.innerHTML = '<div id="yt-player" style="position:absolute;top:0;left:0;width:100%;height:100%"></div>';
-      playerRef.current = new window.YT.Player('yt-player', {
-        videoId,
-        playerVars: {
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          iv_load_policy: 3,
-          autoplay: 1,
-          playsinline: 1
-        },
+       playerRef.current = new window.YT.Player('yt-player', {
+         videoId,
+         playerVars: {
+           controls: 0,
+           modestbranding: 1,
+           rel: 0,
+           showinfo: 0,
+           iv_load_policy: 3,
+           autoplay: trailerAutoplayPreference ? 1 : 0,
+           playsinline: 1
+         },
         events: {
           onReady: (e) => {
             setTrailerPlayer(prev => ({ ...prev, duration: e.target.getDuration(), playing: true }));
@@ -419,23 +432,26 @@ export default function App() {
     }
   };
 
-  // Fetch Movies on genre/sort changes (search is decoupled)
-  const loadMoviesList = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchMovies({
-        genre: selectedGenre,
-        sort: sortOption
-      });
-      setMovies(data);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load movies. Make sure backend is running!");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+   // Fetch Movies on genre/sort changes (search is decoupled)
+   const loadMoviesList = async () => {
+     setIsLoading(true);
+     try {
+       const data = await retryAsync(() => fetchMovies({
+         genre: selectedGenre,
+         sort: sortOption
+       }), { maxRetries: 2, baseDelay: 500 });
+       setMovies(data);
+       setError(null);
+     } catch (err) {
+       console.error('Error loading movies:', err);
+       const errorInfo = generateErrorMessage(err, 'Failed to load movies');
+       setError(errorInfo.message);
+       // Store error info for potential retry UI
+       setLastError(errorInfo);
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
   useEffect(() => {
     loadMoviesList();
@@ -583,13 +599,75 @@ export default function App() {
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+     window.addEventListener('popstate', handlePopState);
+     return () => window.removeEventListener('popstate', handlePopState);
+   }, []);
 
-  useEffect(() => {
-    if (!isSessionVerified || activeView !== 'admin') return;
-    if (!currentUser || currentUser.role !== 'admin') {
+   // Keyboard shortcuts
+   useEffect(() => {
+     const handleKeyDown = (e) => {
+       // Prevent shortcuts when typing in inputs/textareas
+       const target = e.target;
+       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+         return;
+       }
+
+       // Focus search with /
+       if (e.key === '/' && !e.shiftKey) {
+         e.preventDefault();
+         if (!isSearchOpen) {
+           setIsSearchOpen(true);
+           // Focus search input after a brief delay to ensure it's rendered
+           setTimeout(() => {
+             searchInputRef.current?.focus();
+           }, 100);
+         }
+       }
+
+       // Close modals with Escape
+       if (e.key === 'Escape') {
+         if (isSearchOpen) {
+           setIsSearchOpen(false);
+           setSearchQuery('');
+           setSearchResults([]);
+         }
+         if (isWriteReviewOpen) {
+           setIsWriteReviewOpen(false);
+         }
+         if (showTrailer) {
+           setShowTrailer(false);
+         }
+         if (showCurateModal) {
+           setShowCurateModal(false);
+         }
+         if (isAuthModalOpen) {
+           setIsAuthModalOpen(false);
+         }
+         if (editingProfile) {
+           setEditingProfile(false);
+         }
+       }
+
+       // Hero carousel navigation with arrow keys (only on home view)
+       if (activeView === 'home' && heroMovies.length > 1) {
+         if (e.key === 'ArrowLeft') {
+           e.preventDefault();
+           setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length) % heroMovies.length);
+         }
+         if (e.key === 'ArrowRight') {
+           e.preventDefault();
+           setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+         }
+       }
+     };
+
+     window.addEventListener('keydown', handleKeyDown);
+     return () => window.removeEventListener('keydown', handleKeyDown);
+   }, [isSearchOpen, isWriteReviewOpen, showTrailer, showCurateModal, isAuthModalOpen, editingProfile, activeView, heroMovies.length, searchInputRef]);
+
+   useEffect(() => {
+     if (!isSessionVerified || activeView !== 'admin') return;
+     if (!currentUser || currentUser.role !== 'admin') {
       navigateTo('home', { replace: true });
     }
   }, [activeView, currentUser, isSessionVerified]);
@@ -837,12 +915,27 @@ export default function App() {
                     <div className="search-spinner"></div>
                     <span>Searching...</span>
                   </div>
-                ) : searchResults.length === 0 ? (
-                  <div className="search-results-empty">
-                    <Film size={24} />
-                    <p>No results found for "{searchQuery}"</p>
-                  </div>
-                ) : (
+                 ) : searchResults.length === 0 ? (
+                   <div className="search-results-empty">
+                     <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                     <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                       No results found for "{searchQuery}"
+                     </p>
+                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6', maxWidth: '400px' }}>
+                       Try different keywords, check spelling, or browse by genre to discover movies.
+                     </p>
+                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                       <button onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                         className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
+                         Clear Search
+                       </button>
+                       <button onClick={() => { setSearchQuery(''); setSearchResults([]); navigateTo('home'); }}
+                         className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
+                         Browse All Movies
+                       </button>
+                     </div>
+                   </div>
+                 ) : (
                   <>
                     <div className="search-results-header">
                       <span>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found</span>
@@ -1187,9 +1280,28 @@ export default function App() {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>The best of the best, ranked by critic and audience scores.</p>
             </div>
-            {movies.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>No movies found.</div>
-            ) : (
+             {movies.length === 0 ? (
+               <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                 <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                 <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                   No new releases found
+                 </p>
+                 <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                   Check back soon for the latest hit movies, or explore our full catalog using the 
+                   genre and sort filters above.
+                 </p>
+                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                   <button onClick={() => { setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
+                     className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
+                     Browse All Movies
+                   </button>
+                   <button onClick={() => setActiveView('coming-soon')}
+                     className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
+                     See Coming Soon
+                   </button>
+                 </div>
+               </div>
+             ) : (
               <div className="movie-grid">
                 {[...movies].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
@@ -1223,15 +1335,26 @@ export default function App() {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Watchlist</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Movies you've saved to watch later.</p>
             </div>
-            {(() => {
-              const watchlistMovies = movies.filter(m => watchlist.includes(m.id));
-              return watchlistMovies.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  <p style={{ marginBottom: '0.5rem' }}>Your watchlist is empty.</p>
-                  <p style={{ fontSize: '0.85rem' }}>Browse movies and add them to your watchlist to see them here.</p>
-                </div>
-              ) : (
-                <div className="movie-grid">
+             {(() => {
+               const watchlistMovies = movies.filter(m => watchlist.includes(m.id));
+               return watchlistMovies.length === 0 ? (
+                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                   <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                   <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                     Your watchlist is empty
+                   </p>
+                   <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                     Start building your personal collection by browsing movies and clicking the 
+                     '+ Add to Watchlist' button on any movie card.
+                   </p>
+                   <button onClick={() => { setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
+                     className="btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }}>
+                     <Plus size={16} /> Explore Movies
+                   </button>
+                 </div>
+               ) : (
+                 <div className="movie-grid">
+
                   {watchlistMovies.map(movie => (
                     <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
@@ -2002,10 +2125,35 @@ export default function App() {
               <div className="community-thread-list">
                 {isCommunityLoading ? (
                   <div className="community-empty glass-panel">Loading community discussions...</div>
-                ) : communityError ? (
-                  <div className="community-empty glass-panel">{communityError}</div>
-                ) : communityThreads.length === 0 ? (
-                  <div className="community-empty glass-panel">No discussions yet. Start the first one.</div>
+                 ) : communityError ? (
+                   <div className="community-empty glass-panel" style={{ textAlign: 'center', padding: '2rem' }}>
+                     <AlertTriangle size={24} style={{ marginBottom: '1rem', color: 'var(--color-accent-red)' }} />
+                     <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-accent-red)' }}>
+                       Unable to load discussions
+                     </p>
+                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6', maxWidth: '400px' }}>
+                       We're having trouble loading community discussions. Please check your connection and try again.
+                     </p>
+                     <button onClick={loadCommunityThreads}
+                       className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
+                       <RefreshCw size={16} /> Try Again
+                     </button>
+                   </div>
+                 ) : communityThreads.length === 0 ? (
+                   <div className="community-empty glass-panel" style={{ textAlign: 'center', padding: '3rem' }}>
+                     <Users size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                     <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                       No discussions yet
+                     </p>
+                     <p style={{ marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6', maxWidth: '500px' }}>
+                       Be the first to start a conversation! Share your thoughts on movies, ask questions, or connect 
+                       with other film enthusiasts in our community.
+                     </p>
+                     <button onClick={() => { setIsAuthModalOpen(true); setAuthTab('login'); }}
+                       className="btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }}>
+                       <Users size={16} /> Sign In to Start
+                     </button>
+                   </div>
                 ) : (
                   communityThreads.map(thread => (
                     <article key={thread.id} className="community-thread glass-panel">
@@ -2164,14 +2312,27 @@ export default function App() {
       {/* TRAILER MODAL POPUP */}
       <Modal isOpen={showTrailer} onClose={() => setShowTrailer(false)} width="800px">
         <div style={{ padding: '0.25rem 0' }}>
-          <div className="trailer-header-info" style={{ padding: '0 0.25rem 0.75rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{selectedMovie?.title}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-              <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{selectedMovie?.trailerChannelName || 'YouTube'}</span>
-              <span style={{ fontSize: '0.6rem', color: 'rgba(148,163,184,0.4)' }}>·</span>
-              <span style={{ fontSize: '0.68rem', color: 'var(--color-accent-gold)', fontWeight: 600 }}>Official Trailer</span>
-            </div>
-          </div>
+           <div className="trailer-header-info" style={{ padding: '0 0.25rem 0.75rem' }}>
+             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{selectedMovie?.title}</h2>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+               <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{selectedMovie?.trailerChannelName || 'YouTube'}</span>
+               <span style={{ fontSize: '0.6rem', color: 'rgba(148,163,184,0.4)' }}>·</span>
+               <span style={{ fontSize: '0.68rem', color: 'var(--color-accent-gold)', fontWeight: 600 }}>Official Trailer</span>
+             </div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+               <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+                 <input
+                   type="checkbox"
+                   checked={trailerAutoplayPreference}
+                   onChange={(e) => {
+                     setTrailerAutoplayPreference(e.target.checked);
+                     localStorage.setItem('mc_trailer_autoplay', e.target.checked);
+                   }}
+                 />
+                 <span>Autoplay trailer</span>
+               </label>
+             </div>
+           </div>
           {selectedMovie?.trailerUrl ? (
             <div
               ref={playerContainerRef}
