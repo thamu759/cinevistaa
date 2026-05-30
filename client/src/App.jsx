@@ -47,6 +47,8 @@ export default function App() {
    const [newReleases, setNewReleases] = useState([]);
    const [newReleasesPage, setNewReleasesPage] = useState([]);
    const [newReleasesPageLoading, setNewReleasesPageLoading] = useState(false);
+   const [topRatedPage, setTopRatedPage] = useState([]);
+   const [topRatedPageLoading, setTopRatedPageLoading] = useState(false);
    const [selectedMovie, setSelectedMovie] = useState(null);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
@@ -557,6 +559,24 @@ export default function App() {
     }
   }, [activeView]);
 
+  // Fetch full top-rated list sorted by rating descending
+  useEffect(() => {
+    if (activeView === 'top-rated') {
+      const load = async () => {
+        setTopRatedPageLoading(true);
+        try {
+          const data = await fetchMovies({ sort: 'rating' });
+          setTopRatedPage(data.filter(m => m.rating >= 7));
+        } catch (err) {
+          console.error('Failed to load top-rated page:', err);
+        } finally {
+          setTopRatedPageLoading(false);
+        }
+      };
+      load();
+    }
+  }, [activeView]);
+
   // Verify auth session token on mount
   useEffect(() => {
     const token = localStorage.getItem('mc_token');
@@ -586,6 +606,7 @@ export default function App() {
     if (path === '/profile') return { view: 'profile' };
     if (path === '/community') return { view: 'community' };
     if (path === '/new-releases') return { view: 'new-releases' };
+    if (path === '/top-rated') return { view: 'top-rated' };
     if (path === '/watchlist') return { view: 'watchlist' };
     if (path === '/coming-soon') return { view: 'coming-soon' };
     if (path === '/leaderboard') return { view: 'leaderboard' };
@@ -600,6 +621,7 @@ export default function App() {
     if (view === 'profile') return '/profile';
     if (view === 'community') return '/community';
     if (view === 'new-releases') return '/new-releases';
+    if (view === 'top-rated') return '/top-rated';
     if (view === 'watchlist') return '/watchlist';
     if (view === 'coming-soon') return '/coming-soon';
     if (view === 'leaderboard') return '/leaderboard';
@@ -1207,9 +1229,15 @@ const handleDeleteReview = async (reviewId) => {
 
             {/* WEEKLY CHARTS (Movie Grid) */}
             <section className="movies-section">
-              <p className="section-meta">Weekly Charts</p>
-              <h2 className="section-title">Top Rated Cinevistaa</h2>
-              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                <div>
+                  <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Weekly Charts</p>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated Cinevistaa</h2>
+                </div>
+                <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
+                  View All
+                </button>
+              </div>
               {isLoading ? (
                 <div className="skeleton-grid">
                   {Array.from({ length: 8 }).map((_, i) => (
@@ -1231,7 +1259,7 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               ) : (
                 <div className="movie-grid">
-                  {movies.map(movie => (
+                  {movies.filter(m => m.rating >= 7).slice(0, 20).map(movie => (
                     <div 
                       key={movie.id} 
                       className="movie-card"
@@ -1393,6 +1421,64 @@ const handleDeleteReview = async (reviewId) => {
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                        <div className="movie-card-poster-wrapper">
                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                      <div className="movie-card-rating">
+                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        <span>{(movie.rating || 0).toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <div className="movie-card-info">
+                      <h3 className="movie-card-title">{movie.title}</h3>
+                      <div className="movie-card-genre-tags">
+                        {movie.genre && movie.genre.split('/').map(tag => (
+                          <span key={tag} className="genre-tag">{tag.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TOP RATED VIEW */}
+        {activeView === 'top-rated' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Highest Rated</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Top Rated</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Every movie rated 7 and above, ranked by score.</p>
+            </div>
+            {topRatedPageLoading ? (
+              <div className="skeleton-grid">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="skeleton-card">
+                    <div className="skeleton skeleton-poster" />
+                    <div className="skeleton skeleton-text medium" />
+                    <div className="skeleton skeleton-text short" />
+                  </div>
+                ))}
+              </div>
+            ) : topRatedPage.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                  No top rated movies yet
+                </p>
+                <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                  Movies with a rating of 7 or higher will appear here.
+                </p>
+                <button onClick={() => navigateTo('home')}
+                  className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
+                  Browse All Movies
+                </button>
+              </div>
+            ) : (
+              <div className="movie-grid">
+                {topRatedPage.map(movie => (
+                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                    <div className="movie-card-poster-wrapper">
+                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
                       <div className="movie-card-rating">
                         <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                         <span>{(movie.rating || 0).toFixed(1)}</span>
