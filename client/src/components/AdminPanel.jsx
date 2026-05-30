@@ -215,20 +215,31 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       try {
         const data = await searchTmdbMovies(title);
         const results = Array.isArray(data) ? data : [];
+        console.log('[auto-fetch] search results:', results.length);
         if (results.length > 0) {
           const best = results[0];
+          console.log('[auto-fetch] best:', best.title, 'tmdbId:', best.tmdbId);
           setAddForm(prev => ({ ...prev, posterUrl: best.posterUrl || prev.posterUrl }));
           if (best.tmdbId) {
             const [credits, details] = await Promise.all([
               fetchTmdbCredits(best.tmdbId),
               fetchTmdbMovieDetails(best.tmdbId)
             ]);
-            if (Array.isArray(credits) && credits.length > 0) setAddCast(credits);
-            if (details) setAddForm(prev => ({ ...prev, ...details }));
+            console.log('[auto-fetch] credits:', credits?.length, 'details:', details);
+            if (Array.isArray(credits) && credits.length > 0) {
+              setAddCast(credits);
+              console.log('[auto-fetch] cast set:', credits.length);
+            }
+            if (details) {
+              setAddForm(prev => ({ ...prev, ...details }));
+              console.log('[auto-fetch] details set:', details);
+            }
           }
         }
         setLastAutoFetchedTitle(title);
-      } catch (e) {}
+      } catch (e) {
+        console.error('[auto-fetch] error:', e);
+      }
       setAddAutoSearching(false);
     }, 600);
     return () => clearTimeout(timer);
