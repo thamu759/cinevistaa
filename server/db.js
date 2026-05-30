@@ -147,6 +147,39 @@ export const fetchTmdbMovieCredits = async (tmdbId) => {
   }
 };
 
+export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
+  if (!hasTmdbCredentials() || !tmdbId) return null;
+
+  try {
+    const [details, credits] = await Promise.all([
+      fetch(buildTmdbUrl(`movie/${tmdbId}`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null),
+      fetch(buildTmdbUrl(`movie/${tmdbId}/credits`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null)
+    ]);
+
+    if (!details) return null;
+
+    const crew = credits?.crew || [];
+    const director = crew.find(c => c.job === 'Director')?.name || '';
+    const writer = crew.find(c => c.department === 'Writing')?.name || '';
+    const studio = details.production_companies?.[0]?.name || '';
+    const genres = (details.genres || []).map(g => g.name).join(' / ');
+    const runtime = details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : '';
+
+    return {
+      director,
+      writer,
+      studio,
+      genre: genres,
+      runtime,
+      releaseYear: details.release_date ? details.release_date.split('-')[0] : '',
+      releaseDate: details.release_date || ''
+    };
+  } catch (error) {
+    console.warn(`TMDB full details lookup failed for ID "${tmdbId}":`, error.message);
+    return null;
+  }
+};
+
 export const fetchTmdbMovieLogo = async (tmdbId) => {
   if (!hasTmdbCredentials() || !tmdbId) return null;
 

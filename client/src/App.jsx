@@ -1021,8 +1021,7 @@ const handleDeleteReview = async (reviewId) => {
                         className="hero-backdrop" 
                         style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
                       />
-                      <div className="hero-layout">
-                          <div className="hero-content">
+                      <div className="hero-content">
                           <MovieLogo movie={movie} />
                           <div className="hero-rating-badge">
                             <span className="hero-tag-fav">FEATURED</span>
@@ -1041,10 +1040,6 @@ const handleDeleteReview = async (reviewId) => {
                               {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
                               {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
                             </button>
-                          </div>
-                        </div>
-                        <div className="hero-poster">
-                          <img src={proxyImageUrl(movie.posterUrl, 'w342')} alt={movie.title} />
                         </div>
                       </div>
                     </div>

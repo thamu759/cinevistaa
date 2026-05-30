@@ -8,7 +8,7 @@ import {
   fetchMovies, fetchMovieById, addMovie, deleteMovie, updateMovie,
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
-  searchTmdbMovies, fetchTmdbCredits
+  searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -177,7 +177,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [page, setPage] = useState(0);
   const [filterText, setFilterText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' });
+  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' });
   const [addCast, setAddCast] = useState([]);
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
@@ -219,8 +219,12 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           const best = results[0];
           setAddForm(prev => ({ ...prev, posterUrl: best.posterUrl || prev.posterUrl }));
           if (best.tmdbId) {
-            const credits = await fetchTmdbCredits(best.tmdbId);
+            const [credits, details] = await Promise.all([
+              fetchTmdbCredits(best.tmdbId),
+              fetchTmdbMovieDetails(best.tmdbId)
+            ]);
             if (Array.isArray(credits) && credits.length > 0) setAddCast(credits);
+            if (details) setAddForm(prev => ({ ...prev, ...details }));
           }
         }
         setLastAutoFetchedTitle(title);
@@ -267,10 +271,14 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     setEditPreview(m.posterUrl ? m.posterUrl : null);
     if (m.tmdbId) {
       try {
-        const credits = await fetchTmdbCredits(m.tmdbId);
+        const [credits, details] = await Promise.all([
+          fetchTmdbCredits(m.tmdbId),
+          fetchTmdbMovieDetails(m.tmdbId)
+        ]);
         if (Array.isArray(credits) && credits.length > 0) {
           setEditingMovie(prev => prev ? { ...prev, cast: credits } : prev);
         }
+        if (details) setEditingMovie(prev => prev ? { ...prev, ...details } : prev);
       } catch (e) {}
     }
   };
@@ -283,11 +291,20 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       posterUrl: m.posterUrl || '',
       releaseDate: m.releaseDate || '',
       language: (m.language || '').toUpperCase(),
+      director: '',
+      writer: '',
+      studio: '',
+      genre: '',
+      runtime: '',
     });
     if (m.tmdbId) {
       try {
-        const credits = await fetchTmdbCredits(m.tmdbId);
+        const [credits, details] = await Promise.all([
+          fetchTmdbCredits(m.tmdbId),
+          fetchTmdbMovieDetails(m.tmdbId)
+        ]);
         if (Array.isArray(credits) && credits.length > 0) setAddCast(credits);
+        if (details) setAddForm(prev => ({ ...prev, ...details }));
       } catch (e) {}
     }
   };
@@ -298,7 +315,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     try {
       const created = await addMovie({ ...addForm, rating: 0, cast: addCast });
       setMovies(prev => [...prev, created]);
-      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '' });
+      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' });
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
@@ -403,7 +420,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       )}
 
       {/* Add Movie Modal */}
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
         <div className="admin-add-modal-tmdb">
           <label className="admin-label" style={{ marginBottom: '0.25rem' }}>Quick fill from TMDB</label>
           <div style={{ position: 'relative' }}>
@@ -431,6 +448,11 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           <div className="admin-edit-full"><label className="admin-label">Description</label><textarea className="admin-textarea" value={addForm.description} onChange={e => setAddForm(prev => ({ ...prev, description: e.target.value }))} rows={2} /></div>
           <div><label className="admin-label">Poster URL</label><input className="admin-input" value={addForm.posterUrl} onChange={e => setAddForm(prev => ({ ...prev, posterUrl: e.target.value }))} /></div>
           <div><label className="admin-label">Language</label><input className="admin-input" value={addForm.language} onChange={e => setAddForm(prev => ({ ...prev, language: e.target.value }))} /></div>
+          <div><label className="admin-label">Director</label><input className="admin-input" value={addForm.director} onChange={e => setAddForm(prev => ({ ...prev, director: e.target.value }))} /></div>
+          <div><label className="admin-label">Writer</label><input className="admin-input" value={addForm.writer} onChange={e => setAddForm(prev => ({ ...prev, writer: e.target.value }))} /></div>
+          <div><label className="admin-label">Studio</label><input className="admin-input" value={addForm.studio} onChange={e => setAddForm(prev => ({ ...prev, studio: e.target.value }))} /></div>
+          <div><label className="admin-label">Genre</label><input className="admin-input" value={addForm.genre} onChange={e => setAddForm(prev => ({ ...prev, genre: e.target.value }))} /></div>
+          <div><label className="admin-label">Runtime</label><input className="admin-input" value={addForm.runtime} onChange={e => setAddForm(prev => ({ ...prev, runtime: e.target.value }))} placeholder="e.g. 2h 44m" /></div>
           <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={addForm.trailerUrl} onChange={e => setAddForm(prev => ({ ...prev, trailerUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." /></div>
           <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={addForm.trailerChannelName} onChange={e => setAddForm(prev => ({ ...prev, trailerChannelName: e.target.value }))} placeholder="e.g. Sony Pictures Entertainment" /></div>
           {addCast.length > 0 && (
@@ -466,7 +488,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -510,6 +532,11 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
             <div className="admin-edit-full"><label className="admin-label">Title</label><input className="admin-input" value={editingMovie?.title || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, title: e.target.value } : prev)} /></div>
             <div><label className="admin-label">Release Date</label><input className="admin-input" value={editingMovie?.releaseDate || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, releaseDate: e.target.value } : prev)} /></div>
             <div><label className="admin-label">Language</label><input className="admin-input" value={editingMovie?.language || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, language: e.target.value } : prev)} /></div>
+            <div><label className="admin-label">Director</label><input className="admin-input" value={editingMovie?.director || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, director: e.target.value } : prev)} /></div>
+            <div><label className="admin-label">Writer</label><input className="admin-input" value={editingMovie?.writer || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, writer: e.target.value } : prev)} /></div>
+            <div><label className="admin-label">Studio</label><input className="admin-input" value={editingMovie?.studio || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, studio: e.target.value } : prev)} /></div>
+            <div><label className="admin-label">Genre</label><input className="admin-input" value={editingMovie?.genre || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, genre: e.target.value } : prev)} /></div>
+            <div><label className="admin-label">Runtime</label><input className="admin-input" value={editingMovie?.runtime || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, runtime: e.target.value } : prev)} placeholder="e.g. 2h 44m" /></div>
             <div className="admin-edit-full"><label className="admin-label">Description</label><textarea className="admin-textarea" value={editingMovie?.description || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, description: e.target.value } : prev)} rows={2} /></div>
             <div><label className="admin-label">Poster URL</label><input className="admin-input" value={editingMovie?.posterUrl || ''} onChange={e => { setEditingMovie(prev => prev ? { ...prev, posterUrl: e.target.value } : prev); setEditPreview(e.target.value); }} /></div>
             <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={editingMovie?.trailerUrl || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, trailerUrl: e.target.value } : prev)} placeholder="https://www.youtube.com/watch?v=..." /></div>

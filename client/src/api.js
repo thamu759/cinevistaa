@@ -344,6 +344,12 @@ export const fetchTmdbLogo = async (tmdbId) => {
   return data.logoUrl || null;
 };
 
+export const fetchTmdbMovieDetails = async (tmdbId) => {
+  const response = await fetch(`${API_BASE_URL}/tmdb/details/${tmdbId}`);
+  if (!response.ok) return null;
+  return response.json();
+};
+
 export const updateUserRole = async (username, role) => {
   const response = await fetch(`${API_BASE_URL}/admin/users/${encodeURIComponent(username)}/role`, {
     method: 'PATCH',
