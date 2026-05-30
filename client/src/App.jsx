@@ -524,6 +524,7 @@ export default function App() {
   // Fetch detailed movie info when selected
   useEffect(() => {
     if (selectedMovieId) {
+      setSelectedMovie(null);
       const loadMovieDetails = async () => {
         try {
           const data = await fetchMovieById(selectedMovieId);
