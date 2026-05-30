@@ -784,7 +784,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('mc_token');
     setCurrentUser(null);
-    setActiveView('home');
+    navigateTo('home');
   };
 
   // Toggle watchlist item
@@ -902,7 +902,7 @@ const handleDeleteReview = async (reviewId) => {
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
-          <div className="logo" onClick={() => { setActiveView('home'); setSelectedMovieId(null); }}>
+          <div className="logo" onClick={() => { navigateTo('home'); }}>
             Cine<span>Vistaa</span>
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
