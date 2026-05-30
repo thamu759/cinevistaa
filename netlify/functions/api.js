@@ -1,275 +1,122 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 import crypto from 'crypto';
+import dbData from './db.json';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const getDb = () => dbData;
 
-const readDb = () => {
-  try {
-    return JSON.parse(readFileSync(resolve(__dirname, '../../db.json'), 'utf-8'));
-  } catch {
-    return { movies: [], users: [], communityThreads: [] };
-  }
+const TMDB_TOKEN = process.env.TMDB_ACCESS_TOKEN;
+const TMDB_KEY = process.env.TMDB_API_KEY;
+
+const tUrl = (path, p = {}) => {
+  const u = new URL(`https://api.themoviedb.org/3/${path}`);
+  Object.entries(p).forEach(([k, v]) => v && u.searchParams.set(k, v));
+  if (!TMDB_TOKEN && TMDB_KEY) u.searchParams.set('api_key', TMDB_KEY);
+  return u;
 };
+const tHdrs = () => TMDB_TOKEN ? { Authorization: `Bearer ${TMDB_TOKEN}` } : {};
 
-const TMDB_ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN;
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
-
-const tmdbUrl = (path, params = {}) => {
-  const url = new URL(`https://api.themoviedb.org/3/${path}`);
-  Object.entries(params).forEach(([k, v]) => { if (v) url.searchParams.set(k, v); });
-  if (!TMDB_ACCESS_TOKEN && TMDB_API_KEY) url.searchParams.set('api_key', TMDB_API_KEY);
-  return url;
-};
-
-const tmdbHeaders = () => TMDB_ACCESS_TOKEN ? { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` } : {};
-
-const hash = (password, salt) => crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-const genSalt = () => crypto.randomBytes(16).toString('hex');
-
-const verifyToken = (token) => {
-  if (!token) return null;
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 2) return null;
-    const user = readDb().users.find(u => u.username === parts[0]);
-    if (!user) return null;
-    const expected = hash(parts[0] + user.password + (user.salt || ''), parts[0].slice(0, 8));
-    if (expected === parts[1]) return user;
-    return null;
-  } catch { return null; }
-};
-
-const corsHeaders = {
+const hdrs = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-  'Content-Type': 'application/json',
 };
 
-const json = (body, status = 200) => ({ statusCode: status, headers: corsHeaders, body: JSON.stringify(body) });
+const r = (b, s = 200) => ({
+  statusCode: s,
+  headers: { ...hdrs, 'Content-Type': 'application/json' },
+  body: JSON.stringify(b),
+});
 
-const parsePath = (event) => {
-  const base = event.path.replace('/.netlify/functions/api', '').replace(/\/api/, '') || '/';
-  const parts = base.split('/').filter(Boolean);
-  return parts;
+const pth = (e) => {
+  const x = e.path.replace('/.netlify/functions/api', '').replace(/\/api/, '') || '/';
+  return x.split('/').filter(Boolean);
 };
 
 export const handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: corsHeaders, body: '' };
-
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: hdrs, body: '' };
   try {
-    const parts = parsePath(event);
-    const method = event.httpMethod;
-    const q = event.queryStringParameters || {};
+    const parts = pth(event), m = event.httpMethod, q = event.queryStringParameters || {};
 
-    // GET /movies
-    if (parts[0] === 'movies' && !parts[1] && method === 'GET') {
-      let { movies } = readDb();
-      const search = q.search?.toLowerCase();
-      const genre = q.genre?.toLowerCase();
-      if (search) movies = movies.filter(m => m.title?.toLowerCase().includes(search) || m.description?.toLowerCase().includes(search));
-      if (genre) movies = movies.filter(m => m.genre?.toLowerCase().includes(genre));
+    if (parts[0] === 'movies' && !parts[1] && m === 'GET') {
+      let { movies } = getDb();
+      const s = q.search?.toLowerCase(), g = q.genre?.toLowerCase();
+      if (s) movies = movies.filter(x => x.title?.toLowerCase().includes(s) || x.description?.toLowerCase().includes(s));
+      if (g) movies = movies.filter(x => x.genre?.toLowerCase().includes(g));
       if (q.sort === 'rating') movies.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       else if (q.sort === 'latest') movies.sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
       else if (q.sort === 'popular') movies.sort((a, b) => (b.audienceScore || 0) - (a.audienceScore || 0));
-      return json(movies);
+      return r(movies);
     }
 
-    // GET /movies/:id
-    if (parts[0] === 'movies' && parts[1] && !parts[2] && method === 'GET') {
-      const { movies } = readDb();
-      const movie = movies.find(m => m.id === parts[1]);
-      if (!movie) return json({ error: 'Movie not found' }, 404);
-      return json(movie);
+    if (parts[0] === 'movies' && parts[1] && !parts[2] && m === 'GET') {
+      const x = getDb().movies.find(m => m.id === parts[1]);
+      return x ? r(x) : r({ error: 'Not found' }, 404);
     }
 
-    // POST /movies/:id/reviews
-    if (parts[0] === 'movies' && parts[1] && parts[2] === 'reviews' && method === 'POST') {
-      const body = JSON.parse(event.body || '{}');
-      const user = verifyToken(event.headers.authorization?.replace('Bearer ', ''));
-      if (!user) return json({ error: 'Authentication required' }, 401);
-      const db = readDb();
-      const movie = db.movies.find(m => m.id === parts[1]);
-      if (!movie) return json({ error: 'Movie not found' }, 404);
-      const review = {
-        id: Date.now().toString(36),
-        user: user.username,
-        avatarUrl: user.avatarUrl || '',
-        role: user.role || '',
-        rating: body.rating || 0,
-        text: body.text || '',
-        timestamp: new Date().toISOString(),
-        likes: 0,
-        comments: 0,
-      };
-      if (!movie.reviews) movie.reviews = [];
-      movie.reviews.push(review);
-      // Write back (best effort in serverless)
-      try { writeFileSync(resolve(__dirname, '../../db.json'), JSON.stringify(db, null, 2)); } catch {}
-      return json(review, 201);
+    if (parts[0] === 'tmdb' && parts[1] === 'search' && m === 'GET') {
+      if (!q.query) return r([]);
+      const res = await fetch(tUrl('search/movie', { query: q.query, include_adult: 'false', language: 'en-US' }), { headers: tHdrs() });
+      const p = await res.json();
+      return r((p.results || []).slice(0, 10).map(x => ({
+        tmdbId: x.id, title: x.title, description: x.overview,
+        releaseDate: x.release_date || '', releaseYear: x.release_date?.split('-')[0] || '',
+        posterUrl: x.poster_path ? `https://image.tmdb.org/t/p/w342${x.poster_path}` : '',
+        backdropUrl: x.backdrop_path ? `https://image.tmdb.org/t/p/original${x.backdrop_path}` : '',
+        language: x.original_language || '', rating: x.vote_average || 0,
+      })));
     }
 
-    // PATCH /movies/:id/curate
-    if (parts[0] === 'movies' && parts[1] && parts[2] === 'curate' && method === 'PATCH') {
-      const user = verifyToken(event.headers.authorization?.replace('Bearer ', ''));
-      if (!user || user.role !== 'admin') return json({ error: 'Admin required' }, 403);
-      const db = readDb();
-      const idx = db.movies.findIndex(m => m.id === parts[1]);
-      if (idx === -1) return json({ error: 'Not found' }, 404);
-      const updates = JSON.parse(event.body || '{}');
-      Object.assign(db.movies[idx], updates);
-      try { writeFileSync(resolve(__dirname, '../../db.json'), JSON.stringify(db, null, 2)); } catch {}
-      return json(db.movies[idx]);
+    if (parts[0] === 'tmdb' && parts[1] === 'credits' && parts[2] && m === 'GET') {
+      const res = await fetch(tUrl(`movie/${parts[2]}/credits`), { headers: tHdrs() });
+      const d = res.ok ? await res.json() : { cast: [] };
+      return r((d.cast || []).filter(c => c.profile_path).slice(0, 8).map(c => ({
+        name: c.name, role: c.character || '',
+        avatarUrl: `https://image.tmdb.org/t/p/w185${c.profile_path}`,
+      })));
     }
 
-    // POST /auth/register
-    if (parts[0] === 'auth' && parts[1] === 'register' && method === 'POST') {
-      const { username, email, password } = JSON.parse(event.body || '{}');
-      if (!username || !password) return json({ error: 'Username and password required' }, 400);
-      const db = readDb();
-      if (db.users.find(u => u.username === username)) return json({ error: 'Username taken' }, 409);
-      const salt = genSalt();
-      const user = {
-        username,
-        email: email || '',
-        password: hash(password, salt),
-        salt,
-        role: db.users.length === 0 ? 'admin' : 'user',
-        avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${username}`,
-        createdAt: new Date().toISOString(),
-      };
-      db.users.push(user);
-      try { writeFileSync(resolve(__dirname, '../../db.json'), JSON.stringify(db, null, 2)); } catch {}
-      const token = user.username + '.' + hash(user.username + user.password + salt, user.username.slice(0, 8));
-      return json({ user: { username: user.username, role: user.role, avatarUrl: user.avatarUrl, email: user.email }, token }, 201);
+    if (parts[0] === 'users' && m === 'GET') {
+      const { users, movies } = getDb();
+      if (!parts[1]) return r(users.map(u => ({ username: u.username, avatarUrl: u.avatarUrl, role: u.role })));
+      const u = users.find(x => x.username === parts[1]);
+      if (!u) return r({ error: 'Not found' }, 404);
+      const revs = movies.flatMap(m => (m.reviews || []).filter(r => r.user === parts[1]).map(r => ({ ...r, movieTitle: m.title, movieId: m.id })));
+      return r({ username: u.username, avatarUrl: u.avatarUrl, role: u.role, email: u.email, createdAt: u.createdAt, reviews: revs });
     }
 
-    // POST /auth/login
-    if (parts[0] === 'auth' && parts[1] === 'login' && method === 'POST') {
-      const { username, password } = JSON.parse(event.body || '{}');
-      const db = readDb();
-      const user = db.users.find(u => u.username === username);
-      if (!user || user.password !== hash(password, user.salt || '')) return json({ error: 'Invalid credentials' }, 401);
-      const token = user.username + '.' + hash(user.username + user.password + (user.salt || ''), user.username.slice(0, 8));
-      return json({ user: { username: user.username, role: user.role, avatarUrl: user.avatarUrl, email: user.email }, token });
-    }
-
-    // GET /auth/me
-    if (parts[0] === 'auth' && parts[1] === 'me' && method === 'GET') {
-      const user = verifyToken(event.headers.authorization?.replace('Bearer ', ''));
-      if (!user) return json({ error: 'Invalid token' }, 401);
-      return json({ username: user.username, role: user.role, avatarUrl: user.avatarUrl, email: user.email });
-    }
-
-    // GET /tmdb/search
-    if (parts[0] === 'tmdb' && parts[1] === 'search' && method === 'GET') {
-      const query = q.query;
-      if (!query) return json([]);
-      const res = await fetch(tmdbUrl('search/movie', { query, include_adult: 'false', language: 'en-US' }), { headers: tmdbHeaders() });
-      const payload = await res.json();
-      const results = (payload.results || []).slice(0, 10).map(m => ({
-        tmdbId: m.id,
-        title: m.title,
-        description: m.overview,
-        releaseYear: m.release_date?.split('-')[0] || '',
-        releaseDate: m.release_date || '',
-        posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : '',
-        backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : '',
-        language: m.original_language || '',
-        rating: m.vote_average || 0,
-      }));
-      return json(results);
-    }
-
-    // GET /tmdb/credits/:tmdbId
-    if (parts[0] === 'tmdb' && parts[1] === 'credits' && parts[2] && method === 'GET') {
-      const res = await fetch(tmdbUrl(`movie/${parts[2]}/credits`), { headers: tmdbHeaders() });
-      if (!res.ok) return json([]);
-      const data = await res.json();
-      const credits = (data.cast || []).filter(m => m.profile_path).slice(0, 8).map(m => ({
-        name: m.name,
-        role: m.character || '',
-        avatarUrl: `https://image.tmdb.org/t/p/w185${m.profile_path}`,
-      }));
-      return json(credits);
-    }
-
-    // GET /tmdb/image (proxy - fallback, direct CDN preferred)
-    if (parts[0] === 'tmdb' && parts[1] === 'image' && method === 'GET') {
-      const imgPath = q.path;
-      const size = q.size || 'original';
-      if (!imgPath) return json({ error: 'Missing path' }, 400);
-      const sanitized = imgPath.startsWith('/') ? imgPath : '/' + imgPath;
-      const imageUrl = `https://image.tmdb.org/t/p/${size}${sanitized}`;
-      try {
-        const resp = await fetch(imageUrl);
-        const buffer = await resp.arrayBuffer();
-        return {
-          statusCode: resp.status,
-          headers: { ...corsHeaders, 'Content-Type': resp.headers.get('content-type') || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' },
-          body: Buffer.from(buffer).toString('base64'),
-          isBase64Encoded: true,
-        };
-      } catch {
-        return json({ error: 'Image fetch failed' }, 502);
-      }
-    }
-
-    // GET /users (public list)
-    if (parts[0] === 'users' && !parts[1] && method === 'GET') {
-      const { users } = readDb();
-      return json(users.map(u => ({ username: u.username, avatarUrl: u.avatarUrl, role: u.role })));
-    }
-
-    // GET /users/:username
-    if (parts[0] === 'users' && parts[1] && method === 'GET') {
-      const { users, movies } = readDb();
-      const user = users.find(u => u.username === parts[1]);
-      if (!user) return json({ error: 'User not found' }, 404);
-      const reviews = movies.flatMap(m => (m.reviews || []).filter(r => r.user === parts[1]).map(r => ({ ...r, movieTitle: m.title, movieId: m.id })));
-      return json({ username: user.username, avatarUrl: user.avatarUrl, role: user.role, email: user.email, createdAt: user.createdAt, reviews });
-    }
-
-    // GET /leaderboard
-    if (parts[0] === 'leaderboard' && method === 'GET') {
-      const { movies, users } = readDb();
-      const userStats = {};
+    if (parts[0] === 'leaderboard' && m === 'GET') {
+      const { movies } = getDb();
+      const s = {};
       movies.forEach(m => (m.reviews || []).forEach(r => {
-        if (!userStats[r.user]) userStats[r.user] = { username: r.user, avatarUrl: r.avatarUrl || '', totalReviews: 0, totalLikes: 0, moviesReviewed: new Set() };
-        userStats[r.user].totalReviews++;
-        userStats[r.user].totalLikes += r.likes || 0;
-        userStats[r.user].moviesReviewed.add(m.title);
+        if (!s[r.user]) s[r.user] = { username: r.user, avatarUrl: r.avatarUrl || '', totalReviews: 0, totalLikes: 0, movies: new Set() };
+        s[r.user].totalReviews++; s[r.user].totalLikes += r.likes || 0; s[r.user].movies.add(m.title);
       }));
-      return json(Object.values(userStats).map(u => ({ ...u, moviesReviewed: u.moviesReviewed.size })).sort((a, b) => b.totalReviews - a.totalReviews));
+      return r(Object.values(s).map(x => ({ ...x, moviesReviewed: x.movies.size })).sort((a, b) => b.totalReviews - a.totalReviews));
     }
 
-    // GET /community/threads
-    if (parts[0] === 'community' && parts[1] === 'threads' && method === 'GET') {
-      const { communityThreads } = readDb();
-      return json(communityThreads || []);
+    if (parts[0] === 'community' && parts[1] === 'threads' && m === 'GET') {
+      return r(getDb().communityThreads || []);
     }
 
-    // GET /lists
-    if (parts[0] === 'lists' && !parts[1] && method === 'GET') {
-      const db = readDb();
-      const lists = db.lists || [];
-      if (q.username) return json(lists.filter(l => l.createdBy === q.username));
-      return json(lists);
+    if (parts[0] === 'lists' && m === 'GET') {
+      const { lists } = getDb();
+      if (!parts[1]) return r(q.username ? (lists || []).filter(l => l.createdBy === q.username) : (lists || []));
+      const l = (lists || []).find(x => x.id === parts[1]);
+      return l ? r(l) : r({ error: 'Not found' }, 404);
     }
 
-    // GET /lists/:id
-    if (parts[0] === 'lists' && parts[1] && !parts[2] && method === 'GET') {
-      const db = readDb();
-      const list = (db.lists || []).find(l => l.id === parts[1]);
-      if (!list) return json({ error: 'List not found' }, 404);
-      return json(list);
+    if (parts[0] === 'auth' && parts[1] === 'me' && m === 'GET') {
+      const token = event.headers.authorization?.replace('Bearer ', '');
+      if (!token) return r({ error: 'No token' }, 401);
+      const [uname] = token.split('.');
+      const user = getDb().users.find(u => u.username === uname);
+      if (!user) return r({ error: 'Invalid' }, 401);
+      const expected = user.username + '.' + crypto.pbkdf2Sync(user.username + user.password + (user.salt || ''), user.username.slice(0, 8), 1000, 64, 'sha512').toString('hex');
+      if (token !== expected) return r({ error: 'Invalid' }, 401);
+      return r({ username: user.username, role: user.role, avatarUrl: user.avatarUrl, email: user.email });
     }
 
-    return json({ error: 'Not found' }, 404);
+    return r({ error: 'Not found' }, 404);
   } catch (err) {
-    return json({ error: err.message }, 500);
+    return r({ error: err.message }, 500);
   }
 };

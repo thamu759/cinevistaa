@@ -1,5 +1,5 @@
 [build]
-  command = "cd client && npm run build"
+  command = "cd client && npm run build && cp ../db.json ../netlify/functions/db.json"
   functions = "netlify/functions"
   publish = "client/dist"
 
