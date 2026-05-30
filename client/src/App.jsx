@@ -46,6 +46,7 @@ export default function App() {
    const [movies, setMovies] = useState([]);
    const [newReleases, setNewReleases] = useState([]);
    const [newReleasesPage, setNewReleasesPage] = useState([]);
+   const [newReleasesPageLoading, setNewReleasesPageLoading] = useState(false);
    const [selectedMovie, setSelectedMovie] = useState(null);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
@@ -541,11 +542,14 @@ export default function App() {
   useEffect(() => {
     if (activeView === 'new-releases') {
       const load = async () => {
+        setNewReleasesPageLoading(true);
         try {
           const data = await fetchMovies({ sort: 'release-asc' });
           setNewReleasesPage(data);
         } catch (err) {
           console.error('Failed to load new releases page:', err);
+        } finally {
+          setNewReleasesPageLoading(false);
         }
       };
       load();
@@ -1136,7 +1140,17 @@ const handleDeleteReview = async (reviewId) => {
                   View All
                 </button>
               </div>
-              {newReleases.length === 0 ? null : (
+              {newReleases.length === 0 ? (
+                <div className="skeleton-horizontal">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="skeleton-card" style={{ flex: '0 0 160px' }}>
+                      <div className="skeleton skeleton-poster" />
+                      <div className="skeleton skeleton-text medium" />
+                      <div className="skeleton skeleton-text short" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <div className="movie-grid-horizontal">
                   {newReleases.map(movie => (
                     <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
@@ -1196,8 +1210,14 @@ const handleDeleteReview = async (reviewId) => {
               <h2 className="section-title">Top Rated Cinevistaa</h2>
               
               {isLoading ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  Loading cinematic records...
+                <div className="skeleton-grid">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="skeleton-card">
+                      <div className="skeleton skeleton-poster" />
+                      <div className="skeleton skeleton-text medium" />
+                      <div className="skeleton skeleton-text short" />
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-accent-gold)' }}>
@@ -1335,7 +1355,17 @@ const handleDeleteReview = async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All movies sorted by release date, from earliest to latest.</p>
             </div>
-             {newReleasesPage.length === 0 ? (
+             {newReleasesPageLoading ? (
+               <div className="skeleton-grid">
+                 {Array.from({ length: 8 }).map((_, i) => (
+                   <div key={i} className="skeleton-card">
+                     <div className="skeleton skeleton-poster" />
+                     <div className="skeleton skeleton-text medium" />
+                     <div className="skeleton skeleton-text short" />
+                   </div>
+                 ))}
+               </div>
+             ) : newReleasesPage.length === 0 ? (
                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                  <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
                  <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
@@ -1528,6 +1558,25 @@ const handleDeleteReview = async (reviewId) => {
         )}
 
         {/* MOVIE DETAILS VIEW */}
+        {activeView === 'movie-details' && !selectedMovie && (
+          <div>
+            <div className="skeleton skeleton-details-backdrop" />
+            <div className="skeleton-details-content">
+              <div className="skeleton skeleton-details-poster" />
+              <div className="skeleton-details-info">
+                <div className="skeleton skeleton-title" />
+                <div className="skeleton skeleton-text medium" />
+                <div className="skeleton skeleton-text" />
+                <div className="skeleton skeleton-text" />
+                <div className="skeleton skeleton-text short" />
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                  <div className="skeleton skeleton-badge" />
+                  <div className="skeleton skeleton-badge" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {activeView === 'movie-details' && selectedMovie && (
           <div className="slide-up">
             {/* Backdrop & Blurred Cover background */}
