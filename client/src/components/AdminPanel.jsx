@@ -189,7 +189,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
     const timer = setTimeout(async () => {
       setEditTmdbSearching(true);
-      try { const data = await searchTmdbMovies(editTmdbQuery.trim()); setEditTmdbResults(data.results || []); }
+      try { const data = await searchTmdbMovies(editTmdbQuery.trim()); setEditTmdbResults(Array.isArray(data) ? data : []); }
       catch (e) { setEditTmdbResults([]); }
       setEditTmdbSearching(false);
     }, 400);
@@ -200,7 +200,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!addTmdbQuery.trim()) { setAddTmdbResults([]); return; }
     const timer = setTimeout(async () => {
       setAddTmdbSearching(true);
-      try { const data = await searchTmdbMovies(addTmdbQuery.trim()); setAddTmdbResults(data.results || []); }
+      try { const data = await searchTmdbMovies(addTmdbQuery.trim()); setAddTmdbResults(Array.isArray(data) ? data : []); }
       catch (e) { setAddTmdbResults([]); }
       setAddTmdbSearching(false);
     }, 400);
@@ -210,12 +210,11 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   useEffect(() => {
     const title = addForm.title.trim();
     if (!title || title.length < 3 || title === lastAutoFetchedTitle) return;
-    if (addForm.posterUrl && lastAutoFetchedTitle) return;
     setAddAutoSearching(true);
     const timer = setTimeout(async () => {
       try {
         const data = await searchTmdbMovies(title);
-        const results = data.results || [];
+        const results = Array.isArray(data) ? data : [];
         if (results.length > 0) {
           const best = results[0];
           setAddForm(prev => ({ ...prev, posterUrl: best.posterUrl || prev.posterUrl }));

@@ -1,18 +1,25 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isProduction ? '/api' : 'http://localhost:5000/api');
+
+const extractTmdbPath = (url) => {
+  const idx = url.indexOf('/t/p/');
+  if (idx === -1) return null;
+  const after = url.substring(idx + '/t/p/'.length);
+  const parts = after.split('/');
+  if (parts.length > 1) parts.shift();
+  return '/' + parts.join('/');
+};
 
 export const proxyImageUrl = (originalUrl, size = 'original') => {
   if (!originalUrl || typeof originalUrl !== 'string') return originalUrl;
   try {
-    const tmdbIndex = originalUrl.indexOf('/t/p/');
-    if (tmdbIndex === -1) return originalUrl;
-    // pathAfter includes size segment like "w500/<file>" or "original/<file>"
-    const pathAfter = originalUrl.substring(tmdbIndex + '/t/p/'.length);
-    const parts = pathAfter.split('/');
-    // remove the leading size token if present
-    if (parts.length > 1) parts.shift();
-    const posterPath = '/' + parts.join('/');
+    const path = extractTmdbPath(originalUrl);
+    if (!path) return originalUrl;
+    if (isProduction) {
+      return `https://image.tmdb.org/t/p/${size}${path}`;
+    }
     const serverBase = API_BASE_URL.replace(/\/api\/?$/, '');
-    return `${serverBase}/api/tmdb/image?path=${encodeURIComponent(posterPath)}&size=${encodeURIComponent(size)}`;
+    return `${serverBase}/api/tmdb/image?path=${encodeURIComponent(path)}&size=${encodeURIComponent(size)}`;
   } catch (e) {
     return originalUrl;
   }
