@@ -44,6 +44,8 @@ export default function App() {
   
    // API Data State
    const [movies, setMovies] = useState([]);
+   const [newReleases, setNewReleases] = useState([]);
+   const [newReleasesPage, setNewReleasesPage] = useState([]);
    const [selectedMovie, setSelectedMovie] = useState(null);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
@@ -463,6 +465,20 @@ export default function App() {
     loadMoviesList();
   }, [selectedGenre, sortOption]);
 
+  // Fetch new releases separately (most recently added movies)
+  const loadNewReleases = async () => {
+    try {
+      const data = await fetchMovies({ sort: 'newest' });
+      setNewReleases(data.slice(0, 15));
+    } catch (err) {
+      console.error('Failed to load new releases:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadNewReleases();
+  }, []);
+
   const loadCommunityThreads = useCallback(async () => {
     setIsCommunityLoading(true);
     setCommunityError('');
@@ -520,6 +536,21 @@ export default function App() {
       setSelectedMovie(null);
     }
   }, [selectedMovieId]);
+
+  // Fetch full new-releases list sorted ascending by release date
+  useEffect(() => {
+    if (activeView === 'new-releases') {
+      const load = async () => {
+        try {
+          const data = await fetchMovies({ sort: 'release-asc' });
+          setNewReleasesPage(data);
+        } catch (err) {
+          console.error('Failed to load new releases page:', err);
+        }
+      };
+      load();
+    }
+  }, [activeView]);
 
   // Verify auth session token on mount
   useEffect(() => {
@@ -1093,7 +1124,7 @@ const handleDeleteReview = async (reviewId) => {
               </header>
             )}
 
-            {/* NEW RELEASES — horizontal slider of top-rated movies */}
+            {/* NEW RELEASES — horizontal slider of recently added movies */}
             <section className="movies-section" style={{ marginTop: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
                 <div>
@@ -1104,33 +1135,29 @@ const handleDeleteReview = async (reviewId) => {
                   View All
                 </button>
               </div>
-              {(() => {
-                const sortedByDate = [...movies].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 10);
-                if (sortedByDate.length === 0) return null;
-                return (
-                  <div className="movie-grid-horizontal">
-                    {sortedByDate.map(movie => (
-                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                       <div className="movie-card-poster-wrapper">
-                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                          <div className="movie-card-rating">
-                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                            <span>{movie.rating.toFixed(1)}</span>
-                          </div>
-                        </div>
-                        <div className="movie-card-info">
-                          <h3 className="movie-card-title">{movie.title}</h3>
-                          <div className="movie-card-genre-tags">
-                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                              <span key={tag} className="genre-tag">{tag.trim()}</span>
-                            ))}
-                          </div>
+              {newReleases.length === 0 ? null : (
+                <div className="movie-grid-horizontal">
+                  {newReleases.map(movie => (
+                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                     <div className="movie-card-poster-wrapper">
+                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                );
-              })()}
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* FILTER & EXPLORER CONTROLS */}
@@ -1303,11 +1330,11 @@ const handleDeleteReview = async (reviewId) => {
         {activeView === 'new-releases' && (
           <div className="main-content">
             <div className="page-header">
-              <p className="section-meta">Highest Rated</p>
+              <p className="section-meta">Chronological Order</p>
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>The best of the best, ranked by critic and audience scores.</p>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All movies sorted by release date, from earliest to latest.</p>
             </div>
-             {movies.length === 0 ? (
+             {newReleasesPage.length === 0 ? (
                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                  <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
                  <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
@@ -1330,7 +1357,7 @@ const handleDeleteReview = async (reviewId) => {
                </div>
              ) : (
               <div className="movie-grid">
-                {[...movies].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).map(movie => (
+                {newReleasesPage.map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                        <div className="movie-card-poster-wrapper">
                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />

@@ -53,13 +53,16 @@ const needsTmdbImageRefresh = (movie) => {
     return !avatar || avatar.includes('unsplash.com') || avatar.includes('placeholder');
   });
 
+  const hasEmptyCast = movie.tmdbId && (!Array.isArray(movie.cast) || movie.cast.length === 0);
+
   return (
     !movie.tmdbId ||
     !movie.posterUrl ||
     !movie.backdropUrl ||
     movie.posterUrl.includes('media.tamilmdb.com') ||
     movie.backdropUrl.includes('media.tamilmdb.com') ||
-    hasPlaceholderCast
+    hasPlaceholderCast ||
+    hasEmptyCast
   );
 };
 
@@ -198,8 +201,12 @@ export const fetchTmdbMovieLogo = async (tmdbId) => {
 };
 
 const applyTmdbCastAvatars = (currentCast, tmdbCast) => {
-  if (!Array.isArray(currentCast) || !Array.isArray(tmdbCast) || tmdbCast.length === 0) {
+  if (!Array.isArray(tmdbCast) || tmdbCast.length === 0) {
     return currentCast;
+  }
+
+  if (!Array.isArray(currentCast) || currentCast.length === 0) {
+    return tmdbCast;
   }
 
   const normalizedTmdb = tmdbCast.map(member => ({
@@ -998,6 +1005,7 @@ try {
     isStaffPick: { type: Boolean, default: false },
     staffPickType: { type: String, default: "" },
     isUpcoming: { type: Boolean, default: false },
+    createdAt: { type: String, default: () => new Date().toISOString() },
     trailerUrl: { type: String },
     trailerChannelName: { type: String },
     cast: [{ name: String, role: String, avatarUrl: String }],
@@ -1074,6 +1082,20 @@ const generateSalt = () => {
 export const initDB = async () => {
   const seededMovies = await enrichMoviesWithTmdbImages(tamilPriorityMovies);
   const mongoUri = process.env.MONGO_URI;
+  const ensureCreatedAt = (movie) => {
+    if (!movie.createdAt) movie.createdAt = new Date().toISOString();
+    return movie;
+  };
+
+  const writeJsonAfterMigration = (data) => {
+    const needsMigration = (data.movies || []).some(m => !m.createdAt);
+    if (needsMigration) {
+      data.movies = (data.movies || []).map(ensureCreatedAt);
+      writeJsonDb(data);
+      console.log("Added createdAt to existing movies.");
+    }
+  };
+
   if (mongoUri) {
     try {
       await mongoose.connect(mongoUri);
@@ -1081,13 +1103,14 @@ export const initDB = async () => {
       useMongoDB = true;
       const count = await MovieModel.countDocuments();
       if (count === 0) {
-        await MovieModel.insertMany(seededMovies);
+        await MovieModel.insertMany(seededMovies.map(ensureCreatedAt));
         console.log("MongoDB seeded with Tamil priority movies.");
       } else {
         const existingMovies = await MovieModel.find({});
         const refreshedMovies = await refreshMoviesIfNeeded(existingMovies.map(movie => movie.toObject()));
-        if (JSON.stringify(refreshedMovies) !== JSON.stringify(existingMovies.map(movie => movie.toObject()))) {
-          await Promise.all(refreshedMovies.map(movie => {
+        const migratedMovies = refreshedMovies.map(ensureCreatedAt);
+        if (JSON.stringify(migratedMovies) !== JSON.stringify(existingMovies.map(movie => movie.toObject()))) {
+          await Promise.all(migratedMovies.map(movie => {
             const { _id, __v, ...update } = movie;
             return MovieModel.updateOne({ id: movie.id }, { $set: update });
           }));
@@ -1107,6 +1130,7 @@ export const initDB = async () => {
         writeJsonDb(data);
         console.log(hasTmdbCredentials() ? "JSON movie posters auto-refreshed from TMDB." : "JSON movie poster URLs upgraded with local HD fallbacks.");
       }
+      writeJsonAfterMigration(data);
     }
   } else {
     console.log("No MONGO_URI specified. Using local JSON database (db.json).");
@@ -1118,6 +1142,7 @@ export const initDB = async () => {
       writeJsonDb(data);
       console.log(hasTmdbCredentials() ? "JSON movie posters auto-refreshed from TMDB." : "JSON movie poster URLs upgraded with local HD fallbacks.");
     }
+    writeJsonAfterMigration(data);
   }
 };
 
@@ -1140,6 +1165,10 @@ export const getMovies = async (query = {}) => {
       sortOption = { releaseYear: -1 };
     } else if (sort === 'popular') {
       sortOption = { audienceScore: -1 };
+    } else if (sort === 'newest') {
+      sortOption = { createdAt: -1 };
+    } else if (sort === 'release-asc') {
+      sortOption = { releaseDate: 1 };
     }
 
     const movies = await MovieModel.find(mongoQuery).sort(sortOption);
@@ -1163,6 +1192,10 @@ export const getMovies = async (query = {}) => {
       movies.sort((a, b) => b.releaseYear - a.releaseYear);
     } else if (sort === 'popular') {
       movies.sort((a, b) => b.audienceScore - a.audienceScore);
+    } else if (sort === 'newest') {
+      movies.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    } else if (sort === 'release-asc') {
+      movies.sort((a, b) => new Date(a.releaseDate || 0) - new Date(b.releaseDate || 0));
     }
 
     return movies.map(applyLocalHdImageFallback);
@@ -1189,15 +1222,32 @@ export const refreshMovieImages = async () => {
 export const getMovieById = async (id) => {
   if (useMongoDB) {
     const movie = await MovieModel.findOne({ id });
-    return movie ? applyLocalHdImageFallback(movie.toObject()) : null;
+    if (!movie) return null;
+    const plain = movie.toObject();
+    if (needsTmdbImageRefresh(plain) && plain.tmdbId) {
+      const enriched = await enrichMovieWithTmdbImages(plain);
+      const { _id, __v, ...update } = enriched;
+      await MovieModel.updateOne({ id: plain.id }, { $set: update });
+      return applyLocalHdImageFallback(enriched);
+    }
+    return applyLocalHdImageFallback(plain);
   } else {
-    const { movies } = readJsonDb();
-    const movie = movies.find(m => m.id === id) || null;
-    return movie ? applyLocalHdImageFallback(movie) : null;
+    const data = readJsonDb();
+    const index = data.movies.findIndex(m => m.id === id);
+    if (index === -1) return null;
+    const movie = data.movies[index];
+    if (needsTmdbImageRefresh(movie) && movie.tmdbId) {
+      const enriched = await enrichMovieWithTmdbImages(movie);
+      data.movies[index] = enriched;
+      writeJsonDb(data);
+      return applyLocalHdImageFallback(enriched);
+    }
+    return applyLocalHdImageFallback(movie);
   }
 };
 
 export const createMovie = async (movieData) => {
+  const now = new Date().toISOString();
   const cleanData = await enrichMovieWithTmdbImages({
     ...movieData,
     id: movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
@@ -1207,7 +1257,8 @@ export const createMovie = async (movieData) => {
     reviews: movieData.reviews || [],
     isHero: false,
     isStaffPick: false,
-    staffPickType: ""
+    staffPickType: "",
+    createdAt: now
   });
 
   if (useMongoDB) {
