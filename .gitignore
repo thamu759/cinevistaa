@@ -76,8 +76,6 @@ temp/
 .vitepress/node_modules
 
 # Build outputs
-client/dist/
-server/dist/
 
 # Misc
 .DS_Store
