@@ -182,6 +182,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
   const [addTmdbSearching, setAddTmdbSearching] = useState(false);
+  const [addAutoSearching, setAddAutoSearching] = useState(false);
+  const [lastAutoFetchedTitle, setLastAutoFetchedTitle] = useState('');
 
   useEffect(() => {
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
@@ -204,6 +206,30 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     }, 400);
     return () => clearTimeout(timer);
   }, [addTmdbQuery]);
+
+  useEffect(() => {
+    const title = addForm.title.trim();
+    if (!title || title.length < 3 || title === lastAutoFetchedTitle) return;
+    if (addForm.posterUrl && lastAutoFetchedTitle) return;
+    setAddAutoSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchTmdbMovies(title);
+        const results = data.results || [];
+        if (results.length > 0) {
+          const best = results[0];
+          setAddForm(prev => ({ ...prev, posterUrl: best.posterUrl || prev.posterUrl }));
+          if (best.tmdbId) {
+            const credits = await fetchTmdbCredits(best.tmdbId);
+            if (Array.isArray(credits) && credits.length > 0) setAddCast(credits);
+          }
+        }
+        setLastAutoFetchedTitle(title);
+      } catch (e) {}
+      setAddAutoSearching(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [addForm.title]);
 
   const handleDeleteConfirm = async () => {
     setLoading(true);
@@ -251,6 +277,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   };
 
   const applyAddTmdb = async (m) => {
+    setLastAutoFetchedTitle(m.title || '');
     setAddForm({
       title: m.title || '',
       description: m.description || '',
@@ -276,6 +303,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
+      setAddAutoSearching(false);
+      setLastAutoFetchedTitle('');
       setShowAddModal(false);
       showSuccess('Movie added.');
     } catch (err) { alert(err.message); }
@@ -375,7 +404,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       )}
 
       {/* Add Movie Modal */}
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); }} title="Add New Movie" width="720px">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
         <div className="admin-add-modal-tmdb">
           <label className="admin-label" style={{ marginBottom: '0.25rem' }}>Quick fill from TMDB</label>
           <div style={{ position: 'relative' }}>
@@ -398,7 +427,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
         </div>
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.85rem 0' }} />
         <div className="admin-edit-grid">
-          <div><label className="admin-label">Title *</label><input className="admin-input" value={addForm.title} onChange={e => setAddForm(prev => ({ ...prev, title: e.target.value }))} /></div>
+          <div><label className="admin-label">Title *</label><div style={{ position: 'relative' }}><input className="admin-input" value={addForm.title} onChange={e => setAddForm(prev => ({ ...prev, title: e.target.value }))} />{addAutoSearching && <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>Fetching TMDB...</span>}</div></div>
           <div><label className="admin-label">Release Date</label><input className="admin-input" value={addForm.releaseDate} onChange={e => setAddForm(prev => ({ ...prev, releaseDate: e.target.value }))} /></div>
           <div className="admin-edit-full"><label className="admin-label">Description</label><textarea className="admin-textarea" value={addForm.description} onChange={e => setAddForm(prev => ({ ...prev, description: e.target.value }))} rows={2} /></div>
           <div><label className="admin-label">Poster URL</label><input className="admin-input" value={addForm.posterUrl} onChange={e => setAddForm(prev => ({ ...prev, posterUrl: e.target.value }))} /></div>
@@ -438,7 +467,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
