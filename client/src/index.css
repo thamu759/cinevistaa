@@ -1523,3 +1523,51 @@
   border-radius: 6px;
 }
 
+/* ─── SKELETON RESPONSIVE ─── */
+@media (max-width: 480px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+  .skeleton-horizontal .skeleton-card {
+    flex: 0 0 120px;
+  }
+  .skeleton-details-content {
+    flex-direction: column;
+    padding: 1rem;
+    margin-top: -80px;
+  }
+  .skeleton-details-poster {
+    width: 160px;
+  }
+  .skeleton-details-backdrop {
+    height: 220px;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .skeleton-horizontal .skeleton-card {
+    flex: 0 0 140px;
+  }
+  .skeleton-details-content {
+    flex-direction: column;
+    padding: 1.5rem;
+    margin-top: -100px;
+  }
+  .skeleton-details-poster {
+    width: 200px;
+  }
+  .skeleton-details-backdrop {
+    height: 300px;
+  }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
