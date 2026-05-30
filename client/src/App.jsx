@@ -1025,6 +1025,10 @@ const handleDeleteReview = async (reviewId) => {
                           <div className="hero-content">
                           <MovieLogo movie={movie} />
                           <div className="hero-rating-badge">
+                            <span className="hero-tag-fav">FEATURED</span>
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                          </div>
                           <p className="hero-description">{movie.description}</p>
                           <div className="hero-actions">
                             <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
