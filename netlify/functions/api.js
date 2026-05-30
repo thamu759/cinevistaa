@@ -31,6 +31,32 @@ const pth = (e) => {
   return x.split('/').filter(Boolean);
 };
 
+const hashPwd = (password, salt) =>
+  crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+
+const makeToken = (user) => {
+  const h = crypto.pbkdf2Sync(user.username + user.passwordHash + (user.salt || ''), user.username, 1000, 32, 'sha512').toString('hex');
+  return Buffer.from(user.username).toString('base64') + '.' + h;
+};
+
+const verifyToken = (token) => {
+  if (!token) return null;
+  const { users } = getDb();
+  try {
+    const [b64, hash] = token.split('.');
+    if (b64 && hash) {
+      const uname = Buffer.from(b64, 'base64').toString();
+      const u = users.find(x => x.username === uname);
+      if (u) {
+        const expected = crypto.pbkdf2Sync(u.username + u.passwordHash + (u.salt || ''), u.username, 1000, 32, 'sha512').toString('hex');
+        if (hash === expected) return u;
+      }
+    }
+  } catch {}
+  const u = users.find(x => x.token === token);
+  return u || null;
+};
+
 export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: hdrs, body: '' };
   try {
@@ -59,7 +85,7 @@ export const handler = async (event) => {
       return r((p.results || []).slice(0, 10).map(x => ({
         tmdbId: x.id, title: x.title, description: x.overview,
         releaseDate: x.release_date || '', releaseYear: x.release_date?.split('-')[0] || '',
-        posterUrl: x.poster_path ? `https://image.tmdb.org/t/p/w342${x.poster_path}` : '',
+        posterUrl: x.poster_path ? `https://image.tmdb.org/t/p/w500${x.poster_path}` : '',
         backdropUrl: x.backdrop_path ? `https://image.tmdb.org/t/p/original${x.backdrop_path}` : '',
         language: x.original_language || '', rating: x.vote_average || 0,
       })));
@@ -72,6 +98,29 @@ export const handler = async (event) => {
         name: c.name, role: c.character || '',
         avatarUrl: `https://image.tmdb.org/t/p/w185${c.profile_path}`,
       })));
+    }
+
+    if (parts[0] === 'auth' && parts[1] === 'login' && m === 'POST') {
+      const { username, password } = JSON.parse(event.body || '{}');
+      if (!username || !password) return r({ error: 'Username and password required' }, 400);
+      const { users } = getDb();
+      const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+      if (!user || user.passwordHash !== hashPwd(password, user.salt || '')) return r({ error: 'Invalid credentials' }, 401);
+      return r({
+        user: { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio },
+        token: makeToken(user),
+      });
+    }
+
+    if (parts[0] === 'auth' && parts[1] === 'register' && m === 'POST') {
+      return r({ error: 'Registration not available on this site. Use local server.' }, 400);
+    }
+
+    if (parts[0] === 'auth' && parts[1] === 'me' && m === 'GET') {
+      const token = event.headers.authorization?.replace('Bearer ', '');
+      const user = verifyToken(token);
+      if (!user) return r({ error: 'Invalid token' }, 401);
+      return r({ username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio });
     }
 
     if (parts[0] === 'users' && m === 'GET') {
@@ -102,17 +151,6 @@ export const handler = async (event) => {
       if (!parts[1]) return r(q.username ? (lists || []).filter(l => l.createdBy === q.username) : (lists || []));
       const l = (lists || []).find(x => x.id === parts[1]);
       return l ? r(l) : r({ error: 'Not found' }, 404);
-    }
-
-    if (parts[0] === 'auth' && parts[1] === 'me' && m === 'GET') {
-      const token = event.headers.authorization?.replace('Bearer ', '');
-      if (!token) return r({ error: 'No token' }, 401);
-      const [uname] = token.split('.');
-      const user = getDb().users.find(u => u.username === uname);
-      if (!user) return r({ error: 'Invalid' }, 401);
-      const expected = user.username + '.' + crypto.pbkdf2Sync(user.username + user.password + (user.salt || ''), user.username.slice(0, 8), 1000, 64, 'sha512').toString('hex');
-      if (token !== expected) return r({ error: 'Invalid' }, 401);
-      return r({ username: user.username, role: user.role, avatarUrl: user.avatarUrl, email: user.email });
     }
 
     return r({ error: 'Not found' }, 404);
