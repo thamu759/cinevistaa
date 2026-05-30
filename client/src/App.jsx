@@ -611,6 +611,7 @@ export default function App() {
     } else {
       window.history.pushState(null, '', nextPath);
     }
+    window.scrollTo({ top: 0, behavior: 'instant' });
     setActiveView(view);
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
