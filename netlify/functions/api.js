@@ -117,7 +117,7 @@ export const handler = async (event) => {
       const salt = crypto.randomBytes(16).toString('hex');
       const passwordHash = hashPwd(password, salt);
       const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=blue,green,purple,orange&textColor=ffffff`;
-      const newUser = { username, email: email || '', passwordHash, salt, role: 'Cinema Enthusiast', avatarUrl, token: '', createdAt: new Date().toISOString() };
+      const newUser = { username, email: email || '', passwordHash, salt, role: 'admin', avatarUrl, token: '', createdAt: new Date().toISOString() };
       db.users.push(newUser);
       const token = makeToken(newUser);
       return r({ username: newUser.username, email: newUser.email, role: newUser.role, avatarUrl: newUser.avatarUrl, token }, 201);

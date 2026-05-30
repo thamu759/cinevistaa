@@ -960,6 +960,7 @@ try {
       text: String,
       timestamp: String,
       likes: { type: Number, default: 0 },
+      likedBy: { type: [String], default: [] },
       comments: { type: Number, default: 0 }
     }]
   });
@@ -1224,6 +1225,7 @@ export const addReview = async (movieId, reviewData) => {
     text: reviewData.text,
     timestamp: "Just now",
     likes: 0,
+    likedBy: [],
     comments: 0
   };
 
@@ -1254,6 +1256,74 @@ export const addReview = async (movieId, reviewData) => {
     
     writeJsonDb(data);
     return movie;
+  }
+};
+
+export const deleteReview = async (movieId, reviewId, username) => {
+  if (useMongoDB) {
+    const movie = await MovieModel.findOne({ id: movieId });
+    if (!movie) return null;
+    const review = movie.reviews.id(reviewId);
+    if (!review) return null;
+    if (review.user !== username) return { error: "Unauthorized" };
+    movie.reviews.pull({ _id: reviewId });
+    const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avg = movie.reviews.length > 0 ? totalRating / movie.reviews.length : 0;
+    movie.criticScore = parseFloat(avg.toFixed(1));
+    movie.rating = parseFloat((avg / 2).toFixed(1));
+    await movie.save();
+    return movie;
+  } else {
+    const data = readJsonDb();
+    const movieIndex = data.movies.findIndex(m => m.id === movieId);
+    if (movieIndex === -1) return null;
+    const movie = data.movies[movieIndex];
+    const reviewIndex = movie.reviews.findIndex(r => r.id === reviewId);
+    if (reviewIndex === -1) return null;
+    if (movie.reviews[reviewIndex].user !== username) return { error: "Unauthorized" };
+    movie.reviews.splice(reviewIndex, 1);
+    const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avg = movie.reviews.length > 0 ? totalRating / movie.reviews.length : 0;
+    movie.criticScore = parseFloat(avg.toFixed(1));
+    movie.rating = parseFloat((avg / 2).toFixed(1));
+    writeJsonDb(data);
+    return movie;
+  }
+};
+
+export const toggleReviewLike = async (movieId, reviewId, username) => {
+  if (useMongoDB) {
+    const movie = await MovieModel.findOne({ id: movieId });
+    if (!movie) return null;
+    const review = movie.reviews.id(reviewId);
+    if (!review) return null;
+    const idx = review.likedBy.indexOf(username);
+    if (idx > -1) {
+      review.likedBy.splice(idx, 1);
+      review.likes = Math.max(0, review.likes - 1);
+    } else {
+      review.likedBy.push(username);
+      review.likes = (review.likes || 0) + 1;
+    }
+    await movie.save();
+    return { likes: review.likes, likedBy: review.likedBy, reviewId };
+  } else {
+    const data = readJsonDb();
+    const movieIndex = data.movies.findIndex(m => m.id === movieId);
+    if (movieIndex === -1) return null;
+    const movie = data.movies[movieIndex];
+    const review = movie.reviews.find(r => r.id === reviewId);
+    if (!review) return null;
+    const idx = review.likedBy.indexOf(username);
+    if (idx > -1) {
+      review.likedBy.splice(idx, 1);
+      review.likes = Math.max(0, review.likes - 1);
+    } else {
+      review.likedBy.push(username);
+      review.likes = (review.likes || 0) + 1;
+    }
+    writeJsonDb(data);
+    return { likes: review.likes, likedBy: review.likedBy, reviewId };
   }
 };
 

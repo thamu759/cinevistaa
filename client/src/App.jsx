@@ -3,7 +3,7 @@ import {
   Play, Pause, Plus, Search, Star, User, Film, Tv, 
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Globe, Share2, Sparkles, Check, Info, Lock, Mail, Eye, EyeOff, Shield,
-  Users, Send, Volume2, VolumeX, Maximize, List
+  Users, Send, Volume2, VolumeX, Maximize, List, Trash2
 } from 'lucide-react';
 import {
   fetchMovies,
@@ -27,7 +27,9 @@ import {
   removeMovieFromList,
   deleteList,
   fetchLeaderboard,
-  curateMovie
+  curateMovie,
+  deleteReview,
+  toggleReviewLike
 } from './api';
 // Import API utilities for enhanced error handling
 import { retryAsync, generateErrorMessage } from './utils/apiUtils';
@@ -60,6 +62,9 @@ export default function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSessionVerified, setIsSessionVerified] = useState(false);
+
+  // Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Search Overlay State (IMDb-style, decoupled from grid)
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -624,9 +629,14 @@ export default function App() {
          }
        }
 
-       // Close modals with Escape
-       if (e.key === 'Escape') {
-         if (isSearchOpen) {
+        // Close mobile menu with Escape
+        if (e.key === 'Escape' && isMobileMenuOpen) {
+          setIsMobileMenuOpen(false);
+        }
+
+        // Close modals with Escape
+        if (e.key === 'Escape') {
+          if (isSearchOpen) {
            setIsSearchOpen(false);
            setSearchQuery('');
            setSearchResults([]);
@@ -759,22 +769,35 @@ export default function App() {
     }
   };
 
-  // Optimistic upvote review comment
-  const handleUpvoteReview = (reviewId) => {
-    if (!selectedMovie) return;
-    
-    const updatedReviews = selectedMovie.reviews.map(rev => {
-      if (rev.id === reviewId) {
-        return { ...rev, likes: (rev.likes || 0) + 1 };
-      }
-      return rev;
-    });
-
+// Upvote review comment with API persistence
+const handleUpvoteReview = async (reviewId) => {
+  if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
+  if (!selectedMovie) return;
+  try {
+    const result = await toggleReviewLike(selectedMovie.id, reviewId);
     setSelectedMovie({
       ...selectedMovie,
-      reviews: updatedReviews
+      reviews: selectedMovie.reviews.map(rev =>
+        rev.id === reviewId ? { ...rev, likes: result.likes, likedBy: result.likedBy } : rev
+      )
     });
-  };
+  } catch (err) {
+    console.error("Failed to toggle like:", err);
+  }
+};
+
+// Delete review
+const handleDeleteReview = async (reviewId) => {
+  if (!selectedMovie) return;
+  if (!window.confirm("Delete this review?")) return;
+  try {
+    const updatedMovie = await deleteReview(selectedMovie.id, reviewId);
+    setSelectedMovie(updatedMovie);
+    loadMoviesList();
+  } catch (err) {
+    alert(err.message || "Failed to delete review");
+  }
+};
 
   const handleCreateThreadSubmit = async (e) => {
     e.preventDefault();
@@ -820,13 +843,13 @@ export default function App() {
       <div className="navbar-container">
         <nav className="navbar">
           <div className="logo" onClick={() => { setActiveView('home'); setSelectedMovieId(null); }}>
-            Midnight <span>Cinema</span>
+            Cine<span>Vistaa</span>
           </div>
-          <div className="nav-links">
+          <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
             <a 
               className={`nav-link ${activeView === 'home' ? 'active' : ''}`}
               href="/"
-              onClick={(e) => { e.preventDefault(); setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
+              onClick={(e) => { e.preventDefault(); setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); setIsMobileMenuOpen(false); }}
             >
               Movies
             </a>
@@ -834,7 +857,7 @@ export default function App() {
             <a 
               className={`nav-link ${activeView === 'watchlist' ? 'active' : ''}`}
               href="/watchlist"
-              onClick={(e) => { e.preventDefault(); navigateTo('watchlist'); }}
+              onClick={(e) => { e.preventDefault(); navigateTo('watchlist'); setIsMobileMenuOpen(false); }}
             >
               Watchlist
             </a>
@@ -842,7 +865,7 @@ export default function App() {
             <a 
               className={`nav-link ${activeView === 'coming-soon' ? 'active' : ''}`}
               href="/coming-soon"
-              onClick={(e) => { e.preventDefault(); navigateTo('coming-soon'); }}
+              onClick={(e) => { e.preventDefault(); navigateTo('coming-soon'); setIsMobileMenuOpen(false); }}
             >
               Coming Soon
             </a>
@@ -850,7 +873,7 @@ export default function App() {
             <a 
               className={`nav-link ${activeView === 'leaderboard' ? 'active' : ''}`}
               href="/leaderboard"
-              onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); }}
+              onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); setIsMobileMenuOpen(false); }}
             >
               Top Critics
             </a>
@@ -859,7 +882,7 @@ export default function App() {
               <a 
                 className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}
                 href="/admin"
-                onClick={(e) => { e.preventDefault(); navigateTo('admin'); }}
+                onClick={(e) => { e.preventDefault(); navigateTo('admin'); setIsMobileMenuOpen(false); }}
                 style={{ color: 'var(--color-accent-gold)', fontWeight: '600' }}
               >
                 Admin Control
@@ -867,10 +890,13 @@ export default function App() {
             )}
           </div>
           <div className="nav-actions">
+            <button className="hamburger-btn" onClick={() => setIsMobileMenuOpen(prev => !prev)} aria-label="Menu">
+              <List size={22} />
+            </button>
             <button className="search-trigger" onClick={toggleSearch} aria-label="Search">
               <Search size={20} />
             </button>
-            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setActiveView('profile'); } }}>
+            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setActiveView('profile'); setIsMobileMenuOpen(false); } }}>
               <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-avatar-circle" />
               {currentUser && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: '0.5rem', fontWeight: 500 }} className="profile-nav-name">{currentUser.username}</span>}
             </button>
@@ -1507,7 +1533,7 @@ export default function App() {
                   <div className="details-scores-row">
                     <div className="score-dial-container">
                       <div className="dial-circle-wrapper">
-                        <svg className="dial-svg">
+                        <svg className="dial-svg" viewBox="0 0 60 60">
                           <circle className="dial-bg" cx="30" cy="30" r="26" />
                           <circle 
                             className="dial-progress" 
@@ -1525,7 +1551,7 @@ export default function App() {
 
                     <div className="score-dial-container">
                       <div className="dial-circle-wrapper">
-                        <svg className="dial-svg">
+                        <svg className="dial-svg" viewBox="0 0 60 60">
                           <circle className="dial-bg" cx="30" cy="30" r="26" />
                           <circle 
                             className="dial-progress" 
@@ -1668,13 +1694,18 @@ export default function App() {
                         </div>
                         <p className="review-text">"{review.text}"</p>
                         <div className="review-actions-bar">
-                          <button className="review-action-btn" onClick={() => handleUpvoteReview(review.id)}>
-                            <ThumbsUp /> <span>{review.likes || 0}</span>
-                          </button>
-                          <button className="review-action-btn" onClick={() => { setActiveView('community'); setSelectedMovieId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                            <MessageSquare /> <span>{review.comments || 0}</span>
-                          </button>
-                        </div>
+                            <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''}`} onClick={() => handleUpvoteReview(review.id)}>
+                              <ThumbsUp size={14} fill={review.likedBy?.includes(currentUser?.username) ? 'var(--color-accent-gold)' : 'none'} /> <span>{review.likes || 0}</span>
+                            </button>
+                            <button className="review-action-btn" onClick={() => { setActiveView('community'); setSelectedMovieId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                              <MessageSquare size={14} /> <span>{review.comments || 0}</span>
+                            </button>
+                            {(currentUser && (review.user === currentUser.username || currentUser.role === 'admin')) && (
+                              <button className="review-action-btn review-delete-btn" onClick={() => handleDeleteReview(review.id)} style={{ marginLeft: 'auto' }}>
+                                <Trash2 size={14} /> <span>Delete</span>
+                              </button>
+                            )}
+                          </div>
                       </div>
                     ))
                   ) : (
@@ -1747,7 +1778,7 @@ export default function App() {
                 <div className="profile-bio-box">
                   <span className="profile-badge-gold">{currentUser ? currentUser.role : userProfile.role}</span>
                   <h1 className="profile-name">{currentUser ? currentUser.username : userProfile.name}</h1>
-                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'Midnight Film Critic') : userProfile.bio}"</p>
+                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'CineVistaa Film Critic') : userProfile.bio}"</p>
                   {currentUser && profileData && (
                     <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.followers || []).length}</strong> followers</span>
@@ -1940,7 +1971,7 @@ export default function App() {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{critic.username}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                        {critic.bio || 'Midnight Film Critic'}
+                        {critic.bio || 'CineVistaa Film Critic'}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -2051,9 +2082,9 @@ export default function App() {
             <section className="community-hero-band">
               <div>
                 <p className="section-meta">Phase 8 Community</p>
-                <h1 className="community-title">Midnight Forum</h1>
+                <h1 className="community-title">CineVistaa Forum</h1>
                 <p className="community-subtitle">
-                  Open film discussions, recommendations, and critic notes from the Midnight Cinema room.
+                  Open film discussions, recommendations, and critic notes from the CineVistaa room.
                 </p>
               </div>
               <div className="community-hero-stats">
@@ -2218,7 +2249,7 @@ export default function App() {
       <footer className="footer-container">
         <div className="footer">
           <div className="footer-brand">
-            <h3 className="footer-brand-title">Midnight <span>Cinema</span></h3>
+            <h3 className="footer-brand-title">Cine<span>Vistaa</span></h3>
             <p className="footer-brand-desc">
               Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
             </p>
@@ -2245,12 +2276,12 @@ export default function App() {
             <span className="footer-column-title">Connect</span>
             <ul className="footer-links">
               <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Newsletter signed!"); }}>Newsletter</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@midnightcinema.com"); }}>Contact Support</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@cinevistaa.com"); }}>Contact Support</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} Midnight Cinema. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} CineVistaa. All rights reserved.</span>
           <div className="footer-socials">
             <a href="#" className="footer-social-link"><Globe size={16} /></a>
             <a href="#" className="footer-social-link"><Share2 size={16} /></a>
@@ -2459,7 +2490,7 @@ export default function App() {
             <div className="auth-header-ticket">
               <div className="auth-badge-premium">
                 <Sparkles size={11} fill="var(--color-accent-gold)" />
-                <span>Midnight Critic Circle</span>
+                <span>CineVistaa Critic Circle</span>
               </div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
                 {authTab === 'login' ? 'Pass Verification' : 'Critic Enrollment'}

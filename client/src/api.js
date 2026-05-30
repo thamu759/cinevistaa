@@ -1,5 +1,6 @@
 const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 const API_BASE_URL = import.meta.env.VITE_API_URL || (isProduction ? '/api' : 'http://localhost:5000/api');
+const IS_SERVER_DEPLOYED = API_BASE_URL !== '/api' && !API_BASE_URL.includes('localhost');
 
 const extractTmdbPath = (url) => {
   const idx = url.indexOf('/t/p/');
@@ -15,6 +16,10 @@ export const proxyImageUrl = (originalUrl, size = 'original') => {
   try {
     const path = extractTmdbPath(originalUrl);
     if (!path) return originalUrl;
+    if (IS_SERVER_DEPLOYED) {
+      const serverBase = API_BASE_URL.replace(/\/api\/?$/, '');
+      return `${serverBase}/api/tmdb/image?path=${encodeURIComponent(path)}&size=${encodeURIComponent(size)}`;
+    }
     if (isProduction) {
       return `https://image.tmdb.org/t/p/${size}${path}`;
     }
@@ -104,6 +109,36 @@ export const addMovieReview = async (movieId, reviewData) => {
   if (!response.ok) {
     const err = await response.json();
     throw new Error(err.error || 'Failed to submit review');
+  }
+  return response.json();
+};
+
+export const deleteReview = async (movieId, reviewId) => {
+  const token = localStorage.getItem('mc_token');
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const response = await fetch(`${API_BASE_URL}/movies/${movieId}/reviews/${reviewId}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to delete review');
+  }
+  return response.json();
+};
+
+export const toggleReviewLike = async (movieId, reviewId) => {
+  const token = localStorage.getItem('mc_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const response = await fetch(`${API_BASE_URL}/movies/${movieId}/reviews/${reviewId}/like`, {
+    method: 'POST',
+    headers,
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to toggle like');
   }
   return response.json();
 };

@@ -12,6 +12,8 @@ import {
   curateMovie,
   updateMovie,
   addReview,
+  deleteReview,
+  toggleReviewLike,
   registerUser,
   loginUser,
   verifyToken,
@@ -411,6 +413,41 @@ app.post('/api/movies/:id/reviews', async (req, res) => {
   }
 });
 
+// Delete a review
+app.delete('/api/movies/:id/reviews/:reviewId', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: "No authentication token provided" });
+    const user = await verifyToken(authHeader.split(' ')[1]);
+    if (!user) return res.status(401).json({ error: "Session expired or invalid token" });
+
+    const result = await deleteReview(req.params.id, req.params.reviewId, user.username);
+    if (!result) return res.status(404).json({ error: "Movie or review not found" });
+    if (result.error) return res.status(403).json({ error: result.error });
+    res.json(result);
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    res.status(500).json({ error: "Server error deleting review" });
+  }
+});
+
+// Toggle like on a review
+app.post('/api/movies/:id/reviews/:reviewId/like', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: "No authentication token provided" });
+    const user = await verifyToken(authHeader.split(' ')[1]);
+    if (!user) return res.status(401).json({ error: "Session expired or invalid token" });
+
+    const result = await toggleReviewLike(req.params.id, req.params.reviewId, user.username);
+    if (!result) return res.status(404).json({ error: "Movie or review not found" });
+    res.json(result);
+  } catch (error) {
+    console.error("Error toggling review like:", error);
+    res.status(500).json({ error: "Server error toggling review like" });
+  }
+});
+
 // Community forum threads
 app.get('/api/community/threads', async (req, res) => {
   try {
@@ -678,5 +715,5 @@ app.get('/api/tmdb/image', async (req, res) => {
 
 // Start Express Server
 app.listen(PORT, () => {
-  console.log(`Midnight Cinema Server running on port ${PORT}`);
+  console.log(`CineVistaa Server running on port ${PORT}`);
 });
