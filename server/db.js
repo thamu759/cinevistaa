@@ -88,12 +88,11 @@ const pickTmdbImages = (movie) => {
 const pickTmdbCredits = (credits) => {
   if (!credits || !Array.isArray(credits.cast)) return null;
   return credits.cast
-    .filter(member => member.profile_path)
     .slice(0, 8)
     .map(member => ({
       name: member.name,
       role: member.character || '',
-      avatarUrl: `${TMDB_IMAGE_BASE_URL}/w185${member.profile_path}`
+      avatarUrl: member.profile_path ? `${TMDB_IMAGE_BASE_URL}/w185${member.profile_path}` : ''
     }));
 };
 
