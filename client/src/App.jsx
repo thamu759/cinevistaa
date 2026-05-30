@@ -1020,25 +1020,30 @@ const handleDeleteReview = async (reviewId) => {
                         className="hero-backdrop" 
                         style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
                       />
-                      <div className="hero-content">
-                        <div className="hero-rating-badge">
-                          <span className="hero-tag-fav">FEATURED</span>
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                      <div className="hero-layout">
+                        <div className="hero-content">
+                          <div className="hero-rating-badge">
+                            <span className="hero-tag-fav">FEATURED</span>
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                          </div>
+                          <h1 className="hero-title">{movie.title}</h1>
+                          <p className="hero-description">{movie.description}</p>
+                          <div className="hero-actions">
+                            <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
+                              <Play size={16} fill="black" /> Watch Trailer
+                            </button>
+                            <button 
+                              className="btn-secondary" 
+                              onClick={(e) => handleToggleWatchlist(movie.id, e)}
+                            >
+                              {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
+                              {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
+                            </button>
+                          </div>
                         </div>
-                        <h1 className="hero-title">{movie.title}</h1>
-                        <p className="hero-description">{movie.description}</p>
-                        <div className="hero-actions">
-                          <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
-                            <Play size={16} fill="black" /> Watch Trailer
-                          </button>
-                          <button 
-                            className="btn-secondary" 
-                            onClick={(e) => handleToggleWatchlist(movie.id, e)}
-                          >
-                            {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
-                            {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
-                          </button>
+                        <div className="hero-poster">
+                          <img src={proxyImageUrl(movie.posterUrl, 'w342')} alt={movie.title} />
                         </div>
                       </div>
                     </div>
