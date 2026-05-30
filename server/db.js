@@ -147,6 +147,24 @@ export const fetchTmdbMovieCredits = async (tmdbId) => {
   }
 };
 
+export const fetchTmdbMovieLogo = async (tmdbId) => {
+  if (!hasTmdbCredentials() || !tmdbId) return null;
+
+  try {
+    const url = buildTmdbUrl(`movie/${tmdbId}/images`, { include_image_language: 'en,null' });
+    const response = await fetch(url, { headers: getTmdbHeaders() });
+    if (!response.ok) return null;
+    const json = await response.json();
+    const logos = json.logos || [];
+    const preferred = logos.find(l => l.iso_639_1 === 'en') || logos[0];
+    if (!preferred) return null;
+    return `https://image.tmdb.org/t/p/w500${preferred.file_path}`;
+  } catch (error) {
+    console.warn(`TMDB logo lookup failed for ID "${tmdbId}":`, error.message);
+    return null;
+  }
+};
+
 const applyTmdbCastAvatars = (currentCast, tmdbCast) => {
   if (!Array.isArray(currentCast) || !Array.isArray(tmdbCast) || tmdbCast.length === 0) {
     return currentCast;

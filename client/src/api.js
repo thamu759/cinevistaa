@@ -337,6 +337,13 @@ export const fetchTmdbCredits = async (tmdbId) => {
   return response.json();
 };
 
+export const fetchTmdbLogo = async (tmdbId) => {
+  const response = await fetch(`${API_BASE_URL}/tmdb/logo/${tmdbId}`);
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.logoUrl || null;
+};
+
 export const updateUserRole = async (username, role) => {
   const response = await fetch(`${API_BASE_URL}/admin/users/${encodeURIComponent(username)}/role`, {
     method: 'PATCH',

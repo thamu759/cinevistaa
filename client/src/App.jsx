@@ -28,6 +28,7 @@ import {
   deleteList,
   fetchLeaderboard,
   curateMovie,
+  fetchTmdbLogo,
   deleteReview,
   toggleReviewLike
 } from './api';
@@ -1021,13 +1022,14 @@ const handleDeleteReview = async (reviewId) => {
                         style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
                       />
                       <div className="hero-layout">
-                        <div className="hero-content">
+                          <div className="hero-content">
+                          <MovieLogo movie={movie} />
                           <div className="hero-rating-badge">
                             <span className="hero-tag-fav">FEATURED</span>
                             <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                             <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
                           </div>
-                          <h1 className="hero-title">{movie.title}</h1>
+                          <h1 className="hero-title" id={movie.id}>{movie.title}</h1>
                           <p className="hero-description">{movie.description}</p>
                           <div className="hero-actions">
                             <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
@@ -2671,4 +2673,24 @@ const handleDeleteReview = async (reviewId) => {
       )}
     </div>
   );
+}
+
+function MovieLogo({ movie }) {
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const { tmdbId, title } = movie;
+
+  useEffect(() => {
+    if (!tmdbId) { setLoaded(true); return; }
+    setLogoUrl(null);
+    setLoaded(false);
+    fetchTmdbLogo(tmdbId).then(url => {
+      setLogoUrl(url);
+      setLoaded(true);
+    });
+  }, [tmdbId]);
+
+  if (!loaded) return <div className="hero-title-placeholder" style={{ height: '1.2em', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', width: '60%', marginBottom: '0.5rem' }} />;
+  if (logoUrl) return <img src={logoUrl} alt={title} className="hero-logo" />;
+  return null;
 }

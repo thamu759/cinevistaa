@@ -31,6 +31,7 @@ import {
   unfollowUser,
   searchTmdbMovies,
   fetchTmdbMovieCredits,
+  fetchTmdbMovieLogo,
   createList,
   getUserLists,
   getAllLists,
@@ -671,6 +672,18 @@ app.get('/api/tmdb/search', async (req, res) => {
   } catch (error) {
     console.error("TMDB search error:", error);
     res.status(500).json({ error: "Server error searching TMDB" });
+  }
+});
+
+// TMDB logo endpoint (fetches movie title logo)
+app.get('/api/tmdb/logo/:tmdbId', async (req, res) => {
+  try {
+    const logoUrl = await fetchTmdbMovieLogo(req.params.tmdbId);
+    if (!logoUrl) return res.json({ logoUrl: null });
+    res.json({ logoUrl });
+  } catch (error) {
+    console.error("TMDB logo error:", error);
+    res.status(500).json({ error: "Server error fetching TMDB logo" });
   }
 });
 
