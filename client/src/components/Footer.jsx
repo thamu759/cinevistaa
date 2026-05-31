@@ -63,7 +63,7 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
             </button>
           </div>
           <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="footer-tmdb-attribution">
             <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg"
               alt="TMDB" style={{ height: '14px', width: 'auto', opacity: 0.6 }} />
             <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', opacity: 0.7, lineHeight: 1.4 }}>

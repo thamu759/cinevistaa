@@ -2518,6 +2518,12 @@ a {
 .footer-social-link:hover {
   color: var(--color-accent-gold);
 }
+.footer-tmdb-attribution {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
 @keyframes slideUp {
   0% {
     opacity: 0;
@@ -4015,6 +4021,13 @@ a {
 
   .review-reply-item {
     align-items: flex-start;
+  }
+
+  .footer-tmdb-attribution {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.35rem;
   }
 }
 
