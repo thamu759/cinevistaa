@@ -1072,7 +1072,7 @@ const handleDeleteReview = async (reviewId) => {
             <button className="search-trigger" onClick={toggleSearch} aria-label="Search">
               <Search size={20} />
             </button>
-            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setActiveView('profile'); setIsMobileMenuOpen(false); } }}>
+            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { if (activeView === 'profile') { navigateTo('home'); } else { setActiveView('profile'); } setIsMobileMenuOpen(false); } }}>
               <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-avatar-circle" />
               {currentUser && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: '0.5rem', fontWeight: 500 }} className="profile-nav-name">{currentUser.username}</span>}
             </button>
