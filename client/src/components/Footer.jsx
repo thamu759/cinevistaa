@@ -12,7 +12,7 @@ const InstagramIcon = () => (
   </svg>
 );
 
-export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
+export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onShowLegal }) {
   return (
     <footer className="footer-container">
       <div className="footer">
@@ -35,9 +35,9 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
         <div className="footer-column">
           <span className="footer-column-title">Legal</span>
           <ul className="footer-links">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy Details"); }}>Privacy Policy</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Terms and Conditions"); }}>Terms of Service</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Cookie Policy"); }}>Cookie Policy</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('privacy'); }}>Privacy Policy</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('terms'); }}>Terms of Service</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('cookie'); }}>Cookie Policy</a></li>
           </ul>
         </div>
         <div className="footer-column">

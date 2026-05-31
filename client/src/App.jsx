@@ -104,6 +104,7 @@ export default function App() {
     const [showCurateModal, setShowCurateModal] = useState(false);
     const [curationMovies, setCurationMovies] = useState([]);
     const [trailerPreRoll, setTrailerPreRoll] = useState(false);
+    const [legalModal, setLegalModal] = useState(null); // 'privacy' | 'terms' | 'cookie' | null
     const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
    const [trailerAutoplayPreference, setTrailerAutoplayPreference] = useState(() => {
      // Load from localStorage or default to true (autoplay on)
@@ -2523,6 +2524,7 @@ const handleDeleteReview = async (reviewId) => {
         onNavigate={navigateTo}
         onLoadLeaderboard={loadLeaderboard}
         onLoadLists={loadAllLists}
+        onShowLegal={setLegalModal}
       />
 
       {/* MODAL - WRITE REVIEW */}
@@ -2908,6 +2910,58 @@ const handleDeleteReview = async (reviewId) => {
                 </p>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* LEGAL MODAL - Privacy / Terms / Cookie */}
+      {legalModal && (
+        <div className="modal-overlay" onClick={() => setLegalModal(null)}>
+          <div className="modal-content-panel" style={{ maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem' }} onClick={() => setLegalModal(null)}>
+              <X size={18} />
+            </button>
+            {legalModal === 'privacy' && (
+              <>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.25rem' }}>Privacy Policy</h2>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>Last updated: May 2026</p>
+                <div style={{ fontSize: '0.82rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Information We Collect</strong><br />When you create an account on ThiraiPedia, we collect your username, email address, and a hashed password. You may optionally provide an avatar URL and bio.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>How We Use Your Data</strong><br />Your information is used to identify you as a critic, display your reviews and profile publicly, and allow other users to engage with your content. We do not sell or share your personal data with third parties.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Movie Ratings & Reviews</strong><br />Reviews, ratings, and lists you create are visible to all users. You may delete your own reviews at any time.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Cookies</strong><br />We use localStorage to store your login token, watchlist, and autoplay preference. No cookies are served from third-party domains.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Data Retention</strong><br />Your data is retained until you request account deletion. Contact us at support@thiraipedia.com to delete your account.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>TMDB Attribution</strong><br />Movie poster and backdrop images are sourced from TMDB. TMDB does not endorse this application.</p>
+                </div>
+              </>
+            )}
+            {legalModal === 'terms' && (
+              <>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.25rem' }}>Terms of Service</h2>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>Last updated: May 2026</p>
+                <div style={{ fontSize: '0.82rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Acceptance</strong><br />By using ThiraiPedia, you agree to these terms. If you do not agree, do not use the service.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>User Accounts</strong><br />You are responsible for maintaining the confidentiality of your login credentials. You must be at least 13 years old to create an account.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Content Guidelines</strong><br />Reviews and forum posts must not contain hate speech, harassment, or illegal content. We reserve the right to remove content and ban users who violate this policy.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Intellectual Property</strong><br />Movie data and images are provided by TMDB under their terms. User-generated content remains the property of its author.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Service Availability</strong><br />We strive to keep the service running but do not guarantee uninterrupted availability. We may modify or discontinue features at any time.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Limitation of Liability</strong><br />ThiraiPedia is provided "as is" without warranties. We are not liable for damages arising from use of the service.</p>
+                </div>
+              </>
+            )}
+            {legalModal === 'cookie' && (
+              <>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.25rem' }}>Cookie Policy</h2>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>Last updated: May 2026</p>
+                <div style={{ fontSize: '0.82rem', lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>What We Use</strong><br />ThiraiPedia uses browser localStorage (not traditional cookies) to remember your login session, watchlist, and trailer autoplay preference. This data stays on your device and is not sent to our servers except for your login token.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Essential Storage</strong><br />Your authentication token is stored in localStorage to keep you logged in across sessions. Without it, you would need to log in every visit.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Preference Storage</strong><br />Watchlist and autoplay settings are stored locally and are not tracked or shared with any third party.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Third-Party Storage</strong><br />YouTube embeds in our trailer player may set their own cookies. These are governed by Google's privacy policy.</p>
+                  <p style={{ marginBottom: '0.75rem' }}><strong style={{ color: '#e2e8f0' }}>Managing Storage</strong><br />You can clear localStorage at any time through your browser settings. This will log you out and reset your preferences.</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
