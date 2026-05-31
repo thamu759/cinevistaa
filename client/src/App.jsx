@@ -1262,55 +1262,6 @@ const handleDeleteReview = async (reviewId) => {
               )}
             </section>
 
-            {/* NOW STREAMING — movies with OTT platform info */}
-            {streamingMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Streaming & Coming to OTT</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Now Streaming</h2>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal">
-                  {streamingMovies.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
-                        </div>
-                        {movie.ott?.platform && (
-                          <div style={{
-                            position: 'absolute', bottom: 0, left: 0, right: 0,
-                            background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
-                            padding: '1rem 0.4rem 0.35rem',
-                            textAlign: 'center'
-                          }}>
-                            <span style={{
-                              fontSize: '0.6rem', fontWeight: 700, color: '#fbbf24',
-                              textTransform: 'uppercase', letterSpacing: '0.05em',
-                              textShadow: '0 1px 4px rgba(0,0,0,0.8)'
-                            }}>
-                              {movie.ott.platform}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* TAMIL CINEMA SECTION */}
             {tamilMovies.length > 0 && (
               <section className="movies-section" style={{ marginTop: '2rem' }}>
