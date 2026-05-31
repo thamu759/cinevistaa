@@ -4034,6 +4034,10 @@ a {
     text-align: center;
     gap: 0.35rem;
   }
+
+  .movie-details-backdrop-container {
+    height: 200px;
+  }
 }
 
 /* ─── 769px - 1024px (tablets / small laptops) ─── */
