@@ -291,21 +291,30 @@ export default function MovieDetailsView({
         </section>
 
         {(() => {
-          const similar = movies.filter(m =>
-            m.id !== selectedMovie.id &&
-            m.genre &&
-            selectedMovie.genre &&
-            m.genre.split('/').some(g => selectedMovie.genre.split('/').includes(g))
-          ).slice(0, 6);
-          if (similar.length === 0) return null;
+          const targetGenres = selectedMovie.genre ? selectedMovie.genre.split('/').map(g => g.trim()) : [];
+          const targetYear = selectedMovie.releaseDate ? new Date(selectedMovie.releaseDate).getFullYear() : null;
+          const scored = movies.map(m => {
+            if (m.id === selectedMovie.id || !m.genre) return null;
+            const mGenres = m.genre.split('/').map(g => g.trim());
+            const genreOverlap = targetGenres.filter(g => mGenres.includes(g)).length;
+            let score = genreOverlap * 3;
+            if (selectedMovie.language && m.language === selectedMovie.language) score += 2;
+            if (targetYear && m.releaseDate) {
+              const mYear = new Date(m.releaseDate).getFullYear();
+              if (Math.abs(mYear - targetYear) <= 2) score += 1;
+            }
+            if (selectedMovie.director && m.director === selectedMovie.director) score += 1;
+            return { movie: m, score };
+          }).filter(Boolean).filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 6).map(s => s.movie);
+          if (scored.length === 0) return null;
           return (
             <section style={{ marginTop: '3rem' }}>
               <h2 className="section-title" style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>Similar Movies</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                Films sharing the same genre
+                Picks based on genre, language & more
               </p>
               <div className="movie-grid">
-                {similar.map(movie => (
+                {scored.map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => onViewMovie(movie.id)}>
                     <div className="movie-card-poster-wrapper">
                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
