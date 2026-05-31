@@ -1269,6 +1269,7 @@ a {
   display: flex;
   position: relative;
   overflow: hidden;
+  animation: cardIn 0.35s ease both;
 }
 .movie-card-horizontal:hover {
   border-color: var(--color-accent-gold);
@@ -1276,6 +1277,22 @@ a {
   box-shadow:
     0 12px 28px -8px #000000e6,
     0 0 20px #fbbf2414;
+}
+/* Shimmer on horizontal cards */
+.movie-card-horizontal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  transition: background-position 0s;
+  pointer-events: none;
+  z-index: 2;
+}
+.movie-card-horizontal:hover::after {
+  background-position: -100% 0;
+  transition: background-position 0.6s ease;
 }
 .movie-card-horizontal .movie-card-poster-wrapper {
   aspect-ratio: 2/3;
@@ -1308,6 +1325,10 @@ a {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  transition: box-shadow 0.3s ease;
+}
+.movie-card-horizontal:hover .movie-card-rating {
+  box-shadow: 0 0 12px #fbbf2440;
 }
 .movie-card-horizontal .movie-card-info {
   flex-direction: column;
@@ -1345,7 +1366,13 @@ a {
   margin-top: 1.5rem;
   display: grid;
 }
+/* Card entrance animation */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 .movie-card {
+  animation: cardIn 0.35s ease both;
   border: 1px solid var(--color-border);
   cursor: pointer;
   transition: var(--transition-smooth);
@@ -1356,12 +1383,40 @@ a {
   position: relative;
   overflow: hidden;
 }
+.movie-card:nth-child(1) { animation-delay: 0s; }
+.movie-card:nth-child(2) { animation-delay: 0.04s; }
+.movie-card:nth-child(3) { animation-delay: 0.08s; }
+.movie-card:nth-child(4) { animation-delay: 0.12s; }
+.movie-card:nth-child(5) { animation-delay: 0.16s; }
+.movie-card:nth-child(6) { animation-delay: 0.2s; }
+.movie-card:nth-child(7) { animation-delay: 0.24s; }
+.movie-card:nth-child(8) { animation-delay: 0.28s; }
+.movie-card:nth-child(9) { animation-delay: 0.32s; }
+.movie-card:nth-child(10) { animation-delay: 0.36s; }
+.movie-card:nth-child(11) { animation-delay: 0.4s; }
+.movie-card:nth-child(12) { animation-delay: 0.44s; }
 .movie-card:hover {
   border-color: var(--color-accent-gold);
   transform: translateY(-10px);
   box-shadow:
     0 15px 35px -10px #000000e6,
     0 0 25px #fbbf2414;
+}
+/* Shimmer overlay on hover */
+.movie-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  transition: background-position 0s;
+  pointer-events: none;
+  z-index: 2;
+}
+.movie-card:hover::after {
+  background-position: -100% 0;
+  transition: background-position 0.6s ease;
 }
 .movie-card-poster-wrapper {
   aspect-ratio: 2/3;
@@ -1394,6 +1449,10 @@ a {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  transition: box-shadow 0.3s ease;
+}
+.movie-card:hover .movie-card-rating {
+  box-shadow: 0 0 12px #fbbf2440;
 }
 .movie-card-info {
   flex-direction: column;
@@ -1581,12 +1640,64 @@ a {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* Movie detail page entrance */
 .movie-details-backdrop-container {
+  animation: heroIn 0.5s ease both;
   border-bottom: 1px solid var(--color-border);
   width: 100%;
   height: 480px;
   position: relative;
   overflow: hidden;
+}
+.movie-details-backdrop-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(212,175,55,0.03) 50%, transparent 65%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  pointer-events: none;
+  z-index: 2;
+  animation: shimmerSlide 1.2s ease forwards;
+}
+@keyframes shimmerSlide {
+  to { background-position: -100% 0; }
+}
+@keyframes heroIn {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+.details-wrapper {
+  animation: fadeUp 0.4s 0.1s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.details-left-panel > * {
+  animation: fadeUp 0.3s ease both;
+}
+.details-left-panel > *:nth-child(1) { animation-delay: 0.15s; }
+.details-left-panel > *:nth-child(2) { animation-delay: 0.25s; }
+.details-left-panel > *:nth-child(3) { animation-delay: 0.35s; }
+.details-left-panel > *:nth-child(4) { animation-delay: 0.45s; }
+.details-left-panel > *:nth-child(5) { animation-delay: 0.55s; }
+.details-right-panel > * {
+  animation: fadeUp 0.3s ease both;
+}
+.details-right-panel > *:nth-child(1) { animation-delay: 0.2s; }
+.details-right-panel > *:nth-child(2) { animation-delay: 0.3s; }
+.details-right-panel > *:nth-child(3) { animation-delay: 0.4s; }
+.details-right-panel > *:nth-child(4) { animation-delay: 0.5s; }
+
+.details-wrapper {
+  z-index: 10;
+  grid-template-columns: 280px 1fr;
+  align-items: flex-start;
+  gap: 3rem;
+  margin-top: -280px;
+  display: grid;
+  position: relative;
 }
 .movie-details-backdrop {
   width: 100%;
