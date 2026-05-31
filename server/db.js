@@ -182,6 +182,39 @@ export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
   }
 };
 
+export const fetchTmdbWatchProviders = async (tmdbId) => {
+  if (!hasTmdbCredentials() || !tmdbId) return [];
+
+  try {
+    const url = buildTmdbUrl(`movie/${tmdbId}/watch/providers`);
+    const response = await fetch(url, { headers: getTmdbHeaders() });
+    if (!response.ok) return [];
+    const json = await response.json();
+    const results = json.results || {};
+    const inData = results.IN || results.US || null;
+    if (!inData) return [];
+    const providers = [
+      ...(inData.flatrate || []),
+      ...(inData.rent || []),
+      ...(inData.buy || [])
+    ];
+    const seen = new Set();
+    return providers.filter(p => {
+      if (seen.has(p.provider_id)) return false;
+      seen.add(p.provider_id);
+      return true;
+    }).map(p => ({
+      id: p.provider_id,
+      name: p.provider_name,
+      logo: p.logo_path ? `${TMDB_IMAGE_BASE_URL}/w92${p.logo_path}` : null,
+      type: inData.flatrate?.some(fp => fp.provider_id === p.provider_id) ? 'flatrate' : 'other'
+    }));
+  } catch (error) {
+    console.warn(`TMDB watch providers lookup failed for ID "${tmdbId}":`, error.message);
+    return [];
+  }
+};
+
 export const fetchTmdbMovieLogo = async (tmdbId) => {
   if (!hasTmdbCredentials() || !tmdbId) return null;
 

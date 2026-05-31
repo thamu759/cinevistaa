@@ -337,6 +337,17 @@ export const fetchTmdbCredits = async (tmdbId) => {
   return response.json();
 };
 
+export const fetchWatchProviders = async (tmdbId) => {
+  if (!tmdbId) return [];
+  try {
+    const response = await fetch(`${API_BASE_URL}/tmdb/providers/${tmdbId}`);
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
+};
+
 export const fetchTmdbLogo = async (tmdbId) => {
   const response = await fetch(`${API_BASE_URL}/tmdb/logo/${tmdbId}`);
   if (!response.ok) return null;

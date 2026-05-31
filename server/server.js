@@ -33,6 +33,7 @@ import {
   fetchTmdbMovieCredits,
   fetchTmdbMovieDetailsFull,
   fetchTmdbMovieLogo,
+  fetchTmdbWatchProviders,
   createList,
   getUserLists,
   getAllLists,
@@ -709,6 +710,17 @@ app.get('/api/tmdb/credits/:tmdbId', async (req, res) => {
   } catch (error) {
     console.error("TMDB credits error:", error);
     res.status(500).json({ error: "Server error fetching TMDB credits" });
+  }
+});
+
+// TMDB watch providers endpoint
+app.get('/api/tmdb/providers/:tmdbId', async (req, res) => {
+  try {
+    const providers = await fetchTmdbWatchProviders(req.params.tmdbId);
+    res.json(providers);
+  } catch (error) {
+    console.error("TMDB providers error:", error);
+    res.status(500).json({ error: "Server error fetching watch providers" });
   }
 });
 

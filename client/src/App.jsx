@@ -29,6 +29,7 @@ import {
   fetchLeaderboard,
   curateMovie,
   fetchTmdbLogo,
+  fetchWatchProviders,
   deleteReview,
   toggleReviewLike
 } from './api';
@@ -50,6 +51,7 @@ export default function App() {
    const [topRatedPage, setTopRatedPage] = useState([]);
    const [topRatedPageLoading, setTopRatedPageLoading] = useState(false);
    const [selectedMovie, setSelectedMovie] = useState(null);
+   const [watchProviders, setWatchProviders] = useState([]);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
    const [lastError, setLastError] = useState(null);
@@ -540,6 +542,15 @@ export default function App() {
       setSelectedMovie(null);
     }
   }, [selectedMovieId]);
+
+  // Fetch watch providers when selectedMovie changes
+  useEffect(() => {
+    if (selectedMovie?.tmdbId) {
+      fetchWatchProviders(selectedMovie.tmdbId).then(setWatchProviders);
+    } else {
+      setWatchProviders([]);
+    }
+  }, [selectedMovie?.tmdbId]);
 
   // Fetch full new-releases list sorted ascending by release date
   useEffect(() => {
@@ -1816,10 +1827,24 @@ const handleDeleteReview = async (reviewId) => {
                     <div className="tech-row">
                       <span className="tech-lbl">Where to Watch</span>
                       <div className="tech-val">
-                        <div className="where-to-watch-row">
-                          <span className="watch-icon"><Tv size={12} /></span>
-                          <span className="watch-icon"><Film size={12} /></span>
-                        </div>
+                        {watchProviders.length > 0 ? (
+                          <div className="where-to-watch-row">
+                            {watchProviders.map(p => (
+                              <span key={p.id} className="watch-provider" title={p.name}>
+                                {p.logo ? (
+                                  <img src={p.logo} alt={p.name} className="watch-provider-logo" />
+                                ) : (
+                                  <span className="watch-provider-name">{p.name}</span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="where-to-watch-row">
+                            <span className="watch-icon"><Tv size={12} /></span>
+                            <span className="watch-icon"><Film size={12} /></span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
