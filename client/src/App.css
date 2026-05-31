@@ -183,27 +183,36 @@
   }
 }
 
+.tech-row .where-to-watch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
 .watch-provider {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 2px 6px;
+  border-radius: 4px;
+  padding: 2px 4px;
   background: #ffffff0a;
   cursor: default;
   transition: all 0.2s;
+  max-width: 100%;
 }
 .watch-provider:hover {
   border-color: var(--color-accent-gold);
   background: #fbbf240f;
 }
 .watch-provider-logo {
-  height: 16px;
+  height: 14px;
   width: auto;
+  max-width: 60px;
   border-radius: 2px;
+  display: block;
 }
 .watch-provider-name {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: var(--color-text-muted);
   white-space: nowrap;
