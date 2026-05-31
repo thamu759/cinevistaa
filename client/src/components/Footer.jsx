@@ -12,7 +12,7 @@ const InstagramIcon = () => (
   </svg>
 );
 
-export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onShowLegal }) {
+export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onShowLegal, onShowNewsletter, onShowContact }) {
   return (
     <footer className="footer-container">
       <div className="footer">
@@ -43,8 +43,8 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onS
         <div className="footer-column">
           <span className="footer-column-title">Connect</span>
           <ul className="footer-links">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Newsletter signed!"); }}>Newsletter</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@thiraipedia.com"); }}>Contact Support</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowNewsletter(); }}>Newsletter</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowContact(); }}>Contact Support</a></li>
           </ul>
         </div>
       </div>

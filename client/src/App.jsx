@@ -105,6 +105,10 @@ export default function App() {
     const [curationMovies, setCurationMovies] = useState([]);
     const [trailerPreRoll, setTrailerPreRoll] = useState(false);
     const [legalModal, setLegalModal] = useState(null); // 'privacy' | 'terms' | 'cookie' | null
+    const [showNewsletter, setShowNewsletter] = useState(false);
+    const [showContact, setShowContact] = useState(false);
+    const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [newsletterDone, setNewsletterDone] = useState(false);
     const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
    const [trailerAutoplayPreference, setTrailerAutoplayPreference] = useState(() => {
      // Load from localStorage or default to true (autoplay on)
@@ -2525,6 +2529,8 @@ const handleDeleteReview = async (reviewId) => {
         onLoadLeaderboard={loadLeaderboard}
         onLoadLists={loadAllLists}
         onShowLegal={setLegalModal}
+        onShowNewsletter={() => { setShowNewsletter(true); setNewsletterEmail(''); setNewsletterDone(false); }}
+        onShowContact={() => setShowContact(true)}
       />
 
       {/* MODAL - WRITE REVIEW */}
@@ -2962,6 +2968,81 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* NEWSLETTER MODAL */}
+      {showNewsletter && (
+        <div className="modal-overlay" onClick={() => setShowNewsletter(false)}>
+          <div className="modal-content-panel" style={{ maxWidth: '420px', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem' }} onClick={() => setShowNewsletter(false)}>
+              <X size={18} />
+            </button>
+            {newsletterDone ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🎉</div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>You're in!</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Thanks for subscribing to ThiraiPedia updates.</p>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.25rem' }}>Newsletter</h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>Get weekly movie reviews, new releases, and curated picks.</p>
+                <input
+                  type="email"
+                  className="auth-field-input"
+                  style={{ width: '100%', marginBottom: '0.75rem' }}
+                  placeholder="your@email.com"
+                  value={newsletterEmail}
+                  onChange={e => setNewsletterEmail(e.target.value)}
+                />
+                <button
+                  className="btn-primary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  disabled={!newsletterEmail.includes('@')}
+                  onClick={() => setNewsletterDone(true)}
+                >
+                  Subscribe
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CONTACT MODAL */}
+      {showContact && (
+        <div className="modal-overlay" onClick={() => setShowContact(false)}>
+          <div className="modal-content-panel" style={{ maxWidth: '420px', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+            <button className="modal-close-btn" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem' }} onClick={() => setShowContact(false)}>
+              <X size={18} />
+            </button>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.25rem' }}>Contact Support</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>We'd love to hear from you.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: '#11141c66', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <Mail size={16} style={{ opacity: 0.5, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.8rem' }}>Email</div>
+                  <a href="mailto:support@thiraipedia.com" style={{ color: 'var(--color-accent-gold)', textDecoration: 'none', fontSize: '0.78rem' }}>support@thiraipedia.com</a>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: '#11141c66', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <MessageSquare size={16} style={{ opacity: 0.5, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.8rem' }}>Community</div>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.78rem' }}>Post in the Community Forum</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: '#11141c66', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <Info size={16} style={{ opacity: 0.5, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.8rem' }}>Response Time</div>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.78rem' }}>We typically reply within 24 hours</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
