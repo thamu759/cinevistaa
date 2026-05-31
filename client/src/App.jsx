@@ -120,6 +120,9 @@ export default function App() {
     const heroRef = useRef(null);
     const isHoveringRef = useRef(false);
     const touchStartX = useRef(0);
+    const newReleasesScrollRef = useRef(null);
+    const tamilScrollRef = useRef(null);
+    const malayalamScrollRef = useRef(null);
 
   const getYoutubeVideoId = (url) => {
     if (!url) return null;
@@ -1259,9 +1262,21 @@ const handleDeleteReview = async (reviewId) => {
                   <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Now Playing</p>
                   <h2 className="section-title" style={{ marginBottom: 0 }}>New Releases</h2>
                 </div>
-                <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('new-releases'); }}>
-                  View All
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                    onClick={() => newReleasesScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+                    aria-label="Scroll left">
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                    onClick={() => newReleasesScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+                    aria-label="Scroll right">
+                    <ChevronRight size={18} />
+                  </button>
+                  <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('new-releases'); }}>
+                    View All
+                  </button>
+                </div>
               </div>
               {newReleases.length === 0 ? (
                 <div className="skeleton-horizontal">
@@ -1274,7 +1289,7 @@ const handleDeleteReview = async (reviewId) => {
                   ))}
                 </div>
               ) : (
-                <div className="movie-grid-horizontal">
+                <div className="movie-grid-horizontal" ref={newReleasesScrollRef}>
                   {newReleases.map(movie => (
                     <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                      <div className="movie-card-poster-wrapper">
@@ -1306,8 +1321,20 @@ const handleDeleteReview = async (reviewId) => {
                     <p className="section-meta" style={{ marginBottom: '0.25rem' }}>தமிழ் சினிமா</p>
                     <h2 className="section-title" style={{ marginBottom: 0 }}>Tamil Cinema</h2>
                   </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => tamilScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+                      aria-label="Scroll left">
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => tamilScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+                      aria-label="Scroll right">
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
                 </div>
-                <div className="movie-grid-horizontal">
+                <div className="movie-grid-horizontal" ref={tamilScrollRef}>
                   {tamilMovies.map(movie => (
                     <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
@@ -1339,8 +1366,20 @@ const handleDeleteReview = async (reviewId) => {
                     <p className="section-meta" style={{ marginBottom: '0.25rem' }}>മലയാള സിനിമ</p>
                     <h2 className="section-title" style={{ marginBottom: 0 }}>Malayalam Cinema</h2>
                   </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => malayalamScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+                      aria-label="Scroll left">
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => malayalamScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+                      aria-label="Scroll right">
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
                 </div>
-                <div className="movie-grid-horizontal">
+                <div className="movie-grid-horizontal" ref={malayalamScrollRef}>
                   {malayalamMovies.map(movie => (
                     <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
