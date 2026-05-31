@@ -903,7 +903,7 @@ const handleDeleteReview = async (reviewId) => {
       <div className="navbar-container">
         <nav className="navbar">
           <div className="logo" onClick={() => { navigateTo('home'); }}>
-            Cine<span>Vistaa</span>
+            thiraipedia
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
             <a 
@@ -1232,7 +1232,7 @@ const handleDeleteReview = async (reviewId) => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
                 <div>
                   <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Weekly Charts</p>
-                  <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated Cinevistaa</h2>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated on thiraipedia</h2>
                 </div>
                 <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
                   View All
@@ -2414,7 +2414,7 @@ const handleDeleteReview = async (reviewId) => {
       <footer className="footer-container">
         <div className="footer">
           <div className="footer-brand">
-            <h3 className="footer-brand-title">Cine<span>Vistaa</span></h3>
+            <h3 className="footer-brand-title">thiraipedia</h3>
             <p className="footer-brand-desc">
               Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
             </p>
@@ -2441,7 +2441,7 @@ const handleDeleteReview = async (reviewId) => {
             <span className="footer-column-title">Connect</span>
             <ul className="footer-links">
               <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Newsletter signed!"); }}>Newsletter</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@cinevistaa.com"); }}>Contact Support</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@thiraipedia.com"); }}>Contact Support</a></li>
             </ul>
           </div>
         </div>

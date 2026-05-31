@@ -1,7 +1,7 @@
 #!/bin/bash
-# Deployment helper script for Midnight Cinema
+# Deployment helper script for thiraipedia
 
-echo "=== Midnight Cinema Deployment Helper ==="
+echo "=== thiraipedia Deployment Helper ==="
 echo "This script helps build and prepare the application for deployment."
 echo ""
 

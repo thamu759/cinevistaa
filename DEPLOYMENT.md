@@ -1,6 +1,6 @@
-# Deployment Guide for Midnight Cinema
+# Deployment Guide for thiraipedia
 
-This guide provides instructions for deploying the Midnight Cinema movie review application to various platforms.
+This guide provides instructions for deploying the thiraipedia movie review application to various platforms.
 
 ## Overview
 
