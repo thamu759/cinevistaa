@@ -1833,17 +1833,9 @@ const handleDeleteReview = async (reviewId) => {
                       <span className="tech-lbl">Where to Watch</span>
                       <div className="tech-val">
                         {watchProviders.length > 0 ? (
-                          <div className="where-to-watch-row">
-                            {watchProviders.map(p => (
-                              <span key={p.id} className="watch-provider" title={p.name}>
-                                {p.logo ? (
-                                  <img src={p.logo} alt={p.name} className="watch-provider-logo" />
-                                ) : (
-                                  <span className="watch-provider-name">{p.name}</span>
-                                )}
-                              </span>
-                            ))}
-                          </div>
+                          <span className="watch-provider-text">
+                            {watchProviders.map(p => p.name).join(', ')}
+                          </span>
                         ) : (
                           <div className="where-to-watch-row">
                             <span className="watch-icon"><Tv size={12} /></span>
