@@ -2646,19 +2646,14 @@ const handleDeleteReview = async (reviewId) => {
               <X size={18} />
             </button>
 
-            {/* Cinematic badge and header */}
+            {/* Header */}
             <div className="auth-header-ticket">
-              <div className="auth-badge-premium">
-                <Sparkles size={11} fill="var(--color-accent-gold)" />
-                <span>thiraipedia Critic Circle</span>
-              </div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
-                {authTab === 'login' ? 'Pass Verification' : 'Critic Enrollment'}
+                {authTab === 'login' ? 'Login' : 'Sign Up'}
               </h2>
-              <span className="auth-logo-sub">Access premium ratings and cast review logs</span>
             </div>
 
-            {/* Premium Sliding Capsule Tabs */}
+            {/* Tabs */}
             <div className="auth-capsule-tabs">
               <button 
                 type="button" 
@@ -2666,7 +2661,7 @@ const handleDeleteReview = async (reviewId) => {
                 onClick={() => { if (!isAuthLoading) setTabAndClearForm('login'); }}
                 disabled={isAuthLoading}
               >
-                <Lock size={12} /> Sign In
+                Login
               </button>
               <button 
                 type="button" 
@@ -2674,7 +2669,7 @@ const handleDeleteReview = async (reviewId) => {
                 onClick={() => { if (!isAuthLoading) setTabAndClearForm('register'); }}
                 disabled={isAuthLoading}
               >
-                <User size={12} /> Register
+                Sign Up
               </button>
             </div>
 
@@ -2718,7 +2713,7 @@ const handleDeleteReview = async (reviewId) => {
                     <input 
                       type="email" 
                       className="auth-field-input" 
-                      placeholder="Email Address"
+                      placeholder="Email"
                       value={authFormData.email || ''}
                       onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
                       required={authTab === 'register'} 
@@ -2782,7 +2777,7 @@ const handleDeleteReview = async (reviewId) => {
                       boxShadow: authFormData.password.length >= 6 ? '0 0 8px var(--color-accent-gold)' : 'none',
                       transition: 'all 0.3s ease'
                     }} />
-                    <span>{authFormData.password.length >= 6 ? 'Valid passkey strength' : 'Passkey must be 6+ characters'}</span>
+                    <span>{authFormData.password.length >= 6 ? 'Password okay' : 'Min 6 characters'}</span>
                   </div>
                 )}
 
@@ -2801,22 +2796,19 @@ const handleDeleteReview = async (reviewId) => {
                   {isAuthLoading ? (
                     <>
                       <span className="auth-spinner" />
-                      <span>Verifying...</span>
+                      <span>Loading...</span>
                     </>
                   ) : (
-                    <>
-                      <Shield size={14} />
-                      <span>{authTab === 'login' ? 'Verify pass' : 'Enlist as Critic'}</span>
-                    </>
+                    <span>{authTab === 'login' ? 'Login' : 'Sign Up'}</span>
                   )}
                 </button>
 
                 <p className="auth-footer-toggle">
-                  {authTab === 'login' ? "New critic in town?" : "Already verified?"}
+                  {authTab === 'login' ? "Don't have an account?" : "Already have an account?"}
                   <span 
                     onClick={() => { if (!isAuthLoading) setTabAndClearForm(authTab === 'login' ? 'register' : 'login'); }}
                   >
-                    {authTab === 'login' ? 'Request Pass' : 'Sign In'}
+                    {authTab === 'login' ? 'Sign Up' : 'Login'}
                   </span>
                 </p>
               </div>
