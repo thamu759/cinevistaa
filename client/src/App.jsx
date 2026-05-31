@@ -100,10 +100,11 @@ export default function App() {
 
    // Modals Toggles
    const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
-   const [showTrailer, setShowTrailer] = useState(false);
-   const [showCurateModal, setShowCurateModal] = useState(false);
-   const [curationMovies, setCurationMovies] = useState([]);
-   const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
+    const [showTrailer, setShowTrailer] = useState(false);
+    const [showCurateModal, setShowCurateModal] = useState(false);
+    const [curationMovies, setCurationMovies] = useState([]);
+    const [trailerPreRoll, setTrailerPreRoll] = useState(false);
+    const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
    const [trailerAutoplayPreference, setTrailerAutoplayPreference] = useState(() => {
      // Load from localStorage or default to true (autoplay on)
      const saved = localStorage.getItem('mc_trailer_autoplay');
@@ -144,9 +145,9 @@ export default function App() {
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
 
-  // Initialize YouTube player when modal opens
+  // Initialize YouTube player when modal opens and pre-roll is done
   useEffect(() => {
-    if (!showTrailer || !selectedMovie?.trailerUrl) return;
+    if (!showTrailer || trailerPreRoll || !selectedMovie?.trailerUrl) return;
     const videoId = getYoutubeVideoId(selectedMovie.trailerUrl);
     if (!videoId) return;
 
@@ -215,7 +216,7 @@ export default function App() {
         playerRef.current = null;
       }
     };
-  }, [showTrailer, selectedMovie?.trailerUrl]);
+  }, [showTrailer, trailerPreRoll, selectedMovie?.trailerUrl]);
 
   const togglePlay = () => {
     const p = playerRef.current;
@@ -813,6 +814,13 @@ export default function App() {
     setAuthFormData({ username: '', email: '', password: '' });
   };
 
+  // Handle watch trailer with pre-roll ad
+  const handleWatchTrailer = useCallback(() => {
+    setShowTrailer(true);
+    setTrailerPreRoll(true);
+    setTimeout(() => setTrailerPreRoll(false), 5000);
+  }, []);
+
   // Handle Login and Register Submit
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -1255,6 +1263,20 @@ const handleDeleteReview = async (reviewId) => {
               </header>
             )}
 
+            {/* AD BANNER — below hero */}
+            <section className="ad-section" style={{ marginTop: '2rem' }}>
+              <div className="ad-container ad-banner">
+                <span className="ad-label">Advertisement</span>
+                <div className="ad-placeholder ad-banner-placeholder">
+                  <div className="ad-content">
+                    <span className="ad-icon">🎬</span>
+                    <span className="ad-text">Your Ad Here — 728×90</span>
+                    <span className="ad-sub">Reach movie lovers daily</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* NEW RELEASES — horizontal slider of recently added movies */}
             <section className="movies-section" style={{ marginTop: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
@@ -1290,25 +1312,43 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               ) : (
                 <div className="movie-grid-horizontal" ref={newReleasesScrollRef}>
-                  {newReleases.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                     <div className="movie-card-poster-wrapper">
-                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
+                  {newReleases.flatMap((movie, idx) => {
+                    const items = [];
+                    if (idx > 0 && idx % 6 === 0) {
+                      items.push(
+                        <div key={`ad-nr-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
+                          <div className="ad-card-inner">
+                            <span className="ad-label-sm">Ad</span>
+                            <div className="ad-card-content">
+                              <span className="ad-card-icon">🎬</span>
+                              <span className="ad-card-text">Sponsor</span>
+                              <span className="ad-card-sub">Book this slot</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    }
+                    items.push(
+                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                       <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                         <div className="movie-card-rating">
+                           <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                           <span>{movie.rating.toFixed(1)}</span>
+                         </div>
+                       </div>
+                       <div className="movie-card-info">
+                         <h3 className="movie-card-title">{movie.title}</h3>
+                         <div className="movie-card-genre-tags">
+                           {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                             <span key={tag} className="genre-tag">{tag.trim()}</span>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                    );
+                    return items;
+                  })}
                 </div>
               )}
             </section>
@@ -1335,25 +1375,43 @@ const handleDeleteReview = async (reviewId) => {
                   </div>
                 </div>
                 <div className="movie-grid-horizontal" ref={tamilScrollRef}>
-                  {tamilMovies.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
+                  {tamilMovies.flatMap((movie, idx) => {
+                    const items = [];
+                    if (idx > 0 && idx % 6 === 0) {
+                      items.push(
+                        <div key={`ad-ta-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
+                          <div className="ad-card-inner">
+                            <span className="ad-label-sm">Ad</span>
+                            <div className="ad-card-content">
+                              <span className="ad-card-icon">🎬</span>
+                              <span className="ad-card-text">Sponsor</span>
+                              <span className="ad-card-sub">Book this slot</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    items.push(
+                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                        <div className="movie-card-poster-wrapper">
+                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                          <div className="movie-card-rating">
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span>{movie.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <div className="movie-card-info">
+                          <h3 className="movie-card-title">{movie.title}</h3>
+                          <div className="movie-card-genre-tags">
+                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                              <span key={tag} className="genre-tag">{tag.trim()}</span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                    return items;
+                  })}
                 </div>
               </section>
             )}
@@ -1380,25 +1438,43 @@ const handleDeleteReview = async (reviewId) => {
                   </div>
                 </div>
                 <div className="movie-grid-horizontal" ref={malayalamScrollRef}>
-                  {malayalamMovies.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
+                  {malayalamMovies.flatMap((movie, idx) => {
+                    const items = [];
+                    if (idx > 0 && idx % 6 === 0) {
+                      items.push(
+                        <div key={`ad-ml-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
+                          <div className="ad-card-inner">
+                            <span className="ad-label-sm">Ad</span>
+                            <div className="ad-card-content">
+                              <span className="ad-card-icon">🎬</span>
+                              <span className="ad-card-text">Sponsor</span>
+                              <span className="ad-card-sub">Book this slot</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    items.push(
+                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                        <div className="movie-card-poster-wrapper">
+                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                          <div className="movie-card-rating">
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span>{movie.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <div className="movie-card-info">
+                          <h3 className="movie-card-title">{movie.title}</h3>
+                          <div className="movie-card-genre-tags">
+                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                              <span key={tag} className="genre-tag">{tag.trim()}</span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                    return items;
+                  })}
                 </div>
               </section>
             )}
@@ -1857,7 +1933,7 @@ const handleDeleteReview = async (reviewId) => {
           onViewActor={handleViewActor}
           onUpvoteReview={handleUpvoteReview}
           onDeleteReview={handleDeleteReview}
-          setShowTrailer={setShowTrailer}
+          onWatchTrailer={handleWatchTrailer}
           setIsWriteReviewOpen={setIsWriteReviewOpen}
           setShowListMenu={setShowListMenu}
           loadUserLists={loadUserLists}
@@ -2523,9 +2599,27 @@ const handleDeleteReview = async (reviewId) => {
                  <span>Autoplay trailer</span>
                </label>
              </div>
-           </div>
-          {selectedMovie?.trailerUrl ? (
-            <div
+            </div>
+           {selectedMovie?.trailerUrl ? (
+             <div style={{ position: 'relative' }}>
+              {/* Pre-roll ad overlay */}
+              {trailerPreRoll && (
+                <div className="preroll-overlay">
+                  <div className="preroll-content">
+                    <div className="preroll-badge">Ad</div>
+                    <div className="preroll-icon">🎬</div>
+                    <p className="preroll-text">Sponsored Content</p>
+                    <p className="preroll-sub">This ad will end in 5 seconds</p>
+                    <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>
+                      Skip Ad
+                    </button>
+                  </div>
+                  <div className="preroll-timer">
+                    <div className="preroll-timer-bar" />
+                  </div>
+                </div>
+              )}
+             <div
               ref={playerContainerRef}
               className="trailer-player-wrapper"
               style={{ position: 'relative', paddingBottom: '56.25%', borderRadius: '12px', overflow: 'hidden', background: '#000', cursor: 'pointer' }}
@@ -2563,6 +2657,7 @@ const handleDeleteReview = async (reviewId) => {
                   <Maximize size={14} />
                 </button>
               </div>
+            </div>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>

@@ -5,7 +5,7 @@ export default function MovieDetailsView({
   userLists, showListMenu, movies, proxyImageUrl,
   onViewMovie, onToggleWatchlist, onViewActor,
   onUpvoteReview, onDeleteReview,
-  setShowTrailer, setIsWriteReviewOpen,
+  onWatchTrailer, setIsWriteReviewOpen,
   setShowListMenu, loadUserLists, navigateTo, addMovieToList,
   setAuthTab, setIsAuthModalOpen
 }) {
@@ -95,7 +95,7 @@ export default function MovieDetailsView({
             </div>
 
             <div className="hero-actions" style={{ marginTop: '0.5rem' }}>
-              <button className="btn-primary" onClick={() => setShowTrailer(true)}>
+              <button className="btn-primary" onClick={onWatchTrailer}>
                 <Play size={16} fill="black" /> Watch Trailer
               </button>
               <button
@@ -148,6 +148,20 @@ export default function MovieDetailsView({
             <div>
               <h3 className="details-section-title">Synopsis</h3>
               <p className="synopsis-text">{selectedMovie.description}</p>
+            </div>
+
+            {/* Native Ad Card */}
+            <div className="ad-container ad-native" style={{ marginBottom: '1.5rem' }}>
+              <span className="ad-label">Advertisement</span>
+              <div className="ad-placeholder ad-native-placeholder">
+                <div className="ad-content ad-native-content">
+                  <span className="ad-icon">🎬</span>
+                  <div>
+                    <span className="ad-text">Sponsored Content</span>
+                    <span className="ad-sub">Reach cinema lovers — Advertise with us</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {selectedMovie.cast && selectedMovie.cast.length > 0 && (
