@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_API_URL: https://thiraipedia.onrender.com/api
+          VITE_API_URL: https://cinevistaa.onrender.com/api
       - name: Copy index.html as 404.html for SPA routing
         run: cp dist/index.html dist/404.html
       - name: Upload Pages Artifact
