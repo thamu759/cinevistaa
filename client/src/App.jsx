@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Play, Pause, Plus, Search, Star, User, Film, Tv, 
+  Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
-  Edit3, Sparkles, Check, Info, Lock, Mail, Eye, EyeOff, Shield,
-  Users, Send, Volume2, VolumeX, Maximize, List, Trash2
+  Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
+  Users, Send, Volume2, Maximize, List, Trash2,
+  AlertTriangle, RefreshCw
 } from 'lucide-react';
 import {
   fetchMovies,

@@ -15,8 +15,8 @@
       "studio": "Raaj Kamal Films International",
       "releaseDate": "June 3, 2022",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/87/47/6679/600x840/62902a383c9ad.jpeg",
-      "backdropUrl": "https://media.tamilmdb.com/i/gallery/d1/c3/225/1024xa/6548fb6dab80b.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/774UV1aCURb4s4JfEFg3IEMu5Zj.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/dkIX4dSMuVqjfrPGunBJUR7K3LQ.jpg",
       "isHero": true,
       "isStaffPick": false,
       "staffPickType": "",
@@ -24,17 +24,17 @@
         {
           "name": "Kamal Haasan",
           "role": "Karnan / Vikram",
-          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/xqnKeA127YoXfjDPjPKIJF8Kd2C.jpg"
         },
         {
           "name": "Vijay Sethupathi",
           "role": "Sandhanam",
-          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
         },
         {
           "name": "Fahadh Faasil",
           "role": "Amar",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
         }
       ],
       "reviews": [
@@ -49,7 +49,9 @@
           "likes": 1420,
           "comments": 68
         }
-      ]
+      ],
+      "tmdbId": 743563,
+      "createdAt": "2026-05-30T17:00:33.004Z"
     },
     {
       "id": "jai-bhim",
@@ -66,8 +68,8 @@
       "studio": "2D Entertainment",
       "releaseDate": "November 2, 2021",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/dd/d9/6738/600x840/60fae94a9bb18.jpeg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/dd/d9/6738/1024xa/60fae94a9bb18.jpeg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/ehybiOtBUtrMkmtB39zQEtq1Jie.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/40lmQ5vzKJhj5k7i0hvZuglneyj.jpg",
       "isHero": true,
       "isStaffPick": false,
       "staffPickType": "",
@@ -75,20 +77,22 @@
         {
           "name": "Suriya",
           "role": "Advocate Chandru",
-          "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/hIFXv3gIjlNS78gJmaguEOxvfPH.jpg"
         },
         {
           "name": "Lijomol Jose",
           "role": "Sengeni",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/vXFBgF6NMON7L4RzZ6B35lOVYOu.jpg"
         },
         {
           "name": "Manikandan",
           "role": "Rajakannu",
-          "avatarUrl": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/x54nrbLPVxUaStUt5I2om0WuE6j.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 855400,
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "kaithi",
@@ -105,8 +109,8 @@
       "studio": "Dream Warrior Pictures",
       "releaseDate": "October 25, 2019",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/1b/89/6568/600x840/5da691f6d3eb0.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/1b/89/6568/1024xa/5da691f6d3eb0.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/mxvOvom5zKRp4WPURKrhjoatt4P.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/seTFDq1iKyJ6YHr7HePbC20DMsy.jpg",
       "isHero": true,
       "isStaffPick": false,
       "staffPickType": "",
@@ -114,20 +118,24 @@
         {
           "name": "Karthi",
           "role": "Dilli",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
         },
         {
           "name": "Narain",
           "role": "Bejoy",
-          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/d0ApUGeFuGXpBkODIc6eLbBkb7B.jpg"
         },
         {
           "name": "Arjun Das",
           "role": "Anbu",
-          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/20RDzfTjpfRHxLYBfnIYXs7vcri.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 587030,
+      "trailerUrl": "https://youtu.be/g79CvhHaj5I?si=Em8wcq6-86J58Qzj",
+      "trailerChannelName": "Dream Warrior Pictures",
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "super-deluxe",
@@ -144,8 +152,8 @@
       "studio": "Tyler Durden and Kino Fist",
       "releaseDate": "March 29, 2019",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/45/59/6483/600x840/5c6fe5c42228d.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/45/59/6483/1024xa/5c6fe5c42228d.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/rTsYDdFWyw87CTk4YgJO6nYmVcJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/trBGubNu0WWBGQMLxMBOJe4DylV.jpg",
       "isHero": false,
       "isStaffPick": true,
       "staffPickType": "featured",
@@ -153,20 +161,22 @@
         {
           "name": "Vijay Sethupathi",
           "role": "Shilpa",
-          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
         },
         {
           "name": "Fahadh Faasil",
           "role": "Mugil",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
         },
         {
           "name": "Samantha",
           "role": "Vaembu",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/iGQ0AT1bNULlrJwSOGSRqLDSfGG.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 432011,
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "asuran",
@@ -183,8 +193,8 @@
       "studio": "V Creations",
       "releaseDate": "October 4, 2019",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/ee/6e/6564/600x840/5d9724f18d41e.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/ee/6e/6564/1024xa/5d9724f18d41e.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/Elnp3XrAlMM30dil8rbL7D9XeP.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/oxl1w7sICYDJfaD9PM06HfPUmOi.jpg",
       "isHero": false,
       "isStaffPick": true,
       "staffPickType": "grid",
@@ -192,15 +202,17 @@
         {
           "name": "Dhanush",
           "role": "Sivasaami",
-          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
         },
         {
           "name": "Manju Warrier",
           "role": "Pachaiyamma",
-          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7u1WgUHnwIW9mtL6aTdo1cRXmCM.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 576928,
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "karnan",
@@ -217,8 +229,8 @@
       "studio": "V Creations",
       "releaseDate": "April 9, 2021",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/e9/87/6701/600x840/6028f0c4b4803.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/e9/87/6701/1024xa/6028f0c4b4803.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/z5SxDcVWa9nokynVqBHb2IKk78J.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/t4BafoETA8JKbB9x5cbqEA5gLMU.jpg",
       "isHero": false,
       "isStaffPick": true,
       "staffPickType": "grid",
@@ -226,85 +238,17 @@
         {
           "name": "Dhanush",
           "role": "Karnan",
-          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
         },
         {
           "name": "Lal",
           "role": "Yeman",
-          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/ds3eeWA56YFeeuWP6WUs1ok58FK.jpg"
         }
       ],
-      "reviews": []
-    },
-    {
-      "id": "leo-2023",
-      "title": "Leo",
-      "description": "A mild-mannered cafe owner is dragged into a violent past when gangsters insist he is a missing crime heir. Vijay anchors Lokesh Kanagaraj's icy action drama.",
-      "rating": 7.2,
-      "criticScore": 7.1,
-      "audienceScore": 82,
-      "genre": "Tamil / Action / Crime / Drama",
-      "releaseYear": 2023,
-      "runtime": "2h 44m",
-      "director": "Lokesh Kanagaraj",
-      "writer": "Lokesh Kanagaraj",
-      "studio": "Seven Screen Studio",
-      "releaseDate": "October 19, 2023",
-      "language": "Tamil",
-      "tmdbId": 949229,
-      "posterUrl": "https://media.tamilmdb.com/i/movie/6f/d8/6957/600x840/650b046dcfaef.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/6f/d8/6957/1024xa/650b046dcfaef.jpg",
-      "isHero": false,
-      "isStaffPick": false,
-      "staffPickType": "",
-      "cast": [
-        {
-          "name": "Vijay",
-          "role": "Parthiban / Leo",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-          "name": "Trisha",
-          "role": "Sathya",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
-        }
-      ],
-      "reviews": []
-    },
-    {
-      "id": "master",
-      "title": "Master",
-      "description": "A troubled college professor is sent to a juvenile home where he clashes with a ruthless gangster who uses children for crime.",
-      "rating": 7.4,
-      "criticScore": 7.2,
-      "audienceScore": 83,
-      "genre": "Tamil / Action / Crime / Drama",
-      "releaseYear": 2021,
-      "runtime": "2h 58m",
-      "director": "Lokesh Kanagaraj",
-      "writer": "Lokesh Kanagaraj",
-      "studio": "XB Film Creators",
-      "releaseDate": "January 13, 2021",
-      "language": "Tamil",
-      "tmdbId": 626392,
-      "posterUrl": "https://media.tamilmdb.com/i/movie/48/8e/6629/600x840/5f37f98ee514e.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/48/8e/6629/1024xa/5f37f98ee514e.jpg",
-      "isHero": false,
-      "isStaffPick": false,
-      "staffPickType": "",
-      "cast": [
-        {
-          "name": "Vijay",
-          "role": "JD",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-          "name": "Vijay Sethupathi",
-          "role": "Bhavani",
-          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop"
-        }
-      ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 680652,
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "96-2018",
@@ -321,8 +265,8 @@
       "studio": "Madras Enterprises",
       "releaseDate": "October 4, 2018",
       "language": "Tamil",
-      "posterUrl": "https://media.tamilmdb.com/i/movie/a2/f0/6463/600x840/5bb836f0b5788.jpg",
-      "backdropUrl": "https://media.tamilmdb.com/i/movie/a2/f0/6463/1024xa/5bb836f0b5788.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/nrVloCa2hCFOztRF1DZU2jnWIiQ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/qzu94AvnZ1az30sTUuibx2bXpfs.jpg",
       "isHero": false,
       "isStaffPick": true,
       "staffPickType": "grid",
@@ -330,15 +274,17 @@
         {
           "name": "Vijay Sethupathi",
           "role": "Ram",
-          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
         },
         {
           "name": "Trisha",
           "role": "Jaanu",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 441717,
+      "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
       "id": "ponniyin-selvan-1",
@@ -355,9 +301,8 @@
       "studio": "Madras Talkies",
       "releaseDate": "September 30, 2022",
       "language": "Tamil",
-      "tmdbId": 660046,
-      "posterUrl": "https://media.tamilmdb.com/i/movie/8a/b7/6761/600x840/62c2b2afa87ed.jpeg",
-      "backdropUrl": "https://media.tamilmdb.com/i/gallery/d1/c3/221/1024xa/6333c4dc52582.jpg",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/zSNyZUeqDdii0doQ9970E90kCkb.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/nrVpYaBw0kqm2ySiwbxo33LnRkr.jpg",
       "isHero": false,
       "isStaffPick": false,
       "staffPickType": "",
@@ -365,31 +310,100 @@
         {
           "name": "Vikram",
           "role": "Aditha Karikalan",
-          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/c171LQMyHtULZC0RmuIHiiFDOjv.jpg"
         },
         {
           "name": "Karthi",
           "role": "Vandiyadevan",
-          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
         },
         {
           "name": "Trisha",
           "role": "Kundavai",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/jfeAV0VeAQhKONzIv1UEYbklJGn.jpg"
         }
       ],
-      "reviews": []
+      "reviews": [],
+      "tmdbId": 660046,
+      "createdAt": "2026-05-30T17:00:33.006Z"
+    },
+    {
+      "title": "Master",
+      "description": "An alcoholic professor is sent to a juvenile school, where he clashes with a gangster, who uses the children of the school for criminal activities.",
+      "genre": "Drama",
+      "releaseYear": 2021,
+      "runtime": "2h",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Unknown Writer",
+      "studio": "Indie",
+      "releaseDate": "2021-01-13",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/wjbOlovDadOdPKkSAMohLCjbIsc.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/x1I63Mm5KU2DXjL4HdBy6JaGTms.jpg",
+      "rating": 10,
+      "criticScore": 10,
+      "audienceScore": 100,
+      "id": "master",
+      "reviews": [],
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vijay",
+          "role": "John 'JD' Durairaj",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/zbQ1sDRVRHkroWwvrnqYKMerl66.jpg"
+        },
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Bhavani / Young Bhavani (voice)",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Arjun Das",
+          "role": "Das",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/20RDzfTjpfRHxLYBfnIYXs7vcri.jpg"
+        },
+        {
+          "name": "Malavika Mohanan",
+          "role": "Chaarulatha 'Chaaru' Prasad",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/5Uy1sP3RMabzZeG2P7zi8cPavqY.jpg"
+        },
+        {
+          "name": "Andrea Jeremiah",
+          "role": "Vanathi",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/rYuhyicWBWguymMQ5B02IfENdvI.jpg"
+        },
+        {
+          "name": "Nassar",
+          "role": "College Founder",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/p3I0tSQY3C5qZW3NzFfbpjKPNL6.jpg"
+        },
+        {
+          "name": "Shanthanu Bhagyaraj",
+          "role": "Bhargav",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/sbNZuxJr7XCCXPxx9lcXMPKVvVF.jpg"
+        },
+        {
+          "name": "Mahendran",
+          "role": "Young Bhavani",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/eqv9gaikHJkzrTA78VdWxVcnbyo.jpg"
+        }
+      ],
+      "tmdbId": 626392,
+      "trailerUrl": "https://youtu.be/UTiXQcrLlv4?si=WpuAeMfLkEsPZJwM",
+      "createdAt": "2026-05-30T17:00:33.006Z"
     }
   ],
   "users": [
     {
       "username": "admin",
-      "email": "admin@example.com",
-      "passwordHash": "0a5db606c1fe39d3730f90bfc86304eff3c10249175a36f7c8b6e57bf6a3448f1921baf95ba1388e416a90cce4daacc4cc983dd4db4d2c1baa308436734e1dc5",
-      "salt": "1b6d784a99cf252709277d7cc144f596",
+      "email": "admin@gmail.com",
+      "passwordHash": "a0358583e86ad2642f2cdf1b1065afd0d609ea97d0c0c6d0d41dd1a77022b165e7ab915a87643a8457d73575653efea0b61b8ad4520a8edfabf9a917ea991de9",
+      "salt": "845067aefd8a36cf5b5b033c366bf202",
       "role": "admin",
       "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
-      "token": "4b91a4695fb6b40302293622ccd07e3ca4360e6303bd022457a7679180b1229d"
+      "token": "9ed58fe770a0d6f1d46fe90c1ef2cfe6ac5eeef9527177e824a1ade27502e07b"
     }
   ],
   "communityThreads": [
