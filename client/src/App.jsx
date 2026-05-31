@@ -1862,17 +1862,12 @@ const handleDeleteReview = async (reviewId) => {
                       {watchlist.includes(selectedMovie.id) ? 'Watchlist Added' : 'Add to Watchlist'}
                     </button>
                     {currentUser && (
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <div className="hero-actions-btn-wrapper">
                         <button className="btn-secondary" onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}>
                           <List size={16} /> Add to List
                         </button>
                         {showListMenu && (
-                          <div style={{
-                            position: 'absolute', top: '100%', right: 0, zIndex: 100,
-                            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: '8px', padding: '0.4rem', minWidth: '180px',
-                            marginTop: '4px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-                          }}>
+                          <div className="hero-actions-dropdown">
                             {userLists.length === 0 ? (
                               <div style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                                 No lists yet. Create one from the Lists page.
