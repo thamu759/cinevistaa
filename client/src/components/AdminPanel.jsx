@@ -215,24 +215,19 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       try {
         const data = await searchTmdbMovies(title);
         const results = Array.isArray(data) ? data : [];
-        console.log('[auto-fetch] search results:', results.length);
         if (results.length > 0) {
           const best = results[0];
-          console.log('[auto-fetch] best:', best.title, 'tmdbId:', best.tmdbId);
           setAddForm(prev => ({ ...prev, posterUrl: best.posterUrl || prev.posterUrl }));
           if (best.tmdbId) {
             const [credits, details] = await Promise.all([
               fetchTmdbCredits(best.tmdbId),
               fetchTmdbMovieDetails(best.tmdbId)
             ]);
-            console.log('[auto-fetch] credits:', credits?.length, 'details:', details);
             if (Array.isArray(credits) && credits.length > 0) {
               setAddCast(credits);
-              console.log('[auto-fetch] cast set:', credits.length);
             }
             if (details) {
               setAddForm(prev => ({ ...prev, ...details }));
-              console.log('[auto-fetch] details set:', details);
             }
           }
         }
@@ -391,7 +386,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
         {paged.map(movie => (
           <div key={movie.id} className="admin-movie-grid-card">
             <div className="admin-movie-grid-poster-wrap">
-              <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt="" className="admin-movie-grid-poster" />
+              <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt={movie.title} className="admin-movie-grid-poster" />
               <div className="admin-movie-grid-overlay">
                 <button onClick={() => { setEditingMovie({ ...movie }); setEditPreview(null); setEditTmdbQuery(''); setEditTmdbResults([]); }} disabled={loading}
                   className="admin-movie-grid-action edit">
@@ -453,10 +448,10 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
             {addTmdbSearching && <span style={{ position: 'absolute', right: '10px', top: '8px', fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>Searching...</span>}
           </div>
           {addTmdbResults.length > 0 && (
-            <div className="admin-tmdb-results" style={{ marginTop: '0.3rem', maxHeight: '160px' }}>
-              {addTmdbResults.map(tmdb => (
-                <div key={tmdb.tmdbId} onClick={() => applyAddTmdb(tmdb)} className="admin-tmdb-item">
-                  {tmdb.posterUrl && <img src={tmdb.posterUrl} alt="" style={{ width: '26px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />}
+              <div className="admin-tmdb-results" style={{ marginTop: '0.3rem', maxHeight: '160px' }}>
+                {addTmdbResults.map(tmdb => (
+                  <div key={tmdb.tmdbId} onClick={() => applyAddTmdb(tmdb)} className="admin-tmdb-item">
+                    {tmdb.posterUrl && <img src={tmdb.posterUrl} alt={tmdb.title} style={{ width: '26px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />}
                   <div>
                     <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{tmdb.title}</div>
                     <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{tmdb.releaseDate || '—'} • {tmdb.language?.toUpperCase()}</div>
@@ -511,7 +506,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {addCast.map((member, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.75rem' }}>
-                    {member.avatarUrl && <img src={member.avatarUrl} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />}
+{member.avatarUrl && <img src={member.avatarUrl} alt={member.name} style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />}
                     <span style={{ fontWeight: 600 }}>{member.name}</span>
                     <span style={{ color: 'var(--color-text-muted)' }}>({member.role})</span>
                   </div>
@@ -556,10 +551,10 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
             {editTmdbSearching && <span style={{ position: 'absolute', right: '10px', top: '8px', fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>Searching...</span>}
           </div>
           {editTmdbResults.length > 0 && (
-            <div className="admin-tmdb-results" style={{ marginTop: '0.3rem', maxHeight: '160px' }}>
-              {editTmdbResults.map(tmdb => (
-                <div key={tmdb.tmdbId} onClick={() => applyEditTmdb(tmdb)} className="admin-tmdb-item">
-                  {tmdb.posterUrl && <img src={tmdb.posterUrl} alt="" style={{ width: '26px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />}
+              <div className="admin-tmdb-results" style={{ marginTop: '0.3rem', maxHeight: '160px' }}>
+                {editTmdbResults.map(tmdb => (
+                  <div key={tmdb.tmdbId} onClick={() => applyEditTmdb(tmdb)} className="admin-tmdb-item">
+                    {tmdb.posterUrl && <img src={tmdb.posterUrl} alt={tmdb.title} style={{ width: '26px', height: '38px', borderRadius: '4px', objectFit: 'cover' }} />}
                   <div>
                     <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{tmdb.title}</div>
                     <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{tmdb.releaseDate || '—'} • {tmdb.language?.toUpperCase()}</div>
@@ -573,7 +568,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ flexShrink: 0, width: '140px' }}>
             {(editPreview || editingMovie?.posterUrl) ? (
-              <img src={proxyImageUrl(editPreview || editingMovie.posterUrl)} alt="" style={{ width: '100%', borderRadius: '8px' }} />
+              <img src={proxyImageUrl(editPreview || editingMovie.posterUrl)} alt={editingMovie?.title || 'Movie poster'} style={{ width: '100%', borderRadius: '8px' }} />
             ) : (
               <div style={{ width: '100%', aspectRatio: '2/3', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.08)', fontSize: '0.7rem' }}>No Poster</div>
             )}
@@ -622,7 +617,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                   {editingMovie.cast.map((member, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', fontSize: '0.75rem' }}>
-                      {member.avatarUrl && <img src={member.avatarUrl} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />}
+                      {member.avatarUrl && <img src={member.avatarUrl} alt={member.name} style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />}
                       <span style={{ fontWeight: 600 }}>{member.name}</span>
                       <span style={{ color: 'var(--color-text-muted)' }}>({member.role})</span>
                     </div>
@@ -732,7 +727,7 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
               <tr key={user.username}>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={user.avatarUrl} alt="" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <img src={user.avatarUrl} alt={user.username} style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{user.username}</div>
                   </div>
                 </td>

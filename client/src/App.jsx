@@ -568,13 +568,10 @@ export default function App() {
   // Fetch watch providers when selectedMovie changes
   useEffect(() => {
     if (selectedMovie?.tmdbId) {
-      console.log('[WatchProviders] fetching for tmdbId:', selectedMovie.tmdbId);
       fetchWatchProviders(selectedMovie.tmdbId).then(providers => {
-        console.log('[WatchProviders] received:', providers);
         setWatchProviders(providers);
       });
     } else {
-      console.log('[WatchProviders] no tmdbId on movie:', selectedMovie);
       setWatchProviders([]);
     }
   }, [selectedMovie?.tmdbId]);
@@ -1989,9 +1986,9 @@ const handleDeleteReview = async (reviewId) => {
                             <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''}`} onClick={() => handleUpvoteReview(review.id)}>
                               <ThumbsUp size={14} fill={review.likedBy?.includes(currentUser?.username) ? 'var(--color-accent-gold)' : 'none'} /> <span>{review.likes || 0}</span>
                             </button>
-                            <button className="review-action-btn" onClick={() => { setActiveView('community'); setSelectedMovieId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                            <span className="review-action-btn" style={{ cursor: 'default' }}>
                               <MessageSquare size={14} /> <span>{review.comments || 0}</span>
-                            </button>
+                            </span>
                             {(currentUser && (review.user === currentUser.username || currentUser.role === 'admin')) && (
                               <button className="review-action-btn review-delete-btn" onClick={() => handleDeleteReview(review.id)} style={{ marginLeft: 'auto' }}>
                                 <Trash2 size={14} /> <span>Delete</span>
@@ -2007,11 +2004,7 @@ const handleDeleteReview = async (reviewId) => {
                   )}
                 </div>
 
-                <div className="load-more-btn-container">
-                  <button className="btn-secondary" onClick={() => alert("All reviews loaded")}>
-                    LOAD ALL REVIEWS
-                  </button>
-                </div>
+
               </section>
 
               {/* SIMILAR MOVIES */}
@@ -2125,7 +2118,7 @@ const handleDeleteReview = async (reviewId) => {
                   {allUsers.filter(u => u.username !== currentUser.username).map(u => (
                     <div key={u.username} className="stat-box glass-panel" style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                        <img src={u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150'} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <img src={u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150'} alt={u.username} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         <div style={{ minWidth: 0 }}>
                           <p style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.username}</p>
                           <p style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{(u.followers || []).length} followers</p>
@@ -2224,11 +2217,6 @@ const handleDeleteReview = async (reviewId) => {
                 ))}
               </div>
 
-              <div className="load-more-btn-container">
-                <button className="btn-secondary" onClick={() => alert("All user reviews loaded")}>
-                  LOAD OLDER REVIEWS
-                </button>
-              </div>
             </section>
           </div>
         )}
@@ -2830,7 +2818,7 @@ const handleDeleteReview = async (reviewId) => {
           <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {(curationMovies.length > 0 ? curationMovies : movies).slice(0, 30).map(movie => (
               <div key={movie.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem' }}>
-                <img src={proxyImageUrl(movie.posterUrl, 'w92')} alt="" style={{ width: '36px', height: '54px', borderRadius: '4px', objectFit: 'cover' }} />
+                <img src={proxyImageUrl(movie.posterUrl, 'w92')} alt={movie.title} style={{ width: '36px', height: '54px', borderRadius: '4px', objectFit: 'cover' }} />
                 <div style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600 }}>{movie.title}</div>
                 <span
                   onClick={() => handleCurate(movie.id, { isStaffPick: !movie.isStaffPick, staffPickType: movie.isStaffPick ? '' : 'grid' })}
