@@ -1296,8 +1296,6 @@ const handleDeleteReview = async (reviewId) => {
             )}
 
 
-            </div>
-
             {/* WEEKLY CHARTS (Movie Grid) */}
             <section className="movies-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
