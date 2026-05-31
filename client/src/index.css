@@ -3753,13 +3753,12 @@ a {
     height: 18px;
   }
 
-  .hero-indicator-dot {
-    width: 18px;
-    height: 3px;
+  .hero-indicators {
+    display: none;
   }
 
-  .hero-indicator-dot--active {
-    width: 28px;
+  .hero-logo {
+    max-height: 100px;
   }
 
   .movie-card-horizontal {
