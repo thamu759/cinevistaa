@@ -903,7 +903,7 @@ const handleDeleteReview = async (reviewId) => {
       <div className="navbar-container">
         <nav className="navbar">
           <div className="logo" onClick={() => { navigateTo('home'); }}>
-            thiraipedia
+            Thirai<span>Pedia</span>
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
             <a 
@@ -2414,7 +2414,7 @@ const handleDeleteReview = async (reviewId) => {
       <footer className="footer-container">
         <div className="footer">
           <div className="footer-brand">
-            <h3 className="footer-brand-title">thiraipedia</h3>
+            <h3 className="footer-brand-title">Thirai<span>Pedia</span></h3>
             <p className="footer-brand-desc">
               Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
             </p>
