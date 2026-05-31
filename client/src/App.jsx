@@ -1929,28 +1929,6 @@ const handleDeleteReview = async (reviewId) => {
                     </div>
                   )}
 
-                  {/* SIMILAR MOVIES */}
-                  {(() => {
-                    const similar = movies.filter(m =>
-                      m.id !== selectedMovie.id && (
-                        (selectedMovie.genre && m.genre && m.genre.split('/').some(g => selectedMovie.genre.includes(g.trim()))) ||
-                        (selectedMovie.director && m.director === selectedMovie.director)
-                      )
-                    ).slice(0, 6);
-                    return similar.length > 0 ? (
-                      <div style={{ marginTop: '2rem' }}>
-                        <h3 className="details-section-title">More Like This</h3>
-                        <div className="similar-movies-horizontal">
-                          {similar.map(m => (
-                            <div key={m.id} className="similar-movie-card" onClick={() => handleViewMovie(m.id)}>
-                              <img src={proxyImageUrl(m.posterUrl, 'w200')} alt={m.title} className="similar-movie-poster" />
-                              <p className="similar-movie-title">{m.title}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
                 </div>
 
                 {/* Right Panel: Technical details */}

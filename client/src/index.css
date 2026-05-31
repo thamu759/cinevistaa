@@ -820,46 +820,7 @@
   }
 
   /* --- Details Page --- */
-  .similar-movies-horizontal {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  -webkit-overflow-scrolling: touch;
-}
-
-.similar-movies-horizontal::-webkit-scrollbar {
-  height: 4px;
-}
-
-.similar-movie-card {
-  flex: 0 0 120px;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.similar-movie-card:hover {
-  transform: translateY(-4px);
-}
-
-.similar-movie-poster {
-  width: 100%;
-  border-radius: 8px;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-}
-
-.similar-movie-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  margin-top: 0.3rem;
-  color: #e2e8f0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.movie-details-backdrop-container {
+  .movie-details-backdrop-container {
     height: 300px;
   }
 
@@ -1001,14 +962,6 @@
     right: 0;
     left: auto;
     min-width: 160px;
-  }
-
-  .similar-movie-card {
-    flex: 0 0 100px;
-  }
-
-  .similar-movie-title {
-    font-size: 0.62rem;
   }
 
   /* --- Reviews --- */
@@ -1406,14 +1359,7 @@
     width: 28px;
   }
 
-  .similar-movie-card {
-    flex: 0 0 85px;
-  }
 
-  .similar-movie-title {
-    font-size: 0.55rem;
-    margin-top: 0.2rem;
-  }
 
   .movie-card-horizontal {
     flex: 0 0 110px;
