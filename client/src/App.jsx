@@ -84,6 +84,33 @@ export default function App() {
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // SEO title updates per view
+  const pageTitles = {
+    home: 'thiraipedia | Premium Film Critique & Reviews',
+    'new-releases': 'New Releases — thiraipedia',
+    'top-rated': 'Top Rated — thiraipedia',
+    watchlist: 'My Watchlist — thiraipedia',
+    'coming-soon': 'Coming Soon — thiraipedia',
+    actor: 'Actor — thiraipedia',
+    profile: 'My Profile — thiraipedia',
+    leaderboard: 'Top Critics — thiraipedia',
+    lists: 'Lists — thiraipedia',
+    'list-detail': 'List — thiraipedia',
+    'ott-calendar': 'OTT Calendar — thiraipedia',
+    community: 'Community Forum — thiraipedia',
+    admin: 'Admin Panel — thiraipedia',
+    'movie-details': 'Movie Details — thiraipedia',
+    privacy: 'Privacy Policy — thiraipedia',
+    terms: 'Terms of Service — thiraipedia',
+    contact: 'Contact Us — thiraipedia',
+    about: 'About Us — thiraipedia',
+  };
+
+  useEffect(() => {
+    const title = pageTitles[activeView] || 'thiraipedia | Premium Film Critique & Reviews';
+    document.title = title;
+  }, [activeView]);
+
   // Search Overlay State (IMDb-style, decoupled from grid)
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
