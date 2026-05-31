@@ -1,7 +1,7 @@
 {
-  "name": "midnight-cinema-backend",
+  "name": "thiraipedia-backend",
   "version": "1.0.0",
-  "description": "Backend API for CineVistaa Movie Review Website",
+  "description": "Backend API for thiraipedia Movie Review Website",
   "main": "server.js",
   "type": "module",
   "scripts": {

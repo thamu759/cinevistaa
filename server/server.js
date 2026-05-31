@@ -741,5 +741,5 @@ app.get('/api/tmdb/image', async (req, res) => {
 
 // Start Express Server
 app.listen(PORT, () => {
-  console.log(`CineVistaa Server running on port ${PORT}`);
+  console.log(`thiraipedia Server running on port ${PORT}`);
 });

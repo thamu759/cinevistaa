@@ -1943,7 +1943,7 @@ const handleDeleteReview = async (reviewId) => {
                 <div className="profile-bio-box">
                   <span className="profile-badge-gold">{currentUser ? currentUser.role : userProfile.role}</span>
                   <h1 className="profile-name">{currentUser ? currentUser.username : userProfile.name}</h1>
-                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'CineVistaa Film Critic') : userProfile.bio}"</p>
+                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'thiraipedia Film Critic') : userProfile.bio}"</p>
                   {currentUser && profileData && (
                     <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.followers || []).length}</strong> followers</span>
@@ -2136,7 +2136,7 @@ const handleDeleteReview = async (reviewId) => {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{critic.username}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                        {critic.bio || 'CineVistaa Film Critic'}
+                        {critic.bio || 'thiraipedia Film Critic'}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -2247,9 +2247,9 @@ const handleDeleteReview = async (reviewId) => {
             <section className="community-hero-band">
               <div>
                 <p className="section-meta">Phase 8 Community</p>
-                <h1 className="community-title">CineVistaa Forum</h1>
+                <h1 className="community-title">thiraipedia Forum</h1>
                 <p className="community-subtitle">
-                  Open film discussions, recommendations, and critic notes from the CineVistaa room.
+                  Open film discussions, recommendations, and critic notes from the thiraipedia room.
                 </p>
               </div>
               <div className="community-hero-stats">
@@ -2446,7 +2446,7 @@ const handleDeleteReview = async (reviewId) => {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} CineVistaa. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
           <div className="footer-socials">
             <a href="#" className="footer-social-link"><Globe size={16} /></a>
             <a href="#" className="footer-social-link"><Share2 size={16} /></a>
@@ -2655,7 +2655,7 @@ const handleDeleteReview = async (reviewId) => {
             <div className="auth-header-ticket">
               <div className="auth-badge-premium">
                 <Sparkles size={11} fill="var(--color-accent-gold)" />
-                <span>CineVistaa Critic Circle</span>
+                <span>thiraipedia Critic Circle</span>
               </div>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
                 {authTab === 'login' ? 'Pass Verification' : 'Critic Enrollment'}

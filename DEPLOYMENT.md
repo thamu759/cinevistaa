@@ -113,7 +113,7 @@ WORKDIR /app/server
 # Environment variables
 ENV PORT=5000
 # Add your MongoDB URI here or set via docker run -e
-# ENV MONGO_URI=mongodb://localhost:27017/midnight_cinema
+# ENV MONGO_URI=mongodb://localhost:27017/thiraipedia
 
 EXPOSE 5000
 
@@ -122,8 +122,8 @@ CMD ["node", "server.js"]
 
 Then build and run:
 ```bash
-docker build -t midnight-cinema .
-docker run -p 5000:5000 -e MONGO_URI="your_mongodb_uri" midnight-cinema
+docker build -t thiraipedia .
+docker run -p 5000:5000 -e MONGO_URI="your_mongodb_uri" thiraipedia
 ```
 
 ## Environment Variables

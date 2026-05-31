@@ -3,7 +3,7 @@
   publish = "client/dist"
 
 [context.production.environment]
-  VITE_API_URL = "https://cinevistaa.onrender.com/api"
+  VITE_API_URL = "https://thiraipedia.onrender.com/api"
 
 [[redirects]]
   from = "/*"

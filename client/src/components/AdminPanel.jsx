@@ -77,7 +77,7 @@ export default function AdminPanel({ currentUser }) {
       <div className="admin-header">
         <div>
           <div className="admin-session-badge"><Shield size={10} /><span>Admin Session</span></div>
-          <h1 className="admin-title">CineVistaa Control Panel</h1>
+          <h1 className="admin-title">thiraipedia Control Panel</h1>
           <p className="admin-subtitle">Configure library entries, manage users, moderate community, and oversee metrics.</p>
         </div>
         <div className="admin-user">
