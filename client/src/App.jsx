@@ -530,6 +530,7 @@ export default function App() {
 
   const streamingMovies = movies.filter(m => m.ott?.platform);
   const tamilMovies = movies.filter(m => m.language?.toUpperCase() === 'TAMIL');
+  const malayalamMovies = movies.filter(m => m.language?.toUpperCase() === 'MALAYALAM');
   const upcomingOttMovies = movies
     .filter(m => m.ott?.platform && m.ott?.releaseDate && new Date(m.ott.releaseDate) > new Date())
     .sort((a, b) => new Date(a.ott.releaseDate) - new Date(b.ott.releaseDate));
@@ -1308,6 +1309,39 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
                 <div className="movie-grid-horizontal">
                   {tamilMovies.map(movie => (
+                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* MALAYALAM CINEMA SECTION */}
+            {malayalamMovies.length > 0 && (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>മലയാള സിനിമ</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Malayalam Cinema</h2>
+                  </div>
+                </div>
+                <div className="movie-grid-horizontal">
+                  {malayalamMovies.map(movie => (
                     <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
