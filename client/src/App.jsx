@@ -546,8 +546,13 @@ export default function App() {
   // Fetch watch providers when selectedMovie changes
   useEffect(() => {
     if (selectedMovie?.tmdbId) {
-      fetchWatchProviders(selectedMovie.tmdbId).then(setWatchProviders);
+      console.log('[WatchProviders] fetching for tmdbId:', selectedMovie.tmdbId);
+      fetchWatchProviders(selectedMovie.tmdbId).then(providers => {
+        console.log('[WatchProviders] received:', providers);
+        setWatchProviders(providers);
+      });
     } else {
+      console.log('[WatchProviders] no tmdbId on movie:', selectedMovie);
       setWatchProviders([]);
     }
   }, [selectedMovie?.tmdbId]);
