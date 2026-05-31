@@ -63,6 +63,8 @@ export default function App() {
   const [sortOption, setSortOption] = useState('rating');
   const [selectedOttPlatform, setSelectedOttPlatform] = useState('');
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [releaseFilterMonth, setReleaseFilterMonth] = useState('');
+  const [releaseFilterYear, setReleaseFilterYear] = useState('');
 
   // Real User Auth State
   const [currentUser, setCurrentUser] = useState(null);
@@ -953,6 +955,17 @@ const handleDeleteReview = async (reviewId) => {
       .map(r => ({ ...r, movieTitle: m.title, moviePoster: m.posterUrl, movieId: m.id }))
   );
 
+  // Filtered new releases by month/year
+  const filteredReleases = (() => {
+    if (!releaseFilterMonth && !releaseFilterYear) return newReleasesPage;
+    return newReleasesPage.filter(m => {
+      const parts = m.releaseDate?.split('-');
+      if (releaseFilterYear && parts?.[0] !== releaseFilterYear) return false;
+      if (releaseFilterMonth && parts?.[1] !== String(releaseFilterMonth).padStart(2, '0')) return false;
+      return true;
+    });
+  })();
+
   return (
     <div className="app-container">
       {/* NAVIGATION HEADER */}
@@ -1475,6 +1488,24 @@ const handleDeleteReview = async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All movies sorted by release date, from earliest to latest.</p>
             </div>
+            {(movies.length > 0) && (
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <select value={releaseFilterMonth} onChange={e => setReleaseFilterMonth(e.target.value)}
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.7rem', borderRadius: '6px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8', fontFamily: 'var(--font-sans)' }}>
+                  <option value="">All Months</option>
+                  {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                    <option key={i} value={i + 1}>{m}</option>
+                  ))}
+                </select>
+                <select value={releaseFilterYear} onChange={e => setReleaseFilterYear(e.target.value)}
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.7rem', borderRadius: '6px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8', fontFamily: 'var(--font-sans)' }}>
+                  <option value="">All Years</option>
+                  {[...new Set(newReleasesPage.map(m => m.releaseDate?.split('-')[0]).filter(Boolean))].sort().reverse().map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            )}
              {newReleasesPageLoading ? (
                <div className="skeleton-grid">
                  {Array.from({ length: 8 }).map((_, i) => (
@@ -1485,7 +1516,7 @@ const handleDeleteReview = async (reviewId) => {
                    </div>
                  ))}
                </div>
-             ) : newReleasesPage.length === 0 ? (
+              ) : filteredReleases.length === 0 ? (
                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                  <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
                  <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
@@ -1508,7 +1539,7 @@ const handleDeleteReview = async (reviewId) => {
                </div>
              ) : (
               <div className="movie-grid">
-                {newReleasesPage.map(movie => (
+                 {filteredReleases.map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                        <div className="movie-card-poster-wrapper">
                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
