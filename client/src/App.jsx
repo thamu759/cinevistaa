@@ -523,12 +523,8 @@ export default function App() {
     loadCommunityThreads();
   }, [loadCommunityThreads]);
 
-  // Derive heroMovies list from current movies
-  const heroMovies = movies.length > 0 
-    ? (movies.filter(m => m.isHero || m.rating >= 4.5).length > 0
-        ? movies.filter(m => m.isHero || m.rating >= 4.5)
-        : movies.slice(0, 4))
-    : [];
+  // Derive heroMovies — only explicitly marked as hero
+  const heroMovies = movies.filter(m => m.isHero);
 
   const streamingMovies = movies.filter(m => m.ott?.platform);
   const tamilMovies = movies.filter(m => m.language?.toUpperCase() === 'TAMIL');
