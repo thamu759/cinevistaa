@@ -1041,6 +1041,11 @@ try {
     createdAt: { type: String, default: () => new Date().toISOString() },
     trailerUrl: { type: String },
     trailerChannelName: { type: String },
+    ott: {
+      platform: { type: String },
+      releaseDate: { type: String },
+      url: { type: String }
+    },
     cast: [{ name: String, role: String, avatarUrl: String }],
     reviews: [{
       id: String,

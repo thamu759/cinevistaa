@@ -143,7 +143,7 @@ app.post('/api/movies', async (req, res) => {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
-    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, isUpcoming, trailerUrl, trailerChannelName } = req.body;
+    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, isUpcoming, trailerUrl, trailerChannelName, ott } = req.body;
     if (!title || !description) {
       return res.status(400).json({ error: "Title and description are required" });
     }
@@ -166,7 +166,8 @@ app.post('/api/movies', async (req, res) => {
       audienceScore: 100,
       isUpcoming: isUpcoming || false,
       trailerUrl: trailerUrl || '',
-      trailerChannelName: trailerChannelName || ''
+      trailerChannelName: trailerChannelName || '',
+      ott: ott ? { platform: ott.platform || '', releaseDate: ott.releaseDate || '', url: ott.url || '' } : undefined
     });
 
     res.status(201).json(newMovie);

@@ -509,6 +509,8 @@ export default function App() {
         : movies.slice(0, 4))
     : [];
 
+  const streamingMovies = movies.filter(m => m.ott?.platform);
+
   // Reset index if out of range when list changes
   useEffect(() => {
     if (currentHeroIndex >= heroMovies.length && heroMovies.length > 0) {
@@ -1214,6 +1216,55 @@ const handleDeleteReview = async (reviewId) => {
               )}
             </section>
 
+            {/* NOW STREAMING — movies with OTT platform info */}
+            {streamingMovies.length > 0 && (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Streaming & Coming to OTT</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Now Streaming</h2>
+                  </div>
+                </div>
+                <div className="movie-grid-horizontal">
+                  {streamingMovies.map(movie => (
+                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
+                        </div>
+                        {movie.ott?.platform && (
+                          <div style={{
+                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                            background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
+                            padding: '1rem 0.4rem 0.35rem',
+                            textAlign: 'center'
+                          }}>
+                            <span style={{
+                              fontSize: '0.6rem', fontWeight: 700, color: '#fbbf24',
+                              textTransform: 'uppercase', letterSpacing: '0.05em',
+                              textShadow: '0 1px 4px rgba(0,0,0,0.8)'
+                            }}>
+                              {movie.ott.platform}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* FILTER & EXPLORER CONTROLS */}
             <div className="explorer-header" style={{ justifyContent: 'flex-end' }}>
               <div className="explorer-filters">
@@ -1844,6 +1895,22 @@ const handleDeleteReview = async (reviewId) => {
                         )}
                       </div>
                     </div>
+                    {selectedMovie.ott?.platform && (
+                      <div className="tech-row">
+                        <span className="tech-lbl">Streaming on</span>
+                        <div className="tech-val">
+                          <a href={selectedMovie.ott.url || '#'} target="_blank" rel="noopener noreferrer"
+                            style={{ color: 'var(--color-accent-gold)', fontWeight: 700, fontSize: '0.78rem', textDecoration: 'none' }}>
+                            {selectedMovie.ott.platform}
+                          </a>
+                          {selectedMovie.ott.releaseDate && (
+                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem', marginLeft: '0.4rem' }}>
+                              {new Date(selectedMovie.ott.releaseDate) > new Date() ? 'from ' : ''}{new Date(selectedMovie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

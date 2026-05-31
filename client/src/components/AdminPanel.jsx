@@ -177,7 +177,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [page, setPage] = useState(0);
   const [filterText, setFilterText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' });
+  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' });
   const [addCast, setAddCast] = useState([]);
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
@@ -260,7 +260,11 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!editingMovie) return;
     setLoading(true);
     try {
-      const updated = await updateMovie(editingMovie.id, editingMovie);
+      const data = { ...editingMovie };
+      if (data.ott && !data.ott.platform) {
+        data.ott = undefined;
+      }
+      const updated = await updateMovie(editingMovie.id, data);
       setMovies(prev => prev.map(m => m.id === updated.id ? updated : m));
       setEditingMovie(null);
       setEditPreview(null);
@@ -307,6 +311,9 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       studio: '',
       genre: '',
       runtime: '',
+      ottPlatform: '',
+      ottReleaseDate: '',
+      ottUrl: '',
     });
     if (m.tmdbId) {
       try {
@@ -324,9 +331,16 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!addForm.title.trim()) return;
     setLoading(true);
     try {
-      const created = await addMovie({ ...addForm, rating: 0, cast: addCast });
+      const { ottPlatform, ottReleaseDate, ottUrl, ...restForm } = addForm;
+      const payload = {
+        ...restForm,
+        rating: 0,
+        cast: addCast,
+        ott: ottPlatform ? { platform: ottPlatform, releaseDate: ottReleaseDate || '', url: ottUrl || '' } : undefined
+      };
+      const created = await addMovie(payload);
       setMovies(prev => [...prev, created]);
-      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' });
+      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' });
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
@@ -466,6 +480,31 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           <div><label className="admin-label">Runtime</label><input className="admin-input" value={addForm.runtime} onChange={e => setAddForm(prev => ({ ...prev, runtime: e.target.value }))} placeholder="e.g. 2h 44m" /></div>
           <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={addForm.trailerUrl} onChange={e => setAddForm(prev => ({ ...prev, trailerUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." /></div>
           <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={addForm.trailerChannelName} onChange={e => setAddForm(prev => ({ ...prev, trailerChannelName: e.target.value }))} placeholder="e.g. Sony Pictures Entertainment" /></div>
+          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div style={{ flex: 1, minWidth: '140px' }}>
+              <label className="admin-label">OTT Platform</label>
+              <select className="admin-input" value={addForm.ottPlatform} onChange={e => setAddForm(prev => ({ ...prev, ottPlatform: e.target.value }))} style={{ fontSize: '0.72rem', padding: '0.3rem 0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8', fontFamily: 'var(--font-sans)', width: '100%' }}>
+                <option value="">None</option>
+                <option value="Netflix">Netflix</option>
+                <option value="Amazon Prime Video">Amazon Prime Video</option>
+                <option value="Disney+ Hotstar">Disney+ Hotstar</option>
+                <option value="Sony LIV">Sony LIV</option>
+                <option value="Zee5">Zee5</option>
+                <option value="JioCinema">JioCinema</option>
+                <option value="Sun NXT">Sun NXT</option>
+                <option value="Aha">Aha</option>
+                <option value="YouTube">YouTube</option>
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: '140px' }}>
+              <label className="admin-label">OTT Release Date</label>
+              <input className="admin-input" type="date" value={addForm.ottReleaseDate} onChange={e => setAddForm(prev => ({ ...prev, ottReleaseDate: e.target.value }))} style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: '160px' }}>
+              <label className="admin-label">OTT URL</label>
+              <input className="admin-input" value={addForm.ottUrl} onChange={e => setAddForm(prev => ({ ...prev, ottUrl: e.target.value }))} placeholder="https://" style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} />
+            </div>
+          </div>
           {addCast.length > 0 && (
             <div className="admin-edit-full">
               <label className="admin-label">Cast (auto-fetched from TMDB)</label>
@@ -499,7 +538,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -552,6 +591,31 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
             <div><label className="admin-label">Poster URL</label><input className="admin-input" value={editingMovie?.posterUrl || ''} onChange={e => { setEditingMovie(prev => prev ? { ...prev, posterUrl: e.target.value } : prev); setEditPreview(e.target.value); }} /></div>
             <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={editingMovie?.trailerUrl || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, trailerUrl: e.target.value } : prev)} placeholder="https://www.youtube.com/watch?v=..." /></div>
             <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={editingMovie?.trailerChannelName || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, trailerChannelName: e.target.value } : prev)} placeholder="e.g. Sony Pictures Entertainment" /></div>
+            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ flex: 1, minWidth: '140px' }}>
+                <label className="admin-label">OTT Platform</label>
+                <select className="admin-input" value={editingMovie?.ott?.platform || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, ott: { ...prev.ott, platform: e.target.value } } : prev)} style={{ fontSize: '0.72rem', padding: '0.3rem 0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8', fontFamily: 'var(--font-sans)', width: '100%' }}>
+                  <option value="">None</option>
+                  <option value="Netflix">Netflix</option>
+                  <option value="Amazon Prime Video">Amazon Prime Video</option>
+                  <option value="Disney+ Hotstar">Disney+ Hotstar</option>
+                  <option value="Sony LIV">Sony LIV</option>
+                  <option value="Zee5">Zee5</option>
+                  <option value="JioCinema">JioCinema</option>
+                  <option value="Sun NXT">Sun NXT</option>
+                  <option value="Aha">Aha</option>
+                  <option value="YouTube">YouTube</option>
+                </select>
+              </div>
+              <div style={{ flex: 1, minWidth: '140px' }}>
+                <label className="admin-label">OTT Release Date</label>
+                <input className="admin-input" type="date" value={editingMovie?.ott?.releaseDate || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, ott: { ...prev.ott, releaseDate: e.target.value } } : prev)} style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: '160px' }}>
+                <label className="admin-label">OTT URL</label>
+                <input className="admin-input" value={editingMovie?.ott?.url || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, ott: { ...prev.ott, url: e.target.value } } : prev)} placeholder="https://" style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }} />
+              </div>
+            </div>
             {editingMovie?.cast && editingMovie.cast.length > 0 && (
               <div className="admin-edit-full">
                 <label className="admin-label">Cast (auto-fetched from TMDB)</label>
