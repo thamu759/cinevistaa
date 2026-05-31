@@ -112,9 +112,12 @@ export default function App() {
    useEffect(() => {
      localStorage.setItem('mc_trailer_autoplay', trailerAutoplayPreference);
    }, [trailerAutoplayPreference]);
-   const playerRef = useRef(null);
-   const playerContainerRef = useRef(null);
-   const progressIntervalRef = useRef(null);
+    const playerRef = useRef(null);
+    const playerContainerRef = useRef(null);
+    const progressIntervalRef = useRef(null);
+    const heroRef = useRef(null);
+    const isHoveringRef = useRef(false);
+    const touchStartX = useRef(0);
 
   const getYoutubeVideoId = (url) => {
     if (!url) return null;
@@ -540,11 +543,29 @@ export default function App() {
     }
   }, [heroMovies.length, currentHeroIndex]);
 
+  // Hero touch swipe handlers
+  const handleHeroTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleHeroTouchEnd = (e) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      setCurrentHeroIndex(prev => diff > 0
+        ? (prev + 1) % heroMovies.length
+        : (prev - 1 + heroMovies.length) % heroMovies.length
+      );
+    }
+  };
+
   // Auto-play the hero carousel (rotate slides every 6.5 seconds)
+  // Pauses when mouse hovers over the hero
   useEffect(() => {
     if (heroMovies.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+      if (!isHoveringRef.current) {
+        setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+      }
     }, 6500);
     return () => clearInterval(interval);
   }, [heroMovies.length]);
@@ -1131,7 +1152,13 @@ const handleDeleteReview = async (reviewId) => {
           <div className="main-content">
             {/* HERO CAROUSEL */}
             {heroMovies.length > 0 && (
-              <header className="hero">
+              <header className="hero"
+                ref={heroRef}
+                onMouseEnter={() => { isHoveringRef.current = true; }}
+                onMouseLeave={() => { isHoveringRef.current = false; }}
+                onTouchStart={handleHeroTouchStart}
+                onTouchEnd={handleHeroTouchEnd}
+              >
                 {heroMovies.map((movie, index) => {
                   const isActive = index === currentHeroIndex;
                   return (
