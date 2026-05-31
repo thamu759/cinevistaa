@@ -105,7 +105,8 @@ app.get('/api/movies', async (req, res) => {
     const filters = {
       search: req.query.search,
       genre: req.query.genre,
-      sort: req.query.sort
+      sort: req.query.sort,
+      ottPlatform: req.query.ottPlatform
     };
     const movies = await getMovies(filters);
     res.json(movies);

@@ -59,6 +59,7 @@ export default function App() {
   // Filter State (for the movie grid only)
   const [selectedGenre, setSelectedGenre] = useState('');
   const [sortOption, setSortOption] = useState('rating');
+  const [selectedOttPlatform, setSelectedOttPlatform] = useState('');
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
   // Real User Auth State
@@ -277,6 +278,8 @@ export default function App() {
   const [showCreateList, setShowCreateList] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDesc, setNewListDesc] = useState('');
+  const [selectedList, setSelectedList] = useState(null);
+  const [showListMenu, setShowListMenu] = useState(false);
 
   // Leaderboard state
   const [leaderboard, setLeaderboard] = useState([]);
@@ -353,6 +356,18 @@ export default function App() {
       const data = await getLists();
       setAllLists(data);
     } catch (e) {}
+  };
+  const handleDeleteList = async (listId) => {
+    if (!window.confirm('Delete this list?')) return;
+    try {
+      await deleteList(listId);
+      loadUserLists();
+      loadAllLists();
+    } catch (e) { alert(e.message); }
+  };
+  const handleViewList = (list) => {
+    setSelectedList(list);
+    setActiveView('list-detail');
   };
   const handleCreateList = async () => {
     if (!newListName.trim() || !currentUser) return;
@@ -449,10 +464,11 @@ export default function App() {
    const loadMoviesList = async () => {
      setIsLoading(true);
      try {
-       const data = await retryAsync(() => fetchMovies({
-         genre: selectedGenre,
-         sort: sortOption
-       }), { maxRetries: 2, baseDelay: 500 });
+        const data = await retryAsync(() => fetchMovies({
+          genre: selectedGenre,
+          sort: sortOption,
+          ottPlatform: selectedOttPlatform
+        }), { maxRetries: 2, baseDelay: 500 });
        setMovies(data);
        setError(null);
      } catch (err) {
@@ -468,7 +484,7 @@ export default function App() {
 
   useEffect(() => {
     loadMoviesList();
-  }, [selectedGenre, sortOption]);
+  }, [selectedGenre, sortOption, selectedOttPlatform]);
 
   // Fetch new releases separately (most recently added movies)
   const loadNewReleases = async () => {
@@ -510,6 +526,10 @@ export default function App() {
     : [];
 
   const streamingMovies = movies.filter(m => m.ott?.platform);
+  const tamilMovies = movies.filter(m => m.language?.toUpperCase() === 'TAMIL');
+  const upcomingOttMovies = movies
+    .filter(m => m.ott?.platform && m.ott?.releaseDate && new Date(m.ott.releaseDate) > new Date())
+    .sort((a, b) => new Date(a.ott.releaseDate) - new Date(b.ott.releaseDate));
 
   // Reset index if out of range when list changes
   useEffect(() => {
@@ -629,6 +649,7 @@ export default function App() {
     if (path === '/coming-soon') return { view: 'coming-soon' };
     if (path === '/leaderboard') return { view: 'leaderboard' };
     if (path === '/lists') return { view: 'lists' };
+    if (path === '/ott-calendar') return { view: 'ott-calendar' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
     return { view: 'home' };
@@ -644,6 +665,7 @@ export default function App() {
     if (view === 'coming-soon') return '/coming-soon';
     if (view === 'leaderboard') return '/leaderboard';
     if (view === 'lists') return '/lists';
+    if (view === 'ott-calendar') return '/ott-calendar';
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
   };
@@ -956,6 +978,30 @@ const handleDeleteReview = async (reviewId) => {
               Top Critics
             </a>
 
+            <a
+              className={`nav-link ${activeView === 'lists' ? 'active' : ''}`}
+              href="/lists"
+              onClick={(e) => { e.preventDefault(); loadAllLists(); navigateTo('lists'); setIsMobileMenuOpen(false); }}
+            >
+              Lists
+            </a>
+
+            <a
+              className={`nav-link ${activeView === 'ott-calendar' ? 'active' : ''}`}
+              href="/ott-calendar"
+              onClick={(e) => { e.preventDefault(); navigateTo('ott-calendar'); setIsMobileMenuOpen(false); }}
+            >
+              OTT Calendar
+            </a>
+
+            <a
+              className={`nav-link ${activeView === 'community' ? 'active' : ''}`}
+              href="/community"
+              onClick={(e) => { e.preventDefault(); navigateTo('community'); setIsMobileMenuOpen(false); }}
+            >
+              Community
+            </a>
+
             {currentUser && currentUser.role === 'admin' && (
               <a 
                 className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}
@@ -1265,6 +1311,39 @@ const handleDeleteReview = async (reviewId) => {
               </section>
             )}
 
+            {/* TAMIL CINEMA SECTION */}
+            {tamilMovies.length > 0 && (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>தமிழ் சினிமா</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Tamil Cinema</h2>
+                  </div>
+                </div>
+                <div className="movie-grid-horizontal">
+                  {tamilMovies.map(movie => (
+                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{movie.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* FILTER & EXPLORER CONTROLS */}
             <div className="explorer-header" style={{ justifyContent: 'flex-end' }}>
               <div className="explorer-filters">
@@ -1290,6 +1369,23 @@ const handleDeleteReview = async (reviewId) => {
                   <option value="popular">Popularity</option>
                   <option value="rating">New Releases</option>
                   <option value="latest">Latest Release</option>
+                </select>
+                <select
+                  className="filter-select"
+                  value={selectedOttPlatform}
+                  onChange={(e) => setSelectedOttPlatform(e.target.value)}
+                  style={{ minWidth: '120px' }}
+                >
+                  <option value="">All Streaming</option>
+                  <option value="Netflix">Netflix</option>
+                  <option value="Amazon Prime Video">Prime Video</option>
+                  <option value="Disney+ Hotstar">Disney+ Hotstar</option>
+                  <option value="Sony LIV">Sony LIV</option>
+                  <option value="Zee5">Zee5</option>
+                  <option value="JioCinema">JioCinema</option>
+                  <option value="Sun NXT">Sun NXT</option>
+                  <option value="Aha">Aha</option>
+                  <option value="YouTube">YouTube</option>
                 </select>
               </div>
             </div>
@@ -1672,12 +1768,14 @@ const handleDeleteReview = async (reviewId) => {
               <p className="section-meta">Filmography</p>
               <h2 className="section-title">{selectedActor}</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                Movies featuring this cast member
+                Movies featuring this person
               </p>
             </div>
             {(() => {
               const actorMovies = movies.filter(m =>
-                m.cast && m.cast.some(c => c.name === selectedActor)
+                (m.cast && m.cast.some(c => c.name === selectedActor)) ||
+                m.director === selectedActor ||
+                m.writer === selectedActor
               );
               return actorMovies.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
@@ -1812,11 +1910,43 @@ const handleDeleteReview = async (reviewId) => {
                       {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
                       {watchlist.includes(selectedMovie.id) ? 'Watchlist Added' : 'Add to Watchlist'}
                     </button>
-                    {currentUser && userLists.length > 0 && (
+                    {currentUser && (
                       <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <button className="btn-secondary" onClick={() => loadUserLists()}>
+                        <button className="btn-secondary" onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}>
                           <List size={16} /> Add to List
                         </button>
+                        {showListMenu && (
+                          <div style={{
+                            position: 'absolute', top: '100%', right: 0, zIndex: 100,
+                            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '8px', padding: '0.4rem', minWidth: '180px',
+                            marginTop: '4px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+                          }}>
+                            {userLists.length === 0 ? (
+                              <div style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                                No lists yet. Create one from the Lists page.
+                              </div>
+                            ) : (
+                              userLists.map(l => (
+                                <div key={l.id} onClick={async () => {
+                                  try {
+                                    await addMovieToList(l.id, selectedMovie.id);
+                                    setShowListMenu(false);
+                                  } catch (e) { alert(e.message); }
+                                }} style={{
+                                  padding: '0.4rem 0.6rem', cursor: 'pointer', borderRadius: '6px',
+                                  fontSize: '0.78rem', color: '#e2e8f0', transition: 'background 0.15s',
+                                }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  {l.name}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                        {showListMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowListMenu(false)} />}
                       </div>
                     )}
                   </div>
@@ -1852,6 +1982,30 @@ const handleDeleteReview = async (reviewId) => {
                       </div>
                     </div>
                   )}
+
+                  {/* SIMILAR MOVIES */}
+                  {(() => {
+                    const similar = movies.filter(m =>
+                      m.id !== selectedMovie.id && (
+                        (selectedMovie.genre && m.genre && m.genre.split('/').some(g => selectedMovie.genre.includes(g.trim()))) ||
+                        (selectedMovie.director && m.director === selectedMovie.director)
+                      )
+                    ).slice(0, 6);
+                    return similar.length > 0 ? (
+                      <div style={{ marginTop: '2rem' }}>
+                        <h3 className="details-section-title">More Like This</h3>
+                        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                          {similar.map(m => (
+                            <div key={m.id} onClick={() => handleViewMovie(m.id)} style={{ flex: '0 0 120px', cursor: 'pointer' }}>
+                              <img src={proxyImageUrl(m.posterUrl, 'w200')} alt={m.title}
+                                style={{ width: '100%', borderRadius: '8px', aspectRatio: '2/3', objectFit: 'cover' }} />
+                              <p style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '0.3rem', color: '#e2e8f0' }}>{m.title}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
 
                 {/* Right Panel: Technical details */}
@@ -1862,11 +2016,17 @@ const handleDeleteReview = async (reviewId) => {
                     </h4>
                     <div className="tech-row">
                       <span className="tech-lbl">Director</span>
-                      <span className="tech-val">{selectedMovie.director}</span>
+                      <span className="tech-val" onClick={() => selectedMovie.director ? handleViewActor(selectedMovie.director) : null}
+                        style={{ cursor: selectedMovie.director ? 'pointer' : 'default', color: selectedMovie.director ? 'var(--color-accent-gold)' : undefined }}>
+                        {selectedMovie.director}
+                      </span>
                     </div>
                     <div className="tech-row">
                       <span className="tech-lbl">Writer</span>
-                      <span className="tech-val">{selectedMovie.writer}</span>
+                      <span className="tech-val" onClick={() => selectedMovie.writer ? handleViewActor(selectedMovie.writer) : null}
+                        style={{ cursor: selectedMovie.writer ? 'pointer' : 'default', color: selectedMovie.writer ? 'var(--color-accent-gold)' : undefined }}>
+                        {selectedMovie.writer}
+                      </span>
                     </div>
                     <div className="tech-row">
                       <span className="tech-lbl">Studio</span>
@@ -2296,10 +2456,10 @@ const handleDeleteReview = async (reviewId) => {
                 {allLists.map(list => {
                   const listMovies = movies.filter(m => list.movieIds.includes(m.id));
                   return (
-                    <div key={list.id} className="glass-panel" style={{ padding: '1rem 1.25rem' }}>
+                    <div key={list.id} className="glass-panel" style={{ padding: '1rem 1.25rem', cursor: 'pointer' }} onClick={() => handleViewList(list)}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{list.name}</h3>
+                          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem', color: 'var(--color-accent-gold)' }}>{list.name}</h3>
                           <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
                             by <strong>{list.createdBy}</strong> &middot; {list.movieIds.length} movies
                           </p>
@@ -2307,11 +2467,16 @@ const handleDeleteReview = async (reviewId) => {
                             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>{list.description}</p>
                           )}
                         </div>
-                        {currentUser && list.createdBy === currentUser.username && (
-                          <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }} onClick={() => handleDeleteList(list.id)}>
-                            <X size={14} /> Delete
+                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                          <button className="btn-primary" style={{ fontSize: '0.7rem', padding: '0.25rem 0.6rem' }} onClick={(e) => { e.stopPropagation(); handleViewList(list); }}>
+                            View
                           </button>
-                        )}
+                          {currentUser && list.createdBy === currentUser.username && (
+                            <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }} onClick={(e) => { e.stopPropagation(); handleDeleteList(list.id); }}>
+                              <X size={14} /> Delete
+                            </button>
+                          )}
+                        </div>
                       </div>
                       {listMovies.length > 0 && (
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
@@ -2325,6 +2490,103 @@ const handleDeleteReview = async (reviewId) => {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LIST DETAIL VIEW */}
+        {activeView === 'list-detail' && selectedList && (
+          <div className="main-content">
+            <div className="page-header">
+              <button className="btn-secondary" onClick={() => { setSelectedList(null); navigateTo('lists'); }} style={{ marginBottom: '1rem' }}>
+                <ChevronLeft size={16} /> Back to Lists
+              </button>
+              <p className="section-meta">Curated Collection</p>
+              <h2 className="section-title">{selectedList.name}</h2>
+              {selectedList.description && (
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{selectedList.description}</p>
+              )}
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '2rem' }}>
+                by <strong>{selectedList.createdBy}</strong> &middot; {selectedList.movieIds.length} movies
+              </p>
+            </div>
+            {(() => {
+              const listMovies = movies.filter(m => selectedList.movieIds.includes(m.id));
+              return listMovies.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                  <p>No movies in this list yet.</p>
+                </div>
+              ) : (
+                <div className="movie-grid">
+                  {listMovies.map(movie => (
+                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                      <div className="movie-card-poster-wrapper">
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <div className="movie-card-rating">
+                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                          <span>{(movie.rating || 0).toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info">
+                        <h3 className="movie-card-title">{movie.title}</h3>
+                        <div className="movie-card-genre-tags">
+                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
+                          {movie.genre && movie.genre.split('/').map(tag => (
+                            <span key={tag} className="genre-tag">{tag.trim()}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* OTT RELEASE CALENDAR */}
+        {activeView === 'ott-calendar' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">Upcoming OTT Releases</p>
+              <h2 className="section-title">OTT Release Calendar</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                Movies coming soon to streaming platforms
+              </p>
+            </div>
+            {upcomingOttMovies.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <p>No upcoming OTT releases scheduled yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {upcomingOttMovies.map(movie => (
+                  <div key={movie.id} className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={() => handleViewMovie(movie.id)}>
+                    <img src={proxyImageUrl(movie.posterUrl, 'w185')} alt={movie.title}
+                      style={{ width: '60px', borderRadius: '6px', flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>{movie.title}</h3>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-accent-gold)', fontWeight: 700 }}>
+                          {movie.ott.platform}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                          {new Date(movie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                        {movie.genre && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                            {movie.genre}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', flexShrink: 0 }}>
+                      {Math.ceil((new Date(movie.ott.releaseDate) - new Date()) / (1000 * 60 * 60 * 24))} days
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>

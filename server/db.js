@@ -1185,7 +1185,7 @@ export const initDB = async () => {
 };
 
 export const getMovies = async (query = {}) => {
-  const { search, genre, sort } = query;
+  const { search, genre, sort, ottPlatform } = query;
 
   if (useMongoDB) {
     let mongoQuery = {};
@@ -1194,6 +1194,9 @@ export const getMovies = async (query = {}) => {
     }
     if (genre) {
       mongoQuery.genre = { $regex: genre, $options: 'i' };
+    }
+    if (ottPlatform) {
+      mongoQuery['ott.platform'] = ottPlatform;
     }
 
     let sortOption = {};
@@ -1222,6 +1225,10 @@ export const getMovies = async (query = {}) => {
     if (genre) {
       const genreLower = genre.toLowerCase();
       movies = movies.filter(m => m.genre.toLowerCase().includes(genreLower));
+    }
+
+    if (ottPlatform) {
+      movies = movies.filter(m => m.ott?.platform === ottPlatform);
     }
 
     if (sort === 'rating') {
