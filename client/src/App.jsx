@@ -1295,50 +1295,7 @@ const handleDeleteReview = async (reviewId) => {
               </section>
             )}
 
-            {/* FILTER & EXPLORER CONTROLS */}
-            <div className="explorer-header" style={{ justifyContent: 'flex-end' }}>
-              <div className="explorer-filters">
-                <select 
-                  className="filter-select"
-                  value={selectedGenre}
-                  onChange={(e) => setSelectedGenre(e.target.value)}
-                >
-                  <option value="">All Genres</option>
-                  <option value="Tamil">Tamil Cinema</option>
-                  <option value="Action">Action</option>
-                  <option value="Crime">Crime</option>
-                  <option value="Drama">Drama</option>
-                  <option value="Thriller">Thriller</option>
-                  <option value="Romance">Romance</option>
-                  <option value="Adventure">Adventure</option>
-                </select>
-                <select 
-                  className="sort-select"
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                >
-                  <option value="popular">Popularity</option>
-                  <option value="rating">New Releases</option>
-                  <option value="latest">Latest Release</option>
-                </select>
-                <select
-                  className="filter-select"
-                  value={selectedOttPlatform}
-                  onChange={(e) => setSelectedOttPlatform(e.target.value)}
-                  style={{ minWidth: '120px' }}
-                >
-                  <option value="">All Streaming</option>
-                  <option value="Netflix">Netflix</option>
-                  <option value="Amazon Prime Video">Prime Video</option>
-                  <option value="Disney+ Hotstar">Disney+ Hotstar</option>
-                  <option value="Sony LIV">Sony LIV</option>
-                  <option value="Zee5">Zee5</option>
-                  <option value="JioCinema">JioCinema</option>
-                  <option value="Sun NXT">Sun NXT</option>
-                  <option value="Aha">Aha</option>
-                  <option value="YouTube">YouTube</option>
-                </select>
-              </div>
+
             </div>
 
             {/* WEEKLY CHARTS (Movie Grid) */}
