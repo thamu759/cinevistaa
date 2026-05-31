@@ -2446,7 +2446,13 @@ const handleDeleteReview = async (reviewId) => {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', opacity: 0.7, lineHeight: 1.4 }}>
+              This product uses the TMDB API but is not endorsed or certified by{' '}
+              <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-gold)' }}>The Movie Database (TMDB)</a>.
+            </span>
+          </div>
           <div className="footer-socials">
             <a href="#" className="footer-social-link"><Globe size={16} /></a>
             <a href="#" className="footer-social-link"><Share2 size={16} /></a>
