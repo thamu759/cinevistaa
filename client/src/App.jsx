@@ -1705,18 +1705,6 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               </section>
             )}
-
-            {/* NEWSLETTER */}
-            <section className="newsletter-section glass-panel">
-              <h2 className="newsletter-title">Join the inner circle</h2>
-              <p className="newsletter-text">
-                Get early access to premieres, exclusive critic reviews, and invitations to private screening events.
-              </p>
-              <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); alert("Welcome to the inner circle!"); }}>
-                <input type="email" placeholder="Enter your email" required />
-                <button type="submit">Subscribe</button>
-              </form>
-            </section>
           </div>
         )}
 
