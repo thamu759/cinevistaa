@@ -1544,6 +1544,67 @@ const handleDeleteReview = async (reviewId) => {
               )}
             </section>
 
+            {/* APP PROMO — Download section with animated cartoon */}
+            <section className="app-promo-section">
+              <div className="app-promo-card">
+                <div className="app-promo-illustration">
+                  <div className="app-promo-char">
+                    <div className="char-body">
+                      <div className="char-eye char-eye-left" />
+                      <div className="char-eye char-eye-right" />
+                      <div className="char-mouth" />
+                    </div>
+                    <div className="char-popcorn">
+                      <div className="popcorn-piece" />
+                      <div className="popcorn-piece" />
+                      <div className="popcorn-piece" />
+                    </div>
+                  </div>
+                  <div className="app-promo-char char-2">
+                    <div className="char-body">
+                      <div className="char-eye char-eye-left" />
+                      <div className="char-eye char-eye-right" />
+                      <div className="char-mouth char-mouth-smile" />
+                    </div>
+                    <div className="char-clapboard">
+                      <div className="clap-line" />
+                      <div className="clap-line" />
+                      <div className="clap-line" />
+                    </div>
+                  </div>
+                </div>
+                <div className="app-promo-content">
+                  <span className="app-promo-badge">Mobile App</span>
+                  <h2 className="app-promo-title">Take ThiraiPedia Everywhere</h2>
+                  <p className="app-promo-desc">Rate movies, write reviews, and discover new films on the go.</p>
+                  <div className="app-promo-stats">
+                    <div className="app-promo-stat">
+                      <span className="app-promo-stat-num">10K+</span>
+                      <span className="app-promo-stat-lbl">Downloads</span>
+                    </div>
+                    <div className="app-promo-stat">
+                      <span className="app-promo-stat-num">4.8</span>
+                      <span className="app-promo-stat-lbl">App Rating</span>
+                    </div>
+                    <div className="app-promo-stat">
+                      <span className="app-promo-stat-num">500+</span>
+                      <span className="app-promo-stat-lbl">Daily Critics</span>
+                    </div>
+                  </div>
+                  <div className="app-promo-buttons">
+                    <button className="app-store-btn" onClick={() => alert('Available on the App Store soon!')}>
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                      App Store
+                    </button>
+                    <button className="app-store-btn" onClick={() => alert('Available on Google Play soon!')}>
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 20.5v-17a.5.5 0 0 1 .74-.44l15.53 8.5a.5.5 0 0 1 0 .88l-15.53 8.5A.5.5 0 0 1 3 20.5z"/></svg>
+                      Google Play
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* CURATED SELECTION (Staff Picks) */}
             {featuredStaffPick && (
               <section className="staff-picks-section">
