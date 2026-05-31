@@ -811,114 +811,131 @@
   }
 
   .details-poster-box {
-    max-width: 200px;
+    max-width: 160px;
     margin: 0 auto;
   }
 
   .details-main-info {
-    padding-top: 0.5rem;
-    gap: 0.85rem;
+    padding-top: 0.25rem;
+    gap: 0.65rem;
   }
 
   .details-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .details-tags-row {
-    gap: 0.45rem;
+    gap: 0.35rem;
   }
 
   .details-scores-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    margin: 0.25rem 0;
+    gap: 0.75rem;
+    margin: 0.15rem 0;
   }
 
   .score-dial-container {
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
 
   .dial-circle-wrapper {
-    width: 56px;
-    height: 56px;
+    width: 44px;
+    height: 44px;
   }
 
   .dial-svg {
-    width: 56px;
-    height: 56px;
+    width: 44px;
+    height: 44px;
   }
 
   .dial-text {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
   .score-dial-lbl {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 
   .details-section-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .synopsis-text {
-    font-size: 0.9rem;
-    line-height: 1.6;
+    font-size: 0.82rem;
+    line-height: 1.5;
   }
 
   /* --- Cast --- */
   .cast-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
   }
 
   .cast-avatar-box {
-    width: 65px;
-    height: 65px;
+    width: 55px;
+    height: 55px;
   }
 
   .cast-name {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 
   .cast-role {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
   }
 
   /* --- Crew --- */
   .crew-summary-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
   }
 
   .crew-summary-card {
-    padding: 0.75rem;
+    padding: 0.6rem;
   }
 
   .crew-summary-title {
-    font-size: 0.68rem;
+    font-size: 0.62rem;
+  }
+
+  .crew-summary-value {
+    font-size: 0.78rem;
   }
 
   /* --- Tech Details --- */
   .tech-details-box {
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.85rem;
+    gap: 0.75rem;
   }
 
   .tech-lbl {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
 
   .tech-val {
-    max-width: 50%;
+    max-width: 55%;
+    font-size: 0.72rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 0.55rem 1rem;
     font-size: 0.78rem;
   }
 
   /* --- Reviews --- */
   .community-reviews-section {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    padding-top: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-top: 1.5rem;
   }
 
   .reviews-section-header {
@@ -1309,20 +1326,8 @@
     width: 28px;
   }
 
-  .details-title {
-    font-size: 1.5rem;
-  }
-
-  .details-poster-box {
-    max-width: 160px;
-  }
-
-  .details-scores-row {
-    gap: 1rem;
-  }
-
   .movie-card-horizontal {
-    flex: 0 0 130px;
+    flex: 0 0 110px;
   }
 
   .profile-name {
@@ -1333,50 +1338,20 @@
     grid-template-columns: 1fr;
   }
 
-  .cast-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .cast-avatar-box {
-    width: 55px;
-    height: 55px;
-  }
-
-  .crew-summary-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .details-main-info {
-    padding: 0.5rem 0;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .hero-actions .btn-primary,
-  .hero-actions .btn-secondary {
-    width: 100%;
-    justify-content: center;
-    padding: 0.65rem 1rem;
-    font-size: 0.78rem;
-  }
-
   .tech-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.2rem;
+    gap: 0.15rem;
   }
 
   .tech-val {
     max-width: 100%;
     text-align: left;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
   }
 
   .details-layout-content {
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .nav-links {
