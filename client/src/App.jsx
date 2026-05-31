@@ -495,7 +495,7 @@ export default function App() {
   const loadNewReleases = async () => {
     try {
       const data = await fetchMovies({ sort: 'newest' });
-      setNewReleases(data.slice(0, 15));
+      setNewReleases(data.filter(m => !m.isUpcoming).slice(0, 15));
     } catch (err) {
       console.error('Failed to load new releases:', err);
     }
@@ -602,7 +602,7 @@ export default function App() {
         setNewReleasesPageLoading(true);
         try {
           const data = await fetchMovies({ sort: 'release-asc' });
-          setNewReleasesPage(data);
+          setNewReleasesPage(data.filter(m => !m.isUpcoming));
         } catch (err) {
           console.error('Failed to load new releases page:', err);
         } finally {
