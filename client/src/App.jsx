@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   Play, Pause, Plus, Search, Star, User, Film, Tv, 
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
@@ -530,6 +530,14 @@ export default function App() {
 
   // Derive heroMovies — only explicitly marked as hero
   const heroMovies = movies.filter(m => m.isHero);
+
+  // Pick a deterministic movie each day using date seed
+  const movieOfTheDay = useMemo(() => {
+    const dateStr = new Date().toISOString().slice(0, 10); // "2026-05-31"
+    const seed = dateStr.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const idx = seed % movies.length;
+    return movies.length > 0 ? movies[idx] : null;
+  }, [movies]);
 
   const streamingMovies = movies.filter(m => m.ott?.platform);
   const tamilMovies = movies.filter(m => m.language?.toUpperCase() === 'TAMIL');
@@ -1253,6 +1261,42 @@ const handleDeleteReview = async (reviewId) => {
                   </div>
                 )}
               </header>
+            )}
+
+            {/* MOVIE OF THE DAY */}
+            {movieOfTheDay && (
+              <section className="movie-of-the-day" style={{ marginTop: '2rem' }}>
+                <div className="motd-card" onClick={() => navigateTo('movie-details', movieOfTheDay.id)} style={{ cursor: 'pointer' }}>
+                  <div className="motd-badge">
+                    <Sparkles size={12} />
+                    <span>Movie of the Day</span>
+                  </div>
+                  <div className="motd-content">
+                    <div className="motd-poster-wrapper">
+                      <img src={proxyImageUrl(movieOfTheDay.posterUrl, 'w200')} alt={movieOfTheDay.title} className="motd-poster" />
+                    </div>
+                    <div className="motd-info">
+                      <h3 className="motd-title">{movieOfTheDay.title}</h3>
+                      <div className="motd-meta">
+                        <span className="motd-year">{movieOfTheDay.releaseYear || movieOfTheDay.releaseDate?.slice(0, 4)}</span>
+                        {movieOfTheDay.genre && <span className="motd-genre">{movieOfTheDay.genre}</span>}
+                        {movieOfTheDay.runtime && <span className="motd-runtime">{movieOfTheDay.runtime}</span>}
+                      </div>
+                      {movieOfTheDay.description && (
+                        <p className="motd-desc">{movieOfTheDay.description.slice(0, 200)}{movieOfTheDay.description.length > 200 ? '...' : ''}</p>
+                      )}
+                      <div className="motd-ratings">
+                        {movieOfTheDay.rating && (
+                          <span className="motd-rating-badge">
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            {movieOfTheDay.rating.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
             )}
 
             {/* NEW RELEASES — horizontal slider of recently added movies */}
