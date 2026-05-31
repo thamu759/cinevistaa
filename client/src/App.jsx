@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Play, Pause, Plus, Search, Star, User, Film, Tv, 
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
-  Edit3, Globe, Share2, Sparkles, Check, Info, Lock, Mail, Eye, EyeOff, Shield,
+  Edit3, Sparkles, Check, Info, Lock, Mail, Eye, EyeOff, Shield,
   Users, Send, Volume2, VolumeX, Maximize, List, Trash2
 } from 'lucide-react';
 import {
@@ -28,7 +28,6 @@ import {
   deleteList,
   fetchLeaderboard,
   curateMovie,
-  fetchTmdbLogo,
   fetchWatchProviders,
   deleteReview,
   toggleReviewLike
@@ -37,6 +36,9 @@ import {
 import { retryAsync, generateErrorMessage } from './utils/apiUtils';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
+import Footer from './components/Footer';
+import MovieDetailsView from './components/MovieDetailsView';
+import MovieLogo from './components/MovieLogo';
 
 export default function App() {
   // App Navigation & Router State
@@ -1713,344 +1715,30 @@ const handleDeleteReview = async (reviewId) => {
         )}
 
         {/* MOVIE DETAILS VIEW */}
-        {activeView === 'movie-details' && !selectedMovie && (
-          <div>
-            <div className="skeleton skeleton-details-backdrop" />
-            <div className="skeleton-details-content">
-              <div className="skeleton skeleton-details-poster" />
-              <div className="skeleton-details-info">
-                <div className="skeleton skeleton-title" />
-                <div className="skeleton skeleton-text medium" />
-                <div className="skeleton skeleton-text" />
-                <div className="skeleton skeleton-text" />
-                <div className="skeleton skeleton-text short" />
-                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                  <div className="skeleton skeleton-badge" />
-                  <div className="skeleton skeleton-badge" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeView === 'movie-details' && selectedMovie && (
-          <div className="slide-up">
-            {/* Backdrop & Blurred Cover background */}
-            <div className="movie-details-backdrop-container">
-              <div 
-                className="movie-details-backdrop"
-                style={{ backgroundImage: `url(${proxyImageUrl(selectedMovie.backdropUrl, 'original')})` }}
-              />
-              <div className="movie-details-backdrop-overlay" />
-            </div>
-
-            {/* Movie Info & Poster Grid */}
-            <div className="main-content" style={{ position: 'relative' }}>
-              <div className="details-wrapper">
-                {/* Left Side: Poster with gold ring shadow */}
-                <div className="details-poster-box">
-                  <img src={proxyImageUrl(selectedMovie.posterUrl, 'original')} alt={selectedMovie.title} className="details-poster-img" />
-                </div>
-
-                {/* Right Side Content Info */}
-                <div className="details-main-info">
-                  <div className="details-tags-row">
-                    <span className="genre-tag" style={{ background: 'rgba(251, 191, 36, 0.12)', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-accent-gold)' }}>
-                      {selectedMovie.genre}
-                    </span>
-                    <span className="genre-tag">{selectedMovie.runtime}</span>
-                  </div>
-                  
-                  <h1 className="details-title">{selectedMovie.title}</h1>
-                  
-                  {/* Critic and Audience Scores Dial meters */}
-                  <div className="details-scores-row">
-                    <div className="score-dial-container">
-                      <div className="dial-circle-wrapper">
-                        <svg className="dial-svg" viewBox="0 0 60 60">
-                          <circle className="dial-bg" cx="30" cy="30" r="26" />
-                          <circle 
-                            className="dial-progress" 
-                            cx="30" 
-                            cy="30" 
-                            r="26" 
-                            strokeDasharray={2 * Math.PI * 26}
-                            strokeDashoffset={2 * Math.PI * 26 * (1 - selectedMovie.criticScore / 10)}
-                          />
-                        </svg>
-                        <span className="dial-text">{selectedMovie.criticScore.toFixed(1)}</span>
-                      </div>
-                      <span className="score-dial-lbl">Critic<br/>Score</span>
-                    </div>
-
-                    <div className="score-dial-container">
-                      <div className="dial-circle-wrapper">
-                        <svg className="dial-svg" viewBox="0 0 60 60">
-                          <circle className="dial-bg" cx="30" cy="30" r="26" />
-                          <circle 
-                            className="dial-progress" 
-                            cx="30" 
-                            cy="30" 
-                            r="26" 
-                            strokeDasharray={2 * Math.PI * 26}
-                            strokeDashoffset={2 * Math.PI * 26 * (1 - selectedMovie.audienceScore / 100)}
-                            style={{ stroke: 'rgba(255, 255, 255, 0.7)' }}
-                          />
-                        </svg>
-                        <span className="dial-text">{selectedMovie.audienceScore}%</span>
-                      </div>
-                      <span className="score-dial-lbl">Audience<br/>Score</span>
-                    </div>
-                  </div>
-
-                  <div className="hero-actions" style={{ marginTop: '0.5rem' }}>
-                    <button className="btn-primary" onClick={() => setShowTrailer(true)}>
-                      <Play size={16} fill="black" /> Watch Trailer
-                    </button>
-                    <button 
-                      className="btn-secondary" 
-                      onClick={(e) => handleToggleWatchlist(selectedMovie.id, e)}
-                    >
-                      {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
-                      {watchlist.includes(selectedMovie.id) ? 'Watchlist Added' : 'Add to Watchlist'}
-                    </button>
-                    {currentUser && (
-                      <div className="hero-actions-btn-wrapper">
-                        <button className="btn-secondary" onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}>
-                          <List size={16} /> Add to List
-                        </button>
-                        {showListMenu && (
-                          <div className="hero-actions-dropdown">
-                            {userLists.length === 0 ? (
-                              <div style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                                No lists yet. Create one from the Lists page.
-                              </div>
-                            ) : (
-                              userLists.map(l => (
-                                <div key={l.id} onClick={async () => {
-                                  try {
-                                    await addMovieToList(l.id, selectedMovie.id);
-                                    setShowListMenu(false);
-                                  } catch (e) { alert(e.message); }
-                                }} style={{
-                                  padding: '0.4rem 0.6rem', cursor: 'pointer', borderRadius: '6px',
-                                  fontSize: '0.78rem', color: '#e2e8f0', transition: 'background 0.15s',
-                                }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  {l.name}
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-                        {showListMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowListMenu(false)} />}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Lower Section: Details panels */}
-              <div className="details-layout-content">
-                
-                {/* Left Panel: Synopsis & Cast */}
-                <div className="details-left-panel">
-                  <div>
-                    <h3 className="details-section-title">Synopsis</h3>
-                    <p className="synopsis-text">{selectedMovie.description}</p>
-                  </div>
-
-                  {selectedMovie.cast && selectedMovie.cast.length > 0 && (
-                    <div>
-                      <h3 className="details-section-title">Cast & Crew</h3>
-                      <p className="details-section-subtitle">Meet the people bringing the story to life, on screen and behind the camera.</p>
-                      <div className="cast-grid">
-                        {selectedMovie.cast.map((member, i) => (
-                          <div key={i} className="cast-member-card" onClick={() => handleViewActor(member.name)} style={{ cursor: 'pointer' }}>
-                            <div className="cast-avatar-box">
-                              <img src={member.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"} alt={member.name} className="cast-avatar-img" />
-                            </div>
-                            <div>
-                              <p className="cast-name">{member.name}</p>
-                              <p className="cast-role">as {member.role}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Right Panel: Technical details */}
-                <div className="details-right-panel">
-                  <div className="tech-details-box glass-panel">
-                    <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-accent-gold)', marginBottom: '1.25rem' }}>
-                      Film Details
-                    </h4>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Director</span>
-                      <span className="tech-val" onClick={() => selectedMovie.director ? handleViewActor(selectedMovie.director) : null}
-                        style={{ cursor: selectedMovie.director ? 'pointer' : 'default', color: selectedMovie.director ? 'var(--color-accent-gold)' : undefined }}>
-                        {selectedMovie.director}
-                      </span>
-                    </div>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Writer</span>
-                      <span className="tech-val" onClick={() => selectedMovie.writer ? handleViewActor(selectedMovie.writer) : null}
-                        style={{ cursor: selectedMovie.writer ? 'pointer' : 'default', color: selectedMovie.writer ? 'var(--color-accent-gold)' : undefined }}>
-                        {selectedMovie.writer}
-                      </span>
-                    </div>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Studio</span>
-                      <span className="tech-val">{selectedMovie.studio}</span>
-                    </div>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Release Date</span>
-                      <span className="tech-val">{selectedMovie.releaseDate}</span>
-                    </div>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Language</span>
-                      <span className="tech-val">{selectedMovie.language}</span>
-                    </div>
-                    <div className="tech-row">
-                      <span className="tech-lbl">Where to Watch</span>
-                      <div className="tech-val">
-                        {watchProviders.length > 0 ? (
-                          <span className="watch-provider-text">
-                            {watchProviders.map(p => p.name).join(', ')}
-                          </span>
-                        ) : (
-                          <div className="where-to-watch-row">
-                            <span className="watch-icon"><Tv size={12} /></span>
-                            <span className="watch-icon"><Film size={12} /></span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {selectedMovie.ott?.platform && (
-                      <div className="tech-row">
-                        <span className="tech-lbl">Streaming on</span>
-                        <div className="tech-val">
-                          <a href={selectedMovie.ott.url || '#'} target="_blank" rel="noopener noreferrer"
-                            style={{ color: 'var(--color-accent-gold)', fontWeight: 700, fontSize: '0.78rem', textDecoration: 'none' }}>
-                            {selectedMovie.ott.platform}
-                          </a>
-                          {selectedMovie.ott.releaseDate && (
-                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem', marginLeft: '0.4rem' }}>
-                              {new Date(selectedMovie.ott.releaseDate) > new Date() ? 'from ' : ''}{new Date(selectedMovie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Reviews section */}
-              <section className="community-reviews-section">
-                <div className="reviews-section-header">
-                  <div>
-                    <h2>Community Reviews</h2>
-                    <p>Based on {selectedMovie.reviews?.length || 0} user ratings</p>
-                  </div>
-                  <button className="btn-primary" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { setIsWriteReviewOpen(true); } }}>
-                    <Edit3 size={16} /> Write a Review
-                  </button>
-                </div>
-
-                {/* Reviews List */}
-                <div className="user-reviews-list">
-                  {selectedMovie.reviews && selectedMovie.reviews.length > 0 ? (
-                    selectedMovie.reviews.map(review => (
-                      <div key={review.id} className="user-review-card glass-panel">
-                        <div className="review-card-header">
-                          <div className="reviewer-info">
-                            <img 
-                              src={review.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"} 
-                              alt="user" 
-                              className="reviewer-avatar" 
-                            />
-                            <div className="reviewer-meta">
-                              <h4 className="review-user-name">{review.user}</h4>
-                              <p>{review.role} • {review.timestamp}</p>
-                            </div>
-                          </div>
-                          <span className="review-score-badge">★ {review.rating.toFixed(1)}/10</span>
-                        </div>
-                        <p className="review-text">"{review.text}"</p>
-                        <div className="review-actions-bar">
-                            <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''}`} onClick={() => handleUpvoteReview(review.id)}>
-                              <ThumbsUp size={14} fill={review.likedBy?.includes(currentUser?.username) ? 'var(--color-accent-gold)' : 'none'} /> <span>{review.likes || 0}</span>
-                            </button>
-                            <span className="review-action-btn" style={{ cursor: 'default' }}>
-                              <MessageSquare size={14} /> <span>{review.comments || 0}</span>
-                            </span>
-                            {(currentUser && (review.user === currentUser.username || currentUser.role === 'admin')) && (
-                              <button className="review-action-btn review-delete-btn" onClick={() => handleDeleteReview(review.id)} style={{ marginLeft: 'auto' }}>
-                                <Trash2 size={14} /> <span>Delete</span>
-                              </button>
-                            )}
-                          </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
-                      No reviews submitted for this film yet. Be the first to criticize!
-                    </div>
-                  )}
-                </div>
-
-
-              </section>
-
-              {/* SIMILAR MOVIES */}
-              {(() => {
-                const similar = movies.filter(m =>
-                  m.id !== selectedMovie.id &&
-                  m.genre &&
-                  selectedMovie.genre &&
-                  m.genre.split('/').some(g => selectedMovie.genre.split('/').includes(g))
-                ).slice(0, 6);
-                if (similar.length === 0) return null;
-                return (
-                  <section style={{ marginTop: '3rem' }}>
-                    <h2 className="section-title" style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>Similar Movies</h2>
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                      Films sharing the same genre
-                    </p>
-                    <div className="movie-grid">
-                      {similar.map(movie => (
-                        <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                       <div className="movie-card-poster-wrapper">
-                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                            <div className="movie-card-rating">
-                              <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                              <span>{(movie.rating || 0).toFixed(1)}</span>
-                            </div>
-                          </div>
-                          <div className="movie-card-info">
-                            <h3 className="movie-card-title">{movie.title}</h3>
-                            <div className="movie-card-genre-tags">
-                              <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
-                              {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                                <span key={tag} className="genre-tag">{tag.trim()}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })()}
-
-            </div>
-          </div>
-        )}
+        <MovieDetailsView
+          selectedMovie={selectedMovie}
+          activeView={activeView}
+          watchlist={watchlist}
+          currentUser={currentUser}
+          watchProviders={watchProviders}
+          userLists={userLists}
+          showListMenu={showListMenu}
+          movies={movies}
+          proxyImageUrl={proxyImageUrl}
+          onViewMovie={handleViewMovie}
+          onToggleWatchlist={handleToggleWatchlist}
+          onViewActor={handleViewActor}
+          onUpvoteReview={handleUpvoteReview}
+          onDeleteReview={handleDeleteReview}
+          setShowTrailer={setShowTrailer}
+          setIsWriteReviewOpen={setIsWriteReviewOpen}
+          setShowListMenu={setShowListMenu}
+          loadUserLists={loadUserLists}
+          navigateTo={navigateTo}
+          addMovieToList={addMovieToList}
+          setAuthTab={setAuthTab}
+          setIsAuthModalOpen={setIsAuthModalOpen}
+        />
 
         {/* PROFILE VIEW */}
         {activeView === 'profile' && (
@@ -2628,54 +2316,11 @@ const handleDeleteReview = async (reviewId) => {
       </div>
 
       {/* FOOTER SECTION */}
-      <footer className="footer-container">
-        <div className="footer">
-          <div className="footer-brand">
-            <h3 className="footer-brand-title">Thirai<span>Pedia</span></h3>
-            <p className="footer-brand-desc">
-              Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
-            </p>
-          </div>
-          <div className="footer-column">
-            <span className="footer-column-title">Explore</span>
-            <ul className="footer-links">
-              <li><a href="/" onClick={(e) => { e.preventDefault(); navigateTo('home'); }}>All Movies</a></li>
-              <li><a href="/leaderboard" onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); }}>Top Critics</a></li>
-              <li><a href="/lists" onClick={(e) => { e.preventDefault(); loadAllLists(); navigateTo('lists'); }}>Lists</a></li>
-              <li><a href="/profile" onClick={(e) => { e.preventDefault(); navigateTo('profile'); }}>Critic Board</a></li>
-              <li><a href="/community" onClick={(e) => { e.preventDefault(); navigateTo('community'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Community Forum</a></li>
-            </ul>
-          </div>
-          <div className="footer-column">
-            <span className="footer-column-title">Legal</span>
-            <ul className="footer-links">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy Details"); }}>Privacy Policy</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Terms and Conditions"); }}>Terms of Service</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Cookie Policy"); }}>Cookie Policy</a></li>
-            </ul>
-          </div>
-          <div className="footer-column">
-            <span className="footer-column-title">Connect</span>
-            <ul className="footer-links">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Newsletter signed!"); }}>Newsletter</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); alert("Contact support at help@thiraipedia.com"); }}>Contact Support</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', opacity: 0.7, lineHeight: 1.4 }}>
-              This product uses the TMDB API but is not endorsed or certified by{' '}
-              <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-accent-gold)' }}>The Movie Database (TMDB)</a>.
-            </span>
-          </div>
-          <div className="footer-socials">
-            <a href="#" className="footer-social-link"><Globe size={16} /></a>
-            <a href="#" className="footer-social-link"><Share2 size={16} /></a>
-          </div>
-        </div>
-      </footer>
+      <Footer
+        onNavigate={navigateTo}
+        onLoadLeaderboard={loadLeaderboard}
+        onLoadLists={loadAllLists}
+      />
 
       {/* MODAL - WRITE REVIEW */}
       <Modal isOpen={isWriteReviewOpen && !!selectedMovie} onClose={() => setIsWriteReviewOpen(false)} width="520px">
@@ -3056,19 +2701,4 @@ const handleDeleteReview = async (reviewId) => {
   );
 }
 
-function MovieLogo({ movie }) {
-  const [logoUrl, setLogoUrl] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-  const { tmdbId, title } = movie;
 
-  useEffect(() => {
-    if (!tmdbId) { setLoaded(true); return; }
-    setLogoUrl(null);
-    setLoaded(false);
-    fetchTmdbLogo(tmdbId).then(url => { setLogoUrl(url); setLoaded(true); });
-  }, [tmdbId]);
-
-  if (!loaded) return <h1 className="hero-title">{title}</h1>;
-  if (logoUrl) return <img src={logoUrl} alt={title} className="hero-logo" />;
-  return <h1 className="hero-title">{title}</h1>;
-}
