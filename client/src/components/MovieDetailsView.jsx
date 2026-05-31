@@ -1,14 +1,22 @@
-import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Tv, Film } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
 
 export default function MovieDetailsView({
   selectedMovie, activeView, watchlist, currentUser, watchProviders,
   userLists, showListMenu, movies, proxyImageUrl,
   onViewMovie, onToggleWatchlist, onViewActor,
-  onUpvoteReview, onDeleteReview,
+  onUpvoteReview, onDeleteReview, onAddReviewReply,
   onWatchTrailer, setIsWriteReviewOpen,
   setShowListMenu, loadUserLists, navigateTo, addMovieToList,
   setAuthTab, setIsAuthModalOpen
 }) {
+  const [expandedReplies, setExpandedReplies] = useState({});
+  const [replyTexts, setReplyTexts] = useState({});
+
+  const toggleReplies = (reviewId) => {
+    setExpandedReplies(prev => ({ ...prev, [reviewId]: !prev[reviewId] }));
+  };
+
   if (activeView !== 'movie-details') return null;
 
   if (!selectedMovie) {
@@ -285,15 +293,56 @@ export default function MovieDetailsView({
                     <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''}`} onClick={() => onUpvoteReview(review.id)}>
                       <ThumbsUp size={14} fill={review.likedBy?.includes(currentUser?.username) ? 'var(--color-accent-gold)' : 'none'} /> <span>{review.likes || 0}</span>
                     </button>
-                    <span className="review-action-btn" style={{ cursor: 'default' }}>
+                    <button className="review-action-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { toggleReplies(review.id); } }}>
                       <MessageSquare size={14} /> <span>{review.comments || 0}</span>
-                    </span>
+                    </button>
                     {(currentUser && (review.user === currentUser.username || currentUser.role === 'admin')) && (
                       <button className="review-action-btn review-delete-btn" onClick={() => onDeleteReview(review.id)} style={{ marginLeft: 'auto' }}>
                         <Trash2 size={14} /> <span>Delete</span>
                       </button>
                     )}
                   </div>
+                  {expandedReplies[review.id] && (
+                    <div className="review-replies-section">
+                      {(review.replies || []).length > 0 && (
+                        <div className="review-replies-list">
+                          {review.replies.map(reply => (
+                            <div key={reply.id} className="review-reply-item">
+                              <img
+                                src={reply.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"}
+                                alt={reply.author}
+                                className="reply-avatar"
+                              />
+                              <div className="reply-body">
+                                <span className="reply-author">{reply.author}</span>
+                                <span className="reply-text">{reply.body}</span>
+                                <span className="reply-time">{reply.timestamp}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="review-reply-input-row">
+                        <textarea
+                          className="reply-input"
+                          placeholder="Write a reply..."
+                          rows={1}
+                          value={replyTexts[review.id] || ''}
+                          onChange={(e) => setReplyTexts(prev => ({ ...prev, [review.id]: e.target.value }))}
+                        />
+                        <button
+                          className="btn-primary reply-send-btn"
+                          disabled={!replyTexts[review.id]?.trim()}
+                          onClick={async () => {
+                            await onAddReviewReply(review.id, replyTexts[review.id]);
+                            setReplyTexts(prev => ({ ...prev, [review.id]: '' }));
+                          }}
+                        >
+                          <Send size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (

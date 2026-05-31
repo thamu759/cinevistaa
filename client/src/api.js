@@ -144,6 +144,22 @@ export const toggleReviewLike = async (movieId, reviewId) => {
   return response.json();
 };
 
+export const addReviewReply = async (movieId, reviewId, body) => {
+  const token = localStorage.getItem('mc_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const response = await fetch(`${API_BASE_URL}/movies/${movieId}/reviews/${reviewId}/replies`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ body }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to add reply');
+  }
+  return response.json();
+};
+
 export const registerUser = async (username, email, password) => {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',

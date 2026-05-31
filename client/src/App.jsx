@@ -30,7 +30,8 @@ import {
   curateMovie,
   fetchWatchProviders,
   deleteReview,
-  toggleReviewLike
+  toggleReviewLike,
+  addReviewReply
 } from './api';
 // Import API utilities for enhanced error handling
 import { retryAsync, generateErrorMessage } from './utils/apiUtils';
@@ -924,6 +925,23 @@ const handleUpvoteReview = async (reviewId) => {
     });
   } catch (err) {
     console.error("Failed to toggle like:", err);
+  }
+};
+
+// Add reply to a review
+const handleAddReviewReply = async (reviewId, body) => {
+  if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
+  if (!selectedMovie) return;
+  try {
+    const result = await addReviewReply(selectedMovie.id, reviewId, body);
+    setSelectedMovie({
+      ...selectedMovie,
+      reviews: selectedMovie.reviews.map(rev =>
+        rev.id === reviewId ? { ...rev, replies: result.replies, comments: result.comments } : rev
+      )
+    });
+  } catch (err) {
+    console.error("Failed to add reply:", err);
   }
 };
 
@@ -2005,6 +2023,7 @@ const handleDeleteReview = async (reviewId) => {
           onViewActor={handleViewActor}
           onUpvoteReview={handleUpvoteReview}
           onDeleteReview={handleDeleteReview}
+          onAddReviewReply={handleAddReviewReply}
           onWatchTrailer={handleWatchTrailer}
           setIsWriteReviewOpen={setIsWriteReviewOpen}
           setShowListMenu={setShowListMenu}

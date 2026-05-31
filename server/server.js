@@ -14,6 +14,7 @@ import {
   addReview,
   deleteReview,
   toggleReviewLike,
+  addReviewReply,
   registerUser,
   loginUser,
   verifyToken,
@@ -450,6 +451,33 @@ app.post('/api/movies/:id/reviews/:reviewId/like', async (req, res) => {
   } catch (error) {
     console.error("Error toggling review like:", error);
     res.status(500).json({ error: "Server error toggling review like" });
+  }
+});
+
+// Add reply to a review
+app.post('/api/movies/:id/reviews/:reviewId/replies', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: "Authentication required to reply" });
+    const user = await verifyToken(authHeader.split(' ')[1]);
+    if (!user) return res.status(401).json({ error: "Session expired or invalid token" });
+
+    const { body } = req.body;
+    if (!body || !body.trim()) return res.status(400).json({ error: "Reply body is required" });
+
+    const replyData = {
+      id: 'reply-' + Date.now(),
+      author: user.username,
+      avatarUrl: user.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150",
+      body: body.trim(),
+      timestamp: "Just now"
+    };
+
+    const result = await addReviewReply(req.params.id, req.params.reviewId, replyData);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("Error adding review reply:", error);
+    res.status(400).json({ error: error.message || "Server error adding review reply" });
   }
 });
 

@@ -376,7 +376,11 @@ const initialMovies = [
         text: "A visual masterpiece that redefines the sci-fi genre. The lighting and sound design are worth the price of admission alone. Truly atmospheric and hypnotic.",
         timestamp: "2h ago",
         likes: 1240,
-        comments: 42
+        comments: 42,
+        replies: [
+          { id: 'rev-reply-n1', author: 'Priya Karthik', body: 'Totally agree about the sound design. That bass in the opening scene was unreal.', timestamp: '1h ago' },
+          { id: 'rev-reply-n2', author: 'Rajesh Menon', body: 'I felt the pacing was a bit slow though. But visually stunning for sure.', timestamp: '45m ago' }
+        ]
       },
       {
         id: "rev-neon-2",
@@ -385,8 +389,7 @@ const initialMovies = [
         role: "Reviewer",
         rating: 8,
         text: "The pacing is slow and deliberate, but the performance by Gosling is breathtaking. Roger Deakins' cinematography is nothing short of legendary.",
-        timestamp: "5h ago",
-        likes: 420,
+        timestamp: "5h ago",        likes: 420,
         comments: 12
       }
     ]
@@ -1057,7 +1060,13 @@ try {
       timestamp: String,
       likes: { type: Number, default: 0 },
       likedBy: { type: [String], default: [] },
-      comments: { type: Number, default: 0 }
+      comments: { type: Number, default: 0 },
+      replies: [{
+        id: String,
+        author: String,
+        body: String,
+        timestamp: String
+      }]
     }]
   });
   MovieModel = mongoose.model('Movie', movieSchema);
@@ -1681,6 +1690,29 @@ export const updateMovie = async (movieId, updateData) => {
   });
   writeJsonDb(data);
   return data.movies[idx];
+};
+
+export const addReviewReply = async (movieId, reviewId, replyData) => {
+  if (useMongoDB) {
+    const movie = await MovieModel.findOne({ id: movieId });
+    if (!movie) throw new Error('Movie not found');
+    const review = movie.reviews.id(reviewId);
+    if (!review) throw new Error('Review not found');
+    review.replies.push(replyData);
+    review.comments = (review.comments || 0) + 1;
+    await movie.save();
+    return { replies: review.replies, comments: review.comments };
+  }
+  const data = readJsonDb();
+  const movie = data.movies.find(m => m.id === movieId);
+  if (!movie) throw new Error('Movie not found');
+  const review = movie.reviews.find(r => r.id === reviewId);
+  if (!review) throw new Error('Review not found');
+  if (!review.replies) review.replies = [];
+  review.replies.push(replyData);
+  review.comments = (review.comments || 0) + 1;
+  writeJsonDb(data);
+  return { replies: review.replies, comments: review.comments };
 };
 
 export const addCommunityReply = async (threadId, replyData, user) => {

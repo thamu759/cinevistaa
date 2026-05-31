@@ -2146,10 +2146,6 @@ a {
 .review-action-btn:hover {
   color: var(--color-text-main);
 }
-.review-action-btn svg {
-  width: 14px;
-  height: 14px;
-}
 .load-more-btn-container {
   justify-content: center;
   margin-top: 2rem;
@@ -3617,652 +3613,89 @@ a {
 }
 
 .review-action-btn.liked {
-  color: var(--color-accent-gold) !important;
+  color: var(--color-accent-gold);
 }
-
-.review-delete-btn {
-  color: rgba(239, 68, 68, 0.6) !important;
+/* --- Review Replies --- */
+.review-replies-section {
+  border-top: 1px solid var(--color-border);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
 }
-.review-delete-btn:hover {
-  color: #ef4444 !important;
+.review-replies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
 }
-
-/* ========== �? MOBILE RESPONSIVE OVERRIDES ========== */
-
-/* Hamburger button - hidden on desktop */
-.hamburger-btn {
-  display: none !important;
+.review-reply-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.reply-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.reply-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.reply-author {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--color-text-main);
+}
+.reply-text {
+  font-size: 0.8rem;
   color: var(--color-text-muted);
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0.25rem;
+  line-height: 1.3;
+}
+.reply-time {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+.review-reply-input-row {
+  display: flex;
+  gap: 0.5rem;
   align-items: center;
-  justify-content: center;
+}
+.reply-input {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  color: var(--color-text-main);
+  font-size: 0.8rem;
+  resize: none;
+  font-family: inherit;
+  outline: none;
   transition: var(--transition-smooth);
+}
+.reply-input:focus {
+  border-color: var(--color-accent-gold);
+}
+.reply-send-btn {
+  padding: 0.45rem 0.75rem !important;
+  border-radius: 8px !important;
+  flex-shrink: 0;
+}
+.reply-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.review-action-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ─── UP TO 768px (tablets & phones) ─── */
 @media (max-width: 768px) {
-  /* --- Navbar / Mobile Side Drawer --- */
-  .hamburger-btn {
-    display: flex !important;
-  }
-
-  .nav-links {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100vh;
-    height: 100dvh;
-    flex-direction: column;
-    background: #0b0c10f2;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid var(--color-border);
-    padding: 5rem 2rem 2rem;
-    gap: 0.25rem;
-    z-index: 200;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
-    align-items: flex-start;
-    display: flex !important;
-  }
-
-  .nav-links--open {
-    transform: translateX(0);
-  }
-
-  .nav-links--open::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-  }
-
-  .nav-link {
-    font-size: 1.05rem;
-    padding: 0.7rem 0;
-    width: 100%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  }
-
-  .profile-nav-name {
-    display: none !important;
-  }
-
-  .navbar {
-    padding: 0.85rem 1rem;
-  }
-
-  .logo {
-    font-size: 1.15rem;
-  }
-
-  .nav-actions {
-    gap: 0.75rem;
-  }
-
-  /* --- Hero --- */
-  .hero {
-    height: 420px;
-    margin-bottom: 2rem;
-    border-radius: 14px;
-  }
-
-  .hero-layout {
-    align-items: flex-end;
-  }
-
-  .hero-content {
-    padding: 2.5rem 1.5rem;
-    gap: 0.75rem;
-    max-width: 100%;
-  }
-
-  .hero-title {
-    font-size: 2.2rem;
-  }
-
-  .hero-description {
-    font-size: 0.88rem;
-    -webkit-line-clamp: 3;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .hero-actions {
-    flex-wrap: wrap;
-    gap: 0.65rem;
-  }
-
-  .hero-actions .btn-primary,
-  .hero-actions .btn-secondary {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.85rem;
-  }
-
-  .hero-nav-btn {
-    width: 38px;
-    height: 38px;
-  }
-
-  .hero-nav-btn--left {
-    left: 0.75rem;
-  }
-  .hero-nav-btn--right {
-    right: 0.75rem;
-  }
-
-  .hero-indicators {
-    bottom: 1rem;
-  }
-
-  .hero-rating-badge {
-    padding: 0.25rem 0.65rem;
-    font-size: 0.68rem;
-  }
-
-  /* --- Main Content --- */
-  .main-content {
-    padding: 1rem;
-  }
-
-  .section-meta {
-    font-size: 0.65rem;
-  }
-
-  .section-title {
-    font-size: 1.35rem;
-    margin-bottom: 1rem;
-  }
-
-  /* --- Movie Grid --- */
-  .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-
-  .movie-card {
-    border-radius: 10px;
-  }
-
-  .movie-card-title {
-    font-size: 0.85rem;
-  }
-
-  .movie-card-info {
-    padding: 0.75rem;
-    gap: 0.35rem;
-  }
-
-  .movie-card-rating {
-    top: 0.5rem;
-    right: 0.5rem;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.4rem;
-  }
-
-  .genre-tag {
-    font-size: 0.55rem;
-    padding: 0.15rem 0.35rem;
-  }
-
-  /* --- Horizontal Movie Card --- */
-  .movie-card-horizontal {
-    flex: 0 0 150px;
-  }
-
-  .movie-card-horizontal .movie-card-info {
-    padding: 0.65rem;
-  }
-
-  .movie-card-horizontal .movie-card-title {
-    font-size: 0.8rem;
-  }
-
-  /* --- Details Page --- */
-  .movie-details-backdrop-container {
-    height: 300px;
-  }
-
-  .details-wrapper {
-    gap: 1.5rem;
-    margin-top: -150px;
-  }
-
-  .details-poster-box {
-    max-width: 160px;
-    margin: 0 auto;
-  }
-
-  .details-main-info {
-    padding-top: 0.25rem;
-    gap: 0.65rem;
-  }
-
-  .details-title {
-    font-size: 1.5rem;
-  }
-
-  .details-tags-row {
-    gap: 0.35rem;
-  }
-
-  .details-scores-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin: 0.15rem 0;
-  }
-
-  .score-dial-container {
-    gap: 0.6rem;
-  }
-
-  .dial-circle-wrapper {
-    width: 44px;
-    height: 44px;
-  }
-
-  .dial-svg {
-    width: 44px;
-    height: 44px;
-  }
-
-  .dial-text {
-    font-size: 0.8rem;
-  }
-
-  .score-dial-lbl {
-    font-size: 0.6rem;
-  }
-
-  .details-section-title {
-    font-size: 1rem;
-  }
-
-  .synopsis-text {
-    font-size: 0.82rem;
-    line-height: 1.5;
-  }
-
-  /* --- Cast --- */
-  .cast-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-  }
-
-  .cast-avatar-box {
-    width: 55px;
-    height: 55px;
-  }
-
-  .cast-name {
-    font-size: 0.68rem;
-  }
-
-  .cast-role {
-    font-size: 0.58rem;
-  }
-
-  /* --- Crew --- */
-  .crew-summary-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.6rem;
-  }
-
-  .crew-summary-card {
-    padding: 0.6rem;
-  }
-
-  .crew-summary-title {
-    font-size: 0.62rem;
-  }
-
-  .crew-summary-value {
-    font-size: 0.78rem;
-  }
-
-  /* --- Tech Details --- */
-  .tech-details-box {
-    padding: 0.85rem;
-    gap: 0.75rem;
-  }
-
-  .tech-lbl {
-    font-size: 0.6rem;
-  }
-
-  .tech-val {
-    max-width: 55%;
-    font-size: 0.72rem;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .hero-actions > * {
-    width: 100%;
-  }
-
-  .hero-actions-btn-wrapper {
-    width: 100%;
-  }
-
-  .hero-actions .btn-primary,
-  .hero-actions .btn-secondary {
-    width: 100%;
-    justify-content: center;
-    padding: 0.55rem 1rem;
-    font-size: 0.78rem;
-  }
-
-  .hero-actions-dropdown {
-    right: 0;
-    left: auto;
-    min-width: 160px;
-  }
-
-  /* --- Reviews --- */
-  .community-reviews-section {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    padding-top: 1.5rem;
-  }
-
-  .reviews-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.35rem;
-  }
-
-  .reviews-section-header h2 {
-    font-size: 1.15rem;
-  }
-
-  .reviews-section-header p {
-    font-size: 0.8rem;
-  }
-
-  .user-review-card {
-    padding: 1rem;
-  }
-
-  .review-text {
-    font-size: 0.85rem;
-  }
-
-  /* --- Auth Modal --- */
-  .modal-overlay {
-    padding: 0.75rem !important;
-    align-items: center !important;
-  }
-
-  .modal-content-panel {
-    max-width: 100%;
-    margin: 0;
-    border-radius: 16px !important;
-  }
-
-  .auth-card-premium {
-    border-radius: 16px !important;
-  }
-
-  .modal-header {
-    padding: 0.85rem 1.15rem;
-  }
-
-  .modal-title {
-    font-size: 1rem;
-  }
-
-  .modal-body {
-    padding: 1.15rem;
-  }
-
-  .auth-capsule-tabs {
-    margin: 1rem 0.25rem;
-  }
-
-  .auth-capsule-tab {
-    font-size: 0.78rem;
-    padding: 0.5rem;
-  }
-
-  .auth-field-input {
-    font-size: 0.88rem !important;
-    padding: 0.65rem 1rem 0.65rem 2.5rem !important;
-  }
-
-  .btn-auth-submit {
-    padding: 0.7rem !important;
-    font-size: 0.88rem !important;
-  }
-
-  .auth-header-ticket {
-    padding: 1rem 0.5rem 0.25rem;
-  }
-
-  /* --- Profile --- */
-  .profile-card {
-    padding: 1.5rem;
-    gap: 1.5rem;
-  }
-
-  .profile-main-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .profile-info-avatar {
-    width: 90px;
-    height: 90px;
-  }
-
-  .profile-bio-box {
-    min-width: unset;
-    align-items: center;
-  }
-
-  .profile-name {
-    font-size: 1.6rem;
-  }
-
-  .profile-quote {
-    font-size: 0.9rem;
-  }
-
-  .profile-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
-  }
-
-  .stat-val {
-    font-size: 1.5rem;
-  }
-
-  .stat-box {
-    padding: 1rem;
-  }
-
-  /* --- Staff Picks --- */
-  .featured-pick-card {
-    height: 340px;
-  }
-
-  .featured-pick-content {
-    padding: 1.5rem 1.25rem;
-    gap: 0.5rem;
-  }
-
-  .featured-pick-title {
-    font-size: 1.4rem;
-  }
-
-  .featured-pick-desc {
-    font-size: 0.85rem;
-  }
-
-  .picks-grid-card {
-    min-height: 120px;
-  }
-
-  .picks-grid-content {
-    padding: 1rem;
-  }
-
-  .picks-grid-title {
-    font-size: 0.95rem;
-  }
-
-  /* --- Critique Section --- */
-  .critique-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .critique-card {
-    padding: 1.25rem;
-  }
-
-  .critique-text {
-    font-size: 0.88rem;
-    height: 5rem;
-  }
-
-  /* --- Explorer --- */
-  .explorer-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .search-bar {
-    max-width: none;
-  }
-
-  .search-bar input {
-    font-size: 0.88rem;
-    padding: 0.65rem 1rem 0.65rem 2.5rem;
-  }
-
-  .explorer-filters {
-    flex-wrap: wrap;
-    gap: 0.65rem;
-  }
-
-  .filter-select,
-  .sort-select {
-    flex: 1;
-    min-width: 0;
-    font-size: 0.82rem;
-    padding: 0.6rem 1rem;
-  }
-
-  /* --- Newsletter --- */
-  .newsletter-section {
-    padding: 2rem 1.25rem;
-    margin: 3rem 0 2rem;
-  }
-
-  .newsletter-title {
-    font-size: 1.3rem;
-  }
-
-  .newsletter-text {
-    font-size: 0.85rem;
-  }
-
-  .newsletter-form {
-    flex-direction: column;
-    max-width: none;
-  }
-
-  .newsletter-form input {
-    font-size: 0.88rem;
-    padding: 0.65rem 1rem;
-  }
-
-  .newsletter-form button {
-    font-size: 0.88rem;
-    padding: 0.65rem 1.25rem;
-  }
-
-  /* --- Search Overlay --- */
-  .search-overlay-inner {
-    padding: 0.65rem 0.85rem 1rem;
-  }
-
-  .search-overlay-input-wrapper {
-    padding: 0.5rem 0.85rem;
-  }
-
-  .search-overlay-input {
-    font-size: 0.9rem;
-  }
-
-  .search-result-item {
-    padding: 0.55rem 0.75rem;
-    gap: 0.65rem;
-  }
-
-  .search-result-poster {
-    width: 34px;
-    height: 48px;
-  }
-
-  .search-result-title {
-    font-size: 0.82rem;
-  }
-
-  .search-result-meta {
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-
-  .search-results-list {
-    max-height: 320px;
-  }
-
-  /* --- Buttons --- */
-  .btn-primary,
-  .btn-secondary {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.85rem;
-  }
-
-  .star-rating-input-row {
-    flex-wrap: wrap;
-  }
-
-  .star-input-btn svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .form-actions-row {
-    flex-direction: column;
-  }
-
-  .form-actions-row button {
-    width: 100%;
-  }
-
-  .form-input,
-  .form-textarea {
-    font-size: 0.88rem;
-    padding: 0.65rem 0.85rem;
-  }
-
-  /* --- Misc --- */
   .load-more-btn-container {
     margin-top: 1.25rem;
   }
