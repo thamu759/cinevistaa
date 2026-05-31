@@ -1945,12 +1945,11 @@ const handleDeleteReview = async (reviewId) => {
                     return similar.length > 0 ? (
                       <div style={{ marginTop: '2rem' }}>
                         <h3 className="details-section-title">More Like This</h3>
-                        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                        <div className="similar-movies-horizontal">
                           {similar.map(m => (
-                            <div key={m.id} onClick={() => handleViewMovie(m.id)} style={{ flex: '0 0 120px', cursor: 'pointer' }}>
-                              <img src={proxyImageUrl(m.posterUrl, 'w200')} alt={m.title}
-                                style={{ width: '100%', borderRadius: '8px', aspectRatio: '2/3', objectFit: 'cover' }} />
-                              <p style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '0.3rem', color: '#e2e8f0' }}>{m.title}</p>
+                            <div key={m.id} className="similar-movie-card" onClick={() => handleViewMovie(m.id)}>
+                              <img src={proxyImageUrl(m.posterUrl, 'w200')} alt={m.title} className="similar-movie-poster" />
+                              <p className="similar-movie-title">{m.title}</p>
                             </div>
                           ))}
                         </div>
