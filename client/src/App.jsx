@@ -1539,46 +1539,35 @@ const handleDeleteReview = async (reviewId) => {
             )}
 
 
-            {/* WEEKLY CHARTS (Movie Grid) */}
-            <section className="movies-section">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                <div>
-                  <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Weekly Charts</p>
-                  <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated on thiraipedia</h2>
+            {/* TOP RATED ON THIRAIPEDIA — horizontal slider */}
+            {topRatedMovies.length > 0 && (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Weekly Charts</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated on thiraipedia</h2>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+                      aria-label="Scroll left">
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+                      aria-label="Scroll right">
+                      <ChevronRight size={18} />
+                    </button>
+                    <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
+                      View All
+                    </button>
+                  </div>
                 </div>
-                <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
-                  View All
-                </button>
-              </div>
-              {isLoading ? (
-                <div className="skeleton-grid">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="skeleton-card">
-                      <div className="skeleton skeleton-poster" />
-                      <div className="skeleton skeleton-text medium" />
-                      <div className="skeleton skeleton-text short" />
-                    </div>
-                  ))}
-                </div>
-              ) : error ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-accent-gold)' }}>
-                  <Info size={24} style={{ marginBottom: '1rem' }} />
-                  <p>{error}</p>
-                </div>
-              ) : movies.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  No cinematic entries match your search criteria.
-                </div>
-              ) : (
-                <div className="movie-grid">
-                  {movies.filter(m => m.rating >= 7).slice(0, 20).map(movie => (
-                    <div 
-                      key={movie.id} 
-                      className="movie-card"
-                      onClick={() => handleViewMovie(movie.id)}
-                    >
+                <div className="movie-grid-horizontal" ref={topRatedScrollRef}>
+                  {topRatedMovies.map(movie => (
+                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
                         <div className="movie-card-rating">
                           <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                           <span>{movie.rating.toFixed(1)}</span>
@@ -1587,7 +1576,7 @@ const handleDeleteReview = async (reviewId) => {
                       <div className="movie-card-info">
                         <h3 className="movie-card-title">{movie.title}</h3>
                         <div className="movie-card-genre-tags">
-                          {movie.genre.split('/').map(tag => (
+                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
                             <span key={tag} className="genre-tag">{tag.trim()}</span>
                           ))}
                         </div>
@@ -1595,8 +1584,8 @@ const handleDeleteReview = async (reviewId) => {
                     </div>
                   ))}
                 </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* APP PROMO — Download section with animated cartoon */}
             <section className="app-promo-section">
@@ -1658,54 +1647,6 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               </div>
             </section>
-
-            {/* TOP RATED — horizontal slider of highest rated movies */}
-            {topRatedMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Highest Rated</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated</h2>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
-                      aria-label="Scroll left">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
-                      aria-label="Scroll right">
-                      <ChevronRight size={18} />
-                    </button>
-                    <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
-                      View All
-                    </button>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal" ref={topRatedScrollRef}>
-                  {topRatedMovies.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* CURATED SELECTION (Staff Picks) */}
             {featuredStaffPick && (
