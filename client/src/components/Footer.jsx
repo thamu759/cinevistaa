@@ -12,7 +12,7 @@ const InstagramIcon = () => (
   </svg>
 );
 
-export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onShowLegal, onShowNewsletter, onShowContact }) {
+export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
   return (
     <footer className="footer-container">
       <div className="footer">
@@ -35,16 +35,18 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, onS
         <div className="footer-column">
           <span className="footer-column-title">Legal</span>
           <ul className="footer-links">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('privacy'); }}>Privacy Policy</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('terms'); }}>Terms of Service</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowLegal('cookie'); }}>Cookie Policy</a></li>
+            <li><a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }}>Privacy Policy</a></li>
+            <li><a href="/terms" onClick={(e) => { e.preventDefault(); onNavigate('terms'); }}>Terms of Service</a></li>
+            <li><a href="/cookie" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }}>Cookie Policy</a></li>
           </ul>
         </div>
         <div className="footer-column">
           <span className="footer-column-title">Connect</span>
           <ul className="footer-links">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowNewsletter(); }}>Newsletter</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); onShowContact(); }}>Contact Support</a></li>
+            <li><a href="/newsletter" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Newsletter</a></li>
+            <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact Support</a></li>
+            <li><a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a></li>
+            <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact</a></li>
           </ul>
         </div>
       </div>
