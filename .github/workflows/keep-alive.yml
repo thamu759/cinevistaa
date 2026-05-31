@@ -1,0 +1,13 @@
+name: Keep Render Server Alive
+
+on:
+  schedule:
+    - cron: '*/13 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping server to prevent cold start
+        run: curl -s -o /dev/null -w "%{http_code}" https://cinevistaa.onrender.com/api/movies
