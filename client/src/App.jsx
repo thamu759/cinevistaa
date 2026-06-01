@@ -45,6 +45,8 @@ import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
 import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
+import SpinWheel from './components/SpinWheel';
+import QuizGame from './components/QuizGame';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -125,6 +127,8 @@ export default function App() {
     about: { title: 'About Us — thiraipedia', desc: 'Learn about thiraipedia — a premium movie review and film critique platform for passionate cinema lovers.' },
     articles: { title: 'Articles & Critique — thiraipedia', desc: 'Read original film criticism articles, cinema trends, and review guides from the thiraipedia editorial team.' },
     'article-detail': { title: 'Article — thiraipedia', desc: 'Read in-depth film analysis and critique articles on thiraipedia.' },
+    quiz: { title: 'Movie Quiz — thiraipedia', desc: 'Test your Tamil cinema knowledge with fun movie trivia quizzes on thiraipedia.' },
+    wheel: { title: 'Spin the Wheel — thiraipedia', desc: 'Discover your next movie to watch with the thiraipedia spin wheel.' },
   };
 
   const updateMeta = (meta) => {
@@ -757,6 +761,8 @@ export default function App() {
     if (path === '/contact') return { view: 'contact' };
     if (path === '/about') return { view: 'about' };
     if (path === '/articles') return { view: 'articles' };
+    if (path === '/quiz') return { view: 'quiz' };
+    if (path === '/wheel') return { view: 'wheel' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
     const articleMatch = path.match(/^\/article\/(.+)$/);
@@ -782,6 +788,8 @@ export default function App() {
     if (view === 'contact') return '/contact';
     if (view === 'about') return '/about';
     if (view === 'articles') return '/articles';
+    if (view === 'quiz') return '/quiz';
+    if (view === 'wheel') return '/wheel';
     if (view === 'article-detail' && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
@@ -1697,7 +1705,23 @@ const handleDeleteReview = async (reviewId) => {
                     <p className="section-meta">Curated Selection</p>
                     <h2 className="section-title">Staff Picks</h2>
                   </div>
-                  {currentUser && currentUser.role === 'admin' && (
+            <a
+              className={`nav-link ${activeView === 'quiz' ? 'active' : ''}`}
+              href="/quiz"
+              onClick={(e) => { e.preventDefault(); navigateTo('quiz'); setIsMobileMenuOpen(false); }}
+            >
+              🧠 Quiz
+            </a>
+
+            <a
+              className={`nav-link ${activeView === 'wheel' ? 'active' : ''}`}
+              href="/wheel"
+              onClick={(e) => { e.preventDefault(); navigateTo('wheel'); setIsMobileMenuOpen(false); }}
+            >
+              🎰 Spin
+            </a>
+
+            {currentUser && currentUser.role === 'admin' && (
                     <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.85rem' }} onClick={() => setShowCurateModal(true)}>
                       <Edit3 size={13} /> Curate
                     </button>
@@ -2724,6 +2748,20 @@ const handleDeleteReview = async (reviewId) => {
                 )}
               </div>
             </section>
+          </div>
+        )}
+
+        {/* QUIZ VIEW */}
+        {activeView === 'quiz' && (
+          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+            <QuizGame movies={movies} onViewMovie={handleViewMovie} />
+          </div>
+        )}
+
+        {/* SPIN WHEEL VIEW */}
+        {activeView === 'wheel' && (
+          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+            <SpinWheel movies={movies} onViewMovie={handleViewMovie} />
           </div>
         )}
 
