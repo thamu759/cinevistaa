@@ -714,6 +714,8 @@ export default function App() {
     if (path === '/profile') return { view: 'profile' };
     if (path === '/community') return { view: 'community' };
     if (path === '/new-releases') return { view: 'new-releases' };
+    if (path === '/tamil-cinema') return { view: 'tamil-cinema' };
+    if (path === '/malayalam-cinema') return { view: 'malayalam-cinema' };
     if (path === '/top-rated') return { view: 'top-rated' };
     if (path === '/watchlist') return { view: 'watchlist' };
     if (path === '/coming-soon') return { view: 'coming-soon' };
@@ -734,6 +736,8 @@ export default function App() {
     if (view === 'profile') return '/profile';
     if (view === 'community') return '/community';
     if (view === 'new-releases') return '/new-releases';
+    if (view === 'tamil-cinema') return '/tamil-cinema';
+    if (view === 'malayalam-cinema') return '/malayalam-cinema';
     if (view === 'top-rated') return '/top-rated';
     if (view === 'watchlist') return '/watchlist';
     if (view === 'coming-soon') return '/coming-soon';
@@ -1444,6 +1448,10 @@ const handleDeleteReview = async (reviewId) => {
                       aria-label="Scroll right">
                       <ChevronRight size={18} />
                     </button>
+                    <button className="btn-secondary" onClick={() => navigateTo('tamil-cinema')}
+                      style={{ fontSize: '0.7rem', padding: '0.25rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', flexShrink: 0 }}>
+                      View All <ChevronRight size={12} />
+                    </button>
                   </div>
                 </div>
                 <div className="movie-grid-horizontal" ref={tamilScrollRef}>
@@ -1506,6 +1514,10 @@ const handleDeleteReview = async (reviewId) => {
                       onClick={() => malayalamScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
                       aria-label="Scroll right">
                       <ChevronRight size={18} />
+                    </button>
+                    <button className="btn-secondary" onClick={() => navigateTo('malayalam-cinema')}
+                      style={{ fontSize: '0.7rem', padding: '0.25rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', flexShrink: 0 }}>
+                      View All <ChevronRight size={12} />
                     </button>
                   </div>
                 </div>
@@ -1802,6 +1814,82 @@ const handleDeleteReview = async (reviewId) => {
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                        <div className="movie-card-poster-wrapper">
                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                      <div className="movie-card-rating">
+                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        <span>{(movie.rating || 0).toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <div className="movie-card-info">
+                      <h3 className="movie-card-title">{movie.title}</h3>
+                      <div className="movie-card-genre-tags">
+                        {movie.genre && movie.genre.split('/').map(tag => (
+                          <span key={tag} className="genre-tag">{tag.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAMIL CINEMA FULL PAGE */}
+        {activeView === 'tamil-cinema' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">தமிழ் சினிமா</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Tamil Cinema</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All Tamil language movies in the library.</p>
+            </div>
+            {tamilMovies.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <p>No Tamil movies found.</p>
+              </div>
+            ) : (
+              <div className="movie-grid">
+                {tamilMovies.map(movie => (
+                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                    <div className="movie-card-poster-wrapper">
+                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                      <div className="movie-card-rating">
+                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        <span>{(movie.rating || 0).toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <div className="movie-card-info">
+                      <h3 className="movie-card-title">{movie.title}</h3>
+                      <div className="movie-card-genre-tags">
+                        {movie.genre && movie.genre.split('/').map(tag => (
+                          <span key={tag} className="genre-tag">{tag.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* MALAYALAM CINEMA FULL PAGE */}
+        {activeView === 'malayalam-cinema' && (
+          <div className="main-content">
+            <div className="page-header">
+              <p className="section-meta">മലയാള സിനിമ</p>
+              <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Malayalam Cinema</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All Malayalam language movies in the library.</p>
+            </div>
+            {malayalamMovies.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
+                <p>No Malayalam movies found.</p>
+              </div>
+            ) : (
+              <div className="movie-grid">
+                {malayalamMovies.map(movie => (
+                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                    <div className="movie-card-poster-wrapper">
+                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
                       <div className="movie-card-rating">
                         <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                         <span>{(movie.rating || 0).toFixed(1)}</span>
