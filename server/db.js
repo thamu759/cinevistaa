@@ -342,23 +342,19 @@ const enrichMovieWithTmdbImages = async (movie) => {
   const tmdbId = images?.tmdbId || movie.tmdbId;
   const credits = await fetchTmdbMovieCredits(tmdbId);
   const castWithAvatars = applyTmdbCastAvatars(localFallbackMovie.cast || [], credits);
-  const trailer = tmdbId ? await fetchTmdbMovieTrailer(tmdbId) : {};
+  const trailer = tmdbId ? await fetchTmdbMovieTrailer(tmdbId) : null;
 
-  if (!images) {
-    return {
-      ...localFallbackMovie,
-      cast: castWithAvatars,
-      ...trailer
-    };
-  }
+  const tmdbTrailerUrl = trailer?.trailerUrl || '';
+  const tmdbChannelName = trailer?.trailerChannelName || '';
 
   return {
     ...localFallbackMovie,
-    posterUrl: images.posterUrl || localFallbackMovie.posterUrl,
-    backdropUrl: images.backdropUrl || localFallbackMovie.backdropUrl,
+    posterUrl: images?.posterUrl || localFallbackMovie.posterUrl,
+    backdropUrl: images?.backdropUrl || localFallbackMovie.backdropUrl,
     tmdbId: tmdbId,
     cast: castWithAvatars,
-    ...trailer
+    trailerUrl: tmdbTrailerUrl || localFallbackMovie.trailerUrl || '',
+    trailerChannelName: tmdbChannelName || localFallbackMovie.trailerChannelName || '',
   };
 };
 
