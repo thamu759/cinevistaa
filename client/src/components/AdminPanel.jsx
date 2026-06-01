@@ -15,10 +15,12 @@ import {
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
+import { useToast } from '../context/ToastContext.jsx';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function AdminPanel({ currentUser }) {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [movies, setMovies] = useState([]);
   const [users, setUsers] = useState([]);
@@ -55,7 +57,7 @@ export default function AdminPanel({ currentUser }) {
       const updated = await refreshMoviePosters();
       setMovies(updated);
       showSuccess('Posters refreshed.');
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setIsLoading(false);
   };
 
@@ -65,7 +67,7 @@ export default function AdminPanel({ currentUser }) {
       const updated = await curateMovie(movieId, data);
       setMovies(prev => prev.map(m => m.id === movieId ? { ...m, ...updated } : m));
       showSuccess('Curation updated.');
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setIsLoading(false);
   };
 
@@ -253,7 +255,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       await deleteMovie(confirmDelete);
       setMovies(prev => prev.filter(m => m.id !== confirmDelete));
       showSuccess("Movie deleted.");
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
     setConfirmDelete(null);
   };
@@ -271,7 +273,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       setEditingMovie(null);
       setEditPreview(null);
       showSuccess("Movie updated.");
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
   };
 
@@ -336,7 +338,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!addForm.title.trim()) return;
     const duplicate = movies.find(m => m.title.toLowerCase() === addForm.title.trim().toLowerCase());
     if (duplicate) {
-      alert(`"${addForm.title}" already exists!`);
+      showToast(`"${addForm.title}" already exists!`, 'error');
       return;
     }
     setLoading(true);
@@ -360,7 +362,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       setLastAutoFetchedTitle('');
       setShowAddModal(false);
       showSuccess('Movie added.');
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
   };
 
@@ -385,7 +387,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       setBulkProgress(results.map(r => ({ ...r, current: 0, total: 0 })));
       showSuccess(`Added ${results.filter(r => r.status === 'added').length}/${titles.length} movies.`);
       loadMovies();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setBulkRunning(false);
   };
 
@@ -767,7 +769,7 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
       await deleteUserApi(confirmUserDelete);
       setUsers(prev => prev.filter(u => u.username !== confirmUserDelete));
       showSuccess(`User "${confirmUserDelete}" deleted.`);
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
     setConfirmUserDelete(null);
   };
@@ -786,7 +788,7 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
       const updated = await updateUserRole(username, newRole);
       setUsers(prev => prev.map(u => u.username === username ? { ...u, role: updated.role } : u));
       showSuccess(`"${username}" role updated to "${newRole}".`);
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
     setConfirmRoleChange(null);
   };

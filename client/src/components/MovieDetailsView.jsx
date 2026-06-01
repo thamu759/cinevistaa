@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
 import AdsterraAd from './AdsterraAd';
 import ShareButton from './ShareButton';
+import { useToast } from '../context/ToastContext.jsx';
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 
@@ -33,8 +34,15 @@ export default function MovieDetailsView({
   setShowListMenu, loadUserLists, navigateTo, addMovieToList,
   setAuthTab, setIsAuthModalOpen
 }) {
+  const { showToast } = useToast();
   const [expandedReplies, setExpandedReplies] = useState({});
   const [replyTexts, setReplyTexts] = useState({});
+  const [animatingReviewId, setAnimatingReviewId] = useState(null);
+  const handleUpvote = (reviewId) => {
+    setAnimatingReviewId(reviewId);
+    setTimeout(() => setAnimatingReviewId(null), 400);
+    onUpvoteReview(reviewId);
+  };
 
   const toggleReplies = (reviewId) => {
     setExpandedReplies(prev => ({ ...prev, [reviewId]: !prev[reviewId] }));
@@ -158,7 +166,7 @@ export default function MovieDetailsView({
                             try {
                               await addMovieToList(l.id, selectedMovie.id);
                               setShowListMenu(false);
-                            } catch (e) { alert(e.message); }
+                            } catch (e) { showToast(e.message, 'error'); }
                           }} style={{
                             padding: '0.4rem 0.6rem', cursor: 'pointer', borderRadius: '6px',
                             fontSize: '0.78rem', color: '#e2e8f0', transition: 'background 0.15s',
@@ -312,7 +320,7 @@ export default function MovieDetailsView({
                   </div>
                   <p className="review-text">"{review.text}"</p>
                   <div className="review-actions-bar">
-                    <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''}`} onClick={() => onUpvoteReview(review.id)}>
+                    <button className={`review-action-btn ${review.likedBy?.includes(currentUser?.username) ? 'liked' : ''} ${animatingReviewId === review.id ? 'animate-upvote' : ''}`} onClick={() => handleUpvote(review.id)}>
                       <ThumbsUp size={14} fill={review.likedBy?.includes(currentUser?.username) ? 'var(--color-accent-gold)' : 'none'} /> <span>{review.likes || 0}</span>
                     </button>
                     <button className="review-action-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { toggleReplies(review.id); } }}>

@@ -7,6 +7,7 @@ import {
   Users, Send, Volume2, Maximize, List, Trash2,
   AlertTriangle, RefreshCw
 } from 'lucide-react';
+import { useToast } from './context/ToastContext.jsx'
 import {
   fetchMovies,
   fetchMovieById,
@@ -217,13 +218,9 @@ export default function App() {
   });
   const [replyDrafts, setReplyDrafts] = useState({});
 
-    // Toasts
-    const [toasts, setToasts] = useState([]);
-    const showToast = useCallback((message, type = 'success') => {
-      const id = Date.now();
-      setToasts(prev => [...prev, { id, message, type }]);
-      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
-    }, []);
+    const showToast = useToast().showToast;
+    const LOAD_STEP = 20;
+    const [visibleCount, setVisibleCount] = useState(LOAD_STEP);
 
     // Modals Toggles
     const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
@@ -530,7 +527,7 @@ const preRollTimerRef = useRef(null);
       await deleteList(listId);
       loadUserLists();
       loadAllLists();
-    } catch (e) { alert(e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
   const handleViewList = (list) => {
     setSelectedList(list);
@@ -879,6 +876,7 @@ const preRollTimerRef = useRef(null);
   };
 
   const navigateTo = (view, options = {}) => {
+    setVisibleCount(LOAD_STEP);
     const { movieId, articleId, replace = false } = options;
     const nextPath = pathForView(view, movieId || articleId);
     navigate(nextPath, { replace });
@@ -1085,7 +1083,7 @@ const preRollTimerRef = useRef(null);
       // Refresh global movie list to sync ratings
       loadMoviesList();
     } catch (err) {
-      alert(err.message || "Failed to post review");
+      showToast(err.message || "Failed to post review", 'error');
     }
   };
 
@@ -1132,7 +1130,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
     setSelectedMovie(updatedMovie);
     loadMoviesList();
   } catch (err) {
-    alert(err.message || "Failed to delete review");
+    showToast(err.message || "Failed to delete review", 'error');
   }
 }, [selectedMovie]);
 
@@ -1145,7 +1143,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       setCommunityThreads(prev => [createdThread, ...prev]);
       setNewThreadData({ title: '', body: '', tag: 'General' });
     } catch (err) {
-      alert(err.message || "Failed to start discussion");
+      showToast(err.message || "Failed to start discussion", 'error');
     }
   };
 
@@ -1159,7 +1157,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       setCommunityThreads(prev => prev.map(thread => thread.id === threadId ? updatedThread : thread));
       setReplyDrafts(prev => ({ ...prev, [threadId]: '' }));
     } catch (err) {
-      alert(err.message || "Failed to post reply");
+      showToast(err.message || "Failed to post reply", 'error');
     }
   };
 
@@ -1188,15 +1186,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
   return (
     <div className="app-container">
       <ScrollRestoration />
-      {/* Toast notifications */}
-      <div className="toast-container">
-        {toasts.map(t => (
-          <div key={t.id} className={`toast toast--${t.type}`}>
-            {t.type === 'success' ? <span>✓</span> : <span>✕</span>}
-            <span>{t.message}</span>
-          </div>
-        ))}
-      </div>
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
@@ -1786,11 +1775,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </div>
                   </div>
                   <div className="app-promo-buttons">
-                    <button className="app-store-btn" onClick={() => alert('Available on the App Store soon!')}>
+                    <button className="app-store-btn" onClick={() => showToast('Available on the App Store soon!')}>
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
                       App Store
                     </button>
-                    <button className="app-store-btn" onClick={() => alert('Available on Google Play soon!')}>
+                    <button className="app-store-btn" onClick={() => showToast('Available on Google Play soon!')}>
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 20.5v-17a.5.5 0 0 1 .74-.44l15.53 8.5a.5.5 0 0 1 0 .88l-15.53 8.5A.5.5 0 0 1 3 20.5z"/></svg>
                       Google Play
                     </button>
@@ -2089,29 +2078,36 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </button>
                  </div>
                </div>
-             ) : (
-              <div className="movie-grid">
-                 {filteredReleases.map(movie => (
-                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                       <div className="movie-card-poster-wrapper">
-                         <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                      <div className="movie-card-rating">
-                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        <span>{(movie.rating || 0).toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <div className="movie-card-info">
-                      <h3 className="movie-card-title">{movie.title}</h3>
-                      <div className="movie-card-genre-tags">
-                        {movie.genre && movie.genre.split('/').map(tag => (
-                          <span key={tag} className="genre-tag">{tag.trim()}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              ) : (
+               <div className="movie-grid">
+                  {filteredReleases.slice(0, visibleCount).map(movie => (
+                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
+                        <div className="movie-card-poster-wrapper">
+                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
+                       <div className="movie-card-rating">
+                         <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                         <span>{(movie.rating || 0).toFixed(1)}</span>
+                       </div>
+                     </div>
+                     <div className="movie-card-info">
+                       <h3 className="movie-card-title">{movie.title}</h3>
+                       <div className="movie-card-genre-tags">
+                         {movie.genre && movie.genre.split('/').map(tag => (
+                           <span key={tag} className="genre-tag">{tag.trim()}</span>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+             {filteredReleases.length > visibleCount && (
+               <div className="load-more-btn-container">
+                 <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
+                   Load More ({filteredReleases.length - visibleCount} remaining)
+                 </button>
+               </div>
+             )}
           </div>
         )}
 
@@ -2129,7 +2125,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             ) : (
               <div className="movie-grid">
-                {tamilMovies.map(movie => (
+                {tamilMovies.slice(0, visibleCount).map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                     <div className="movie-card-poster-wrapper">
                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
@@ -2148,6 +2144,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {tamilMovies.length > visibleCount && (
+              <div className="load-more-btn-container">
+                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
+                  Load More ({tamilMovies.length - visibleCount} remaining)
+                </button>
               </div>
             )}
           </div>
@@ -2167,7 +2170,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             ) : (
               <div className="movie-grid">
-                {malayalamMovies.map(movie => (
+                {malayalamMovies.slice(0, visibleCount).map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                     <div className="movie-card-poster-wrapper">
                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
@@ -2186,6 +2189,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {malayalamMovies.length > visibleCount && (
+              <div className="load-more-btn-container">
+                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
+                  Load More ({malayalamMovies.length - visibleCount} remaining)
+                </button>
               </div>
             )}
           </div>
@@ -2225,7 +2235,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             ) : (
               <div className="movie-grid">
-                {topRatedPage.map(movie => (
+                {topRatedPage.slice(0, visibleCount).map(movie => (
                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                     <div className="movie-card-poster-wrapper">
                       <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
@@ -2244,6 +2254,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {topRatedPage.length > visibleCount && (
+              <div className="load-more-btn-container">
+                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
+                  Load More ({topRatedPage.length - visibleCount} remaining)
+                </button>
               </div>
             )}
           </div>
@@ -2510,7 +2527,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <section className="movies-section" style={{ marginTop: '2.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.5rem' }}>My Watchlist</h2>
-                <span className="critique-movie-link" onClick={() => alert("Already viewing all records")}>View All <ChevronRight size={12} /></span>
+                <span className="critique-movie-link" onClick={() => showToast("Already viewing all records")}>View All <ChevronRight size={12} /></span>
               </div>
 
               {watchlist.length === 0 ? (
