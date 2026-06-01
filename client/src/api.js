@@ -428,6 +428,9 @@ export const bulkAddMovies = async (titles, onProgress, existingTitles = []) => 
           language: (best.language || '').toUpperCase(),
           genre: '',
           runtime: '',
+          criticScore: 5.0,
+          audienceScore: 50,
+          rating: 5.0,
           cast: [],
         };
         if (best.tmdbId) {

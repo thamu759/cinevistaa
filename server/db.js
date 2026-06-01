@@ -1567,22 +1567,9 @@ export const createMovie = async (movieData) => {
   const now = new Date().toISOString();
   const id = movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const description = await generateSynopsis(movieData);
-  let rating = movieData.rating != null ? movieData.rating : null;
-  let criticScore = movieData.criticScore != null ? movieData.criticScore : null;
-  let audienceScore = movieData.audienceScore != null ? movieData.audienceScore : null;
-
-  if (rating == null || criticScore == null || audienceScore == null) {
-    const aiRating = await generateRatingWithAI(movieData.title, movieData.genre, description);
-    if (aiRating) {
-      if (rating == null) rating = aiRating.rating;
-      if (criticScore == null) criticScore = aiRating.criticScore;
-      if (audienceScore == null) audienceScore = aiRating.audienceScore;
-    }
-  }
-
-  if (rating == null) rating = 5.0;
-  if (criticScore == null) criticScore = 5.0;
-  if (audienceScore == null) audienceScore = 50;
+  const rating = movieData.rating != null ? movieData.rating : 5.0;
+  const criticScore = movieData.criticScore != null ? movieData.criticScore : 5.0;
+  const audienceScore = movieData.audienceScore != null ? movieData.audienceScore : 50;
 
   const cleanData = await cachedEnrichMovieWithTmdbImages({
     ...movieData,
