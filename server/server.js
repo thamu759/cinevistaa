@@ -145,7 +145,7 @@ app.post('/api/movies', async (req, res) => {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
-    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, isUpcoming, trailerUrl, trailerChannelName, ott } = req.body;
+    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, isHero, isStaffPick, staffPickType, isUpcoming, trailerUrl, trailerChannelName, ott, cast, criticScore, audienceScore, rating } = req.body;
     if (!title || !description) {
       return res.status(400).json({ error: "Title and description are required" });
     }
@@ -163,13 +163,17 @@ app.post('/api/movies', async (req, res) => {
       language: language || "English",
       posterUrl: posterUrl || "/assets/placeholder.jpg",
       backdropUrl: posterUrl || "/assets/placeholder.jpg",
-      rating: 5.0,
-      criticScore: 10.0,
-      audienceScore: 100,
+      isHero: isHero || false,
+      isStaffPick: isStaffPick || false,
+      staffPickType: staffPickType || '',
       isUpcoming: isUpcoming || false,
       trailerUrl: trailerUrl || '',
       trailerChannelName: trailerChannelName || '',
-      ott: ott ? { platform: ott.platform || '', releaseDate: ott.releaseDate || '', url: ott.url || '' } : undefined
+      ott: ott ? { platform: ott.platform || '', releaseDate: ott.releaseDate || '', url: ott.url || '' } : undefined,
+      cast: cast || [],
+      criticScore: criticScore != null ? criticScore : 5.0,
+      audienceScore: audienceScore != null ? audienceScore : 50,
+      rating: rating != null ? rating : 5.0
     });
 
     res.status(201).json(newMovie);

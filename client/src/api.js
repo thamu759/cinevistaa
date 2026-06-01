@@ -403,6 +403,75 @@ export const deleteCommunityThread = async (threadId) => {
   return response.json();
 };
 
+export const bulkAddMovies = async (titles, onProgress) => {
+  const results = [];
+  for (let i = 0; i < titles.length; i++) {
+    const title = titles[i].trim();
+    if (!title) continue;
+    try {
+      if (onProgress) onProgress(i, titles.length, title, 'searching');
+      const searchResults = await searchTmdbMovies(title);
+      let movieData;
+      if (Array.isArray(searchResults) && searchResults.length > 0) {
+        const best = searchResults[0];
+        movieData = {
+          title: best.title || title,
+          description: best.description || '',
+          posterUrl: best.posterUrl || '',
+          releaseDate: best.releaseDate || '',
+          language: (best.language || '').toUpperCase(),
+          genre: '',
+          runtime: '',
+          criticScore: 5.0,
+          audienceScore: 50,
+          rating: 0,
+          cast: [],
+        };
+        if (best.tmdbId) {
+          try {
+            const credits = await fetchTmdbCredits(best.tmdbId);
+            const details = await fetchTmdbMovieDetails(best.tmdbId);
+            if (Array.isArray(credits)) movieData.cast = credits;
+            if (details) {
+              movieData.director = details.director || '';
+              movieData.writer = details.writer || '';
+              movieData.studio = details.studio || '';
+              movieData.genre = details.genre || '';
+              movieData.runtime = details.runtime || '';
+            }
+          } catch (e) {}
+        }
+      } else {
+        movieData = {
+          title,
+          description: '',
+          posterUrl: '',
+          releaseDate: '',
+          language: '',
+          genre: '',
+          runtime: '',
+          criticScore: 5.0,
+          audienceScore: 50,
+          rating: 0,
+          cast: [],
+        };
+      }
+      movieData.isHero = false;
+      movieData.isStaffPick = false;
+      movieData.staffPickType = '';
+      movieData.isUpcoming = false;
+      if (onProgress) onProgress(i, titles.length, title, 'adding');
+      const created = await addMovie(movieData);
+      results.push({ title, status: 'added', movie: created });
+      if (onProgress) onProgress(i + 1, titles.length, title, 'done');
+    } catch (err) {
+      results.push({ title, status: 'error', error: err.message });
+      if (onProgress) onProgress(i + 1, titles.length, title, 'error');
+    }
+  }
+  return results;
+};
+
 export const searchTmdbMovies = async (query) => {
   const response = await fetch(`${API_BASE_URL}/tmdb/search?query=${encodeURIComponent(query)}`);
   if (!response.ok) {

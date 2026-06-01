@@ -1305,13 +1305,13 @@ export const createMovie = async (movieData) => {
   const cleanData = await enrichMovieWithTmdbImages({
     ...movieData,
     id: movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-    rating: movieData.rating || 5.0,
-    criticScore: movieData.criticScore || 5.0,
-    audienceScore: movieData.audienceScore || 50,
+    rating: movieData.rating != null ? movieData.rating : 5.0,
+    criticScore: movieData.criticScore != null ? movieData.criticScore : 5.0,
+    audienceScore: movieData.audienceScore != null ? movieData.audienceScore : 50,
     reviews: movieData.reviews || [],
-    isHero: false,
-    isStaffPick: false,
-    staffPickType: "",
+    isHero: movieData.isHero || false,
+    isStaffPick: movieData.isStaffPick || false,
+    staffPickType: movieData.staffPickType || "",
     createdAt: now
   });
 

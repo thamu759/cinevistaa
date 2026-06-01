@@ -8,7 +8,8 @@ import {
   fetchMovies, fetchMovieById, addMovie, deleteMovie, updateMovie,
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
-  searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails
+  searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
+  bulkAddMovies
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -177,13 +178,17 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [page, setPage] = useState(0);
   const [filterText, setFilterText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' });
+  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' });
   const [addCast, setAddCast] = useState([]);
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
   const [addTmdbSearching, setAddTmdbSearching] = useState(false);
   const [addAutoSearching, setAddAutoSearching] = useState(false);
   const [lastAutoFetchedTitle, setLastAutoFetchedTitle] = useState('');
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkInput, setBulkInput] = useState('');
+  const [bulkProgress, setBulkProgress] = useState([]);
+  const [bulkRunning, setBulkRunning] = useState(false);
 
   useEffect(() => {
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
@@ -326,16 +331,18 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     if (!addForm.title.trim()) return;
     setLoading(true);
     try {
-      const { ottPlatform, ottReleaseDate, ottUrl, ...restForm } = addForm;
+      const { ottPlatform, ottReleaseDate, ottUrl, criticScore, audienceScore, ...restForm } = addForm;
       const payload = {
         ...restForm,
+        criticScore: criticScore !== '' ? parseFloat(criticScore) : 5.0,
+        audienceScore: audienceScore !== '' ? parseInt(audienceScore) : 50,
         rating: 0,
         cast: addCast,
         ott: ottPlatform ? { platform: ottPlatform, releaseDate: ottReleaseDate || '', url: ottUrl || '' } : undefined
       };
       const created = await addMovie(payload);
       setMovies(prev => [...prev, created]);
-      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' });
+      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' });
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
@@ -345,6 +352,30 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       showSuccess('Movie added.');
     } catch (err) { alert(err.message); }
     setLoading(false);
+  };
+
+  const handleBulkAdd = async () => {
+    const titles = bulkInput.split('\n').filter(t => t.trim());
+    if (titles.length === 0) return;
+    setBulkRunning(true);
+    setBulkProgress([]);
+    try {
+      const results = await bulkAddMovies(titles, (current, total, title, status) => {
+        setBulkProgress(prev => {
+          const idx = prev.findIndex(p => p.title === title);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = { ...next[idx], status, current, total };
+            return next;
+          }
+          return [...prev, { title, status, current, total }];
+        });
+      });
+      setBulkProgress(results.map(r => ({ ...r, current: 0, total: 0 })));
+      showSuccess(`Added ${results.filter(r => r.status === 'added').length}/${titles.length} movies.`);
+      loadMovies();
+    } catch (err) { alert(err.message); }
+    setBulkRunning(false);
   };
 
   const filtered = filterText.trim()
@@ -379,6 +410,10 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
         <button className="btn-primary" onClick={() => setShowAddModal(true)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>
           <Plus size={14} /> Add Movie
+        </button>
+        <button onClick={() => { setShowBulkModal(true); setBulkInput(''); setBulkProgress([]); }}
+          className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>
+          <Database size={14} /> Bulk Add
         </button>
       </div>
 
@@ -440,7 +475,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       )}
 
       {/* Add Movie Modal */}
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
         <div className="admin-add-modal-tmdb">
           <label className="admin-label" style={{ marginBottom: '0.25rem' }}>Quick fill from TMDB</label>
           <div style={{ position: 'relative' }}>
@@ -473,6 +508,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           <div><label className="admin-label">Studio</label><input className="admin-input" value={addForm.studio} onChange={e => setAddForm(prev => ({ ...prev, studio: e.target.value }))} /></div>
           <div><label className="admin-label">Genre</label><input className="admin-input" value={addForm.genre} onChange={e => setAddForm(prev => ({ ...prev, genre: e.target.value }))} /></div>
           <div><label className="admin-label">Runtime</label><input className="admin-input" value={addForm.runtime} onChange={e => setAddForm(prev => ({ ...prev, runtime: e.target.value }))} placeholder="e.g. 2h 44m" /></div>
+          <div><label className="admin-label">Critic Score</label><input className="admin-input" type="number" min="0" max="10" step="0.1" value={addForm.criticScore} onChange={e => setAddForm(prev => ({ ...prev, criticScore: e.target.value }))} placeholder="0-10" /></div>
+          <div><label className="admin-label">Audience Score</label><input className="admin-input" type="number" min="0" max="100" value={addForm.audienceScore} onChange={e => setAddForm(prev => ({ ...prev, audienceScore: e.target.value }))} placeholder="0-100" /></div>
           <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={addForm.trailerUrl} onChange={e => setAddForm(prev => ({ ...prev, trailerUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." /></div>
           <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={addForm.trailerChannelName} onChange={e => setAddForm(prev => ({ ...prev, trailerChannelName: e.target.value }))} placeholder="e.g. Sony Pictures Entertainment" /></div>
           <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
@@ -533,11 +570,48 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
             <Plus size={14} /> {loading ? 'Adding...' : 'Add Movie'}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Bulk Add Modal */}
+      <Modal isOpen={showBulkModal} onClose={() => { if (!bulkRunning) { setShowBulkModal(false); setBulkInput(''); setBulkProgress([]); } }} title="Bulk Add Movies" width="600px">
+        <label className="admin-label" style={{ marginBottom: '0.3rem' }}>Enter movie titles (one per line)</label>
+        <textarea className="admin-textarea" value={bulkInput} onChange={e => setBulkInput(e.target.value)} rows={8} placeholder="Leo&#10;Jailer&#10;Vikram&#10;Master" disabled={bulkRunning} style={{ fontFamily: 'var(--font-sans)', fontSize: '0.8rem' }} />
+        {bulkProgress.length > 0 && (
+          <div style={{ marginTop: '0.75rem', maxHeight: '200px', overflowY: 'auto' }}>
+            {bulkProgress.map((p, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', fontSize: '0.75rem' }}>
+                <span style={{
+                  width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
+                  background: p.status === 'added' || p.status === 'done' ? '#34d399'
+                    : p.status === 'error' ? '#ef4444'
+                    : p.status === 'searching' || p.status === 'adding' ? '#fbbf24'
+                    : 'rgba(255,255,255,0.1)'
+                }} />
+                <span style={{ fontWeight: 600 }}>{p.title}</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>
+                  {p.status === 'added' || p.status === 'done' ? '✓ Added'
+                    : p.status === 'error' ? `✗ ${p.error || 'Failed'}`
+                    : p.status === 'searching' ? 'Searching TMDB...'
+                    : p.status === 'adding' ? 'Adding...'
+                    : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+          <button onClick={() => { setShowBulkModal(false); setBulkInput(''); setBulkProgress([]); }}
+            className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }} disabled={bulkRunning}>Cancel</button>
+          <button onClick={handleBulkAdd} disabled={bulkRunning || !bulkInput.trim()}
+            className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Database size={14} /> {bulkRunning ? 'Adding...' : 'Add All'}
           </button>
         </div>
       </Modal>
