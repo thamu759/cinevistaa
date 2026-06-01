@@ -54,7 +54,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
     );
   }
 
-  const confettiColors = ['#06b6d4', '#d946ef', '#fbbf24', '#22d3ee', '#a855f7', '#f472b6'];
+  const confettiColors = ['#fbbf24', '#f59e0b', '#eab308', '#fef3c7', '#fcd34d', '#fbbf24cc'];
 
   return (
     <div className="cflip-wrap">
@@ -79,10 +79,9 @@ export default function SpinWheel({ movies, onViewMovie }) {
 
       <div className="cflip-head">
         <div className="cflip-brand">
-          <div className="cflip-brand-m">
-            <span className="cflip-brand-m-text">MCF</span>
+          <div className="cflip-brand-badge">
+            <span className="cflip-brand-badge-text">CF</span>
           </div>
-          <span>Macha</span>
           <span className="cflip-brand-highlight">Card Flix</span>
         </div>
         <p className="cflip-sub">Pick a card, discover your next watch!</p>

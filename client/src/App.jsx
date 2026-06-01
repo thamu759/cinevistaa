@@ -128,7 +128,7 @@ export default function App() {
     articles: { title: 'Articles & Critique — thiraipedia', desc: 'Read original film criticism articles, cinema trends, and review guides from the thiraipedia editorial team.' },
     'article-detail': { title: 'Article — thiraipedia', desc: 'Read in-depth film analysis and critique articles on thiraipedia.' },
     quiz: { title: 'Movie Quiz — thiraipedia', desc: 'Test your Tamil cinema knowledge with fun movie trivia quizzes on thiraipedia.' },
-    wheel: { title: 'Macha Card Flix — thiraipedia', desc: 'Flip cards to discover your next movie to watch with Macha Card Flix.' },
+    wheel: { title: 'Card Flix — thiraipedia', desc: 'Flip cards to discover your next movie to watch with Card Flix.' },
   };
 
   const updateMeta = (meta) => {
@@ -1847,7 +1847,7 @@ const handleDeleteReview = async (reviewId) => {
                     </svg>
                   </div>
                   <div className="fun-promo-content">
-                    <h3 className="fun-promo-title">Macha Card Flix</h3>
+                    <h3 className="fun-promo-title">Card Flix</h3>
                     <p className="fun-promo-desc">Feeling lucky? Flip cards to discover your next movie!</p>
                     <span className="fun-promo-cta">Flip Now →</span>
                   </div>

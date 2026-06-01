@@ -4262,7 +4262,7 @@ a {
 }
 
 /* ─── CARD FLIP ─── */
-/* ─── MACHA CARD FLIX ─── */
+/* ─── CARD FLIX ─── */
 .cflip-wrap {
   display: flex;
   flex-direction: column;
@@ -4279,9 +4279,9 @@ a {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 30% 100%, rgba(217,70,239,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 70% 80%, rgba(251,191,36,0.04) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(251,191,36,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 30% 100%, rgba(245,158,11,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 70% 80%, rgba(251,191,36,0.03) 0%, transparent 50%);
 }
 .cflip-bg-grid {
   position: absolute;
@@ -4321,30 +4321,30 @@ a {
 .cflip-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   font-family: var(--font-sans);
   font-size: 2rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--color-text-main);
   letter-spacing: -0.02em;
-  text-shadow: 0 0 40px rgba(6,182,212,0.3);
+  text-shadow: 0 0 40px rgba(251,191,36,0.15);
   position: relative;
 }
-.cflip-brand-m {
+.cflip-brand-badge {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #06b6d4, #d946ef);
+  background: var(--color-accent-gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 16px rgba(6,182,212,0.3);
+  box-shadow: 0 0 16px rgba(251,191,36,0.25);
   animation: cflipPulse 2s ease-in-out infinite;
 }
-.cflip-brand-m-text {
-  font-size: 0.6rem;
+.cflip-brand-badge-text {
+  font-size: 0.55rem;
   font-weight: 900;
-  color: #fff;
+  color: #0b0c10;
   letter-spacing: 0.04em;
 }
 @keyframes cflipPulse {
@@ -4352,10 +4352,8 @@ a {
   50% { transform: scale(1.12); opacity: 0.8; }
 }
 .cflip-brand-highlight {
-  background: linear-gradient(135deg, #06b6d4, #d946ef, #fbbf24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-accent-gold);
+  -webkit-text-fill-color: var(--color-accent-gold);
 }
 .cflip-sub {
   font-size: 0.85rem;
@@ -4396,9 +4394,9 @@ a {
   width: 180px;
   height: 260px;
   border-radius: 14px;
-  background: linear-gradient(145deg, #0f172a, #1e1b4b);
-  border: 1.5px solid rgba(6,182,212,0.12);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(6,182,212,0.05);
+  background: linear-gradient(145deg, var(--color-bg-panel), #0d1017);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(251,191,36,0.03);
   transition: all 0.3s;
   overflow: hidden;
 }
@@ -4407,7 +4405,7 @@ a {
   position: absolute;
   inset: 0;
   background:
-    repeating-conic-gradient(rgba(6,182,212,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
+    repeating-conic-gradient(rgba(251,191,36,0.02) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
   border-radius: 14px;
 }
 .cflip-card-back::after {
@@ -4418,12 +4416,12 @@ a {
   width: 64px;
   height: 64px;
   transform: translate(-50%, -50%) rotate(45deg);
-  border: 1.5px solid rgba(6,182,212,0.07);
+  border: 1.5px solid rgba(251,191,36,0.06);
   border-radius: 4px;
-  background: rgba(6,182,212,0.02);
+  background: rgba(251,191,36,0.02);
   box-shadow:
-    0 0 20px rgba(6,182,212,0.03),
-    inset 0 0 0 1px rgba(6,182,212,0.04);
+    0 0 20px rgba(251,191,36,0.02),
+    inset 0 0 0 1px rgba(251,191,36,0.03);
 }
 .cflip-card-back .cflip-back-diamond {
   position: absolute;
@@ -4432,7 +4430,7 @@ a {
   width: 28px;
   height: 28px;
   transform: translate(-50%, -50%) rotate(45deg);
-  border: 1px solid rgba(6,182,212,0.05);
+  border: 1px solid rgba(251,191,36,0.04);
   border-radius: 2px;
   pointer-events: none;
 }
@@ -4471,9 +4469,9 @@ a {
   border-radius: 14px;
 }
 .cflip-card-front {
-  background: linear-gradient(145deg, #0f172a, #1e1b4b);
-  border: 1.5px solid rgba(6,182,212,0.12);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(6,182,212,0.05);
+  background: linear-gradient(145deg, var(--color-bg-panel), #0d1017);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(251,191,36,0.03);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4483,21 +4481,21 @@ a {
   position: absolute;
   inset: 0;
   background:
-    repeating-conic-gradient(rgba(6,182,212,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
+    repeating-conic-gradient(rgba(251,191,36,0.02) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
   border-radius: 14px;
 }
 .cflip-card-front-logo {
   position: relative;
   z-index: 1;
-  color: rgba(6,182,212,0.08);
-  filter: drop-shadow(0 0 20px rgba(6,182,212,0.03));
-  opacity: 0.6;
+  color: rgba(251,191,36,0.08);
+  filter: drop-shadow(0 0 20px rgba(251,191,36,0.02));
+  opacity: 0.5;
 }
 .cflip-card-back-face {
   transform: rotateY(180deg);
-  background: #0a0b12;
-  border: 1.5px solid rgba(217,70,239,0.15);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 30px rgba(217,70,239,0.05);
+  background: var(--color-bg-dark);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 30px rgba(251,191,36,0.03);
   overflow: hidden;
 }
 .cflip-card-content {
@@ -4528,7 +4526,7 @@ a {
 .cflip-card-img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(10,11,18,0.6) 0%, transparent 40%);
+  background: linear-gradient(to top, rgba(11,12,16,0.6) 0%, transparent 40%);
   pointer-events: none;
 }
 .cflip-card-img-shine {
@@ -4545,12 +4543,12 @@ a {
   justify-content: center;
   gap: 0.15rem;
   padding: 0.4rem 0.5rem;
-  background: linear-gradient(180deg, rgba(10,11,12,0.95), #0a0b12);
+  background: var(--color-bg-dark);
 }
 .cflip-card-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--color-text-main);
   text-align: center;
   margin: 0;
   line-height: 1.2;
@@ -4572,7 +4570,7 @@ a {
   margin-left: 0.2rem;
   font-size: 0.65rem;
   font-weight: 700;
-  color: #fbbf24;
+  color: var(--color-accent-gold);
 }
 .cflip-card-loading {
   display: flex;
@@ -4584,8 +4582,8 @@ a {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid rgba(217,70,239,0.08);
-  border-top-color: #d946ef;
+  border: 2px solid rgba(251,191,36,0.06);
+  border-top-color: var(--color-accent-gold);
   animation: cspin 0.5s linear infinite;
 }
 @keyframes cspin { to { transform: rotate(360deg); } }
@@ -4609,12 +4607,12 @@ a {
   align-items: center;
   gap: 0.3rem;
   padding: 0.25rem 0.8rem;
-  background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(217,70,239,0.08));
-  border: 1px solid rgba(6,182,212,0.2);
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.15);
   border-radius: 20px;
   font-size: 0.55rem;
   font-weight: 800;
-  color: #06b6d4;
+  color: var(--color-accent-gold);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 0.4rem;
@@ -4628,18 +4626,18 @@ a {
   font-size: 0.72rem;
   font-weight: 700;
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, #06b6d4, #0891b2);
-  color: #fff;
+  background: var(--color-accent-gold);
+  color: #0b0c10;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(6,182,212,0.25);
+  box-shadow: 0 4px 16px rgba(251,191,36,0.2);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
-.cflip-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(6,182,212,0.35); }
+.cflip-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(251,191,36,0.3); }
 .cflip-btn-s {
   padding: 0.45rem 0.9rem;
   font-size: 0.68rem;
@@ -4647,7 +4645,7 @@ a {
   font-family: var(--font-sans);
   background: rgba(255,255,255,0.04);
   color: var(--color-text-muted);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--color-border);
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.2s;
@@ -4655,7 +4653,7 @@ a {
   align-items: center;
   gap: 0.3rem;
 }
-.cflip-btn-s:hover { background: rgba(255,255,255,0.08); color: #f1f5f9; border-color: rgba(255,255,255,0.15); }
+.cflip-btn-s:hover { background: rgba(255,255,255,0.08); color: var(--color-text-main); border-color: rgba(255,255,255,0.15); }
 .cflip-cta {
   display: flex;
   flex-direction: column;
@@ -4681,13 +4679,13 @@ a {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 3px solid rgba(217,70,239,0.06);
-  border-top-color: #d946ef;
-  border-right-color: #06b6d4;
-  border-bottom-color: rgba(217,70,239,0.06);
-  border-left-color: rgba(6,182,212,0.06);
+  border: 3px solid rgba(251,191,36,0.05);
+  border-top-color: var(--color-accent-gold);
+  border-right-color: var(--color-accent-gold);
+  border-bottom-color: rgba(251,191,36,0.05);
+  border-left-color: rgba(251,191,36,0.05);
   animation: cflipspin 0.7s linear infinite;
-  filter: drop-shadow(0 0 8px rgba(217,70,239,0.1));
+  filter: drop-shadow(0 0 8px rgba(251,191,36,0.08));
 }
 @keyframes cflipspin { to { transform: rotate(360deg); } }
 .cflip-flipbtn {
@@ -4695,8 +4693,8 @@ a {
   align-items: center;
   gap: 0.55rem;
   padding: 0.9rem 2.4rem;
-  background: linear-gradient(135deg, #d946ef, #06b6d4);
-  color: #fff;
+  background: var(--color-accent-gold);
+  color: #0b0c10;
   font-weight: 800;
   font-size: 0.95rem;
   font-family: var(--font-sans);
@@ -4704,7 +4702,7 @@ a {
   border-radius: 40px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 5px 25px rgba(217,70,239,0.25), 0 0 40px rgba(6,182,212,0.1);
+  box-shadow: 0 5px 25px rgba(251,191,36,0.2), 0 0 40px rgba(251,191,36,0.08);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   position: relative;
@@ -4715,14 +4713,14 @@ a {
   position: absolute;
   inset: 0;
   border-radius: 40px;
-  background: linear-gradient(135deg, #06b6d4, #d946ef);
+  background: var(--color-accent-gold-hover);
   opacity: 0;
   transition: opacity 0.35s;
 }
 .cflip-flipbtn:hover::before { opacity: 1; }
 .cflip-flipbtn:hover {
   transform: scale(1.07) translateY(-2px);
-  box-shadow: 0 8px 35px rgba(217,70,239,0.35), 0 0 60px rgba(6,182,212,0.15);
+  box-shadow: 0 8px 35px rgba(251,191,36,0.3), 0 0 60px rgba(251,191,36,0.1);
 }
 .cflip-flipbtn:active { transform: scale(0.95); }
 .cflip-flipbtn > * { position: relative; z-index: 1; }
