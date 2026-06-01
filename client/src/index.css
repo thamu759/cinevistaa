@@ -1032,6 +1032,19 @@ a {
   justify-content: center !important;
   pointer-events: none;
 }
+.ad-card-hscroll {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  background: #11141c66;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  pointer-events: auto;
+}
 .ad-card-inner {
   display: flex;
   flex-direction: column;

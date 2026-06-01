@@ -45,6 +45,7 @@ import ContactPage from './components/ContactPage';
 import AboutPage from './components/AboutPage';
 import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
+import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
 
 const LANG_MAP = {
@@ -201,7 +202,7 @@ export default function App() {
     const tamilScrollRef = useRef(null);
     const malayalamScrollRef = useRef(null);
     const topRatedScrollRef = useRef(null);
-    const adBannerRef = useRef(null);
+
 
   const getYoutubeVideoId = (url) => {
     if (!url) return null;
@@ -651,27 +652,6 @@ export default function App() {
     }, 6500);
     return () => clearInterval(interval);
   }, [heroMovies.length]);
-
-  // Load Adsterra banner ad
-  useEffect(() => {
-    const container = adBannerRef.current;
-    if (!container) return;
-    const placeholder = container.querySelector('.ad-content');
-    window.atOptions = {
-      'key' : 'a8788b6a4ad2d42dfd9ae792efaef14e',
-      'format' : 'iframe',
-      'height' : 90,
-      'width' : 728,
-      'params' : {}
-    };
-    const script = document.createElement('script');
-    script.src = 'https://www.highperformanceformat.com/a8788b6a4ad2d42dfd9ae792efaef14e/invoke.js';
-    script.async = true;
-    container.appendChild(script);
-    return () => {
-      if (container.contains(script)) container.removeChild(script);
-    };
-  }, []);
 
   // Fetch detailed movie info when selected
   useEffect(() => {
@@ -1404,11 +1384,8 @@ const handleDeleteReview = async (reviewId) => {
             <section className="ad-section" style={{ marginTop: '2rem' }}>
               <div className="ad-container ad-banner">
                 <span className="ad-label">Advertisement</span>
-                <div className="ad-placeholder ad-banner-placeholder" ref={adBannerRef}>
-                  <div className="ad-content">
-                    <span className="ad-icon">🎬</span>
-                    <span className="ad-text">Loading ad...</span>
-                  </div>
+                <div className="ad-placeholder ad-banner-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '90px' }}>
+                  <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
                 </div>
               </div>
             </section>
@@ -1452,15 +1429,9 @@ const handleDeleteReview = async (reviewId) => {
                     const items = [];
                     if (idx > 0 && idx % 6 === 0) {
                       items.push(
-                        <div key={`ad-nr-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
-                          <div className="ad-card-inner">
-                            <span className="ad-label-sm">Ad</span>
-                            <div className="ad-card-content">
-                              <span className="ad-card-icon">🎬</span>
-                              <span className="ad-card-text">Sponsor</span>
-                              <span className="ad-card-sub">Book this slot</span>
-                            </div>
-                          </div>
+                        <div key={`ad-nr-${idx}`} className="ad-card-hscroll">
+                          <span className="ad-label-sm">Ad</span>
+                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
                         </div>
                       );
                     }
@@ -1519,15 +1490,9 @@ const handleDeleteReview = async (reviewId) => {
                     const items = [];
                     if (idx > 0 && idx % 6 === 0) {
                       items.push(
-                        <div key={`ad-ta-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
-                          <div className="ad-card-inner">
-                            <span className="ad-label-sm">Ad</span>
-                            <div className="ad-card-content">
-                              <span className="ad-card-icon">🎬</span>
-                              <span className="ad-card-text">Sponsor</span>
-                              <span className="ad-card-sub">Book this slot</span>
-                            </div>
-                          </div>
+                        <div key={`ad-ta-${idx}`} className="ad-card-hscroll">
+                          <span className="ad-label-sm">Ad</span>
+                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
                         </div>
                       );
                     }
@@ -1586,15 +1551,9 @@ const handleDeleteReview = async (reviewId) => {
                     const items = [];
                     if (idx > 0 && idx % 6 === 0) {
                       items.push(
-                        <div key={`ad-ml-${idx}`} className="movie-card-horizontal ad-card" style={{ cursor: 'default' }}>
-                          <div className="ad-card-inner">
-                            <span className="ad-label-sm">Ad</span>
-                            <div className="ad-card-content">
-                              <span className="ad-card-icon">🎬</span>
-                              <span className="ad-card-text">Sponsor</span>
-                              <span className="ad-card-sub">Book this slot</span>
-                            </div>
-                          </div>
+                        <div key={`ad-ml-${idx}`} className="ad-card-hscroll">
+                          <span className="ad-label-sm">Ad</span>
+                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
                         </div>
                       );
                     }
