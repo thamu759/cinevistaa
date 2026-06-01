@@ -1410,12 +1410,16 @@ const pickN = (arr, min, max) => {
 };
 
 const generateRating = () => {
-  // Weighted distribution: most ratings cluster 6-9, occasional 10, few 3-5
+  // Natural distribution out of 5 → scaled to 10 for storage
+  const steps = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0];
+  const weights = [0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.22, 0.15, 0.08];
   const r = Math.random();
-  if (r < 0.05) return Math.floor(Math.random() * 3) + 3;  // 3-5
-  if (r < 0.15) return 10;
-  if (r < 0.40) return Math.floor(Math.random() * 2) + 8;  // 8-9
-  return Math.floor(Math.random() * 2) + 6;                // 6-7
+  let cum = 0;
+  for (let i = 0; i < steps.length; i++) {
+    cum += weights[i];
+    if (r <= cum) return Math.round(steps[i] * 20) / 10; // scale 1-5 → 2-10
+  }
+  return 10;
 };
 
 const recalcScores = (movie) => {
