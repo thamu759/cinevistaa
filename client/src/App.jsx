@@ -47,6 +47,8 @@ import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
 import SpinWheel from './components/SpinWheel';
 import QuizGame from './components/QuizGame';
+import BlindFrame from './components/BlindFrame';
+import MoodMatcher from './components/MoodMatcher';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -129,6 +131,8 @@ export default function App() {
     'article-detail': { title: 'Article — thiraipedia', desc: 'Read in-depth film analysis and critique articles on thiraipedia.' },
     quiz: { title: 'Movie Quiz — thiraipedia', desc: 'Test your Tamil cinema knowledge with fun movie trivia quizzes on thiraipedia.' },
     wheel: { title: 'Card Flix — thiraipedia', desc: 'Flip cards to discover your next movie to watch with Card Flix.' },
+    'blind-frame': { title: 'Blind Frame — thiraipedia', desc: 'Guess the movie from a blurry poster in Blind Frame on thiraipedia.' },
+    'mood-matcher': { title: 'Mood Matcher — thiraipedia', desc: 'Pick your mood and get the perfect movie match on thiraipedia.' },
   };
 
   const updateMeta = (meta) => {
@@ -763,6 +767,8 @@ export default function App() {
     if (path === '/articles') return { view: 'articles' };
     if (path === '/quiz') return { view: 'quiz' };
     if (path === '/wheel') return { view: 'wheel' };
+    if (path === '/blind-frame') return { view: 'blind-frame' };
+    if (path === '/mood-matcher') return { view: 'mood-matcher' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
     const articleMatch = path.match(/^\/article\/(.+)$/);
@@ -790,6 +796,8 @@ export default function App() {
     if (view === 'articles') return '/articles';
     if (view === 'quiz') return '/quiz';
     if (view === 'wheel') return '/wheel';
+    if (view === 'blind-frame') return '/blind-frame';
+    if (view === 'mood-matcher') return '/mood-matcher';
     if (view === 'article-detail' && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
@@ -1852,6 +1860,20 @@ const handleDeleteReview = async (reviewId) => {
                     <span className="fun-promo-cta">Flip Now →</span>
                   </div>
                 </div>
+                <div className="fun-promo-card" style={{background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(168,85,247,0.06))'}} onClick={() => navigateTo('blind-frame')}>
+                  <div className="fun-promo-content">
+                    <h3 className="fun-promo-title">Blind Frame</h3>
+                    <p className="fun-promo-desc">Guess the movie from a blurry poster as it clears!</p>
+                    <span className="fun-promo-cta">Play Now →</span>
+                  </div>
+                </div>
+                <div className="fun-promo-card" style={{background: 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(251,191,36,0.06))'}} onClick={() => navigateTo('mood-matcher')}>
+                  <div className="fun-promo-content">
+                    <h3 className="fun-promo-title">Mood Matcher</h3>
+                    <p className="fun-promo-desc">Tell us your mood and we'll pick the perfect movie!</p>
+                    <span className="fun-promo-cta">Match Me →</span>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -2829,6 +2851,20 @@ const handleDeleteReview = async (reviewId) => {
         {activeView === 'wheel' && (
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
             <SpinWheel movies={movies} onViewMovie={handleViewMovie} />
+          </div>
+        )}
+
+        {/* BLIND FRAME VIEW */}
+        {activeView === 'blind-frame' && (
+          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+            <BlindFrame movies={movies} onViewMovie={handleViewMovie} />
+          </div>
+        )}
+
+        {/* MOOD MATCHER VIEW */}
+        {activeView === 'mood-matcher' && (
+          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+            <MoodMatcher movies={movies} onViewMovie={handleViewMovie} />
           </div>
         )}
 
