@@ -1705,22 +1705,6 @@ const handleDeleteReview = async (reviewId) => {
                     <p className="section-meta">Curated Selection</p>
                     <h2 className="section-title">Staff Picks</h2>
                   </div>
-            <a
-              className={`nav-link ${activeView === 'quiz' ? 'active' : ''}`}
-              href="/quiz"
-              onClick={(e) => { e.preventDefault(); navigateTo('quiz'); setIsMobileMenuOpen(false); }}
-            >
-              🧠 Quiz
-            </a>
-
-            <a
-              className={`nav-link ${activeView === 'wheel' ? 'active' : ''}`}
-              href="/wheel"
-              onClick={(e) => { e.preventDefault(); navigateTo('wheel'); setIsMobileMenuOpen(false); }}
-            >
-              🎰 Spin
-            </a>
-
             {currentUser && currentUser.role === 'admin' && (
                     <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.85rem' }} onClick={() => setShowCurateModal(true)}>
                       <Edit3 size={13} /> Curate
@@ -1788,6 +1772,31 @@ const handleDeleteReview = async (reviewId) => {
                 </div>
               </section>
             )}
+
+            {/* FUN SECTION: Quiz & Spin Wheel Promo */}
+            <section className="fun-promo-section">
+              <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <div className="fun-promo-card quiz-promo" onClick={() => navigateTo('quiz')}>
+                  <div className="fun-promo-bg" />
+                  <div className="fun-promo-content">
+                    <span className="fun-promo-emoji">🧠</span>
+                    <h3 className="fun-promo-title">Movie Quiz</h3>
+                    <p className="fun-promo-desc">Test your cinema knowledge! Guess ratings, years & directors.</p>
+                    <span className="fun-promo-cta">Play Now →</span>
+                  </div>
+                </div>
+                <div className="fun-promo-card wheel-promo" onClick={() => navigateTo('wheel')}>
+                  <div className="fun-promo-bg" />
+                  <div className="fun-promo-content">
+                    <span className="fun-promo-emoji">🎰</span>
+                    <h3 className="fun-promo-title">Spin the Wheel</h3>
+                    <p className="fun-promo-desc">Feeling lucky? Spin to discover your next movie to watch!</p>
+                    <span className="fun-promo-cta">Spin Now →</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
           </div>
         )}
 
