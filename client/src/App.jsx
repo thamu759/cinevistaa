@@ -201,6 +201,7 @@ export default function App() {
     const tamilScrollRef = useRef(null);
     const malayalamScrollRef = useRef(null);
     const topRatedScrollRef = useRef(null);
+    const adBannerRef = useRef(null);
 
   const getYoutubeVideoId = (url) => {
     if (!url) return null;
@@ -650,6 +651,27 @@ export default function App() {
     }, 6500);
     return () => clearInterval(interval);
   }, [heroMovies.length]);
+
+  // Load Adsterra banner ad
+  useEffect(() => {
+    const container = adBannerRef.current;
+    if (!container) return;
+    const placeholder = container.querySelector('.ad-content');
+    window.atOptions = {
+      'key' : 'a8788b6a4ad2d42dfd9ae792efaef14e',
+      'format' : 'iframe',
+      'height' : 90,
+      'width' : 728,
+      'params' : {}
+    };
+    const script = document.createElement('script');
+    script.src = 'https://www.highperformanceformat.com/a8788b6a4ad2d42dfd9ae792efaef14e/invoke.js';
+    script.async = true;
+    container.appendChild(script);
+    return () => {
+      if (container.contains(script)) container.removeChild(script);
+    };
+  }, []);
 
   // Fetch detailed movie info when selected
   useEffect(() => {
@@ -1382,11 +1404,10 @@ const handleDeleteReview = async (reviewId) => {
             <section className="ad-section" style={{ marginTop: '2rem' }}>
               <div className="ad-container ad-banner">
                 <span className="ad-label">Advertisement</span>
-                <div className="ad-placeholder ad-banner-placeholder">
+                <div className="ad-placeholder ad-banner-placeholder" ref={adBannerRef}>
                   <div className="ad-content">
                     <span className="ad-icon">🎬</span>
-                    <span className="ad-text">Your Ad Here — 728×90</span>
-                    <span className="ad-sub">Reach movie lovers daily</span>
+                    <span className="ad-text">Loading ad...</span>
                   </div>
                 </div>
               </div>
