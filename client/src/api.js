@@ -403,11 +403,17 @@ export const deleteCommunityThread = async (threadId) => {
   return response.json();
 };
 
-export const bulkAddMovies = async (titles, onProgress) => {
+export const bulkAddMovies = async (titles, onProgress, existingTitles = []) => {
   const results = [];
+  const existingLower = existingTitles.map(t => t.toLowerCase());
   for (let i = 0; i < titles.length; i++) {
     const title = titles[i].trim();
     if (!title) continue;
+    if (existingLower.includes(title.toLowerCase())) {
+      results.push({ title, status: 'skipped', error: 'Already exists' });
+      if (onProgress) onProgress(i + 1, titles.length, title, 'skipped');
+      continue;
+    }
     try {
       if (onProgress) onProgress(i, titles.length, title, 'searching');
       const searchResults = await searchTmdbMovies(title);

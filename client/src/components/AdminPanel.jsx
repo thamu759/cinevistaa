@@ -178,7 +178,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [page, setPage] = useState(0);
   const [filterText, setFilterText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' });
+  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
   const [addCast, setAddCast] = useState([]);
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
@@ -329,20 +329,25 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
 
   const handleAddMovie = async () => {
     if (!addForm.title.trim()) return;
+    const duplicate = movies.find(m => m.title.toLowerCase() === addForm.title.trim().toLowerCase());
+    if (duplicate) {
+      alert(`"${addForm.title}" already exists!`);
+      return;
+    }
     setLoading(true);
     try {
-      const { ottPlatform, ottReleaseDate, ottUrl, criticScore, audienceScore, ...restForm } = addForm;
+      const { ottPlatform, ottReleaseDate, ottUrl, criticScore, audienceScore, rating, ...restForm } = addForm;
       const payload = {
         ...restForm,
         criticScore: criticScore !== '' ? parseFloat(criticScore) : 5.0,
         audienceScore: audienceScore !== '' ? parseInt(audienceScore) : 50,
-        rating: 0,
+        rating: rating !== '' ? parseFloat(rating) : 0,
         cast: addCast,
         ott: ottPlatform ? { platform: ottPlatform, releaseDate: ottReleaseDate || '', url: ottUrl || '' } : undefined
       };
       const created = await addMovie(payload);
       setMovies(prev => [...prev, created]);
-      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' });
+      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
@@ -360,6 +365,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
     setBulkRunning(true);
     setBulkProgress([]);
     try {
+      const existingTitles = movies.map(m => m.title);
       const results = await bulkAddMovies(titles, (current, total, title, status) => {
         setBulkProgress(prev => {
           const idx = prev.findIndex(p => p.title === title);
@@ -370,7 +376,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           }
           return [...prev, { title, status, current, total }];
         });
-      });
+      }, existingTitles);
       setBulkProgress(results.map(r => ({ ...r, current: 0, total: 0 })));
       showSuccess(`Added ${results.filter(r => r.status === 'added').length}/${titles.length} movies.`);
       loadMovies();
@@ -475,7 +481,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       )}
 
       {/* Add Movie Modal */}
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
         <div className="admin-add-modal-tmdb">
           <label className="admin-label" style={{ marginBottom: '0.25rem' }}>Quick fill from TMDB</label>
           <div style={{ position: 'relative' }}>
@@ -510,6 +516,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           <div><label className="admin-label">Runtime</label><input className="admin-input" value={addForm.runtime} onChange={e => setAddForm(prev => ({ ...prev, runtime: e.target.value }))} placeholder="e.g. 2h 44m" /></div>
           <div><label className="admin-label">Critic Score</label><input className="admin-input" type="number" min="0" max="10" step="0.1" value={addForm.criticScore} onChange={e => setAddForm(prev => ({ ...prev, criticScore: e.target.value }))} placeholder="0-10" /></div>
           <div><label className="admin-label">Audience Score</label><input className="admin-input" type="number" min="0" max="100" value={addForm.audienceScore} onChange={e => setAddForm(prev => ({ ...prev, audienceScore: e.target.value }))} placeholder="0-100" /></div>
+          <div><label className="admin-label">Rating</label><input className="admin-input" type="number" min="0" max="10" step="0.1" value={addForm.rating} onChange={e => setAddForm(prev => ({ ...prev, rating: e.target.value }))} placeholder="0-10" /></div>
           <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={addForm.trailerUrl} onChange={e => setAddForm(prev => ({ ...prev, trailerUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." /></div>
           <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={addForm.trailerChannelName} onChange={e => setAddForm(prev => ({ ...prev, trailerChannelName: e.target.value }))} placeholder="e.g. Sony Pictures Entertainment" /></div>
           <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
@@ -570,7 +577,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -591,6 +598,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
                   width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
                   background: p.status === 'added' || p.status === 'done' ? '#34d399'
                     : p.status === 'error' ? '#ef4444'
+                    : p.status === 'skipped' ? '#94a3b8'
                     : p.status === 'searching' || p.status === 'adding' ? '#fbbf24'
                     : 'rgba(255,255,255,0.1)'
                 }} />
@@ -598,6 +606,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
                 <span style={{ color: 'var(--color-text-muted)' }}>
                   {p.status === 'added' || p.status === 'done' ? '✓ Added'
                     : p.status === 'error' ? `✗ ${p.error || 'Failed'}`
+                    : p.status === 'skipped' ? '⏭ Already exists'
                     : p.status === 'searching' ? 'Searching TMDB...'
                     : p.status === 'adding' ? 'Adding...'
                     : ''}

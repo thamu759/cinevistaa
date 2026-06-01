@@ -150,6 +150,11 @@ app.post('/api/movies', async (req, res) => {
       return res.status(400).json({ error: "Title and description are required" });
     }
 
+    const existing = await getMovieById(title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+    if (existing) {
+      return res.status(409).json({ error: `"${title}" already exists!` });
+    }
+
     const newMovie = await createMovie({
       title,
       description,
