@@ -344,9 +344,9 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       const { ottPlatform, ottReleaseDate, ottUrl, criticScore, audienceScore, rating, ...restForm } = addForm;
       const payload = {
         ...restForm,
-        criticScore: criticScore !== '' ? parseFloat(criticScore) : 5.0,
-        audienceScore: audienceScore !== '' ? parseInt(audienceScore) : 50,
-        rating: rating !== '' ? parseFloat(rating) : 0,
+        criticScore: criticScore !== '' ? parseFloat(criticScore) : undefined,
+        audienceScore: audienceScore !== '' ? parseInt(audienceScore) : undefined,
+        rating: rating !== '' ? parseFloat(rating) : undefined,
         cast: addCast,
         ott: ottPlatform ? { platform: ottPlatform, releaseDate: ottReleaseDate || '', url: ottUrl || '' } : undefined
       };
