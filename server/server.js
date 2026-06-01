@@ -249,7 +249,7 @@ app.post('/api/admin/seed-reviews/:id', async (req, res) => {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
-    const movie = await seedBotReviewsForMovie(req.params.id);
+    const movie = await seedBotReviewsForMovie(req.params.id, req.body.releaseDate);
     if (!movie) return res.status(404).json({ error: "Movie not found" });
     res.json({ success: true, movie });
   } catch (error) {

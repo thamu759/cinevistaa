@@ -4,6 +4,8 @@ import {
   Trash2, Users, Star, Sparkles, ChevronLeft, ChevronRight,
   Activity, RefreshCw, BarChart3, Save, Edit
 } from 'lucide-react';
+
+const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 import {
   fetchMovies, fetchMovieById, addMovie, deleteMovie, updateMovie,
   refreshMoviePosters, curateMovie, proxyImageUrl,
@@ -86,7 +88,7 @@ export default function AdminPanel({ currentUser }) {
             <span className="admin-user-label">Logged in as</span>
             <span className="admin-user-name">{currentUser.username}</span>
           </div>
-          <img src={currentUser.avatarUrl} alt="Admin" className="admin-user-avatar" />
+          <img src={currentUser.avatarUrl || DEFAULT_AVATAR} alt="Admin" className="admin-user-avatar" />
         </div>
       </div>
 
@@ -813,7 +815,7 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
               <tr key={user.username}>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={user.avatarUrl} alt={user.username} style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <img src={user.avatarUrl || DEFAULT_AVATAR} alt={user.username} style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{user.username}</div>
                   </div>
                 </td>

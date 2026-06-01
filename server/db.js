@@ -1393,13 +1393,47 @@ const REVIEW_TEXTS = [
   '"The twist in the second half completely caught me off guard. Brilliant writing at work here."',
 ];
 
-const RELATIVE_TIMES = [
-  '2h ago', '4h ago', '6h ago', '12h ago', '1d ago', '2d ago',
-  '3d ago', '5d ago', '1w ago', '2w ago', '3w ago',
-  'Oct 28, 2024', 'Nov 5, 2024', 'Nov 18, 2024', 'Dec 1, 2024',
-  'Dec 15, 2024', 'Jan 3, 2025', 'Jan 20, 2025', 'Feb 8, 2025',
-  'Feb 25, 2025', 'Mar 10, 2025', 'Mar 28, 2025', 'Apr 5, 2025',
-];
+const generateTimestamp = (releaseDate) => {
+  const now = Date.now();
+  let earliest = now - 2 * 24 * 60 * 60 * 1000; // 2 days ago default
+
+  if (releaseDate) {
+    // Try multiple date formats
+    let parsed = new Date(releaseDate);
+    if (isNaN(parsed.getTime())) {
+      // Try "March 1, 2024" format
+      parsed = new Date(releaseDate.replace(/(\w+) (\d+), (\d+)/, '$1 $2 $3'));
+    }
+    if (!isNaN(parsed.getTime())) {
+      earliest = parsed.getTime() + 24 * 60 * 60 * 1000; // day after release
+    }
+  }
+
+  const range = now - earliest;
+  if (range <= 0) return 'Just now';
+
+  const offset = Math.floor(Math.random() * range);
+  const date = new Date(earliest + offset);
+  const diffMs = now - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  // Mix relative and absolute dates like existing seed data
+  const useAbsolute = Math.random() < 0.4;
+  if (useAbsolute || diffMonths > 2) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  }
+
+  if (diffMins < 60) return `${Math.max(1, diffMins)}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffWeeks < 5) return `${diffWeeks}w ago`;
+  return `${diffMonths}mo ago`;
+};
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -1431,11 +1465,10 @@ const recalcScores = (movie) => {
   movie.audienceScore = Math.min(99, Math.max(40, Math.round(avg * 9.5)));
 };
 
-export const seedBotReviewsForMovie = async (movieId) => {
+export const seedBotReviewsForMovie = async (movieId, releaseDate) => {
   const count = 2 + Math.floor(Math.random() * 3); // 2-4 reviews
   const chosenUsers = pickN(USERS, count, count);
   const chosenTexts = pickN(REVIEW_TEXTS, count, count);
-  const chosenTimes = pickN(RELATIVE_TIMES, count, count);
   const ratings = Array.from({ length: count }, generateRating);
 
   const reviews = chosenUsers.map((user, i) => ({
@@ -1445,7 +1478,7 @@ export const seedBotReviewsForMovie = async (movieId) => {
     role: user.role,
     rating: ratings[i],
     text: chosenTexts[i],
-    timestamp: chosenTimes[i] || 'Just now',
+    timestamp: generateTimestamp(releaseDate),
     likes: Math.floor(Math.random() * 500) + 10,
     likedBy: [],
     comments: Math.floor(Math.random() * 30) + 2,
@@ -1498,7 +1531,7 @@ export const createMovie = async (movieData) => {
 
   // Auto-seed bot reviews to make movies feel alive
   try {
-    await seedBotReviewsForMovie(movie.id || id);
+    await seedBotReviewsForMovie(movie.id || id, cleanData.releaseDate);
   } catch (e) {
     console.warn('Bot review seeding skipped:', e.message);
   }
@@ -1686,7 +1719,7 @@ export const registerUser = async (userData) => {
   const salt = generateSalt();
   const passwordHash = hashPassword(password, salt);
   const token = crypto.randomBytes(32).toString('hex');
-  const avatarUrl = `https://images.unsplash.com/photo-${['1535713875002-d1d0cf377fde', '1494790108377-be9c29b29330', '1599566150163-29194dcaad36', '1507003211169-0a1dd7228f2d'][Math.floor(Math.random() * 4)]}?q=80&w=150&auto=format&fit=crop`;
+  const avatarUrl = '';
   
   const role = username.toLowerCase() === 'admin' ? 'admin' : 'Cinema Enthusiast';
   const newUser = {
@@ -1785,7 +1818,7 @@ export const createCommunityThread = async (threadData, user) => {
     tag: threadData.tag || "General",
     author: user?.username || "Anonymous Critic",
     role: user?.role || "Cinema Enthusiast",
-    avatarUrl: user?.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop",
+    avatarUrl: user?.avatarUrl || '',
     timestamp: "Just now",
     likes: 0,
     replies: []

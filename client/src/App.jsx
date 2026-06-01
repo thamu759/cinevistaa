@@ -61,6 +61,8 @@ const LANG_MAP = {
 };
 const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
 
+const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
+
 export default function App() {
   // App Navigation & Router State
   const [activeView, setActiveView] = useState('home'); // 'home', 'movie-details', 'profile'
@@ -344,7 +346,7 @@ export default function App() {
   const [userProfile] = useState({
     name: "Julian Vane",
     role: "Gold Critic",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+    avatarUrl: DEFAULT_AVATAR,
     bio: "Searching for the perfect frame in a world of digital noise.",
     followers: "3.8k",
     accuracy: "92%",
@@ -2227,7 +2229,7 @@ const handleDeleteReview = async (reviewId) => {
                   {allUsers.filter(u => u.username !== currentUser.username).map(u => (
                     <div key={u.username} className="stat-box glass-panel" style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                        <img src={u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150'} alt={u.username} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <img src={u.avatarUrl || DEFAULT_AVATAR} alt={u.username} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         <div style={{ minWidth: 0 }}>
                           <p style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.username}</p>
                           <p style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{(u.followers || []).length} followers</p>
@@ -2353,7 +2355,7 @@ const handleDeleteReview = async (reviewId) => {
                       #{index + 1}
                     </div>
                     <img
-                      src={critic.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=80"}
+                      src={critic.avatarUrl || DEFAULT_AVATAR}
                       alt={critic.username}
                       style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }}
                     />
@@ -2680,7 +2682,7 @@ const handleDeleteReview = async (reviewId) => {
                   communityThreads.map(thread => (
                     <article key={thread.id} className="community-thread glass-panel">
                       <div className="community-thread-header">
-                        <img src={thread.avatarUrl} alt={thread.author} className="reviewer-avatar" />
+                        <img src={thread.avatarUrl || DEFAULT_AVATAR} alt={thread.author} className="reviewer-avatar" />
                         <div>
                           <div className="community-thread-meta">
                             <span>{thread.author}</span>

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
 import AdsterraAd from './AdsterraAd';
 
+const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
+
 const LANG_MAP = {
   TA: 'TAMIL', TAMIL: 'TAMIL',
   ML: 'MALAYALAM', MALAYALAM: 'MALAYALAM',
@@ -194,7 +196,7 @@ export default function MovieDetailsView({
                   {selectedMovie.cast.map((member, i) => (
                     <div key={i} className="cast-member-card" onClick={() => onViewActor(member.name)} style={{ cursor: 'pointer' }}>
                       <div className="cast-avatar-box">
-                        <img src={member.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"} alt={member.name} className="cast-avatar-img" />
+                        <img src={member.avatarUrl || DEFAULT_AVATAR} alt={member.name} className="cast-avatar-img" />
                       </div>
                       <div>
                         <p className="cast-name">{member.name}</p>
@@ -291,7 +293,7 @@ export default function MovieDetailsView({
                   <div className="review-card-header">
                     <div className="reviewer-info">
                       <img
-                        src={review.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"}
+                        src={review.avatarUrl || DEFAULT_AVATAR}
                         alt="user"
                         className="reviewer-avatar"
                       />
@@ -323,7 +325,7 @@ export default function MovieDetailsView({
                           {review.replies.map(reply => (
                             <div key={reply.id} className="review-reply-item">
                               <img
-                                src={reply.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150"}
+                                src={reply.avatarUrl || DEFAULT_AVATAR}
                                 alt={reply.author}
                                 className="reply-avatar"
                               />
