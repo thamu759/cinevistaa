@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
 import AdsterraAd from './AdsterraAd';
+import ShareButton from './ShareButton';
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 
@@ -135,6 +136,11 @@ export default function MovieDetailsView({
                 {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
                 {watchlist.includes(selectedMovie.id) ? 'Watchlist Added' : 'Add to Watchlist'}
               </button>
+              <ShareButton
+                title={selectedMovie.title}
+                text={`Check out ${selectedMovie.title} — rating ${selectedMovie.criticScore?.toFixed(1)}/10 on thiraipedia`}
+                variant="icon"
+              />
               {currentUser && (
                 <div className="hero-actions-btn-wrapper">
                   <button className="btn-secondary" onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}>

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
@@ -45,6 +46,7 @@ import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
 import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
+import ShareButton from './components/ShareButton';
 import SpinWheel from './components/SpinWheel';
 import QuizGame from './components/QuizGame';
 import BlindFrame from './components/BlindFrame';
@@ -105,6 +107,9 @@ export default function App() {
 
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const pageMeta = {
     home: { title: 'thiraipedia | Premium Film Critique & Reviews', desc: 'Discover in-depth movie reviews, ratings, and film critiques at thiraipedia. Track your watchlist, explore OTT releases, and join a community of cinema lovers.' },
@@ -439,7 +444,7 @@ export default function App() {
   // ─── ACTOR ───
   const handleViewActor = (actorName) => {
     setSelectedActor(actorName);
-    setActiveView('actor');
+    navigateTo('actor');
   };
 
   // ─── LISTS ───
@@ -465,7 +470,7 @@ export default function App() {
   };
   const handleViewList = (list) => {
     setSelectedList(list);
-    setActiveView('list-detail');
+    navigateTo('list-detail');
   };
   const handleCreateList = async () => {
     if (!newListName.trim() || !currentUser) return;
@@ -769,6 +774,8 @@ export default function App() {
     if (path === '/wheel') return { view: 'wheel' };
     if (path === '/blind-frame') return { view: 'blind-frame' };
     if (path === '/mood-matcher') return { view: 'mood-matcher' };
+    if (path === '/actor') return { view: 'actor' };
+    if (path === '/list-detail') return { view: 'list-detail' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
     const articleMatch = path.match(/^\/article\/(.+)$/);
@@ -798,6 +805,8 @@ export default function App() {
     if (view === 'wheel') return '/wheel';
     if (view === 'blind-frame') return '/blind-frame';
     if (view === 'mood-matcher') return '/mood-matcher';
+    if (view === 'actor') return '/actor';
+    if (view === 'list-detail') return '/list-detail';
     if (view === 'article-detail' && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
@@ -806,11 +815,7 @@ export default function App() {
   const navigateTo = (view, options = {}) => {
     const { movieId, articleId, replace = false } = options;
     const nextPath = pathForView(view, movieId || articleId);
-    if (replace) {
-      window.history.replaceState(null, '', nextPath);
-    } else {
-      window.history.pushState(null, '', nextPath);
-    }
+    navigate(nextPath, { replace });
     window.scrollTo({ top: 0, behavior: 'instant' });
     setActiveView(view);
     if (view === 'movie-details') {
@@ -824,25 +829,18 @@ export default function App() {
   };
 
   useEffect(() => {
-    const { view, movieId } = getRouteFromPath(window.location.pathname);
-    if (view === 'movie-details' && movieId) {
-      setSelectedMovieId(movieId);
-    }
+    const path = location.pathname.replace(/\/+$/, '') || '/';
+    const { view, movieId, articleId } = getRouteFromPath(path);
     setActiveView(view);
-
-    const handlePopState = () => {
-      const { view: newView, movieId: newMovieId } = getRouteFromPath(window.location.pathname);
-      setActiveView(newView);
-      if (newView === 'movie-details') {
-        setSelectedMovieId(newMovieId);
-      } else {
-        setSelectedMovieId(null);
-      }
-    };
-
-     window.addEventListener('popstate', handlePopState);
-     return () => window.removeEventListener('popstate', handlePopState);
-   }, []);
+    if (view === 'movie-details') {
+      setSelectedMovieId(movieId);
+    } else if (view === 'article-detail') {
+      setSelectedArticleId(articleId);
+    } else {
+      setSelectedMovieId(null);
+      setSelectedArticleId(null);
+    }
+  }, [location.pathname]);
 
    // Keyboard shortcuts
    useEffect(() => {
@@ -971,16 +969,16 @@ export default function App() {
   };
 
   // Toggle watchlist item
-  const handleViewMovie = (movieId) => {
+  const handleViewMovie = useCallback((movieId) => {
     navigateTo('movie-details', { movieId });
-  };
+  }, [navigateTo]);
 
-  const handleToggleWatchlist = (movieId, e) => {
+  const handleToggleWatchlist = useCallback((movieId, e) => {
     if (e) e.stopPropagation();
     setWatchlist(prev => 
       prev.includes(movieId) ? prev.filter(id => id !== movieId) : [...prev, movieId]
     );
-  };
+  }, []);
 
   // Submit review form
   const handleCreateReviewSubmit = async (e) => {
@@ -1013,7 +1011,7 @@ export default function App() {
   };
 
 // Upvote review comment with API persistence
-const handleUpvoteReview = async (reviewId) => {
+const handleUpvoteReview = useCallback(async (reviewId) => {
   if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
   if (!selectedMovie) return;
   try {
@@ -1027,10 +1025,10 @@ const handleUpvoteReview = async (reviewId) => {
   } catch (err) {
     console.error("Failed to toggle like:", err);
   }
-};
+}, [currentUser, selectedMovie]);
 
 // Add reply to a review
-const handleAddReviewReply = async (reviewId, body) => {
+const handleAddReviewReply = useCallback(async (reviewId, body) => {
   if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
   if (!selectedMovie) return;
   try {
@@ -1044,10 +1042,10 @@ const handleAddReviewReply = async (reviewId, body) => {
   } catch (err) {
     console.error("Failed to add reply:", err);
   }
-};
+}, [currentUser, selectedMovie]);
 
 // Delete review
-const handleDeleteReview = async (reviewId) => {
+const handleDeleteReview = useCallback(async (reviewId) => {
   if (!selectedMovie) return;
   if (!window.confirm("Delete this review?")) return;
   try {
@@ -1057,7 +1055,7 @@ const handleDeleteReview = async (reviewId) => {
   } catch (err) {
     alert(err.message || "Failed to delete review");
   }
-};
+}, [selectedMovie]);
 
   const handleCreateThreadSubmit = async (e) => {
     e.preventDefault();
@@ -1098,7 +1096,7 @@ const handleDeleteReview = async (reviewId) => {
   );
 
   // Filtered new releases by month/year
-  const filteredReleases = (() => {
+  const filteredReleases = useMemo(() => {
     if (!releaseFilterMonth && !releaseFilterYear) return newReleasesPage;
     return newReleasesPage.filter(m => {
       const parts = m.releaseDate?.split('-');
@@ -1106,7 +1104,7 @@ const handleDeleteReview = async (reviewId) => {
       if (releaseFilterMonth && parts?.[1] !== String(releaseFilterMonth).padStart(2, '0')) return false;
       return true;
     });
-  })();
+  }, [releaseFilterMonth, releaseFilterYear, newReleasesPage]);
 
   return (
     <div className="app-container">
@@ -1117,71 +1115,71 @@ const handleDeleteReview = async (reviewId) => {
             Thirai<span>Pedia</span>
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
-            <a 
+            <Link 
               className={`nav-link ${activeView === 'home' ? 'active' : ''}`}
-              href="/"
-              onClick={(e) => { e.preventDefault(); setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); setIsMobileMenuOpen(false); }}
+              to="/"
+              onClick={() => { setSelectedGenre(''); setSortOption('popular'); setIsMobileMenuOpen(false); }}
             >
               Movies
-            </a>
+            </Link>
 
-            <a 
+            <Link 
               className={`nav-link ${activeView === 'watchlist' ? 'active' : ''}`}
-              href="/watchlist"
-              onClick={(e) => { e.preventDefault(); navigateTo('watchlist'); setIsMobileMenuOpen(false); }}
+              to="/watchlist"
+              onClick={() => { setIsMobileMenuOpen(false); }}
             >
               Watchlist
-            </a>
+            </Link>
 
-            <a 
+            <Link 
               className={`nav-link ${activeView === 'coming-soon' ? 'active' : ''}`}
-              href="/coming-soon"
-              onClick={(e) => { e.preventDefault(); navigateTo('coming-soon'); setIsMobileMenuOpen(false); }}
+              to="/coming-soon"
+              onClick={() => { setIsMobileMenuOpen(false); }}
             >
               Coming Soon
-            </a>
+            </Link>
 
-            <a 
+            <Link 
               className={`nav-link ${activeView === 'leaderboard' ? 'active' : ''}`}
-              href="/leaderboard"
-              onClick={(e) => { e.preventDefault(); loadLeaderboard(); navigateTo('leaderboard'); setIsMobileMenuOpen(false); }}
+              to="/leaderboard"
+              onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}
             >
               Top Critics
-            </a>
+            </Link>
 
-            <a
+            <Link
               className={`nav-link ${activeView === 'lists' ? 'active' : ''}`}
-              href="/lists"
-              onClick={(e) => { e.preventDefault(); loadAllLists(); navigateTo('lists'); setIsMobileMenuOpen(false); }}
+              to="/lists"
+              onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}
             >
               Lists
-            </a>
+            </Link>
 
-            <a
+            <Link
               className={`nav-link ${activeView === 'ott-calendar' ? 'active' : ''}`}
-              href="/ott-calendar"
-              onClick={(e) => { e.preventDefault(); navigateTo('ott-calendar'); setIsMobileMenuOpen(false); }}
+              to="/ott-calendar"
+              onClick={() => { setIsMobileMenuOpen(false); }}
             >
               OTT Calendar
-            </a>
+            </Link>
 
-            <a
+            <Link
               className={`nav-link ${activeView === 'community' ? 'active' : ''}`}
-              href="/community"
-              onClick={(e) => { e.preventDefault(); navigateTo('community'); setIsMobileMenuOpen(false); }}
+              to="/community"
+              onClick={() => { setIsMobileMenuOpen(false); }}
             >
               Community
-            </a>
+            </Link>
 
             {currentUser && currentUser.role === 'admin' && (
-              <a 
+              <Link 
                 className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}
-                href="/admin"
-                onClick={(e) => { e.preventDefault(); navigateTo('admin'); setIsMobileMenuOpen(false); }}
+                to="/admin"
+                onClick={() => { setIsMobileMenuOpen(false); }}
                 style={{ color: 'var(--color-accent-gold)', fontWeight: '600' }}
               >
                 Admin Control
-              </a>
+              </Link>
             )}
           </div>
           <div className="nav-actions">
@@ -1191,7 +1189,7 @@ const handleDeleteReview = async (reviewId) => {
             <button className="search-trigger" onClick={toggleSearch} aria-label="Search">
               <Search size={20} />
             </button>
-            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { if (activeView === 'profile') { navigateTo('home'); } else { setActiveView('profile'); } setIsMobileMenuOpen(false); } }}>
+            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { navigateTo(activeView === 'profile' ? 'home' : 'profile'); setIsMobileMenuOpen(false); } }}>
               <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-avatar-circle" />
               {currentUser && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: '0.5rem', fontWeight: 500 }} className="profile-nav-name">{currentUser.username}</span>}
             </button>
@@ -1989,10 +1987,10 @@ const handleDeleteReview = async (reviewId) => {
                      className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
                      Browse All Movies
                    </button>
-                   <button onClick={() => setActiveView('coming-soon')}
-                     className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
-                     See Coming Soon
-                   </button>
+                    <button onClick={() => navigateTo('coming-soon')}
+                      className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
+                      See Coming Soon
+                    </button>
                  </div>
                </div>
              ) : (
@@ -2650,9 +2648,16 @@ const handleDeleteReview = async (reviewId) => {
               {selectedList.description && (
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{selectedList.description}</p>
               )}
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '2rem' }}>
-                by <strong>{selectedList.createdBy}</strong> &middot; {selectedList.movieIds.length} movies
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  by <strong>{selectedList.createdBy}</strong> &middot; {selectedList.movieIds.length} movies
+                </p>
+                <ShareButton
+                  title={selectedList.name}
+                  text={`Check out "${selectedList.name}" — a curated movie list on thiraipedia`}
+                  variant="icon"
+                />
+              </div>
             </div>
             {(() => {
               const listMovies = movies.filter(m => selectedList.movieIds.includes(m.id));

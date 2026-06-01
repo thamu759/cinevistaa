@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Brain, Trophy, Star, RotateCcw, Calendar, User, RefreshCw, Sparkles, Zap } from 'lucide-react';
+import ShareButton from './ShareButton';
 
 const QUESTIONS_PER_GAME = 7;
 
@@ -202,6 +203,14 @@ export default function QuizGame({ movies, onViewMovie }) {
           <button className="quiz-btn-play" onClick={startGame}>
             <RefreshCw size={16} /> Play Again
           </button>
+          <div style={{ marginTop: '1rem' }}>
+            <ShareButton
+              title="Movie Quiz — thiraipedia"
+              text={`I scored ${finalScore}/${questions.length} (${pct}%) on the Movie Quiz! Can you beat my score?`}
+              variant="text"
+              label="Share Score"
+            />
+          </div>
         </div>
       </div>
     );
