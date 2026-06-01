@@ -4448,6 +4448,17 @@ a {
   transition: transform 0.25s;
 }
 .ldraw-poster:hover { transform: scale(1.08) rotate(-2deg); }
+.ldraw-poster-fallback {
+  width: 110px;
+  height: 165px;
+  border-radius: 12px;
+  background: rgba(251,191,36,0.04);
+  border: 2px solid rgba(251,191,36,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(251,191,36,0.15);
+}
 .ldraw-rtitle {
   font-size: 1rem;
   font-weight: 700;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Shuffle, Film, Sparkles, Star, Ticket } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
@@ -16,6 +16,8 @@ export default function SpinWheel({ movies, onViewMovie }) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [ticketRise, setTicketRise] = useState(false);
+  const imgRef = useRef(null);
+  const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
     const eligible = movies.filter(m => m.posterUrl);
@@ -29,6 +31,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
     setShowConfetti(false);
     setShowResult(false);
     setTicketRise(false);
+    setImgFailed(false);
 
     const w = pickRandom(candidates);
 
@@ -110,7 +113,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
               </div>
             )}
 
-            {ticketRise && winner && (
+            {ticketRise && (
               <div className="ldraw-winning-ticket">
                 <Ticket size={20} />
               </div>
@@ -120,12 +123,20 @@ export default function SpinWheel({ movies, onViewMovie }) {
           {showResult && winner && (
             <div className="ldraw-result animated-pop">
               <div className="ldraw-badge"><Sparkles size={10} /> WINNER</div>
-              <img
-                src={proxyImageUrl(winner.posterUrl, 'w150')}
-                alt={winner.title}
-                className="ldraw-poster"
-                onClick={() => onViewMovie?.(winner.id)}
-              />
+              {imgFailed ? (
+                <div className="ldraw-poster-fallback">
+                  <Film size={28} />
+                </div>
+              ) : (
+                <img
+                  ref={imgRef}
+                  src={proxyImageUrl(winner.posterUrl, 'w150')}
+                  alt={winner.title}
+                  className="ldraw-poster"
+                  onClick={() => onViewMovie?.(winner.id)}
+                  onError={() => setImgFailed(true)}
+                />
+              )}
               <h3 className="ldraw-rtitle">{winner.title}</h3>
               <span className="ldraw-ryear">{getMovieYear(winner)}</span>
               <div className="ldraw-rstars">
