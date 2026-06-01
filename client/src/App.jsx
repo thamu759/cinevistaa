@@ -66,6 +66,7 @@ const LANG_MAP = {
 const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
+const PRE_ROLL_VIDEO_SRC = 'https://player.vimeo.com/video/1197439817?h=1ea764d599&autoplay=1&muted=1'; // Pre-roll video/embed URL
 
 export default function App() {
   // App Navigation & Router State
@@ -234,8 +235,10 @@ export default function App() {
      localStorage.setItem('mc_trailer_autoplay', trailerAutoplayPreference);
    }, [trailerAutoplayPreference]);
     const playerRef = useRef(null);
-    const playerContainerRef = useRef(null);
-    const progressIntervalRef = useRef(null);
+const playerContainerRef = useRef(null);
+const progressIntervalRef = useRef(null);
+const preRollVideoRef = useRef(null);
+const preRollTimerRef = useRef(null);
     const heroRef = useRef(null);
     const isHoveringRef = useRef(false);
     const touchStartX = useRef(0);
@@ -960,11 +963,22 @@ export default function App() {
     setAuthFormData({ username: '', email: '', password: '' });
   };
 
-  // Handle watch trailer with pre-roll ad
+  // Handle watch trailer with pre-roll ad/video
   const handleWatchTrailer = useCallback(() => {
     setShowTrailer(true);
     setTrailerPreRoll(true);
-    setTimeout(() => setTrailerPreRoll(false), 5000);
+    const isEmbed = PRE_ROLL_VIDEO_SRC?.includes('player.vimeo.com');
+    if (!isEmbed && preRollVideoRef.current && PRE_ROLL_VIDEO_SRC) {
+      preRollVideoRef.current.currentTime = 0;
+      preRollVideoRef.current.play().catch(() => {});
+    }
+    setTimeout(() => {
+      if (preRollVideoRef.current && typeof preRollVideoRef.current.pause === 'function') {
+        preRollVideoRef.current.pause();
+        preRollVideoRef.current.currentTime = 0;
+      }
+      setTrailerPreRoll(false);
+    }, PRE_ROLL_VIDEO_SRC ? 30000 : 5000);
   }, []);
 
   // Handle Login and Register Submit
@@ -3076,23 +3090,65 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             </div>
            {selectedMovie?.trailerUrl ? (
              <div style={{ position: 'relative' }}>
-              {/* Pre-roll ad overlay */}
-              {trailerPreRoll && (
-                <div className="preroll-overlay">
-                  <div className="preroll-content">
-                    <div className="preroll-badge">Ad</div>
-                    <div className="preroll-icon">🎬</div>
-                    <p className="preroll-text">Sponsored Content</p>
-                    <p className="preroll-sub">This ad will end in 5 seconds</p>
-                    <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>
-                      Skip Ad
-                    </button>
-                  </div>
-                  <div className="preroll-timer">
-                    <div className="preroll-timer-bar" />
-                  </div>
-                </div>
-              )}
+               {/* Pre-roll ad overlay */}
+               {trailerPreRoll && (
+                 <div className="preroll-overlay">
+                    {PRE_ROLL_VIDEO_SRC ? (
+                      <>
+                        {PRE_ROLL_VIDEO_SRC.includes('player.vimeo.com') ? (
+                          <iframe
+                            title="pre-roll"
+                            src={PRE_ROLL_VIDEO_SRC}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <video
+                            ref={preRollVideoRef}
+                            src={PRE_ROLL_VIDEO_SRC}
+                            muted
+                            playsInline
+                            autoPlay
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                            onEnded={() => {
+                              if (preRollTimerRef.current) clearInterval(preRollTimerRef.current);
+                              setTrailerPreRoll(false);
+                            }}
+                          />
+                        )}
+                        <div className="preroll-content" style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', padding: 0, gap: 0 }}>
+                          <button className="preroll-skip-btn" onClick={() => {
+                            if (preRollVideoRef.current && typeof preRollVideoRef.current.pause === 'function') {
+                              preRollVideoRef.current.pause();
+                              preRollVideoRef.current.currentTime = 0;
+                            }
+                            if (preRollTimerRef.current) clearInterval(preRollTimerRef.current);
+                            setTrailerPreRoll(false);
+                          }}>
+                            Skip Ad
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                     <>
+                       <div className="preroll-content">
+                         <div className="preroll-badge">Ad</div>
+                         <div className="preroll-icon">🎬</div>
+                         <p className="preroll-text">Sponsored Content</p>
+                         <p className="preroll-sub">This ad will end in 5 seconds</p>
+                         <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>
+                           Skip Ad
+                         </button>
+                       </div>
+                       <div className="preroll-timer">
+                         <div className="preroll-timer-bar" />
+                       </div>
+                     </>
+                   )}
+                 </div>
+               )}
              <div
               ref={playerContainerRef}
               className="trailer-player-wrapper"
