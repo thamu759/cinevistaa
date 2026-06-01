@@ -153,9 +153,10 @@ export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
   if (!hasTmdbCredentials() || !tmdbId) return null;
 
   try {
-    const [details, credits] = await Promise.all([
+    const [details, credits, videos] = await Promise.all([
       fetch(buildTmdbUrl(`movie/${tmdbId}`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null),
-      fetch(buildTmdbUrl(`movie/${tmdbId}/credits`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null)
+      fetch(buildTmdbUrl(`movie/${tmdbId}/credits`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null),
+      fetch(buildTmdbUrl(`movie/${tmdbId}/videos`), { headers: getTmdbHeaders() }).then(r => r.ok ? r.json() : null)
     ]);
 
     if (!details) return null;
@@ -167,6 +168,13 @@ export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
     const genres = (details.genres || []).map(g => g.name).join(' / ');
     const runtime = details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : '';
 
+    let trailerUrl = '', trailerChannelName = '';
+    const trailer = (videos?.results || []).find(v => v.site === 'YouTube' && v.type === 'Trailer');
+    if (trailer) {
+      trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
+      trailerChannelName = trailer.name || '';
+    }
+
     return {
       director,
       writer,
@@ -174,7 +182,9 @@ export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
       genre: genres,
       runtime,
       releaseYear: details.release_date ? details.release_date.split('-')[0] : '',
-      releaseDate: details.release_date || ''
+      releaseDate: details.release_date || '',
+      trailerUrl,
+      trailerChannelName
     };
   } catch (error) {
     console.warn(`TMDB full details lookup failed for ID "${tmdbId}":`, error.message);
