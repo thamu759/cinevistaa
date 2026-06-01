@@ -314,17 +314,41 @@ const fetchTmdbMovieImages = async ({ title, releaseYear, language = 'ta', tmdbI
   }
 };
 
+const fetchTmdbMovieTrailer = async (tmdbId) => {
+  if (!hasTmdbCredentials() || !tmdbId) return { trailerUrl: '', trailerChannelName: '' };
+  try {
+    const url = buildTmdbUrl(`movie/${tmdbId}/videos`);
+    const response = await fetch(url, { headers: getTmdbHeaders() });
+    if (!response.ok) return { trailerUrl: '', trailerChannelName: '' };
+    const data = await response.json();
+    const trailer = (data.results || []).find(v => v.site === 'YouTube' && v.type === 'Trailer')
+      || (data.results || []).find(v => v.site === 'YouTube' && v.type === 'Teaser');
+    if (trailer) {
+      return {
+        trailerUrl: `https://www.youtube.com/watch?v=${trailer.key}`,
+        trailerChannelName: trailer.name || ''
+      };
+    }
+    return { trailerUrl: '', trailerChannelName: '' };
+  } catch (error) {
+    console.warn(`TMDB trailer lookup failed for ID "${tmdbId}":`, error.message);
+    return { trailerUrl: '', trailerChannelName: '' };
+  }
+};
+
 const enrichMovieWithTmdbImages = async (movie) => {
   const localFallbackMovie = applyLocalHdImageFallback(movie);
   const images = await fetchTmdbMovieImages(movie);
   const tmdbId = images?.tmdbId || movie.tmdbId;
   const credits = await fetchTmdbMovieCredits(tmdbId);
   const castWithAvatars = applyTmdbCastAvatars(localFallbackMovie.cast || [], credits);
+  const trailer = tmdbId ? await fetchTmdbMovieTrailer(tmdbId) : {};
 
   if (!images) {
     return {
       ...localFallbackMovie,
-      cast: castWithAvatars
+      cast: castWithAvatars,
+      ...trailer
     };
   }
 
@@ -333,7 +357,8 @@ const enrichMovieWithTmdbImages = async (movie) => {
     posterUrl: images.posterUrl || localFallbackMovie.posterUrl,
     backdropUrl: images.backdropUrl || localFallbackMovie.backdropUrl,
     tmdbId: tmdbId,
-    cast: castWithAvatars
+    cast: castWithAvatars,
+    ...trailer
   };
 };
 

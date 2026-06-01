@@ -159,7 +159,7 @@ function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, feature
         <div className="admin-actions-title">Quick Actions</div>
         <div className="admin-actions-row">
           <button onClick={onRefreshPosters} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-            <RefreshCw size={14} /> Refresh All Posters
+            <RefreshCw size={14} /> Refresh All From TMDB
           </button>
         </div>
       </div>
