@@ -1367,6 +1367,37 @@ export const getMovieById = async (id) => {
   }
 };
 
+// ─── SYNOPSIS GENERATOR ───
+
+const SYNOPSIS_TEMPLATES = [
+  (title, genre, year, director) =>
+    `${title} is a compelling ${genre || 'cinematic'} experience that follows a protagonist's journey through extraordinary circumstances. Directed by ${director || 'a visionary filmmaker'}, this ${year || ''} release delivers a powerful narrative filled with unexpected twists and emotional depth.`,
+  (title, genre, year, director) =>
+    `Set against a vividly realized backdrop, ${title} weaves a masterful tale of ambition, conflict, and redemption. ${director ? `Director ${director} ` : ''}crafts a ${genre || 'gripping'} story that resonates long after the credits roll.`,
+  (title, genre) =>
+    `A ${genre || 'thrilling'} cinematic journey, ${title} explores the complexities of human nature through its richly drawn characters and stunning visual storytelling. A must-watch for fans of thought-provoking cinema.`,
+  (title, genre, year, director) =>
+    `${title} brings together an exceptional cast in a ${genre || 'dramatic'} tale of courage and determination. ${director ? `${director}'s ` : ''}visionary direction and a haunting score make this ${year || ''} release an unforgettable experience.`,
+  (title, genre) =>
+    `In ${title}, nothing is as it seems. This ${genre || 'captivating'} film blends suspense, emotion, and breathtaking visuals into a seamless narrative that keeps audiences on the edge of their seats from the first frame to the last.`,
+  (title, genre, year, director) =>
+    `${title} is a ${genre || 'powerful'} film that pushes the boundaries of storytelling. ${director ? `Under ${director}'s expert direction, ` : ''}it delivers a deeply moving exploration of love, loss, and the human spirit. A ${year || 'modern'} classic in the making.`,
+  (title, genre) =>
+    `With ${title}, audiences are treated to a ${genre || 'remarkable'} film that combines sharp writing, outstanding performances, and stunning production design. An immersive experience that demands to be seen on the big screen.`,
+  (title, genre, year, director) =>
+    `${title} stands as a testament to the power of cinema. ${director ? `${director} ` : ''}delivers a ${genre || 'spellbinding'} ${year || ''} narrative that challenges conventions and leaves a lasting impression on all who witness it.`,
+];
+
+const generateSynopsis = (movieData) => {
+  if (movieData.description && movieData.description.length > 30) return movieData.description;
+  const title = movieData.title || 'This film';
+  const genre = movieData.genre || '';
+  const year = movieData.releaseYear || movieData.releaseDate?.split('-')[0] || '';
+  const director = movieData.director || '';
+  const template = SYNOPSIS_TEMPLATES[Math.floor(Math.random() * SYNOPSIS_TEMPLATES.length)];
+  return template(title, genre, year, director);
+};
+
 // ─── BOT REVIEW SEEDING ───
 
 const USERS = [
@@ -1535,6 +1566,7 @@ export const createMovie = async (movieData) => {
   const cleanData = await cachedEnrichMovieWithTmdbImages({
     ...movieData,
     id,
+    description: generateSynopsis(movieData),
     rating: movieData.rating != null ? movieData.rating : 5.0,
     criticScore: movieData.criticScore != null ? movieData.criticScore : 5.0,
     audienceScore: movieData.audienceScore != null ? movieData.audienceScore : 50,
