@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
+import AdsterraAd from './AdsterraAd';
 
 const LANG_MAP = {
   TA: 'TAMIL', TAMIL: 'TAMIL',
@@ -178,16 +179,10 @@ export default function MovieDetailsView({
             </div>
 
             {/* Native Ad Card */}
-            <div className="ad-container ad-native" style={{ marginBottom: '1.5rem' }}>
+            <div className="ad-container" style={{ marginBottom: '1.5rem' }}>
               <span className="ad-label">Advertisement</span>
-              <div className="ad-placeholder ad-native-placeholder">
-                <div className="ad-content ad-native-content">
-                  <span className="ad-icon">🎬</span>
-                  <div>
-                    <span className="ad-text">Sponsored Content</span>
-                    <span className="ad-sub">Reach cinema lovers — Advertise with us</span>
-                  </div>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'center', minHeight: '250px', alignItems: 'center' }}>
+                <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
               </div>
             </div>
 
