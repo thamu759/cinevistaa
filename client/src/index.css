@@ -4261,58 +4261,41 @@ a {
   }
 }
 
-/* ─── 3-REEL SLOT MACHINE ─── */
-.mslot-wrap {
+/* ─── LUCKY DRAW / RAFFLE ─── */
+.ldraw-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   position: relative;
   overflow: hidden;
   min-height: 70vh;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
 }
-.mslot-confetti {
+.ldraw-confetti {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 999;
   overflow: hidden;
 }
-.mslot-confetti-piece {
+.ldraw-confetti-piece {
   position: absolute;
   top: -10px;
-  animation: mslotDrop linear forwards;
+  animation: ldrop linear forwards;
 }
-@keyframes mslotDrop {
+@keyframes ldrop {
   0% { transform: translateY(0) rotate(0deg); opacity: 1; }
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
-.mslot-head {
+.ldraw-head {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.1rem;
 }
-.mslot-lamps {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.2rem;
-}
-.mslot-lamp {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #fbbf24;
-  animation: mslotBlink 1s ease-in-out infinite alternate;
-  box-shadow: 0 0 8px rgba(251,191,36,0.5);
-}
-@keyframes mslotBlink {
-  0% { opacity: 0.1; box-shadow: 0 0 2px rgba(251,191,36,0.1); }
-  100% { opacity: 1; box-shadow: 0 0 12px rgba(251,191,36,0.7); }
-}
-.mslot-title {
+.ldraw-title {
   font-family: var(--font-serif);
   font-size: 1.8rem;
   font-style: italic;
@@ -4321,179 +4304,128 @@ a {
   margin: 0;
   text-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 40px rgba(251,191,36,0.06);
 }
-.mslot-sub {
+.ldraw-sub {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin: 0;
 }
-.mslot-body {
-  display: flex;
-  gap: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-@media (max-width: 900px) {
-  .mslot-body { flex-direction: column-reverse; gap: 1.25rem; }
-}
-.mslot-reels {
-  flex-shrink: 0;
-}
-.mslot-reels-inner {
-  position: relative;
-  width: 300px;
-  height: 250px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.3));
-  border: 2px solid rgba(251,191,36,0.1);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 0 40px rgba(0,0,0,0.35), inset 0 0 50px rgba(0,0,0,0.12);
-}
-.mslot-glass {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(251,191,36,0.02) 0%, transparent 18%, transparent 82%, rgba(251,191,36,0.02) 100%);
-  z-index: 5;
-  pointer-events: none;
-}
-.mslot-reels-row {
-  display: flex;
-  gap: 5px;
-  padding: 10px;
-  height: 100%;
-  box-sizing: border-box;
-  align-items: stretch;
-}
-.mslot-window {
-  flex: 1;
-  overflow: hidden;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.2);
-  position: relative;
-}
-.mslot-track {
+.ldraw-body {
   display: flex;
   flex-direction: column;
-  will-change: transform;
-}
-.mslot-item {
+  align-items: center;
+  gap: 1.5rem;
   width: 100%;
-  height: 140px;
+}
+.ldraw-drum-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.ldraw-drum {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(20,20,35,0.9), rgba(10,10,18,0.95));
+  border: 3px solid rgba(251,191,36,0.12);
+  box-shadow:
+    0 0 50px rgba(0,0,0,0.4),
+    inset 0 0 60px rgba(0,0,0,0.2),
+    0 0 0 8px rgba(251,191,36,0.02);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
+  overflow: hidden;
 }
-.mslot-img {
-  width: 100%;
-  height: 130px;
-  object-fit: cover;
-  border-radius: 5px;
-  display: block;
-}
-.mslot-shade-top {
+.ldraw-drum::before {
+  content: '';
   position: absolute;
-  top: 4px;
-  left: 10px;
-  right: 10px;
-  height: 14px;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
-  z-index: 4;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(251,191,36,0.06);
   pointer-events: none;
-  border-radius: 10px 10px 0 0;
 }
-.mslot-shade-bot {
+.ldraw-drum::after {
+  content: '';
   position: absolute;
-  bottom: 4px;
-  left: 10px;
-  right: 10px;
-  height: 14px;
-  background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
-  z-index: 4;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(251,191,36,0.02), transparent, rgba(251,191,36,0.02), transparent);
   pointer-events: none;
-  border-radius: 0 0 10px 10px;
+  animation: lrotate 6s linear infinite;
+}
+@keyframes lrotate {
+  to { transform: rotate(360deg); }
+}
+
+.ldraw-shake-tickets {
+  position: absolute;
+  inset: 20px;
+  z-index: 1;
+}
+.ldraw-ticket-chip {
+  position: absolute;
+  color: rgba(251,191,36,0.25);
+  animation: lshake 0.25s ease-in-out infinite alternate;
+}
+@keyframes lshake {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+.ldraw-idle-tickets {
+  position: absolute;
+  inset: 25px;
+  z-index: 1;
+}
+.ldraw-idle-ticket {
+  position: absolute;
+  color: rgba(251,191,36,0.08);
+  transition: all 0.3s;
+}
+.ldraw-drum:hover .ldraw-idle-ticket {
+  color: rgba(251,191,36,0.15);
+}
+
+.ldraw-winning-ticket {
+  position: absolute;
+  z-index: 2;
+  color: #fbbf24;
+  animation: lrise 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  filter: drop-shadow(0 0 15px rgba(251,191,36,0.3));
+}
+@keyframes lrise {
+  0% { transform: translateY(40px) scale(0.5); opacity: 0; }
+  60% { transform: translateY(-100px) scale(1.3); }
+  100% { transform: translateY(-80px) scale(1); opacity: 1; }
 }
 @media (max-width: 768px) {
-  .mslot-reels-inner { width: 240px; height: 200px; }
-  .mslot-item { height: 112px; }
-  .mslot-img { height: 104px; }
+  .ldraw-drum { width: 200px; height: 200px; }
 }
 @media (max-width: 480px) {
-  .mslot-reels-inner { width: 185px; height: 155px; }
-  .mslot-item { height: 86px; }
-  .mslot-img { height: 78px; }
+  .ldraw-drum { width: 160px; height: 160px; }
 }
-.mslot-side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-.mslot-lever {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  gap: 0.3rem;
-  user-select: none;
-}
-.mslot-lever-base {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.mslot-lever-stem {
-  width: 4px;
-  height: 36px;
-  background: linear-gradient(to top, #555, #222);
-  border-radius: 2px;
-  transition: height 0.15s;
-}
-.mslot-lever-ball {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fef3c7, #f59e0b);
-  border: 2px solid rgba(251,191,36,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 14px rgba(251,191,36,0.15);
-  transition: transform 0.15s;
-}
-.mslot-lever:hover .mslot-lever-ball { transform: scale(1.12); }
-.mslot-lever:hover .mslot-lever-stem { height: 40px; }
-.mslot-lever-pull .mslot-lever-stem { height: 20px; }
-.mslot-lever-pull .mslot-lever-ball { transform: translateY(14px); }
-.mslot-lever-label {
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-.mslot-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 200px;
-  justify-content: center;
-}
+
+/* Result */
 .animated-pop {
-  animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: lpop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-@keyframes popIn {
+@keyframes lpop {
   0% { transform: scale(0.2); opacity: 0; }
   60% { transform: scale(1.12); }
   100% { transform: scale(1); opacity: 1; }
 }
-.mslot-result {
+.ldraw-result {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
-.mslot-badge {
+.ldraw-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -4507,44 +4439,44 @@ a {
   letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
 }
-.mslot-poster {
-  width: 100px;
+.ldraw-poster {
+  width: 110px;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   cursor: pointer;
   border: 2px solid rgba(251,191,36,0.1);
   transition: transform 0.25s;
 }
-.mslot-poster:hover { transform: scale(1.08) rotate(-2deg); }
-.mslot-rtitle {
+.ldraw-poster:hover { transform: scale(1.08) rotate(-2deg); }
+.ldraw-rtitle {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text-main);
   margin: 0.2rem 0 0.05rem;
 }
-.mslot-ryear {
+.ldraw-ryear {
   font-size: 0.68rem;
   color: var(--color-text-muted);
   margin: 0;
 }
-.mslot-rstars {
+.ldraw-rstars {
   display: inline-flex;
   align-items: center;
   gap: 0.1rem;
   margin-top: 0.2rem;
 }
-.mslot-rrating {
+.ldraw-rrating {
   margin-left: 0.3rem;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent-gold);
 }
-.mslot-actions {
+.ldraw-actions {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
-.mslot-btn-p {
+.ldraw-btn-p {
   padding: 0.45rem 1.1rem;
   font-size: 0.75rem;
   font-weight: 700;
@@ -4557,8 +4489,8 @@ a {
   transition: all 0.2s;
   box-shadow: 0 4px 15px rgba(251,191,36,0.25);
 }
-.mslot-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(251,191,36,0.35); }
-.mslot-btn-s {
+.ldraw-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(251,191,36,0.35); }
+.ldraw-btn-s {
   padding: 0.45rem 0.9rem;
   font-size: 0.7rem;
   font-weight: 600;
@@ -4573,63 +4505,54 @@ a {
   align-items: center;
   gap: 0.3rem;
 }
-.mslot-btn-s:hover { background: rgba(255,255,255,0.08); color: var(--color-text-main); }
-.mslot-spinstate {
+.ldraw-btn-s:hover { background: rgba(255,255,255,0.08); color: var(--color-text-main); }
+
+.ldraw-drawstate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
-.mslot-spinstate p {
+.ldraw-drawstate p {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0;
 }
-.mslot-spinner {
-  width: 38px;
-  height: 38px;
+.ldraw-spinner {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 3px solid rgba(251,191,36,0.08);
   border-top-color: #fbbf24;
-  animation: mslotRing 0.55s linear infinite;
+  animation: lspin 0.55s linear infinite;
 }
-@keyframes mslotRing { to { transform: rotate(360deg); } }
-.mslot-idle {
+@keyframes lspin { to { transform: rotate(360deg); } }
+
+.ldraw-cta {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 0.65rem;
 }
-.mslot-idle-art { opacity: 0.4; transition: opacity 0.3s; }
-.mslot-idle:hover .mslot-idle-art { opacity: 0.7; }
-.mslot-idle-txt {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  max-width: 150px;
-  line-height: 1.4;
-  margin: 0;
-}
-.mslot-spinbtn {
+.ldraw-drawbtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.7rem 1.6rem;
+  gap: 0.45rem;
+  padding: 0.8rem 2rem;
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   color: #0b0c10;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-family: var(--font-sans);
   border: none;
   border-radius: 40px;
   cursor: pointer;
   transition: all 0.25s;
   box-shadow: 0 5px 22px rgba(251,191,36,0.3);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
-.mslot-spinbtn:hover { transform: scale(1.07); box-shadow: 0 7px 30px rgba(251,191,36,0.4); }
-.mslot-spinbtn:active { transform: scale(0.96); }
-.mslot-empty {
+.ldraw-drawbtn:hover { transform: scale(1.07); box-shadow: 0 7px 30px rgba(251,191,36,0.4); }
+.ldraw-drawbtn:active { transform: scale(0.96); }
+.ldraw-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
