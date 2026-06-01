@@ -79,9 +79,6 @@ export default function SpinWheel({ movies, onViewMovie }) {
 
       <div className="cflip-head">
         <div className="cflip-brand">
-          <div className="cflip-brand-badge">
-            <span className="cflip-brand-badge-text">CF</span>
-          </div>
           <span className="cflip-brand-highlight">Card Flix</span>
         </div>
         <p className="cflip-sub">Pick a card, discover your next watch!</p>

@@ -4330,27 +4330,6 @@ a {
   text-shadow: 0 0 40px rgba(251,191,36,0.15);
   position: relative;
 }
-.cflip-brand-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: var(--color-accent-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 16px rgba(251,191,36,0.25);
-  animation: cflipPulse 2s ease-in-out infinite;
-}
-.cflip-brand-badge-text {
-  font-size: 0.55rem;
-  font-weight: 900;
-  color: #0b0c10;
-  letter-spacing: 0.04em;
-}
-@keyframes cflipPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.12); opacity: 0.8; }
-}
 .cflip-brand-highlight {
   color: var(--color-accent-gold);
   -webkit-text-fill-color: var(--color-accent-gold);
