@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import { generateSynopsisWithAI, generateRatingWithAI } from './openai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -1388,12 +1389,14 @@ const SYNOPSIS_TEMPLATES = [
     `${title} stands as a testament to the power of cinema. ${director ? `${director} ` : ''}delivers a ${genre || 'spellbinding'} ${year || ''} narrative that challenges conventions and leaves a lasting impression on all who witness it.`,
 ];
 
-const generateSynopsis = (movieData) => {
+const generateSynopsis = async (movieData) => {
   if (movieData.description && movieData.description.length > 30) return movieData.description;
   const title = movieData.title || 'This film';
   const genre = movieData.genre || '';
   const year = movieData.releaseYear || movieData.releaseDate?.split('-')[0] || '';
   const director = movieData.director || '';
+  const aiSynopsis = await generateSynopsisWithAI(title, genre, year, director);
+  if (aiSynopsis) return aiSynopsis;
   const template = SYNOPSIS_TEMPLATES[Math.floor(Math.random() * SYNOPSIS_TEMPLATES.length)];
   return template(title, genre, year, director);
 };
@@ -1563,13 +1566,31 @@ export const seedBotReviewsForMovie = async (movieId, releaseDate) => {
 export const createMovie = async (movieData) => {
   const now = new Date().toISOString();
   const id = movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const description = await generateSynopsis(movieData);
+  let rating = movieData.rating != null ? movieData.rating : null;
+  let criticScore = movieData.criticScore != null ? movieData.criticScore : null;
+  let audienceScore = movieData.audienceScore != null ? movieData.audienceScore : null;
+
+  if (rating == null || criticScore == null || audienceScore == null) {
+    const aiRating = await generateRatingWithAI(movieData.title, movieData.genre, description);
+    if (aiRating) {
+      if (rating == null) rating = aiRating.rating;
+      if (criticScore == null) criticScore = aiRating.criticScore;
+      if (audienceScore == null) audienceScore = aiRating.audienceScore;
+    }
+  }
+
+  if (rating == null) rating = 5.0;
+  if (criticScore == null) criticScore = 5.0;
+  if (audienceScore == null) audienceScore = 50;
+
   const cleanData = await cachedEnrichMovieWithTmdbImages({
     ...movieData,
     id,
-    description: generateSynopsis(movieData),
-    rating: movieData.rating != null ? movieData.rating : 5.0,
-    criticScore: movieData.criticScore != null ? movieData.criticScore : 5.0,
-    audienceScore: movieData.audienceScore != null ? movieData.audienceScore : 50,
+    description,
+    rating,
+    criticScore,
+    audienceScore,
     reviews: movieData.reviews || [],
     isHero: movieData.isHero || false,
     isStaffPick: movieData.isStaffPick || false,
