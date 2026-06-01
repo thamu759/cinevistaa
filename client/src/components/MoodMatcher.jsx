@@ -1,21 +1,57 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Smile, Frown, Zap, Heart, Skull, Sparkles, Shuffle, Star, Play, RotateCw } from 'lucide-react';
+import { Smile, Frown, Zap, Heart, Skull, Sparkles, Shuffle, Star, Play } from 'lucide-react';
 
 const MOODS = [
-  { key: 'happy', icon: Smile, label: 'Happy', emoji: '😊', color: '#fbbf24' },
-  { key: 'sad', icon: Frown, label: 'Sad', emoji: '😢', color: '#818cf8' },
-  { key: 'thriller', icon: Zap, label: 'Thriller', emoji: '⚡', color: '#f472b6' },
-  { key: 'romantic', icon: Heart, label: 'Romantic', emoji: '❤️', color: '#fb7185' },
-  { key: 'scary', icon: Skull, label: 'Scary', emoji: '👻', color: '#a78bfa' },
-  { key: 'inspiring', icon: Sparkles, label: 'Inspiring', emoji: '✨', color: '#34d399' },
+  {
+    key: 'happy', icon: Smile, label: 'Happy', emoji: '😊', color: '#fbbf24',
+    genres: ['Comedy', 'Family', 'Animation', 'Musical', 'Adventure'],
+    minRating: 6,
+  },
+  {
+    key: 'sad', icon: Frown, label: 'Sad', emoji: '😢', color: '#818cf8',
+    genres: ['Drama', 'Romance', 'Biography'],
+    minRating: 0,
+  },
+  {
+    key: 'thriller', icon: Zap, label: 'Thriller', emoji: '⚡', color: '#f472b6',
+    genres: ['Action', 'Thriller', 'Crime', 'Mystery'],
+    minRating: 6.5,
+  },
+  {
+    key: 'romantic', icon: Heart, label: 'Romantic', emoji: '❤️', color: '#fb7185',
+    genres: ['Romance', 'Drama', 'Comedy'],
+    minRating: 0,
+  },
+  {
+    key: 'scary', icon: Skull, label: 'Scary', emoji: '👻', color: '#a78bfa',
+    genres: ['Horror', 'Thriller', 'Mystery'],
+    minRating: 0,
+  },
+  {
+    key: 'inspiring', icon: Sparkles, label: 'Inspiring', emoji: '✨', color: '#34d399',
+    genres: ['Biography', 'Drama', 'History', 'War', 'Sport'],
+    minRating: 7,
+  },
 ];
 
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 function getMovieYear(m) {
   return m.releaseYear || m.releaseDate?.split('-')[0] || '';
+}
+
+function matchMood(mood, movie) {
+  if (!movie.genre) return false;
+  if (movie.rating != null && movie.rating < mood.minRating) return false;
+  const movieGenres = movie.genre.split('/').map(g => g.trim().toLowerCase());
+  return mood.genres.some(g => movieGenres.includes(g.toLowerCase()));
 }
 
 export default function MoodMatcher({ movies, onViewMovie }) {
@@ -26,7 +62,7 @@ export default function MoodMatcher({ movies, onViewMovie }) {
   const [picked, setPicked] = useState(false);
 
   useEffect(() => {
-    const eligible = movies.filter(m => m.posterUrl);
+    const eligible = movies.filter(m => m.posterUrl && m.genre);
     setCandidates(eligible);
   }, [movies]);
 
@@ -35,19 +71,27 @@ export default function MoodMatcher({ movies, onViewMovie }) {
     setSelectedMood(mood);
     setShowMovie(false);
     setPicked(false);
+    setMovie(null);
+
+    const matched = candidates.filter(m => matchMood(mood, m));
+
     setTimeout(() => {
-      const m = pickRandom(candidates);
-      setMovie(m);
+      if (matched.length > 0) {
+        setMovie(shuffle(matched)[0]);
+      } else {
+        const fallback = shuffle(candidates.filter(m => m.rating >= 6)).slice(0, 5);
+        setMovie(fallback.length > 0 ? fallback[0] : shuffle(candidates)[0]);
+      }
       setShowMovie(true);
       setPicked(true);
-    }, 500);
+    }, 600);
   }, [candidates]);
 
   if (candidates.length === 0) {
     return (
       <div className="cflip-empty">
         <Sparkles size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-        <p>Not enough movies. Add some first!</p>
+        <p>Not enough movies with genre data. Add some first!</p>
       </div>
     );
   }
@@ -110,6 +154,7 @@ export default function MoodMatcher({ movies, onViewMovie }) {
               <div className="mm-info">
                 <h3 className="mm-title">{movie.title}</h3>
                 <span className="mm-year">{getMovieYear(movie)}</span>
+                {movie.genre && <span className="mm-genre">{movie.genre}</span>}
                 <div className="mm-stars">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={10} fill={i < Math.round((movie.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.04)'} color={i < Math.round((movie.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.04)'} />
