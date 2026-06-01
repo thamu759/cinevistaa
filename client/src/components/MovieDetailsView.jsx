@@ -10,6 +10,15 @@ const LANG_MAP = {
   EN: 'ENGLISH', ENGLISH: 'ENGLISH',
 };
 const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
+const DISPLAY_LANG = {
+  'TAMIL': 'Tamil', 'TA': 'Tamil',
+  'MALAYALAM': 'Malayalam', 'ML': 'Malayalam',
+  'TELUGU': 'Telugu', 'TE': 'Telugu',
+  'HINDI': 'Hindi', 'HI': 'Hindi',
+  'KANNADA': 'Kannada', 'KN': 'Kannada',
+  'ENGLISH': 'English', 'EN': 'English',
+};
+const formatLang = (lang) => DISPLAY_LANG[lang?.toUpperCase()] || lang || '—';
 
 export default function MovieDetailsView({
   selectedMovie, activeView, watchlist, currentUser, watchProviders,
@@ -232,7 +241,7 @@ export default function MovieDetailsView({
               </div>
               <div className="tech-row">
                 <span className="tech-lbl">Language</span>
-                <span className="tech-val">{selectedMovie.language}</span>
+                <span className="tech-val">{formatLang(selectedMovie.language)}</span>
               </div>
               <div className="tech-row">
                 <span className="tech-lbl">Where to Watch</span>
