@@ -30,6 +30,7 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
             <li><a href="/lists" onClick={(e) => { e.preventDefault(); onLoadLists(); onNavigate('lists'); }}>Lists</a></li>
             <li><a href="/profile" onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}>Critic Board</a></li>
             <li><a href="/community" onClick={(e) => { e.preventDefault(); onNavigate('community'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Community Forum</a></li>
+            <li><a href="/articles" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>Articles & Critique</a></li>
           </ul>
         </div>
         <div className="footer-column">

@@ -1,0 +1,143 @@
+const ARTICLES = [
+  {
+    id: 'art-of-film-criticism',
+    title: 'The Art of Film Criticism: Beyond Good or Bad',
+    excerpt: 'Movie criticism is more than assigning ratings. Learn how to analyse cinematography, screenplay, and performances like a professional critic.',
+    content: `Film criticism is often misunderstood as simply deciding whether a movie is "good" or "bad." In reality, meaningful criticism is a craft that combines technical knowledge, cultural awareness, and personal perspective.
+
+At thiraipedia, we believe every review should go beyond surface-level judgment. A well-written critique examines multiple dimensions of a film — the visual language, narrative structure, sound design, and performances.
+
+When writing a review, start with context. What was the filmmaker trying to achieve? Consider the genre conventions, budget constraints, and cultural background. A low-budget independent film should not be judged by the same standards as a big-budget spectacle.
+
+Next, analyse the craft. Look at the cinematography: how does the camera movement affect the mood? Examine the screenplay: are the characters well-developed? Does the dialogue feel natural or expository?
+
+Finally, offer your honest reaction. The best criticism is personal yet informed. Tell readers why the film moved you — or why it fell flat. Your unique perspective is what makes your review valuable to the community.`,
+    author: 'thiraipedia Editorial',
+    date: 'June 1, 2026',
+    readTime: '5 min read',
+    category: 'Film Criticism'
+  },
+  {
+    id: 'tamil-cinema-evolution',
+    title: 'Tamil Cinema: A New Golden Age',
+    excerpt: 'From experimental storytelling to global recognition, Tamil cinema is experiencing a remarkable creative renaissance that deserves attention.',
+    content: `Tamil cinema has always been a powerhouse of Indian filmmaking, but the last decade has ushered in what many call a new golden age. Directors like Pa. Ranjith, Vetrimaaran, and Lokesh Kanagaraj have pushed boundaries in both form and content.
+
+What makes this era special is the diversity of storytelling. We have mass-market entertainers that also carry social commentary, intimate character studies that play like thrillers, and genre experiments that rival international cinema.
+
+The rise of OTT platforms has played a crucial role. Tamil films now reach audiences across India and the global diaspora, breaking the language barrier that once limited their reach. Movies like "Jai Bhim," "Soorarai Pottru," and "Super Deluxe" found audiences far beyond Tamil-speaking regions.
+
+Technology has also transformed Tamil cinema. Advanced VFX, better sound design, and world-class cinematography are now standard in mid-budget films. This technical upgrade allows filmmakers to realise ambitious visions without compromising artistic integrity.
+
+For critics and reviewers, this is an exciting time. The sheer volume of quality content means there is always something new to discover, analyse, and debate. Tamil cinema is no longer a regional industry — it is a global cultural force.`,
+    author: 'thiraipedia Editorial',
+    date: 'May 28, 2026',
+    readTime: '4 min read',
+    category: 'Regional Cinema'
+  },
+  {
+    id: 'malayalam-cinema-storytelling',
+    title: 'Why Malayalam Cinema Leads in Storytelling',
+    excerpt: 'Malayalam films consistently deliver some of the most compelling narratives in Indian cinema. Here is what makes their approach unique.',
+    content: `When film buffs discuss the most exciting cinema in India today, Malayalam cinema inevitably tops the list. The industry, based in Kerala, has earned a reputation for prioritising story above everything else.
+
+What sets Malayalam cinema apart is its commitment to realism. Films like "The Great Indian Kitchen," "Kumbalangi Nights," and "Maheshinte Prathikaaram" find drama in everyday life. The characters feel like people you know, the situations feel authentic, and the resolutions never feel manufactured.
+
+The writing is the foundation. Malayalam screenwriters are given tremendous respect in the industry. Directors collaborate closely with writers to develop layered narratives that reward repeat viewing. Even commercial entertainers maintain a level of craft that elevates them above typical masala fare.
+
+Another strength is the willingness to experiment. Malayalam cinema embraces genre-bending — a film can shift from comedy to thriller to drama without feeling jarring. This creative freedom comes from a sophisticated audience that trusts filmmakers to take risks.
+
+For reviewers, Malayalam cinema offers rich material. The subtle performances, nuanced writing, and innovative direction provide endless opportunities for deep analysis and meaningful critique.`,
+    author: 'thiraipedia Editorial',
+    date: 'May 22, 2026',
+    readTime: '4 min read',
+    category: 'Regional Cinema'
+  },
+  {
+    id: 'ott-revolution',
+    title: 'How OTT Platforms Changed Movie Watching',
+    excerpt: 'Streaming services have fundamentally transformed how we discover, watch, and critique films. Here is what it means for cinema lovers.',
+    content: `The rise of OTT platforms has reshaped the film industry in ways we are only beginning to understand. For critics and audiences alike, the change has been profound.
+
+First, access. Earlier, a film's reach was limited by theatrical distribution. Today, a Tamil film can premiere on Netflix and be watched in New York, London, or Dubai on the same day. This global access has created new audiences for regional cinema and forced filmmakers to think beyond local markets.
+
+Second, discovery. OTT algorithms recommend films based on your viewing history, introducing you to movies you might never have found in a traditional theatre. For reviewers, this means your critique of a small independent film could reach exactly the audience looking for that kind of content.
+
+Third, the death of filler. When audiences can pause, rewind, and watch at their own pace, filmmakers must earn every minute. The OTT format rewards tight storytelling and punishes padding.
+
+Fourth, data-driven filmmaking. Streaming platforms know exactly what audiences watch, when they stop watching, and what they skip. This data influences which films get greenlit, shaping the future of cinema.
+
+For platforms like thiraipedia, the OTT revolution means more content to review, more voices to amplify, and a growing community of cinephiles who want thoughtful, honest critique.`,
+    author: 'thiraipedia Editorial',
+    date: 'May 18, 2026',
+    readTime: '5 min read',
+    category: 'Industry'
+  },
+  {
+    id: 'writing-great-review',
+    title: 'How to Write a Movie Review That People Actually Read',
+    excerpt: 'A practical guide to writing film reviews that inform, entertain, and spark conversation — whether you are a beginner or a seasoned critic.',
+    content: `Writing a movie review that stands out requires more than just stating your opinion. Here is a practical approach to crafting reviews that people want to read.
+
+Start with a hook. Your opening sentence should grab attention. Instead of "I watched this movie," try something that captures the film's essence or your emotional reaction. A strong opening makes readers curious.
+
+Summarise without spoiling. Give enough context for readers to understand what the film is about, but never reveal major plot twists or the ending. The goal is to inform, not to ruin the experience.
+
+Focus on craft. Discuss specific elements: the performances, direction, screenplay, music, and cinematography. Use examples from the film to support your points. This is what separates a professional review from a casual comment.
+
+Be honest but fair. If you did not enjoy a film, explain why without being dismissive. Acknowledge what the film attempted to do, even if it failed. Readers respect balanced criticism.
+
+Include context. How does this film compare to the director's previous work? Does it fit within a larger trend in cinema? Context adds depth to your review.
+
+Give a clear verdict. While ratings are helpful, explain what kind of audience might enjoy the film. A movie that fails as a drama might work perfectly as a comedy.
+
+Finally, edit your work. A well-written review with proper grammar and clear structure is more likely to be read and shared. Take five minutes to proofread before publishing.`,
+    author: 'thiraipedia Editorial',
+    date: 'May 12, 2026',
+    readTime: '6 min read',
+    category: 'Film Criticism'
+  }
+];
+
+export default function ArticlesPage({ onNavigate }) {
+  return (
+    <div className="main-content">
+      <div className="page-header">
+        <p className="section-meta">Original Content</p>
+        <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Articles & Critique</h2>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+          In-depth analysis, cinema trends, and guides from the thiraipedia editorial team.
+        </p>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {ARTICLES.map(article => (
+          <article key={article.id} className="glass-panel" style={{ padding: '1.5rem 1.75rem', cursor: 'pointer', transition: 'var(--transition-smooth)' }}
+            onClick={() => onNavigate('article', { articleId: article.id })}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-border-glow)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--color-border)'}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(251,191,36,0.1)', color: 'var(--color-accent-gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {article.category}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{article.date}</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>· {article.readTime}</span>
+                </div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', lineHeight: 1.3, color: 'var(--color-text-main)' }}>
+                  {article.title}
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
+                  {article.excerpt}
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', color: 'var(--color-accent-gold)', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Read More →
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}

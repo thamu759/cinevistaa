@@ -43,6 +43,8 @@ import MovieDetailsView from './components/MovieDetailsView';
 import LegalPage from './components/LegalPage';
 import ContactPage from './components/ContactPage';
 import AboutPage from './components/AboutPage';
+import ArticlesPage from './components/ArticlesPage';
+import ArticleDetail from './components/ArticleDetail';
 import MovieLogo from './components/MovieLogo';
 
 const LANG_MAP = {
@@ -94,6 +96,8 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSessionVerified, setIsSessionVerified] = useState(false);
 
+  const [selectedArticleId, setSelectedArticleId] = useState(null);
+
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -118,6 +122,8 @@ export default function App() {
     terms: { title: 'Terms of Service — thiraipedia', desc: 'Read the thiraipedia terms of service. Guidelines for using our film critique platform.' },
     contact: { title: 'Contact Us — thiraipedia', desc: 'Get in touch with the thiraipedia team. Send us your feedback, suggestions, or inquiries.' },
     about: { title: 'About Us — thiraipedia', desc: 'Learn about thiraipedia — a premium movie review and film critique platform for passionate cinema lovers.' },
+    articles: { title: 'Articles & Critique — thiraipedia', desc: 'Read original film criticism articles, cinema trends, and review guides from the thiraipedia editorial team.' },
+    'article-detail': { title: 'Article — thiraipedia', desc: 'Read in-depth film analysis and critique articles on thiraipedia.' },
   };
 
   const updateMeta = (meta) => {
@@ -751,8 +757,11 @@ export default function App() {
     if (path === '/terms') return { view: 'terms' };
     if (path === '/contact') return { view: 'contact' };
     if (path === '/about') return { view: 'about' };
+    if (path === '/articles') return { view: 'articles' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
+    const articleMatch = path.match(/^\/article\/(.+)$/);
+    if (articleMatch) return { view: 'article-detail', movieId: articleMatch[1] };
     return { view: 'home' };
   };
 
@@ -773,13 +782,15 @@ export default function App() {
     if (view === 'terms') return '/terms';
     if (view === 'contact') return '/contact';
     if (view === 'about') return '/about';
+    if (view === 'articles') return '/articles';
+    if (view === 'article-detail' && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
   };
 
   const navigateTo = (view, options = {}) => {
-    const { movieId, replace = false } = options;
-    const nextPath = pathForView(view, movieId);
+    const { movieId, articleId, replace = false } = options;
+    const nextPath = pathForView(view, movieId || articleId);
     if (replace) {
       window.history.replaceState(null, '', nextPath);
     } else {
@@ -789,8 +800,11 @@ export default function App() {
     setActiveView(view);
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
+    } else if (view === 'article-detail') {
+      setSelectedArticleId(articleId);
     } else {
       setSelectedMovieId(null);
+      setSelectedArticleId(null);
     }
   };
 
@@ -2746,6 +2760,8 @@ const handleDeleteReview = async (reviewId) => {
         {activeView === 'terms' && <LegalPage page="terms" onNavigate={navigateTo} />}
         {activeView === 'contact' && <ContactPage onNavigate={navigateTo} />}
         {activeView === 'about' && <AboutPage onNavigate={navigateTo} />}
+        {activeView === 'articles' && <ArticlesPage onNavigate={navigateTo} />}
+        {activeView === 'article-detail' && selectedArticleId && <ArticleDetail articleId={selectedArticleId} onNavigate={navigateTo} />}
       </div>
 
       {/* FOOTER SECTION */}
