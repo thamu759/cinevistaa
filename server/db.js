@@ -1229,6 +1229,8 @@ export const getMovies = async (query = {}) => {
       sortOption = { createdAt: -1 };
     } else if (sort === 'release-asc') {
       sortOption = { releaseDate: 1 };
+    } else if (sort === 'release-desc') {
+      sortOption = { releaseDate: -1 };
     }
 
     const movies = await MovieModel.find(mongoQuery).sort(sortOption);
@@ -1260,6 +1262,8 @@ export const getMovies = async (query = {}) => {
       movies.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     } else if (sort === 'release-asc') {
       movies.sort((a, b) => new Date(a.releaseDate || 0) - new Date(b.releaseDate || 0));
+    } else if (sort === 'release-desc') {
+      movies.sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
     }
 
     return movies.map(applyLocalHdImageFallback);

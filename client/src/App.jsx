@@ -530,10 +530,10 @@ export default function App() {
     loadMoviesList();
   }, [selectedGenre, sortOption, selectedOttPlatform]);
 
-  // Fetch new releases separately (most recently added movies)
+  // Fetch new releases separately (most recent release dates first)
   const loadNewReleases = async () => {
     try {
-      const data = await fetchMovies({ sort: 'newest' });
+      const data = await fetchMovies({ sort: 'release-desc' });
       setNewReleases(data.filter(m => !m.isUpcoming).slice(0, 15));
     } catch (err) {
       console.error('Failed to load new releases:', err);
@@ -636,13 +636,13 @@ export default function App() {
     }
   }, [selectedMovie?.tmdbId]);
 
-  // Fetch full new-releases list sorted ascending by release date
+  // Fetch full new-releases list sorted descending by release date (latest first)
   useEffect(() => {
     if (activeView === 'new-releases') {
       const load = async () => {
         setNewReleasesPageLoading(true);
         try {
-          const data = await fetchMovies({ sort: 'release-asc' });
+          const data = await fetchMovies({ sort: 'release-desc' });
           setNewReleasesPage(data.filter(m => !m.isUpcoming));
         } catch (err) {
           console.error('Failed to load new releases page:', err);
@@ -1730,7 +1730,7 @@ const handleDeleteReview = async (reviewId) => {
         {activeView === 'new-releases' && (
           <div className="main-content">
             <div className="page-header">
-              <p className="section-meta">Chronological Order</p>
+              <p className="section-meta">Latest First</p>
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>New Releases</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All movies sorted by release date, from earliest to latest.</p>
             </div>
