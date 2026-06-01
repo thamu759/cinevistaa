@@ -1777,18 +1777,51 @@ const handleDeleteReview = async (reviewId) => {
             <section className="fun-promo-section">
               <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
                 <div className="fun-promo-card quiz-promo" onClick={() => navigateTo('quiz')}>
-                  <div className="fun-promo-bg" />
+                  <div className="fun-promo-bg">
+                    <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
+                      <defs>
+                        <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="rgba(99,102,241,0.15)"/>
+                          <stop offset="100%" stopColor="rgba(139,92,246,0.05)"/>
+                        </linearGradient>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#qGrad)"/>
+                      <circle cx="200" cy="140" r="80" fill="none" stroke="rgba(99,102,241,0.08)" strokeWidth="2"/>
+                      <text x="160" y="110" fontSize="60" fill="rgba(99,102,241,0.12)" fontFamily="serif">?</text>
+                      <text x="210" y="170" fontSize="40" fill="rgba(139,92,246,0.1)" fontFamily="serif">?</text>
+                      <text x="140" y="180" fontSize="30" fill="rgba(99,102,241,0.08)" fontFamily="serif">?</text>
+                      <rect x="90" y="90" width="25" height="35" rx="3" fill="none" stroke="rgba(99,102,241,0.06)" strokeWidth="1.5" transform="rotate(-15 102 107)"/>
+                      <rect x="270" y="100" width="25" height="35" rx="3" fill="none" stroke="rgba(139,92,246,0.06)" strokeWidth="1.5" transform="rotate(10 282 117)"/>
+                      <circle cx="200" cy="140" r="10" fill="rgba(251,191,36,0.06)"/>
+                    </svg>
+                  </div>
                   <div className="fun-promo-content">
-                    <span className="fun-promo-emoji">🧠</span>
                     <h3 className="fun-promo-title">Movie Quiz</h3>
                     <p className="fun-promo-desc">Test your cinema knowledge! Guess ratings, years & directors.</p>
                     <span className="fun-promo-cta">Play Now →</span>
                   </div>
                 </div>
                 <div className="fun-promo-card wheel-promo" onClick={() => navigateTo('wheel')}>
-                  <div className="fun-promo-bg" />
+                  <div className="fun-promo-bg">
+                    <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
+                      <defs>
+                        <linearGradient id="wGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="rgba(251,191,36,0.15)"/>
+                          <stop offset="100%" stopColor="rgba(245,158,11,0.05)"/>
+                        </linearGradient>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#wGrad)"/>
+                      <circle cx="200" cy="140" r="70" fill="none" stroke="rgba(251,191,36,0.1)" strokeWidth="2"/>
+                      <circle cx="200" cy="140" r="45" fill="none" stroke="rgba(245,158,11,0.07)" strokeWidth="1.5"/>
+                      <circle cx="200" cy="140" r="20" fill="none" stroke="rgba(251,191,36,0.08)" strokeWidth="1"/>
+                      <circle cx="200" cy="140" r="5" fill="rgba(251,191,36,0.1)"/>
+                      <line x1="200" y1="70" x2="200" y2="140" stroke="rgba(251,191,36,0.06)" strokeWidth="2"/>
+                      <polygon points="200,55 194,70 206,70" fill="rgba(251,191,36,0.1)"/>
+                      <rect x="110" y="90" width="20" height="28" rx="2" fill="none" stroke="rgba(251,191,36,0.06)" strokeWidth="1.5" transform="rotate(-20 120 104)"/>
+                      <rect x="270" y="100" width="20" height="28" rx="2" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="1.5" transform="rotate(15 280 114)"/>
+                    </svg>
+                  </div>
                   <div className="fun-promo-content">
-                    <span className="fun-promo-emoji">🎰</span>
                     <h3 className="fun-promo-title">Spin the Wheel</h3>
                     <p className="fun-promo-desc">Feeling lucky? Spin to discover your next movie to watch!</p>
                     <span className="fun-promo-cta">Spin Now →</span>

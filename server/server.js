@@ -57,6 +57,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (generated promo images, etc.)
+app.use('/static', express.static(path.resolve(__dirname, 'public')));
+
 // Cache control for API responses
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET') {
