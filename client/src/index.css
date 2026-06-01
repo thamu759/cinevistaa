@@ -4262,15 +4262,37 @@ a {
 }
 
 /* ─── CARD FLIP ─── */
+/* ─── MACHA CARD FLIX ─── */
 .cflip-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
   position: relative;
   overflow: hidden;
-  min-height: 70vh;
-  padding: 2rem 1rem;
+  min-height: 75vh;
+  padding: 2.5rem 1rem 3rem;
+  isolation: isolate;
+}
+.cflip-bg-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 30% 100%, rgba(217,70,239,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 70% 80%, rgba(251,191,36,0.04) 0%, transparent 50%);
+}
+.cflip-bg-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 30%, transparent 70%);
 }
 .cflip-confetti {
   position: fixed;
@@ -4283,37 +4305,69 @@ a {
   position: absolute;
   top: -10px;
   animation: cdrop linear forwards;
+  opacity: 0.9;
 }
 @keyframes cdrop {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg) scale(0.3); opacity: 0; }
 }
 .cflip-head {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0.25rem;
 }
-.cflip-title {
-  font-family: var(--font-serif);
-  font-size: 1.8rem;
-  font-style: italic;
-  font-weight: 800;
-  color: var(--color-accent-gold);
-  margin: 0;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.4), 0 0 40px rgba(251,191,36,0.06);
+.cflip-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 40px rgba(6,182,212,0.3);
+  position: relative;
+}
+.cflip-brand-m {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #06b6d4, #d946ef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(6,182,212,0.3);
+  animation: cflipPulse 2s ease-in-out infinite;
+}
+.cflip-brand-m-text {
+  font-size: 0.6rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+@keyframes cflipPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.8; }
+}
+.cflip-brand-highlight {
+  background: linear-gradient(135deg, #06b6d4, #d946ef, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .cflip-sub {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin: 0;
+  letter-spacing: 0.02em;
 }
 .cflip-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.8rem;
   width: 100%;
 }
 .cflip-deck-area {
@@ -4324,14 +4378,14 @@ a {
 }
 .cflip-deck {
   position: relative;
-  width: 200px;
-  height: 290px;
+  width: 220px;
+  height: 310px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 @media (max-width: 480px) {
-  .cflip-deck { width: 160px; height: 240px; }
+  .cflip-deck { width: 170px; height: 250px; }
 }
 .cflip-stack {
   position: absolute;
@@ -4339,44 +4393,71 @@ a {
 }
 .cflip-card-back {
   position: absolute;
-  width: 170px;
-  height: 250px;
-  border-radius: 12px;
-  background: linear-gradient(145deg, #1a1a2e, #151525);
-  border: 2px solid rgba(251,191,36,0.08);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  width: 180px;
+  height: 260px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #0f172a, #1e1b4b);
+  border: 1.5px solid rgba(6,182,212,0.12);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(6,182,212,0.05);
   transition: all 0.3s;
+  overflow: hidden;
+}
+.cflip-card-back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-conic-gradient(rgba(6,182,212,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
+  border-radius: 14px;
 }
 .cflip-card-back::after {
   content: '';
   position: absolute;
-  inset: 12px;
-  border-radius: 8px;
-  border: 1.5px solid rgba(251,191,36,0.05);
-  background: repeating-conic-gradient(rgba(251,191,36,0.02) 0% 25%, transparent 0% 50%) 0 0 / 16px 16px;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1.5px solid rgba(6,182,212,0.07);
+  border-radius: 4px;
+  background: rgba(6,182,212,0.02);
+  box-shadow:
+    0 0 20px rgba(6,182,212,0.03),
+    inset 0 0 0 1px rgba(6,182,212,0.04);
 }
-@keyframes cflipRiffle {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+.cflip-card-back .cflip-back-diamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(6,182,212,0.05);
+  border-radius: 2px;
+  pointer-events: none;
+}
+@keyframes cflipShuffle {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-6px) rotate(2deg); }
 }
 @media (max-width: 480px) {
-  .cflip-card-back { width: 140px; height: 210px; }
+  .cflip-card-back { width: 150px; height: 220px; }
 }
 
 .cflip-card {
-  width: 170px;
-  height: 250px;
-  perspective: 800px;
+  width: 180px;
+  height: 260px;
+  perspective: 900px;
   z-index: 10;
 }
 @media (max-width: 480px) {
-  .cflip-card { width: 140px; height: 210px; }
+  .cflip-card { width: 150px; height: 220px; }
 }
 .cflip-card-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 1s cubic-bezier(0.22, 1.2, 0.36, 1);
   transform-style: preserve-3d;
 }
 .cflip-card-flipped .cflip-card-inner {
@@ -4387,25 +4468,36 @@ a {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 .cflip-card-front {
-  background: linear-gradient(145deg, #1a1a2e, #151525);
-  border: 2px solid rgba(251,191,36,0.08);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  background: linear-gradient(145deg, #0f172a, #1e1b4b);
+  border: 1.5px solid rgba(6,182,212,0.12);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(6,182,212,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .cflip-card-pattern {
   position: absolute;
-  inset: 12px;
-  border-radius: 8px;
-  border: 1.5px solid rgba(251,191,36,0.05);
-  background: repeating-conic-gradient(rgba(251,191,36,0.02) 0% 25%, transparent 0% 50%) 0 0 / 16px 16px;
+  inset: 0;
+  background:
+    repeating-conic-gradient(rgba(6,182,212,0.03) 0% 25%, transparent 0% 50%) 0 0 / 18px 18px;
+  border-radius: 14px;
+}
+.cflip-card-front-logo {
+  position: relative;
+  z-index: 1;
+  color: rgba(6,182,212,0.08);
+  filter: drop-shadow(0 0 20px rgba(6,182,212,0.03));
+  opacity: 0.6;
 }
 .cflip-card-back-face {
   transform: rotateY(180deg);
-  background: #0b0c10;
-  border: 2px solid rgba(251,191,36,0.08);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  background: #0a0b12;
+  border: 1.5px solid rgba(217,70,239,0.15);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 30px rgba(217,70,239,0.05);
   overflow: hidden;
 }
 .cflip-card-content {
@@ -4413,16 +4505,37 @@ a {
   flex-direction: column;
   height: 100%;
 }
-.cflip-card-img {
+.cflip-card-img-wrap {
+  position: relative;
   width: 100%;
-  height: 170px;
-  object-fit: cover;
-  border-radius: 10px 10px 0 0;
-  cursor: pointer;
-  display: block;
+  height: 180px;
+  overflow: hidden;
 }
 @media (max-width: 480px) {
-  .cflip-card-img { height: 140px; }
+  .cflip-card-img-wrap { height: 148px; }
+}
+.cflip-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.cflip-card-img:hover {
+  transform: scale(1.05);
+}
+.cflip-card-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,11,18,0.6) 0%, transparent 40%);
+  pointer-events: none;
+}
+.cflip-card-img-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%);
+  pointer-events: none;
 }
 .cflip-card-info {
   flex: 1;
@@ -4430,16 +4543,21 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-  padding: 0.3rem;
+  gap: 0.15rem;
+  padding: 0.4rem 0.5rem;
+  background: linear-gradient(180deg, rgba(10,11,12,0.95), #0a0b12);
 }
 .cflip-card-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--color-text-main);
+  color: #f1f5f9;
   text-align: center;
   margin: 0;
   line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .cflip-card-year {
   font-size: 0.6rem;
@@ -4454,7 +4572,7 @@ a {
   margin-left: 0.2rem;
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--color-accent-gold);
+  color: #fbbf24;
 }
 .cflip-card-loading {
   display: flex;
@@ -4466,19 +4584,19 @@ a {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid rgba(251,191,36,0.08);
-  border-top-color: #fbbf24;
+  border: 2px solid rgba(217,70,239,0.08);
+  border-top-color: #d946ef;
   animation: cspin 0.5s linear infinite;
 }
 @keyframes cspin { to { transform: rotate(360deg); } }
 
 .animated-pop {
-  animation: cpop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: cpop 0.45s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 @keyframes cpop {
-  0% { transform: scale(0.2); opacity: 0; }
-  60% { transform: scale(1.12); }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.2) translateY(10px); opacity: 0; }
+  60% { transform: scale(1.08) translateY(0); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 .cflip-result {
   display: flex;
@@ -4490,15 +4608,16 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.2rem 0.7rem;
-  background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.1));
-  border: 1px solid rgba(251,191,36,0.25);
+  padding: 0.25rem 0.8rem;
+  background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(217,70,239,0.08));
+  border: 1px solid rgba(6,182,212,0.2);
   border-radius: 20px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 800;
-  color: var(--color-accent-gold);
-  letter-spacing: 0.1em;
-  margin-bottom: 0.3rem;
+  color: #06b6d4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
 }
 .cflip-actions {
   display: flex;
@@ -4506,21 +4625,24 @@ a {
 }
 .cflip-btn-p {
   padding: 0.45rem 1.1rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #0b0c10;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: #fff;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(251,191,36,0.25);
+  box-shadow: 0 4px 16px rgba(6,182,212,0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
-.cflip-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(251,191,36,0.35); }
+.cflip-btn-p:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(6,182,212,0.35); }
 .cflip-btn-s {
   padding: 0.45rem 0.9rem;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   font-family: var(--font-sans);
   background: rgba(255,255,255,0.04);
@@ -4533,7 +4655,7 @@ a {
   align-items: center;
   gap: 0.3rem;
 }
-.cflip-btn-s:hover { background: rgba(255,255,255,0.08); color: var(--color-text-main); }
+.cflip-btn-s:hover { background: rgba(255,255,255,0.08); color: #f1f5f9; border-color: rgba(255,255,255,0.15); }
 .cflip-cta {
   display: flex;
   flex-direction: column;
@@ -4543,41 +4665,67 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 .cflip-flipstate p {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0;
+  animation: cflipPulseText 0.8s ease-in-out infinite alternate;
+}
+@keyframes cflipPulseText {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 .cflip-spinner {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 3px solid rgba(251,191,36,0.08);
-  border-top-color: #fbbf24;
-  animation: cflipspin 0.55s linear infinite;
+  border: 3px solid rgba(217,70,239,0.06);
+  border-top-color: #d946ef;
+  border-right-color: #06b6d4;
+  border-bottom-color: rgba(217,70,239,0.06);
+  border-left-color: rgba(6,182,212,0.06);
+  animation: cflipspin 0.7s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(217,70,239,0.1));
 }
 @keyframes cflipspin { to { transform: rotate(360deg); } }
 .cflip-flipbtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #0b0c10;
+  gap: 0.55rem;
+  padding: 0.9rem 2.4rem;
+  background: linear-gradient(135deg, #d946ef, #06b6d4);
+  color: #fff;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-family: var(--font-sans);
   border: none;
   border-radius: 40px;
   cursor: pointer;
-  transition: all 0.25s;
-  box-shadow: 0 5px 22px rgba(251,191,36,0.3);
-  letter-spacing: 0.05em;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 5px 25px rgba(217,70,239,0.25), 0 0 40px rgba(6,182,212,0.1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
 }
-.cflip-flipbtn:hover { transform: scale(1.07); box-shadow: 0 7px 30px rgba(251,191,36,0.4); }
-.cflip-flipbtn:active { transform: scale(0.96); }
+.cflip-flipbtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #06b6d4, #d946ef);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.cflip-flipbtn:hover::before { opacity: 1; }
+.cflip-flipbtn:hover {
+  transform: scale(1.07) translateY(-2px);
+  box-shadow: 0 8px 35px rgba(217,70,239,0.35), 0 0 60px rgba(6,182,212,0.15);
+}
+.cflip-flipbtn:active { transform: scale(0.95); }
+.cflip-flipbtn > * { position: relative; z-index: 1; }
 .cflip-empty {
   display: flex;
   flex-direction: column;
@@ -4586,6 +4734,7 @@ a {
   padding: 4rem 2rem;
   color: var(--color-text-muted);
   text-align: center;
+  gap: 0.5rem;
 }
 
 /* ─── QUIZ GAME ─── */

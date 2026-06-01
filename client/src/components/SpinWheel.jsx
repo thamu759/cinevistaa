@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Shuffle, Film, Sparkles, Star, RotateCw } from 'lucide-react';
+import { Shuffle, Film, Star, RotateCw, Sparkles, Play } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
 function getMovieYear(m) {
@@ -54,18 +54,23 @@ export default function SpinWheel({ movies, onViewMovie }) {
     );
   }
 
+  const confettiColors = ['#06b6d4', '#d946ef', '#fbbf24', '#22d3ee', '#a855f7', '#f472b6'];
+
   return (
     <div className="cflip-wrap">
+      <div className="cflip-bg-glow" />
+      <div className="cflip-bg-grid" />
+
       {showConfetti && (
         <div className="cflip-confetti">
-          {Array.from({ length: 40 }).map((_, i) => (
+          {Array.from({ length: 50 }).map((_, i) => (
             <div key={i} className="cflip-confetti-piece" style={{
               left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 1.2}s`,
-              animationDuration: `${1.5 + Math.random() * 2}s`,
-              background: ['#fbbf24','#f59e0b','#eab308','#fef3c7'][Math.floor(Math.random() * 4)],
-              width: `${5 + Math.random() * 6}px`,
-              height: `${5 + Math.random() * 6}px`,
+              animationDelay: `${Math.random() * 1.5}s`,
+              animationDuration: `${1.8 + Math.random() * 2.5}s`,
+              background: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+              width: `${4 + Math.random() * 8}px`,
+              height: `${4 + Math.random() * 8}px`,
               borderRadius: Math.random() > 0.5 ? '50%' : '2px',
             }} />
           ))}
@@ -73,8 +78,14 @@ export default function SpinWheel({ movies, onViewMovie }) {
       )}
 
       <div className="cflip-head">
-        <h2 className="cflip-title">🃏 Card Flip</h2>
-        <p className="cflip-sub">Pick a card, any card!</p>
+        <div className="cflip-brand">
+          <div className="cflip-brand-m">
+            <span className="cflip-brand-m-text">MCF</span>
+          </div>
+          <span>Macha</span>
+          <span className="cflip-brand-highlight">Card Flix</span>
+        </div>
+        <p className="cflip-sub">Pick a card, discover your next watch!</p>
       </div>
 
       <div className="cflip-body">
@@ -90,10 +101,16 @@ export default function SpinWheel({ movies, onViewMovie }) {
                       left: `${i * 2}px`,
                       top: `${i * 2}px`,
                       zIndex: 5 - i,
-                      transform: flipping ? `rotate(${(i - 2) * 1.5}deg) translateY(${flipping ? `${i * 3 - 5}px` : '0'})` : `rotate(${i * 1.5 - 4}deg)`,
-                      animation: flipping ? `cflipRiffle 0.15s ${i * 0.05}s ease-in-out infinite alternate` : 'none',
+                      transform: flipping
+                        ? `rotate(${(i - 2) * 2.5}deg) translateY(${i * 3 - 5}px)`
+                        : `rotate(${i * 2 - 5}deg)`,
+                      animation: flipping
+                        ? `cflipShuffle 0.12s ${i * 0.04}s ease-in-out infinite alternate`
+                        : 'none',
                     }}
-                  />
+                  >
+                    <div className="cflip-back-diamond" />
+                  </div>
                 ))}
               </div>
             )}
@@ -102,22 +119,29 @@ export default function SpinWheel({ movies, onViewMovie }) {
               <div className="cflip-card-inner">
                 <div className="cflip-card-front">
                   <div className="cflip-card-pattern" />
+                  <div className="cflip-card-front-logo">
+                    <Film size={22} />
+                  </div>
                 </div>
                 <div className="cflip-card-back-face">
                   {winner ? (
                     <div className="cflip-card-content">
-                      <img
-                        src={proxyImageUrl(winner.posterUrl, 'w185')}
-                        alt={winner.title}
-                        className="cflip-card-img"
-                        onClick={() => onViewMovie?.(winner.id)}
-                      />
+                      <div className="cflip-card-img-wrap">
+                        <img
+                          src={proxyImageUrl(winner.posterUrl, 'w185')}
+                          alt={winner.title}
+                          className="cflip-card-img"
+                          onClick={() => onViewMovie?.(winner.id)}
+                        />
+                        <div className="cflip-card-img-overlay" />
+                        <div className="cflip-card-img-shine" />
+                      </div>
                       <div className="cflip-card-info">
                         <h3 className="cflip-card-title">{winner.title}</h3>
                         <span className="cflip-card-year">{getMovieYear(winner)}</span>
                         <div className="cflip-card-stars">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} size={10} fill={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.06)'} color={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.06)'} />
+                            <Star key={i} size={9} fill={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.05)'} color={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.05)'} />
                           ))}
                           <span className="cflip-card-rating">{winner.rating?.toFixed(1)}</span>
                         </div>
@@ -135,10 +159,17 @@ export default function SpinWheel({ movies, onViewMovie }) {
 
           {showResult && winner && (
             <div className="cflip-result animated-pop">
-              <div className="cflip-badge"><Sparkles size={10} /> YOUR CARD</div>
+              <div className="cflip-badge">
+                <Sparkles size={10} />
+                YOUR PICK
+              </div>
               <div className="cflip-actions">
-                <button className="cflip-btn-p" onClick={() => onViewMovie?.(winner.id)}>View Details</button>
-                <button className="cflip-btn-s" onClick={flip}><RotateCw size={12} /> Flip Again</button>
+                <button className="cflip-btn-p" onClick={() => onViewMovie?.(winner.id)}>
+                  <Play size={12} /> View Details
+                </button>
+                <button className="cflip-btn-s" onClick={flip}>
+                  <RotateCw size={12} /> Flip Again
+                </button>
               </div>
             </div>
           )}
@@ -148,7 +179,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
           {flipping ? (
             <div className="cflip-flipstate">
               <div className="cflip-spinner" />
-              <p>Shuffling cards...</p>
+              <p>Shuffling deck...</p>
             </div>
           ) : !showResult && (
             <button className="cflip-flipbtn" onClick={flip}>
