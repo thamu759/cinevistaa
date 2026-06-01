@@ -1282,7 +1282,7 @@ const handleDeleteReview = async (reviewId) => {
       </div>
 
       {/* RENDER ACTIVE VIEW */}
-      <div className="fade-in">
+      <div className="fade-in" key={activeView + (selectedMovieId || selectedArticleId || '')}>
         {activeView === 'home' && (
           <div className="main-content">
             {/* HERO CAROUSEL */}

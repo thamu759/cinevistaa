@@ -183,7 +183,7 @@ export default function MovieDetailsView({
             {/* Native Ad Card */}
             <div className="ad-container" style={{ marginBottom: '1.5rem' }}>
               <span className="ad-label">Advertisement</span>
-              <div style={{ display: 'flex', justifyContent: 'center', minHeight: '250px', alignItems: 'center' }}>
+              <div className="ad-placeholder" style={{ display: 'flex', justifyContent: 'center', minHeight: '250px', alignItems: 'center', background: '#0b0c10', border: '1px solid var(--color-border)' }}>
                 <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
               </div>
             </div>
