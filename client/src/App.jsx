@@ -1860,14 +1860,72 @@ const handleDeleteReview = async (reviewId) => {
                     <span className="fun-promo-cta">Flip Now →</span>
                   </div>
                 </div>
-                <div className="fun-promo-card" style={{background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(168,85,247,0.06))'}} onClick={() => navigateTo('blind-frame')}>
+                <div className="fun-promo-card blind-promo" onClick={() => navigateTo('blind-frame')}>
+                  <div className="fun-promo-bg">
+                    <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
+                      <defs>
+                        <radialGradient id="bBg" cx="50%" cy="50%" r="60%">
+                          <stop offset="0%" stopColor="rgba(168,85,247,0.2)"/>
+                          <stop offset="100%" stopColor="rgba(30,27,75,0.4)"/>
+                        </radialGradient>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#bBg)"/>
+                      <ellipse cx="110" cy="160" rx="28" ry="32" fill="rgba(255,255,255,0.03)" stroke="rgba(168,85,247,0.1)" strokeWidth="1.5"/>
+                      <circle cx="110" cy="160" r="8" fill="rgba(168,85,247,0.06)"/>
+                      <circle cx="110" cy="160" r="3" fill="rgba(168,85,247,0.1)"/>
+                      <rect x="170" y="120" width="40" height="50" rx="3" fill="rgba(255,255,255,0.02)" stroke="rgba(251,191,36,0.08)" strokeWidth="1" transform="rotate(-8 190 145)"/>
+                      <rect x="180" y="125" width="20" height="40" rx="2" fill="rgba(251,191,36,0.04)" stroke="rgba(251,191,36,0.06)" strokeWidth="1" transform="rotate(-8 190 145)"/>
+                      <rect x="250" y="90" width="35" height="50" rx="3" fill="rgba(255,255,255,0.02)" stroke="rgba(168,85,247,0.08)" strokeWidth="1" transform="rotate(6 267 115)"/>
+                      <rect x="258" y="95" width="18" height="40" rx="2" fill="rgba(168,85,247,0.04)" stroke="rgba(168,85,247,0.06)" strokeWidth="1" transform="rotate(6 267 115)"/>
+                      <text x="290" y="180" fontSize="36" fill="rgba(168,85,247,0.12)" fontFamily="serif" fontWeight="bold">?</text>
+                      <text x="240" y="190" fontSize="22" fill="rgba(251,191,36,0.1)" fontFamily="serif" fontWeight="bold">?</text>
+                      <text x="320" y="160" fontSize="16" fill="rgba(168,85,247,0.08)" fontFamily="serif" fontWeight="bold">?</text>
+                      <circle cx="70" cy="100" r="3" fill="rgba(168,85,247,0.08)"/>
+                      <circle cx="310" cy="230" r="2.5" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="150" cy="210" r="2" fill="rgba(168,85,247,0.06)"/>
+                      <circle cx="260" cy="240" r="3.5" fill="rgba(251,191,36,0.06)"/>
+                      <circle cx="50" cy="200" r="2" fill="rgba(168,85,247,0.05)"/>
+                    </svg>
+                  </div>
                   <div className="fun-promo-content">
                     <h3 className="fun-promo-title">Blind Frame</h3>
                     <p className="fun-promo-desc">Guess the movie from a blurry poster as it clears!</p>
                     <span className="fun-promo-cta">Play Now →</span>
                   </div>
                 </div>
-                <div className="fun-promo-card" style={{background: 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(251,191,36,0.06))'}} onClick={() => navigateTo('mood-matcher')}>
+                <div className="fun-promo-card mood-promo" onClick={() => navigateTo('mood-matcher')}>
+                  <div className="fun-promo-bg">
+                    <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
+                      <defs>
+                        <radialGradient id="mBg" cx="50%" cy="50%" r="60%">
+                          <stop offset="0%" stopColor="rgba(52,211,153,0.2)"/>
+                          <stop offset="100%" stopColor="rgba(30,27,75,0.4)"/>
+                        </radialGradient>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#mBg)"/>
+                      <circle cx="100" cy="140" r="28" fill="rgba(255,255,255,0.03)" stroke="rgba(251,191,36,0.08)" strokeWidth="1.5"/>
+                      <circle cx="90" cy="133" r="4" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="110" cy="133" r="4" fill="rgba(251,191,36,0.08)"/>
+                      <path d="M88 150 Q100 162 112 150" fill="none" stroke="rgba(251,191,36,0.12)" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="190" cy="110" r="24" fill="rgba(255,255,255,0.03)" stroke="rgba(52,211,153,0.08)" strokeWidth="1.5"/>
+                      <circle cx="182" cy="104" r="3.5" fill="rgba(52,211,153,0.08)"/>
+                      <circle cx="198" cy="104" r="3.5" fill="rgba(52,211,153,0.08)"/>
+                      <path d="M182 118 Q190 126 198 118" fill="none" stroke="rgba(52,211,153,0.1)" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="290" cy="150" r="24" fill="rgba(255,255,255,0.03)" stroke="rgba(251,191,36,0.08)" strokeWidth="1.5"/>
+                      <circle cx="290" cy="143" r="3.5" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="290" cy="143" r="3.5" fill="rgba(251,191,36,0.08)"/>
+                      <path d="M282 158 Q290 164 298 158" fill="none" stroke="rgba(251,191,36,0.1)" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="280" cy="180" r="2" fill="rgba(252,211,77,0.08)"/>
+                      <circle cx="300" cy="180" r="2" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="290" cy="172" r="2" fill="rgba(251,191,36,0.06)"/>
+                      <circle cx="140" cy="200" r="2.5" fill="rgba(52,211,153,0.08)"/>
+                      <circle cx="220" cy="200" r="2" fill="rgba(251,191,36,0.06)"/>
+                      <circle cx="70" cy="200" r="2" fill="rgba(52,211,153,0.06)"/>
+                      <text x="330" y="90" fontSize="20" fill="rgba(251,191,36,0.1)" fontFamily="serif">♥</text>
+                      <text x="60" y="80" fontSize="16" fill="rgba(52,211,153,0.1)" fontFamily="serif">★</text>
+                      <text x="220" y="80" fontSize="14" fill="rgba(251,191,36,0.08)" fontFamily="serif">✦</text>
+                    </svg>
+                  </div>
                   <div className="fun-promo-content">
                     <h3 className="fun-promo-title">Mood Matcher</h3>
                     <p className="fun-promo-desc">Tell us your mood and we'll pick the perfect movie!</p>

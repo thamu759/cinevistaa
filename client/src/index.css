@@ -5201,6 +5201,28 @@ a {
 .wheel-promo:hover .fun-promo-cta {
   background: rgba(251,191,36,0.2);
 }
+.blind-promo {
+  background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,191,36,0.06));
+}
+.blind-promo .fun-promo-cta {
+  color: #c4b5fd;
+  background: rgba(168,85,247,0.1);
+  border: 1px solid rgba(168,85,247,0.2);
+}
+.blind-promo:hover .fun-promo-cta {
+  background: rgba(168,85,247,0.2);
+}
+.mood-promo {
+  background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(251,191,36,0.06));
+}
+.mood-promo .fun-promo-cta {
+  color: #6ee7b7;
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.2);
+}
+.mood-promo:hover .fun-promo-cta {
+  background: rgba(52,211,153,0.2);
+}
 
 /* ─── BLIND FRAME ─── */
 .bf-frame {
