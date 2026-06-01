@@ -10,7 +10,7 @@ function pickRandom(arr) {
 }
 
 const REEL_N = 60;
-const ITEM_H = 120;
+const ITEM_H = 140;
 
 export default function SpinWheel({ movies, onViewMovie }) {
   const [spinning, setSpinning] = useState(false);
