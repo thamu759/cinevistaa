@@ -1780,19 +1780,31 @@ const handleDeleteReview = async (reviewId) => {
                   <div className="fun-promo-bg">
                     <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
                       <defs>
-                        <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="rgba(99,102,241,0.15)"/>
-                          <stop offset="100%" stopColor="rgba(139,92,246,0.05)"/>
-                        </linearGradient>
+                        <radialGradient id="qBg" cx="50%" cy="50%" r="60%">
+                          <stop offset="0%" stopColor="rgba(99,102,241,0.2)"/>
+                          <stop offset="100%" stopColor="rgba(30,27,75,0.4)"/>
+                        </radialGradient>
                       </defs>
-                      <rect width="400" height="300" fill="url(#qGrad)"/>
-                      <circle cx="200" cy="140" r="80" fill="none" stroke="rgba(99,102,241,0.08)" strokeWidth="2"/>
-                      <text x="160" y="110" fontSize="60" fill="rgba(99,102,241,0.12)" fontFamily="serif">?</text>
-                      <text x="210" y="170" fontSize="40" fill="rgba(139,92,246,0.1)" fontFamily="serif">?</text>
-                      <text x="140" y="180" fontSize="30" fill="rgba(99,102,241,0.08)" fontFamily="serif">?</text>
-                      <rect x="90" y="90" width="25" height="35" rx="3" fill="none" stroke="rgba(99,102,241,0.06)" strokeWidth="1.5" transform="rotate(-15 102 107)"/>
-                      <rect x="270" y="100" width="25" height="35" rx="3" fill="none" stroke="rgba(139,92,246,0.06)" strokeWidth="1.5" transform="rotate(10 282 117)"/>
-                      <circle cx="200" cy="140" r="10" fill="rgba(251,191,36,0.06)"/>
+                      <rect width="400" height="300" fill="url(#qBg)"/>
+                      <circle cx="110" cy="190" r="30" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="110" cy="190" r="22" fill="rgba(251,191,36,0.06)"/>
+                      <circle cx="110" cy="190" r="4" fill="rgba(251,191,36,0.12)"/>
+                      <circle cx="102" cy="184" r="5" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="118" cy="184" r="5" fill="rgba(251,191,36,0.08)"/>
+                      <path d="M102 198 Q110 208 118 198" fill="none" stroke="rgba(251,191,36,0.12)" strokeWidth="2" strokeLinecap="round"/>
+                      <ellipse cx="200" cy="120" rx="55" ry="60" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
+                      <ellipse cx="185" cy="105" rx="18" ry="22" fill="rgba(255,255,255,0.04)"/>
+                      <circle cx="185" cy="95" r="2.5" fill="rgba(255,255,255,0.08)"/>
+                      <circle cx="195" cy="100" r="2" fill="rgba(255,255,255,0.06)"/>
+                      <path d="M178 115 Q185 125 192 115" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" strokeLinecap="round"/>
+                      <text x="210" y="90" fontSize="28" fill="rgba(251,191,36,0.15)" fontFamily="serif" fontWeight="bold">?</text>
+                      <text x="160" y="75" fontSize="18" fill="rgba(99,102,241,0.12)" fontFamily="serif" fontWeight="bold">?</text>
+                      <text x="225" y="65" fontSize="14" fill="rgba(139,92,246,0.1)" fontFamily="serif" fontWeight="bold">?</text>
+                      <rect x="50" y="50" width="30" height="40" rx="4" fill="none" stroke="rgba(99,102,241,0.08)" strokeWidth="1.5" transform="rotate(-12 65 70)"/>
+                      <rect x="310" y="60" width="30" height="40" rx="4" fill="none" stroke="rgba(139,92,246,0.08)" strokeWidth="1.5" transform="rotate(8 325 80)"/>
+                      <circle cx="90" cy="130" r="3" fill="rgba(251,191,36,0.1)"/>
+                      <circle cx="320" cy="160" r="4" fill="rgba(99,102,241,0.08)"/>
+                      <circle cx="280" cy="80" r="2" fill="rgba(251,191,36,0.08)"/>
                     </svg>
                   </div>
                   <div className="fun-promo-content">
@@ -1805,20 +1817,29 @@ const handleDeleteReview = async (reviewId) => {
                   <div className="fun-promo-bg">
                     <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
                       <defs>
-                        <linearGradient id="wGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="rgba(251,191,36,0.15)"/>
-                          <stop offset="100%" stopColor="rgba(245,158,11,0.05)"/>
-                        </linearGradient>
+                        <radialGradient id="wBg" cx="50%" cy="50%" r="60%">
+                          <stop offset="0%" stopColor="rgba(251,191,36,0.2)"/>
+                          <stop offset="100%" stopColor="rgba(30,27,75,0.4)"/>
+                        </radialGradient>
                       </defs>
-                      <rect width="400" height="300" fill="url(#wGrad)"/>
-                      <circle cx="200" cy="140" r="70" fill="none" stroke="rgba(251,191,36,0.1)" strokeWidth="2"/>
-                      <circle cx="200" cy="140" r="45" fill="none" stroke="rgba(245,158,11,0.07)" strokeWidth="1.5"/>
-                      <circle cx="200" cy="140" r="20" fill="none" stroke="rgba(251,191,36,0.08)" strokeWidth="1"/>
-                      <circle cx="200" cy="140" r="5" fill="rgba(251,191,36,0.1)"/>
-                      <line x1="200" y1="70" x2="200" y2="140" stroke="rgba(251,191,36,0.06)" strokeWidth="2"/>
-                      <polygon points="200,55 194,70 206,70" fill="rgba(251,191,36,0.1)"/>
-                      <rect x="110" y="90" width="20" height="28" rx="2" fill="none" stroke="rgba(251,191,36,0.06)" strokeWidth="1.5" transform="rotate(-20 120 104)"/>
-                      <rect x="270" y="100" width="20" height="28" rx="2" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="1.5" transform="rotate(15 280 114)"/>
+                      <rect width="400" height="300" fill="url(#wBg)"/>
+                      <circle cx="190" cy="160" r="65" fill="none" stroke="rgba(251,191,36,0.08)" strokeWidth="2"/>
+                      <circle cx="190" cy="160" r="50" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="1.5"/>
+                      <circle cx="190" cy="160" r="35" fill="none" stroke="rgba(251,191,36,0.05)" strokeWidth="1"/>
+                      <line x1="190" y1="95" x2="190" y2="160" stroke="rgba(251,191,36,0.06)" strokeWidth="2"/>
+                      <line x1="190" y1="160" x2="240" y2="160" stroke="rgba(245,158,11,0.06)" strokeWidth="2"/>
+                      <line x1="190" y1="160" x2="150" y2="200" stroke="rgba(251,191,36,0.05)" strokeWidth="1.5"/>
+                      <line x1="190" y1="160" x2="230" y2="200" stroke="rgba(245,158,11,0.05)" strokeWidth="1.5"/>
+                      <circle cx="190" cy="160" r="8" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="190" cy="160" r="3" fill="rgba(251,191,36,0.15)"/>
+                      <polygon points="190,78 185,95 195,95" fill="rgba(251,191,36,0.1)"/>
+                      <polygon points="190,78 185,95 195,95" fill="none" stroke="rgba(251,191,36,0.15)" strokeWidth="1"/>
+                      <circle cx="290" cy="80" r="3" fill="rgba(251,191,36,0.1)"/>
+                      <circle cx="100" cy="80" r="2.5" fill="rgba(245,158,11,0.08)"/>
+                      <circle cx="310" cy="210" r="2" fill="rgba(251,191,36,0.08)"/>
+                      <circle cx="80" cy="200" r="3.5" fill="rgba(245,158,11,0.06)"/>
+                      <rect x="100" y="100" width="22" height="32" rx="3" fill="none" stroke="rgba(251,191,36,0.06)" strokeWidth="1.5" transform="rotate(-15 111 116)"/>
+                      <rect x="265" y="120" width="22" height="32" rx="3" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="1.5" transform="rotate(12 276 136)"/>
                     </svg>
                   </div>
                   <div className="fun-promo-content">

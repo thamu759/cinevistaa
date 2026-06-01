@@ -4666,9 +4666,13 @@ a {
 }
 .fun-promo-title {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 700;
   color: var(--color-text-main);
   margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .fun-promo-desc {
   font-size: 0.82rem;
@@ -4679,11 +4683,14 @@ a {
 }
 .fun-promo-cta {
   display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.35rem 1rem;
-  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  font-style: italic;
+  padding: 0.35rem 1.1rem;
+  border-radius: 20px;
   transition: all 0.2s;
+  letter-spacing: 0.03em;
 }
 .quiz-promo .fun-promo-cta {
   color: #a5b4fc;
