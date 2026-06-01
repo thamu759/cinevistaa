@@ -97,32 +97,57 @@ export default function App() {
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // SEO title updates per view
-  const pageTitles = {
-    home: 'thiraipedia | Premium Film Critique & Reviews',
-    'new-releases': 'New Releases — thiraipedia',
-    'top-rated': 'Top Rated — thiraipedia',
-    watchlist: 'My Watchlist — thiraipedia',
-    'coming-soon': 'Coming Soon — thiraipedia',
-    actor: 'Actor — thiraipedia',
-    profile: 'My Profile — thiraipedia',
-    leaderboard: 'Top Critics — thiraipedia',
-    lists: 'Lists — thiraipedia',
-    'list-detail': 'List — thiraipedia',
-    'ott-calendar': 'OTT Calendar — thiraipedia',
-    community: 'Community Forum — thiraipedia',
-    admin: 'Admin Panel — thiraipedia',
-    'movie-details': 'Movie Details — thiraipedia',
-    privacy: 'Privacy Policy — thiraipedia',
-    terms: 'Terms of Service — thiraipedia',
-    contact: 'Contact Us — thiraipedia',
-    about: 'About Us — thiraipedia',
+  const pageMeta = {
+    home: { title: 'thiraipedia | Premium Film Critique & Reviews', desc: 'Discover in-depth movie reviews, ratings, and film critiques at thiraipedia. Track your watchlist, explore OTT releases, and join a community of cinema lovers.' },
+    'new-releases': { title: 'New Releases — thiraipedia', desc: 'Browse the latest movie releases on thiraipedia. Filter by month and year to find newly released films with ratings and reviews.' },
+    'tamil-cinema': { title: 'Tamil Cinema — thiraipedia', desc: 'Explore Tamil movie reviews, ratings, and recommendations on thiraipedia. Discover the best of Tamil cinema.' },
+    'malayalam-cinema': { title: 'Malayalam Cinema — thiraipedia', desc: 'Explore Malayalam movie reviews, ratings, and recommendations on thiraipedia. Discover the best of Malayalam cinema.' },
+    'top-rated': { title: 'Top Rated — thiraipedia', desc: 'View the highest-rated movies on thiraipedia. Every film rated 7 and above, ranked by critic score.' },
+    watchlist: { title: 'My Watchlist — thiraipedia', desc: 'Manage your personal movie watchlist on thiraipedia. Save films to watch later and track your queue.' },
+    'coming-soon': { title: 'Coming Soon — thiraipedia', desc: 'Discover upcoming movie releases and anticipated films on thiraipedia. Stay ahead of new cinema.' },
+    actor: { title: 'Actor — thiraipedia', desc: 'Explore filmography and movies featuring your favourite actors on thiraipedia.' },
+    profile: { title: 'My Profile — thiraipedia', desc: 'View your thiraipedia profile, reviews, watchlist, and critic stats. Manage your account and followers.' },
+    leaderboard: { title: 'Top Critics — thiraipedia', desc: 'See the most active film critics and top reviewers on thiraipedia. Ranked by reviews and ratings.' },
+    lists: { title: 'Lists — thiraipedia', desc: 'Browse curated movie lists created by the thiraipedia community. Discover themed film collections.' },
+    'list-detail': { title: 'List — thiraipedia', desc: 'View a curated movie collection on thiraipedia. Explore films handpicked by critics and community members.' },
+    'ott-calendar': { title: 'OTT Calendar — thiraipedia', desc: 'Track upcoming OTT releases and streaming premieres on thiraipedia. Never miss a digital release.' },
+    community: { title: 'Community Forum — thiraipedia', desc: 'Join film discussions, share recommendations, and connect with fellow cinema enthusiasts on thiraipedia.' },
+    admin: { title: 'Admin Panel — thiraipedia', desc: 'Manage movies, reviews, and site content on the thiraipedia admin control panel.' },
+    'movie-details': { title: 'Movie Details — thiraipedia', desc: 'Read in-depth movie reviews, watch trailers, and see ratings on thiraipedia. Detailed film critique and analysis.' },
+    privacy: { title: 'Privacy Policy — thiraipedia', desc: 'Read the thiraipedia privacy policy. Learn how we handle your data and protect your privacy.' },
+    terms: { title: 'Terms of Service — thiraipedia', desc: 'Read the thiraipedia terms of service. Guidelines for using our film critique platform.' },
+    contact: { title: 'Contact Us — thiraipedia', desc: 'Get in touch with the thiraipedia team. Send us your feedback, suggestions, or inquiries.' },
+    about: { title: 'About Us — thiraipedia', desc: 'Learn about thiraipedia — a premium movie review and film critique platform for passionate cinema lovers.' },
+  };
+
+  const updateMeta = (meta) => {
+    const desc = meta?.desc || 'Discover in-depth movie reviews, ratings, and film critiques at thiraipedia. Track your watchlist, explore OTT releases, and join a community of cinema lovers.';
+    let el = document.querySelector('meta[name="description"]');
+    if (el) el.setAttribute('content', desc);
+    el = document.querySelector('meta[property="og:description"]');
+    if (el) el.setAttribute('content', desc);
+    el = document.querySelector('meta[name="twitter:description"]');
+    if (el) el.setAttribute('content', desc);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', window.location.href);
   };
 
   useEffect(() => {
-    const title = pageTitles[activeView] || 'thiraipedia | Premium Film Critique & Reviews';
-    document.title = title;
+    const meta = pageMeta[activeView] || pageMeta.home;
+    document.title = meta.title;
+    updateMeta(meta);
   }, [activeView]);
+
+  useEffect(() => {
+    if (activeView === 'movie-details' && selectedMovie) {
+      const title = `${selectedMovie.title} — Movie Review & Rating | thiraipedia`;
+      const desc = selectedMovie.description
+        ? selectedMovie.description.slice(0, 160)
+        : `Read reviews, watch the trailer, and see ratings for ${selectedMovie.title} on thiraipedia.`;
+      document.title = title;
+      updateMeta({ desc });
+    }
+  }, [activeView, selectedMovie]);
 
   // Search Overlay State (IMDb-style, decoupled from grid)
   const [isSearchOpen, setIsSearchOpen] = useState(false);
