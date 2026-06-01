@@ -130,11 +130,14 @@ export default function SpinWheel({ movies, onViewMovie }) {
               ) : (
                 <img
                   ref={imgRef}
-                  src={proxyImageUrl(winner.posterUrl, 'w150')}
+                  src={winner.posterUrl?.replace(/\/w\d+/, '/w185') || winner.posterUrl}
                   alt={winner.title}
                   className="ldraw-poster"
                   onClick={() => onViewMovie?.(winner.id)}
-                  onError={() => setImgFailed(true)}
+                  onError={(e) => {
+                    e.target.src = winner.posterUrl;
+                    e.target.onerror = () => setImgFailed(true);
+                  }}
                 />
               )}
               <h3 className="ldraw-rtitle">{winner.title}</h3>
