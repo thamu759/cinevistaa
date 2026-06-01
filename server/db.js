@@ -169,7 +169,8 @@ export const fetchTmdbMovieDetailsFull = async (tmdbId) => {
     const runtime = details.runtime ? `${Math.floor(details.runtime / 60)}h ${details.runtime % 60}m` : '';
 
     let trailerUrl = '', trailerChannelName = '';
-    const trailer = (videos?.results || []).find(v => v.site === 'YouTube' && v.type === 'Trailer');
+    const trailer = (videos?.results || []).find(v => v.site === 'YouTube' && v.type === 'Trailer')
+      || (videos?.results || []).find(v => v.site === 'YouTube' && v.type === 'Teaser');
     if (trailer) {
       trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
       trailerChannelName = trailer.name || '';

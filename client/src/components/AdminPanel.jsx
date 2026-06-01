@@ -300,7 +300,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
 
   const applyAddTmdb = async (m) => {
     setLastAutoFetchedTitle(m.title || '');
-    setAddForm({
+    setAddForm(prev => ({
+      ...prev,
       title: m.title || '',
       description: m.description || '',
       posterUrl: m.posterUrl || '',
@@ -311,10 +312,12 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
       studio: '',
       genre: '',
       runtime: '',
+      trailerUrl: '',
+      trailerChannelName: '',
       ottPlatform: '',
       ottReleaseDate: '',
       ottUrl: '',
-    });
+    }));
     if (m.tmdbId) {
       try {
         const [credits, details] = await Promise.all([
