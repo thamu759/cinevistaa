@@ -1045,12 +1045,39 @@ a {
   border-radius: 8px;
   pointer-events: auto;
 }
+@media (max-width: 480px) {
+  .ad-card-hscroll {
+    flex: 0 0 240px;
+    padding: 0.3rem;
+  }
+}
 .ad-card-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
   padding: 1rem;
+}
+.ad-responsive-wrap {
+  width: 100%;
+  max-width: 728px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+.ad-responsive-wrap iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 728 / 90;
+  transform-origin: center;
+}
+@media (max-width: 768px) {
+  .ad-responsive-wrap iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 728 / 90;
+  }
 }
 .ad-label-sm {
   font-size: 0.55rem;

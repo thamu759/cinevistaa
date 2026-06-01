@@ -1381,7 +1381,7 @@ const handleDeleteReview = async (reviewId) => {
             <section className="ad-section" style={{ marginTop: '2rem' }}>
               <div className="ad-container ad-banner">
                 <span className="ad-label">Advertisement</span>
-                <div className="ad-placeholder ad-banner-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '90px' }}>
+                <div className="ad-responsive-wrap">
                   <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
                 </div>
               </div>
