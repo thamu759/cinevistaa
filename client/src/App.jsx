@@ -43,7 +43,6 @@ import ContactPage from './components/ContactPage';
 import AboutPage from './components/AboutPage';
 import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
-import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
 import SpinWheel from './components/SpinWheel';
 import QuizGame from './components/QuizGame';
@@ -1398,7 +1397,6 @@ const handleDeleteReview = async (reviewId) => {
               <div className="ad-container ad-banner">
                 <span className="ad-label">Advertisement</span>
                 <div className="ad-responsive-wrap">
-                  <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
                 </div>
               </div>
             </section>
@@ -1440,14 +1438,6 @@ const handleDeleteReview = async (reviewId) => {
                 <div className="movie-grid-horizontal" ref={newReleasesScrollRef}>
                   {newReleases.flatMap((movie, idx) => {
                     const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-nr-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
                     items.push(
                       <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                        <div className="movie-card-poster-wrapper">
@@ -1501,14 +1491,6 @@ const handleDeleteReview = async (reviewId) => {
                 <div className="movie-grid-horizontal" ref={tamilScrollRef}>
                   {tamilMovies.flatMap((movie, idx) => {
                     const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-ta-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
                     items.push(
                       <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                         <div className="movie-card-poster-wrapper">
@@ -1562,14 +1544,6 @@ const handleDeleteReview = async (reviewId) => {
                 <div className="movie-grid-horizontal" ref={malayalamScrollRef}>
                   {malayalamMovies.flatMap((movie, idx) => {
                     const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-ml-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
                     items.push(
                       <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
                         <div className="movie-card-poster-wrapper">
