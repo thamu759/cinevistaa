@@ -1,34 +1,33 @@
 import { useEffect, useRef } from 'react';
 
-const AD_QUEUE = [];
-let LOADING = false;
-
-function processQueue() {
-  if (LOADING || AD_QUEUE.length === 0) return;
-  LOADING = true;
-  const { el, zoneKey, format, width, height } = AD_QUEUE.shift();
-  window.atOptions = { key: zoneKey, format, height, width, params: {} };
-  const script = document.createElement('script');
-  script.src = `https://www.highperformanceformat.com/${zoneKey}/invoke.js`;
-  script.async = true;
-  script.onload = () => { LOADING = false; processQueue(); };
-  script.onerror = () => { LOADING = false; processQueue(); };
-  el.appendChild(script);
-}
-
 export default function AdsterraAd({ zoneKey, width, height, format = 'iframe' }) {
   const ref = useRef(null);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || loadedRef.current) return;
+    loadedRef.current = true;
+
     el.innerHTML = '';
-    AD_QUEUE.push({ el, zoneKey, format, width, height });
-    if (!LOADING) processQueue();
-    return () => {
-      const idx = AD_QUEUE.findIndex(a => a.el === el);
-      if (idx !== -1) AD_QUEUE.splice(idx, 1);
-    };
+
+    const iframe = document.createElement('iframe');
+    const srcdoc = `
+      <html><body style="margin:0;padding:0;overflow:hidden">
+        <script>
+          window.atOptions = ${JSON.stringify({ key: zoneKey, format, height, width, params: {} })};
+        <\/script>
+        <script src="https://www.highperformanceformat.com/${zoneKey}/invoke.js"><\/script>
+      </body></html>
+    `;
+    iframe.srcdoc = srcdoc;
+    iframe.width = width;
+    iframe.height = height;
+    iframe.style = 'border:none;display:block';
+    iframe.scrolling = 'no';
+    iframe.title = 'Advertisement';
+    iframe.loading = 'lazy';
+    el.appendChild(iframe);
   }, [zoneKey, width, height, format]);
 
   return <div ref={ref} style={{ minHeight: height, minWidth: width }} />;
