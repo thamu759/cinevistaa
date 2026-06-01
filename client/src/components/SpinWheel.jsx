@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Shuffle, Film, Sparkles, Star, Ticket } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Shuffle, Film, Sparkles, Star, RotateCw } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
 function getMovieYear(m) {
@@ -10,47 +10,44 @@ function pickRandom(arr) {
 }
 
 export default function SpinWheel({ movies, onViewMovie }) {
-  const [drawing, setDrawing] = useState(false);
+  const [flipping, setFlipping] = useState(false);
   const [winner, setWinner] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [ticketRise, setTicketRise] = useState(false);
-  const imgRef = useRef(null);
-  const [imgFailed, setImgFailed] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
     const eligible = movies.filter(m => m.posterUrl);
     setCandidates(eligible);
   }, [movies]);
 
-  const draw = useCallback(() => {
-    if (drawing || candidates.length === 0) return;
-    setDrawing(true);
+  const flip = useCallback(() => {
+    if (flipping || candidates.length === 0) return;
+    setFlipping(true);
     setWinner(null);
     setShowConfetti(false);
     setShowResult(false);
-    setTicketRise(false);
-    setImgFailed(false);
+    setFlipped(false);
 
     const w = pickRandom(candidates);
 
     setTimeout(() => {
-      setTicketRise(true);
+      setFlipped(true);
     }, 1800);
 
     setTimeout(() => {
-      setDrawing(false);
+      setFlipping(false);
       setWinner(w);
       setShowConfetti(true);
       setShowResult(true);
       setTimeout(() => setShowConfetti(false), 3000);
-    }, 3200);
-  }, [drawing, candidates]);
+    }, 2800);
+  }, [flipping, candidates]);
 
   if (candidates.length === 0) {
     return (
-      <div className="ldraw-empty">
+      <div className="cflip-empty">
         <Film size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
         <p>No movies available. Add some first!</p>
       </div>
@@ -58,11 +55,11 @@ export default function SpinWheel({ movies, onViewMovie }) {
   }
 
   return (
-    <div className="ldraw-wrap">
+    <div className="cflip-wrap">
       {showConfetti && (
-        <div className="ldraw-confetti">
+        <div className="cflip-confetti">
           {Array.from({ length: 40 }).map((_, i) => (
-            <div key={i} className="ldraw-confetti-piece" style={{
+            <div key={i} className="cflip-confetti-piece" style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 1.2}s`,
               animationDuration: `${1.5 + Math.random() * 2}s`,
@@ -75,102 +72,91 @@ export default function SpinWheel({ movies, onViewMovie }) {
         </div>
       )}
 
-      <div className="ldraw-head">
-        <h2 className="ldraw-title">🎟️ Lucky Draw</h2>
-        <p className="ldraw-sub">One ticket wins — is it yours?</p>
+      <div className="cflip-head">
+        <h2 className="cflip-title">🃏 Card Flip</h2>
+        <p className="cflip-sub">Pick a card, any card!</p>
       </div>
 
-      <div className="ldraw-body">
-        <div className="ldraw-drum-wrap">
-          <div className="ldraw-drum">
-            {drawing && !ticketRise && (
-              <div className="ldraw-shake-tickets">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="ldraw-ticket-chip" style={{
-                    left: `${20 + Math.random() * 60}%`,
-                    top: `${15 + Math.random() * 55}%`,
-                    transform: `rotate(${Math.random() * 60 - 30}deg)`,
-                    animationDelay: `${Math.random() * 0.8}s`,
-                    animationDuration: `${0.3 + Math.random() * 0.4}s`,
-                  }}>
-                    <Ticket size={11} />
-                  </div>
+      <div className="cflip-body">
+        <div className="cflip-deck-area">
+          <div className="cflip-deck">
+            {!flipped && (
+              <div className="cflip-stack">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="cflip-card-back"
+                    style={{
+                      left: `${i * 2}px`,
+                      top: `${i * 2}px`,
+                      zIndex: 5 - i,
+                      transform: flipping ? `rotate(${(i - 2) * 1.5}deg) translateY(${flipping ? `${i * 3 - 5}px` : '0'})` : `rotate(${i * 1.5 - 4}deg)`,
+                      animation: flipping ? `cflipRiffle 0.15s ${i * 0.05}s ease-in-out infinite alternate` : 'none',
+                    }}
+                  />
                 ))}
               </div>
             )}
 
-            {!drawing && !showResult && (
-              <div className="ldraw-idle-tickets">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="ldraw-idle-ticket" style={{
-                    left: `${18 + i * 8}%`,
-                    top: `${25 + (i % 4) * 12}%`,
-                    transform: `rotate(${i * 7 - 20}deg)`,
-                  }}>
-                    <Ticket size={13} />
-                  </div>
-                ))}
+            <div className={`cflip-card ${flipped ? 'cflip-card-flipped' : ''}`}>
+              <div className="cflip-card-inner">
+                <div className="cflip-card-front">
+                  <div className="cflip-card-pattern" />
+                </div>
+                <div className="cflip-card-back-face">
+                  {winner ? (
+                    <div className="cflip-card-content">
+                      <img
+                        src={proxyImageUrl(winner.posterUrl, 'w185')}
+                        alt={winner.title}
+                        className="cflip-card-img"
+                        onClick={() => onViewMovie?.(winner.id)}
+                      />
+                      <div className="cflip-card-info">
+                        <h3 className="cflip-card-title">{winner.title}</h3>
+                        <span className="cflip-card-year">{getMovieYear(winner)}</span>
+                        <div className="cflip-card-stars">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} size={10} fill={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.06)'} color={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.06)'} />
+                          ))}
+                          <span className="cflip-card-rating">{winner.rating?.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="cflip-card-loading">
+                      <div className="cflip-spinner-s" />
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-
-            {ticketRise && (
-              <div className="ldraw-winning-ticket">
-                <Ticket size={20} />
-              </div>
-            )}
+            </div>
           </div>
 
           {showResult && winner && (
-            <div className="ldraw-result animated-pop">
-              <div className="ldraw-badge"><Sparkles size={10} /> WINNER</div>
-              {imgFailed ? (
-                <div className="ldraw-poster-fallback">
-                  <Film size={28} />
-                </div>
-              ) : (
-                <img
-                  ref={imgRef}
-                  src={winner.posterUrl?.replace(/\/w\d+/, '/w185') || winner.posterUrl}
-                  alt={winner.title}
-                  className="ldraw-poster"
-                  onClick={() => onViewMovie?.(winner.id)}
-                  onError={(e) => {
-                    e.target.src = winner.posterUrl;
-                    e.target.onerror = () => setImgFailed(true);
-                  }}
-                />
-              )}
-              <h3 className="ldraw-rtitle">{winner.title}</h3>
-              <span className="ldraw-ryear">{getMovieYear(winner)}</span>
-              <div className="ldraw-rstars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={12} fill={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.04)'} color={i < Math.round((winner.rating || 0) / 2) ? '#fbbf24' : 'rgba(255,255,255,0.04)'} />
-                ))}
-                <span className="ldraw-rrating">{winner.rating?.toFixed(1)}</span>
-              </div>
-              <div className="ldraw-actions">
-                <button className="ldraw-btn-p" onClick={() => onViewMovie?.(winner.id)}>View Details</button>
-                <button className="ldraw-btn-s" onClick={draw}><Shuffle size={12} /> Draw Again</button>
+            <div className="cflip-result animated-pop">
+              <div className="cflip-badge"><Sparkles size={10} /> YOUR CARD</div>
+              <div className="cflip-actions">
+                <button className="cflip-btn-p" onClick={() => onViewMovie?.(winner.id)}>View Details</button>
+                <button className="cflip-btn-s" onClick={flip}><RotateCw size={12} /> Flip Again</button>
               </div>
             </div>
           )}
         </div>
 
-        {!showResult && (
-          <div className="ldraw-cta">
-            {drawing ? (
-              <div className="ldraw-drawstate">
-                <div className="ldraw-spinner" />
-                <p>Mixing tickets...</p>
-              </div>
-            ) : (
-              <button className="ldraw-drawbtn" onClick={draw}>
-                <Ticket size={16} />
-                <span>DRAW</span>
-              </button>
-            )}
-          </div>
-        )}
+        <div className="cflip-cta">
+          {flipping ? (
+            <div className="cflip-flipstate">
+              <div className="cflip-spinner" />
+              <p>Shuffling cards...</p>
+            </div>
+          ) : !showResult && (
+            <button className="cflip-flipbtn" onClick={flip}>
+              <Shuffle size={16} />
+              <span>FLIP</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
