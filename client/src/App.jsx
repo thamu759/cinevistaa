@@ -66,7 +66,7 @@ const LANG_MAP = {
 const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
-const PRE_ROLL_VIDEO_SRC = 'https://player.vimeo.com/video/1197439817?h=1ea764d599&autoplay=1&muted=1'; // Pre-roll video/embed URL
+const PRE_ROLL_VIDEO_SRC = 'https://player.vimeo.com/video/1197439817?h=1ea764d599&autoplay=1&controls=0&title=0&byline=0&portrait=0&autopause=0'; // Pre-roll video/embed URL
 
 export default function App() {
   // App Navigation & Router State
