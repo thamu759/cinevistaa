@@ -217,11 +217,19 @@ export default function App() {
   });
   const [replyDrafts, setReplyDrafts] = useState({});
 
-   // Modals Toggles
-   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
-    const [showTrailer, setShowTrailer] = useState(false);
-    const [showCurateModal, setShowCurateModal] = useState(false);
-    const [curationMovies, setCurationMovies] = useState([]);
+    // Toasts
+    const [toasts, setToasts] = useState([]);
+    const showToast = useCallback((message, type = 'success') => {
+      const id = Date.now();
+      setToasts(prev => [...prev, { id, message, type }]);
+      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+    }, []);
+
+    // Modals Toggles
+    const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
+     const [showTrailer, setShowTrailer] = useState(false);
+     const [showCurateModal, setShowCurateModal] = useState(false);
+     const [curationMovies, setCurationMovies] = useState([]);
     const [trailerPreRoll, setTrailerPreRoll] = useState(false);
     const [trailerPlayer, setTrailerPlayer] = useState({ playing: false, currentTime: 0, duration: 0, volume: 100 });
    const [trailerAutoplayPreference, setTrailerAutoplayPreference] = useState(() => {
@@ -1013,6 +1021,7 @@ const preRollTimerRef = useRef(null);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
+        showToast('Login successful!');
       } else {
         const user = await registerUser(
           authFormData.username,
@@ -1023,6 +1032,7 @@ const preRollTimerRef = useRef(null);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
+        showToast('Account created successfully!');
       }
     } catch (err) {
       setAuthError(err.message || 'Authentication failed. Please check credentials.');
@@ -1178,6 +1188,15 @@ const handleDeleteReview = useCallback(async (reviewId) => {
   return (
     <div className="app-container">
       <ScrollRestoration />
+      {/* Toast notifications */}
+      <div className="toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast toast--${t.type}`}>
+            {t.type === 'success' ? <span>✓</span> : <span>✕</span>}
+            <span>{t.message}</span>
+          </div>
+        ))}
+      </div>
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
