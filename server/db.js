@@ -1340,11 +1340,137 @@ export const getMovieById = async (id) => {
   }
 };
 
+// ─── BOT REVIEW SEEDING ───
+
+const USERS = [
+  { name: 'Arun Prakash',  role: 'Top Critic',       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Priya Karthik', role: 'Gold Reviewer',    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Rajesh Menon',  role: 'Cinema Enthusiast',avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Divya Nair',    role: 'Verified Critic',  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Vikram Rajan',  role: 'Staff Reviewer',   avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Meera Suresh',  role: 'Top Critic',       avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Karthik Sethu', role: 'Film Buff',        avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Ananya Rangan', role: 'Reviewer',         avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Deepak Chitra', role: 'Cinema Enthusiast',avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Lavanya Krishna',role: 'Verified Critic', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Siddharth Iyer',role: 'Staff Reviewer',  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Nandini Ravi',  role: 'Gold Critic',      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Ajay Bhaskar',  role: 'Top Critic',       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Shreya Mohan',  role: 'Film Analyst',     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=150&auto=format&fit=crop' },
+  { name: 'Ganesh Swamy',  role: 'Cinema Enthusiast',avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop' },
+];
+
+const REVIEW_TEXTS = [
+  '"Absolutely brilliant film. The director knows exactly how to keep you on the edge of your seat from start to finish."',
+  '"The performances in this movie are outstanding. Every actor brought their A-game and it shows in every frame."',
+  '"A visual treat! The cinematography alone makes this worth watching on the biggest screen possible."',
+  '"The screenplay is tight and the dialogues are sharp. Not a single dull moment throughout the runtime."',
+  '"I went in with low expectations but came out thoroughly impressed. This is storytelling at its finest."',
+  '"The background score elevates every scene to another level. Music director deserves all the applause."',
+  '"One of those rare films that gets better with every rewatch. So many layers to unpack."',
+  '"Powerful performances and an emotional rollercoaster. Had me laughing and crying in the same scene."',
+  '"A masterclass in filmmaking. The way the narrative unfolds is simply brilliant and keeps you guessing."',
+  '"The action sequences are choreographed to perfection. Raw, intense, and utterly gripping."',
+  '"What a comeback! This film proves that good content will always find its audience. Bravo to the entire team."',
+  '"The first half sets up the world beautifully and the second half delivers on every promise. Perfect pacing."',
+  '"An emotional gutpunch of a film. The climax will stay with you long after you leave the theatre."',
+  '"Technically brilliant with top-notch VFX work that blends seamlessly with the practical sets."',
+  '"The chemistry between the lead pair is electric. Their scenes together are the highlight of the film."',
+  '"A dark and gritty take that respects the source material while bringing something fresh to the table."',
+  '"The supporting cast is phenomenal. Even the smallest roles leave a lasting impression."',
+  '"This film raises the bar for Indian cinema. World-class execution with a distinctly local flavor."',
+  '"Beautifully shot and superbly acted. The director extracts career-best performances from the entire cast."',
+  '"Edge-of-the-seat thriller that keeps you hooked till the very last frame. Must watch for genre fans."',
+  '"The way the story weaves multiple narratives together is sheer genius. Everything connects perfectly."',
+  '"A soul-stirring experience. The music and visuals combine to create something truly magical on screen."',
+  '"Raw and unfiltered portrayal that doesn\'t shy away from uncomfortable truths. Brave filmmaking."',
+  '"The comedic timing in this film is impeccable. Had the entire theatre roaring with laughter."',
+  '"Stunning debut from the director. Shows tremendous command over the medium and a unique voice."',
+  '"Every frame is like a painting. The art direction and production design deserve special mention."',
+  '"A slow-burn that rewards patient viewers with an incredibly satisfying payoff in the final act."',
+  '"The antagonist is one of the best-written villains in recent memory. Menacing and layered."',
+  '"A feel-good entertainer that doesnt rely on cliches. Refreshingly original and heartfelt."',
+  '"The twist in the second half completely caught me off guard. Brilliant writing at work here."',
+];
+
+const RELATIVE_TIMES = [
+  '2h ago', '4h ago', '6h ago', '12h ago', '1d ago', '2d ago',
+  '3d ago', '5d ago', '1w ago', '2w ago', '3w ago',
+  'Oct 28, 2024', 'Nov 5, 2024', 'Nov 18, 2024', 'Dec 1, 2024',
+  'Dec 15, 2024', 'Jan 3, 2025', 'Jan 20, 2025', 'Feb 8, 2025',
+  'Feb 25, 2025', 'Mar 10, 2025', 'Mar 28, 2025', 'Apr 5, 2025',
+];
+
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const pickN = (arr, min, max) => {
+  const count = min + Math.floor(Math.random() * (max - min + 1));
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+};
+
+const generateRating = () => {
+  // Weighted distribution: most ratings cluster 6-9, occasional 10, few 3-5
+  const r = Math.random();
+  if (r < 0.05) return Math.floor(Math.random() * 3) + 3;  // 3-5
+  if (r < 0.15) return 10;
+  if (r < 0.40) return Math.floor(Math.random() * 2) + 8;  // 8-9
+  return Math.floor(Math.random() * 2) + 6;                // 6-7
+};
+
+const recalcScores = (movie) => {
+  if (!movie.reviews || movie.reviews.length === 0) return;
+  const total = movie.reviews.reduce((s, r) => s + (r.rating || 0), 0);
+  const avg = total / movie.reviews.length;
+  movie.criticScore = parseFloat(avg.toFixed(1));
+  movie.rating = parseFloat((avg / 2).toFixed(1));
+  movie.audienceScore = Math.min(99, Math.max(40, Math.round(avg * 9.5)));
+};
+
+export const seedBotReviewsForMovie = async (movieId) => {
+  const count = 2 + Math.floor(Math.random() * 3); // 2-4 reviews
+  const chosenUsers = pickN(USERS, count, count);
+  const chosenTexts = pickN(REVIEW_TEXTS, count, count);
+  const chosenTimes = pickN(RELATIVE_TIMES, count, count);
+  const ratings = Array.from({ length: count }, generateRating);
+
+  const reviews = chosenUsers.map((user, i) => ({
+    id: 'rev-bot-' + Date.now() + '-' + i,
+    user: user.name,
+    avatarUrl: user.avatar,
+    role: user.role,
+    rating: ratings[i],
+    text: chosenTexts[i],
+    timestamp: chosenTimes[i] || 'Just now',
+    likes: Math.floor(Math.random() * 500) + 10,
+    likedBy: [],
+    comments: Math.floor(Math.random() * 30) + 2,
+    replies: [],
+  }));
+
+  if (useMongoDB) {
+    const movie = await MovieModel.findOne({ id: movieId });
+    if (!movie) return null;
+    movie.reviews.push(...reviews);
+    recalcScores(movie);
+    return await movie.save();
+  } else {
+    const data = readJsonDb();
+    const idx = data.movies.findIndex(m => m.id === movieId);
+    if (idx === -1) return null;
+    data.movies[idx].reviews.push(...reviews);
+    recalcScores(data.movies[idx]);
+    writeJsonDb(data);
+    return data.movies[idx];
+  }
+};
+
 export const createMovie = async (movieData) => {
   const now = new Date().toISOString();
+  const id = movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const cleanData = await enrichMovieWithTmdbImages({
     ...movieData,
-    id: movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    id,
     rating: movieData.rating != null ? movieData.rating : 5.0,
     criticScore: movieData.criticScore != null ? movieData.criticScore : 5.0,
     audienceScore: movieData.audienceScore != null ? movieData.audienceScore : 50,
@@ -1355,14 +1481,30 @@ export const createMovie = async (movieData) => {
     createdAt: now
   });
 
+  let movie;
   if (useMongoDB) {
-    const movie = new MovieModel(cleanData);
-    return await movie.save();
+    movie = new MovieModel(cleanData);
+    movie = await movie.save();
   } else {
     const data = readJsonDb();
     data.movies.push(cleanData);
     writeJsonDb(data);
-    return cleanData;
+    movie = cleanData;
+  }
+
+  // Auto-seed bot reviews to make movies feel alive
+  try {
+    await seedBotReviewsForMovie(movie.id || id);
+  } catch (e) {
+    console.warn('Bot review seeding skipped:', e.message);
+  }
+
+  // Re-fetch so we return the version with seeded reviews
+  if (useMongoDB) {
+    return await MovieModel.findOne({ id: movie.id || id });
+  } else {
+    const data = readJsonDb();
+    return data.movies.find(m => m.id === (movie.id || id));
   }
 };
 

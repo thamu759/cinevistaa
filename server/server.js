@@ -42,7 +42,8 @@ import {
   addMovieToList,
   removeMovieFromList,
   deleteList,
-  getLeaderboard
+  getLeaderboard,
+  seedBotReviewsForMovie
 } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -232,6 +233,28 @@ app.post('/api/admin/refresh-posters', async (req, res) => {
   } catch (error) {
     console.error("Error refreshing TMDB posters:", error);
     res.status(400).json({ error: error.message || "Server error refreshing posters" });
+  }
+});
+
+// Seed bot reviews for a movie (Admin Only)
+app.post('/api/admin/seed-reviews/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const movie = await seedBotReviewsForMovie(req.params.id);
+    if (!movie) return res.status(404).json({ error: "Movie not found" });
+    res.json({ success: true, movie });
+  } catch (error) {
+    console.error("Error seeding bot reviews:", error);
+    res.status(500).json({ error: error.message || "Server error seeding reviews" });
   }
 });
 
