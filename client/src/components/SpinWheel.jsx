@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Shuffle, Film, AlertTriangle, Sparkles, Star, RotateCw } from 'lucide-react';
+import { proxyImageUrl } from '../api';
 
 function getMovieYear(m) {
   return m.releaseYear || m.releaseDate?.split('-')[0] || '';
@@ -26,6 +27,10 @@ export default function SpinWheel({ movies, onViewMovie }) {
   useEffect(() => {
     const eligible = movies.filter(m => m.posterUrl);
     setCandidates(eligible);
+    if (eligible.length > 0) {
+      const init = Array.from({ length: REEL_ITEMS }, () => pickRandom(eligible));
+      setReelCandidates(init);
+    }
   }, [movies]);
 
   const spin = () => {
@@ -117,7 +122,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
               {reelCandidates.map((m, i) => (
                 <div key={`${m.id}-${i}`} className="slot-reel-item">
                   <img
-                    src={m.posterUrl?.replace(/w300/, 'w92') || m.posterUrl}
+                    src={proxyImageUrl(m.posterUrl, 'w92')}
                     alt=""
                     className="slot-reel-img"
                     loading="lazy"
@@ -153,7 +158,7 @@ export default function SpinWheel({ movies, onViewMovie }) {
                   <Sparkles size={10} /> WINNER
                 </div>
                 <img
-                  src={selectedMovie.posterUrl?.replace(/w300/, 'w150') || selectedMovie.posterUrl}
+                  src={proxyImageUrl(selectedMovie.posterUrl, 'w150')}
                   alt={selectedMovie.title}
                   className="slot-result-poster"
                   onClick={() => onViewMovie?.(selectedMovie.id)}
