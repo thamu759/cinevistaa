@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, ScrollRestoration } from 'react-router-dom';
 import { 
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
@@ -110,6 +110,34 @@ export default function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const SectionLoader = ({ rows = 4, type = 'grid' }) => (
+    <div className="fade-in">
+      {type === 'grid' ? (
+        <div className="skeleton-grid">
+          {Array.from({ length: rows * 3 }).map((_, i) => (
+            <div key={i} className="skeleton-card">
+              <div className="skeleton skeleton-poster" />
+              <div className="skeleton skeleton-text medium" />
+              <div className="skeleton skeleton-text short" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {Array.from({ length: rows }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+              <div className="skeleton" style={{ width: '60px', height: '60px', borderRadius: '50%', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div className="skeleton skeleton-text medium" />
+                <div className="skeleton skeleton-text short" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   const pageMeta = {
     home: { title: 'thiraipedia | Premium Film Critique & Reviews', desc: 'Discover in-depth movie reviews, ratings, and film critiques at thiraipedia. Track your watchlist, explore OTT releases, and join a community of cinema lovers.' },
@@ -386,6 +414,9 @@ export default function App() {
 
   // Leaderboard state
   const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [listsLoading, setListsLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [selectedListDetail, setSelectedListDetail] = useState(null);
 
   // Form State - Write Review
@@ -455,10 +486,12 @@ export default function App() {
     } catch (e) {}
   };
   const loadAllLists = async () => {
+    setListsLoading(true);
     try {
       const data = await getLists();
       setAllLists(data);
     } catch (e) {}
+    setListsLoading(false);
   };
   const handleDeleteList = async (listId) => {
     if (!window.confirm('Delete this list?')) return;
@@ -494,10 +527,12 @@ export default function App() {
 
   // ─── LEADERBOARD ───
   const loadLeaderboard = async () => {
+    setLeaderboardLoading(true);
     try {
       const data = await fetchLeaderboard();
       setLeaderboard(data);
     } catch (e) {}
+    setLeaderboardLoading(false);
   };
 
   // Debounce + live search for overlay results
@@ -1108,6 +1143,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
   return (
     <div className="app-container">
+      <ScrollRestoration />
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
@@ -1230,9 +1266,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             {searchQuery.trim() && (
               <div className="search-results-dropdown">
                 {isSearching ? (
-                  <div className="search-results-loading">
-                    <div className="search-spinner"></div>
-                    <span>Searching...</span>
+                  <div className="search-results-list">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="search-result-item" style={{ cursor: 'default', pointerEvents: 'none' }}>
+                        <div className="skeleton" style={{ width: '48px', height: '72px', borderRadius: '6px', flexShrink: 0 }} />
+                        <div className="search-result-info">
+                          <div className="skeleton skeleton-text medium" />
+                          <div className="skeleton skeleton-text short" style={{ marginTop: '0.4rem' }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                  ) : searchResults.length === 0 ? (
                    <div className="search-results-empty">
@@ -2506,7 +2549,9 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 Most active reviewers ranked by reviews and ratings
               </p>
             </div>
-            {leaderboard.length === 0 ? (
+            {leaderboardLoading ? (
+              <SectionLoader rows={5} type="list" />
+            ) : leaderboard.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                 <p style={{ marginBottom: '0.5rem' }}>No critics found yet.</p>
                 <p style={{ fontSize: '0.85rem' }}>Reviews need to be submitted first.</p>
@@ -2588,7 +2633,9 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             )}
 
-            {allLists.length === 0 ? (
+            {listsLoading ? (
+              <SectionLoader rows={3} type="grid" />
+            ) : allLists.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                 <p>No lists created yet.</p>
               </div>
@@ -2819,7 +2866,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
               <div className="community-thread-list">
                 {isCommunityLoading ? (
-                  <div className="community-empty glass-panel">Loading community discussions...</div>
+                  <SectionLoader rows={4} type="list" />
                  ) : communityError ? (
                    <div className="community-empty glass-panel" style={{ textAlign: 'center', padding: '2rem' }}>
                      <AlertTriangle size={24} style={{ marginBottom: '1rem', color: 'var(--color-accent-red)' }} />
