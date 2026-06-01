@@ -341,6 +341,26 @@ const preRollTimerRef = useRef(null);
     };
   }, [showTrailer, trailerPreRoll, selectedMovie?.trailerUrl]);
 
+  // Detect Vimeo pre-roll video ended via Vimeo Player API
+  useEffect(() => {
+    if (!showTrailer || !trailerPreRoll || !PRE_ROLL_VIDEO_SRC?.includes('player.vimeo.com')) return;
+    let vimeoPlayer = null;
+    const script = document.createElement('script');
+    script.src = 'https://player.vimeo.com/api/player.js';
+    script.onload = () => {
+      const iframe = document.querySelector('.preroll-overlay iframe');
+      if (iframe && window.Vimeo) {
+        vimeoPlayer = new window.Vimeo.Player(iframe);
+        vimeoPlayer.on('ended', () => setTrailerPreRoll(false));
+      }
+    };
+    document.body.appendChild(script);
+    return () => {
+      if (vimeoPlayer) vimeoPlayer.off('ended');
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+  }, [showTrailer, trailerPreRoll]);
+
   const togglePlay = () => {
     const p = playerRef.current;
     if (!p || !p.getPlayerState) return;
@@ -978,7 +998,7 @@ const preRollTimerRef = useRef(null);
         preRollVideoRef.current.currentTime = 0;
       }
       setTrailerPreRoll(false);
-    }, PRE_ROLL_VIDEO_SRC ? 30000 : 5000);
+    }, 10000);
   }, []);
 
   // Handle Login and Register Submit
