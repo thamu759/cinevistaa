@@ -6,6 +6,11 @@
   VITE_API_URL = "https://cinevistaa.onrender.com/api"
 
 [[redirects]]
+  from = "https://www.cinevistaa.in/*"
+  to = "https://cinevistaa.in/:splat"
+  status = 301
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
