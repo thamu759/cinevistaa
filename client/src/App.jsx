@@ -34,8 +34,6 @@ import {
   toggleReviewLike,
   addReviewReply
 } from './api';
-// Import API utilities for enhanced error handling
-import { retryAsync, generateErrorMessage } from './utils/apiUtils';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
 import Footer from './components/Footer';
@@ -556,19 +554,16 @@ export default function App() {
    const loadMoviesList = async () => {
      setIsLoading(true);
      try {
-        const data = await retryAsync(() => fetchMovies({
-          genre: selectedGenre,
-          sort: sortOption,
-          ottPlatform: selectedOttPlatform
-        }), { maxRetries: 2, baseDelay: 500 });
+       const data = await fetchMovies({
+         genre: selectedGenre,
+         sort: sortOption,
+         ottPlatform: selectedOttPlatform
+       });
        setMovies(data);
        setError(null);
      } catch (err) {
        console.error('Error loading movies:', err);
-       const errorInfo = generateErrorMessage(err, 'Failed to load movies');
-       setError(errorInfo.message);
-       // Store error info for potential retry UI
-       setLastError(errorInfo);
+       setError(err.message || 'Failed to load movies');
      } finally {
        setIsLoading(false);
      }
@@ -1308,7 +1303,7 @@ const handleDeleteReview = async (reviewId) => {
                     >
                       <div 
                         className="hero-backdrop" 
-                        style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
+                        style={{ backgroundImage: isActive ? `url(${proxyImageUrl(movie.backdropUrl, 'original')})` : 'none' }}
                       />
                       <div className="hero-content">
                           <MovieLogo movie={movie} />
@@ -2020,7 +2015,7 @@ const handleDeleteReview = async (reviewId) => {
                   {watchlistMovies.map(movie => (
                     <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
                         <div className="movie-card-rating">
                           <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                           <span>{(movie.rating || 0).toFixed(1)}</span>
@@ -2062,7 +2057,7 @@ const handleDeleteReview = async (reviewId) => {
                   {upcoming.map(movie => (
                     <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
                       <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
+                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
                         <div className="movie-card-rating">
                           <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                           <span>{(movie.rating || 0).toFixed(1)}</span>

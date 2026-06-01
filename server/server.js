@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import {
   initDB,
@@ -55,6 +56,14 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Cache control for API responses
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
+  }
+  next();
+});
 
 // Initialize Database (MongoDB or fallback db.json)
 await initDB();
@@ -786,7 +795,29 @@ app.get('/api/tmdb/providers/:tmdbId', async (req, res) => {
   }
 });
 
-// TMDB Image proxy endpoint
+// TMDB Image proxy endpoint with file-system caching
+const IMAGE_CACHE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '.img_cache');
+
+const getCachedImage = (cacheKey) => {
+  const cacheFile = path.join(IMAGE_CACHE_DIR, cacheKey);
+  if (fs.existsSync(cacheFile)) {
+    const stat = fs.statSync(cacheFile);
+    if (Date.now() - stat.mtimeMs < 7 * 24 * 60 * 60 * 1000) { // 7 day TTL
+      return fs.readFileSync(cacheFile);
+    }
+  }
+  return null;
+};
+
+const setCachedImage = (cacheKey, data) => {
+  try {
+    if (!fs.existsSync(IMAGE_CACHE_DIR)) {
+      fs.mkdirSync(IMAGE_CACHE_DIR, { recursive: true });
+    }
+    fs.writeFileSync(path.join(IMAGE_CACHE_DIR, cacheKey), data);
+  } catch (e) {}
+};
+
 app.get('/api/tmdb/image', async (req, res) => {
   try {
     const imgPath = req.query.path;
@@ -794,6 +825,17 @@ app.get('/api/tmdb/image', async (req, res) => {
     if (!imgPath) return res.status(400).json({ error: 'Missing image path query param `path`' });
 
     const sanitizedPath = imgPath.startsWith('/') ? imgPath : '/' + imgPath;
+    const cacheKey = `${size}${sanitizedPath.replace(/\//g, '_')}`;
+
+    const cached = getCachedImage(cacheKey);
+    if (cached) {
+      const ext = path.extname(sanitizedPath) || '.jpg';
+      const mime = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(cached);
+    }
+
     const imageUrl = `${process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p'}/${size}${sanitizedPath}`;
 
     const response = await fetch(imageUrl);
@@ -802,11 +844,14 @@ app.get('/api/tmdb/image', async (req, res) => {
     }
 
     const contentType = response.headers.get('content-type') || 'image/jpeg';
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400'); // cache for 1 day
-
     const arrayBuffer = await response.arrayBuffer();
-    res.send(Buffer.from(arrayBuffer));
+    const buffer = Buffer.from(arrayBuffer);
+
+    setCachedImage(cacheKey, buffer);
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
   } catch (error) {
     console.error('TMDB image proxy error:', error);
     res.status(500).json({ error: 'Failed to fetch TMDB image' });

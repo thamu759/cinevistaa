@@ -371,7 +371,7 @@ const refreshMoviesIfNeeded = async (movies) => {
   if (!movies?.length) return [];
   if (!hasTmdbCredentials()) return movies.map(applyLocalHdImageFallback);
   if (!movies.some(needsTmdbImageRefresh)) return movies;
-  return enrichMoviesWithTmdbImages(movies);
+  return cachedEnrichMoviesWithTmdbImages(movies);
 };
 
 // Default initial seed data (Real movie hits matching design categories)
@@ -1162,8 +1162,49 @@ const generateSalt = () => {
   return crypto.randomBytes(16).toString('hex');
 };
 
+const CACHE_DIR = path.resolve(__dirname, '.tmdb_cache');
+
+const ensureCacheDir = () => {
+  if (!fs.existsSync(CACHE_DIR)) {
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+  }
+};
+
+const readTmdbCache = () => {
+  const cacheFile = path.join(CACHE_DIR, 'movie_data.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      return JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+    } catch (e) {}
+  }
+  return {};
+};
+
+const writeTmdbCache = (cache) => {
+  ensureCacheDir();
+  const cacheFile = path.join(CACHE_DIR, 'movie_data.json');
+  fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2), 'utf-8');
+};
+
+const cachedEnrichMovieWithTmdbImages = async (movie) => {
+  const cache = readTmdbCache();
+  const cacheKey = `${movie.id || movie.title}_${movie.releaseYear || 'unknown'}`;
+  const cached = cache[cacheKey];
+  if (cached && !needsTmdbImageRefresh(cached)) {
+    return cached;
+  }
+  const enriched = await enrichMovieWithTmdbImages(movie);
+  cache[cacheKey] = enriched;
+  writeTmdbCache(cache);
+  return enriched;
+};
+
+const cachedEnrichMoviesWithTmdbImages = async (movies) => {
+  if (!hasTmdbCredentials()) return movies.map(applyLocalHdImageFallback);
+  return Promise.all(movies.map(m => cachedEnrichMovieWithTmdbImages(m)));
+};
+
 export const initDB = async () => {
-  const seededMovies = await enrichMoviesWithTmdbImages(tamilPriorityMovies);
   const mongoUri = process.env.MONGO_URI;
   const ensureCreatedAt = (movie) => {
     if (!movie.createdAt) movie.createdAt = new Date().toISOString();
@@ -1186,19 +1227,9 @@ export const initDB = async () => {
       useMongoDB = true;
       const count = await MovieModel.countDocuments();
       if (count === 0) {
+        const seededMovies = await cachedEnrichMoviesWithTmdbImages(tamilPriorityMovies);
         await MovieModel.insertMany(seededMovies.map(ensureCreatedAt));
         console.log("MongoDB seeded with Tamil priority movies.");
-      } else {
-        const existingMovies = await MovieModel.find({});
-        const refreshedMovies = await refreshMoviesIfNeeded(existingMovies.map(movie => movie.toObject()));
-        const migratedMovies = refreshedMovies.map(ensureCreatedAt);
-        if (JSON.stringify(migratedMovies) !== JSON.stringify(existingMovies.map(movie => movie.toObject()))) {
-          await Promise.all(migratedMovies.map(movie => {
-            const { _id, __v, ...update } = movie;
-            return MovieModel.updateOne({ id: movie.id }, { $set: update });
-          }));
-          console.log(hasTmdbCredentials() ? "MongoDB movie posters auto-refreshed from TMDB." : "MongoDB movie poster URLs upgraded with local HD fallbacks.");
-        }
       }
       if (CommunityThreadModel && await CommunityThreadModel.countDocuments() === 0) {
         await CommunityThreadModel.insertMany(initialCommunityThreads);
@@ -1207,11 +1238,11 @@ export const initDB = async () => {
       console.warn("Failed to connect to MongoDB. Falling back to local JSON file db.json. Error:", err.message);
       useMongoDB = false;
       const data = readJsonDb();
-      const refreshedMovies = await refreshMoviesIfNeeded(data.movies || []);
-      if (JSON.stringify(refreshedMovies) !== JSON.stringify(data.movies || [])) {
+      const moviesToRefresh = (data.movies || []).filter(needsTmdbImageRefresh);
+      if (moviesToRefresh.length > 0) {
+        const refreshedMovies = await cachedEnrichMoviesWithTmdbImages(data.movies);
         data.movies = refreshedMovies;
         writeJsonDb(data);
-        console.log(hasTmdbCredentials() ? "JSON movie posters auto-refreshed from TMDB." : "JSON movie poster URLs upgraded with local HD fallbacks.");
       }
       writeJsonAfterMigration(data);
     }
@@ -1219,11 +1250,11 @@ export const initDB = async () => {
     console.log("No MONGO_URI specified. Using local JSON database (db.json).");
     useMongoDB = false;
     const data = readJsonDb();
-    const refreshedMovies = await refreshMoviesIfNeeded(data.movies || []);
-    if (JSON.stringify(refreshedMovies) !== JSON.stringify(data.movies || [])) {
+    const moviesToRefresh = (data.movies || []).filter(needsTmdbImageRefresh);
+    if (moviesToRefresh.length > 0) {
+      const refreshedMovies = await cachedEnrichMoviesWithTmdbImages(data.movies);
       data.movies = refreshedMovies;
       writeJsonDb(data);
-      console.log(hasTmdbCredentials() ? "JSON movie posters auto-refreshed from TMDB." : "JSON movie poster URLs upgraded with local HD fallbacks.");
     }
     writeJsonAfterMigration(data);
   }
@@ -1299,7 +1330,7 @@ export const getMovies = async (query = {}) => {
 export const refreshMovieImages = async () => {
   if (useMongoDB) {
     const movies = await MovieModel.find({});
-    const enrichedMovies = await enrichMoviesWithTmdbImages(movies.map(movie => movie.toObject()));
+    const enrichedMovies = await cachedEnrichMoviesWithTmdbImages(movies.map(movie => movie.toObject()));
     await Promise.all(enrichedMovies.map(movie => {
       const { _id, __v, ...update } = movie;
       return MovieModel.updateOne({ id: movie.id }, { $set: update });
@@ -1308,7 +1339,7 @@ export const refreshMovieImages = async () => {
   }
 
   const data = readJsonDb();
-  data.movies = await enrichMoviesWithTmdbImages(data.movies);
+  data.movies = await cachedEnrichMoviesWithTmdbImages(data.movies);
   writeJsonDb(data);
   return data.movies;
 };
@@ -1319,7 +1350,7 @@ export const getMovieById = async (id) => {
     if (!movie) return null;
     const plain = movie.toObject();
     if (needsTmdbImageRefresh(plain) && plain.tmdbId) {
-      const enriched = await enrichMovieWithTmdbImages(plain);
+      const enriched = await cachedEnrichMovieWithTmdbImages(plain);
       const { _id, __v, ...update } = enriched;
       await MovieModel.updateOne({ id: plain.id }, { $set: update });
       return applyLocalHdImageFallback(enriched);
@@ -1331,7 +1362,7 @@ export const getMovieById = async (id) => {
     if (index === -1) return null;
     const movie = data.movies[index];
     if (needsTmdbImageRefresh(movie) && movie.tmdbId) {
-      const enriched = await enrichMovieWithTmdbImages(movie);
+      const enriched = await cachedEnrichMovieWithTmdbImages(movie);
       data.movies[index] = enriched;
       writeJsonDb(data);
       return applyLocalHdImageFallback(enriched);
@@ -1505,7 +1536,7 @@ export const seedBotReviewsForMovie = async (movieId, releaseDate) => {
 export const createMovie = async (movieData) => {
   const now = new Date().toISOString();
   const id = movieData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const cleanData = await enrichMovieWithTmdbImages({
+  const cleanData = await cachedEnrichMovieWithTmdbImages({
     ...movieData,
     id,
     rating: movieData.rating != null ? movieData.rating : 5.0,
