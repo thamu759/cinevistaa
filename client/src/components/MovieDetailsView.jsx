@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
 
+const LANG_MAP = {
+  TA: 'TAMIL', TAMIL: 'TAMIL',
+  ML: 'MALAYALAM', MALAYALAM: 'MALAYALAM',
+  TE: 'TELUGU', TELUGU: 'TELUGU',
+  HI: 'HINDI', HINDI: 'HINDI',
+  KN: 'KANNADA', KANNADA: 'KANNADA',
+  EN: 'ENGLISH', ENGLISH: 'ENGLISH',
+};
+const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
+
 export default function MovieDetailsView({
   selectedMovie, activeView, watchlist, currentUser, watchProviders,
   userLists, showListMenu, movies, proxyImageUrl,
@@ -361,7 +371,7 @@ export default function MovieDetailsView({
             const mGenres = m.genre.split('/').map(g => g.trim());
             const genreOverlap = targetGenres.filter(g => mGenres.includes(g)).length;
             let score = genreOverlap * 3;
-            if (selectedMovie.language && m.language === selectedMovie.language) score += 2;
+            if (selectedMovie.language && normalizeLang(m.language) === normalizeLang(selectedMovie.language)) score += 2;
             if (targetYear && m.releaseDate) {
               const mYear = new Date(m.releaseDate).getFullYear();
               if (Math.abs(mYear - targetYear) <= 2) score += 1;

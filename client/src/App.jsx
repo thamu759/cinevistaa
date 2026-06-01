@@ -45,6 +45,19 @@ import ContactPage from './components/ContactPage';
 import AboutPage from './components/AboutPage';
 import MovieLogo from './components/MovieLogo';
 
+const LANG_MAP = {
+  'TA': 'TAMIL', 'TAMIL': 'TAMIL',
+  'ML': 'MALAYALAM', 'MALAYALAM': 'MALAYALAM',
+  'TE': 'TELUGU', 'TELUGU': 'TELUGU',
+  'HI': 'HINDI', 'HINDI': 'HINDI',
+  'KN': 'KANNADA', 'KANNADA': 'KANNADA',
+  'EN': 'ENGLISH', 'ENGLISH': 'ENGLISH',
+  'MR': 'MARATHI', 'MARATHI': 'MARATHI',
+  'BN': 'BENGALI', 'BENGALI': 'BENGALI',
+  'GU': 'GUJARATI', 'GUJARATI': 'GUJARATI',
+};
+const normalizeLang = (lang) => LANG_MAP[lang?.toUpperCase()] || lang?.toUpperCase();
+
 export default function App() {
   // App Navigation & Router State
   const [activeView, setActiveView] = useState('home'); // 'home', 'movie-details', 'profile'
@@ -566,8 +579,8 @@ export default function App() {
   const heroMovies = movies.filter(m => m.isHero);
 
   const streamingMovies = movies.filter(m => m.ott?.platform);
-  const tamilMovies = movies.filter(m => m.language?.toUpperCase() === 'TAMIL');
-  const malayalamMovies = movies.filter(m => m.language?.toUpperCase() === 'MALAYALAM');
+  const tamilMovies = movies.filter(m => normalizeLang(m.language) === 'TAMIL');
+  const malayalamMovies = movies.filter(m => normalizeLang(m.language) === 'MALAYALAM');
   const topRatedMovies = [...movies].filter(m => m.rating >= 7).sort((a, b) => b.rating - a.rating);
   const upcomingOttMovies = movies
     .filter(m => m.ott?.platform && m.ott?.releaseDate && new Date(m.ott.releaseDate) > new Date())
