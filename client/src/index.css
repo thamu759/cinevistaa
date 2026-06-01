@@ -4616,13 +4616,16 @@ a {
   margin: 0 auto;
   width: 100%;
 }
-.fun-promo-section > div {
+.fun-promo-header {
+  margin-bottom: 1.25rem;
+}
+.fun-promo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
 }
 @media (max-width: 640px) {
-  .fun-promo-section > div {
+  .fun-promo-grid {
     grid-template-columns: 1fr;
   }
 }

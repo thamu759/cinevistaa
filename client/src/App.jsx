@@ -1775,7 +1775,11 @@ const handleDeleteReview = async (reviewId) => {
 
             {/* FUN SECTION: Quiz & Spin Wheel Promo */}
             <section className="fun-promo-section">
-              <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <div className="fun-promo-header">
+                <p className="section-meta">Play & Explore</p>
+                <h2 className="section-title">Fun Activities</h2>
+              </div>
+              <div className="fun-promo-grid">
                 <div className="fun-promo-card quiz-promo" onClick={() => navigateTo('quiz')}>
                   <div className="fun-promo-bg">
                     <svg viewBox="0 0 400 300" className="fun-promo-svg" preserveAspectRatio="xMidYMid slice">
