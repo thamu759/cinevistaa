@@ -146,7 +146,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 12),
                         Text('${movie.criticScore}',
-                            style: const TextStyle(color: const Color(0xFFE50914), fontSize: 14)),
+                            style: TextStyle(color: const Color(0xFFE50914), fontSize: 14)),
                         const SizedBox(width: 4),
                         const Text('Critic Score', style: TextStyle(color: Colors.white54, fontSize: 12)),
                       ],
@@ -172,7 +172,11 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => setState(() => _showTrailer = true),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Trailer playback coming soon')),
+                  );
+                },
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('Watch Trailer'),
               ),

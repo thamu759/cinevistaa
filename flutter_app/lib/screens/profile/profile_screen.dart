@@ -106,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(user.username,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
             Text(user.role,
-                style: const TextStyle(color: const Color(0xFFF5C518), fontSize: 14)),
+                style: TextStyle(color: const Color(0xFFF5C518), fontSize: 14)),
             const SizedBox(height: 8),
             Text(user.bio.isNotEmpty ? user.bio : 'No bio yet',
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
@@ -215,9 +215,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.white54),
                   onPressed: () => setState(() => _editingProfile = false),
                   child: const Text('Cancel'),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.white54),
                 ),
               ),
             ],
