@@ -83,3 +83,12 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+
+# Flutter
+flutter_app/build/
+flutter_app/.dart_tool/
+flutter_app/.pub-cache/
+flutter_app/android/.gradle/
+flutter_app/ios/Pods/
+flutter_app/ios/.symlinks/
+flutter_app/coverage/
