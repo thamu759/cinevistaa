@@ -33,7 +33,7 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                       ? Image.network(
                           'https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(child: Text('Poster', style: TextStyle(color: Colors.white54))),
+                          errorBuilder: (_, _, _) => const Center(child: Text('Poster', style: TextStyle(color: Colors.white54))),
                         )
                       : Center(
                           child: Column(

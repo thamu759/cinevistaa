@@ -121,6 +121,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     _bodyController.clear();
                     setState(() => _showNewThread = false);
                   } catch (e) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('$e')),
                     );
@@ -247,6 +248,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         await community.addReply(thread.id, controller.text.trim());
                         controller.clear();
                       } catch (e) {
+                        if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('$e')),
                         );

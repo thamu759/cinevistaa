@@ -64,8 +64,8 @@ class MovieSection extends StatelessWidget {
                                 imageUrl: movie.posterUrl,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                placeholder: (_, __) => Container(color: const Color(0xFF16213E)),
-                                errorWidget: (_, __, ___) => Container(
+                                placeholder: (_, _) => Container(color: const Color(0xFF16213E)),
+                                errorWidget: (_, _, _) => Container(
                                   color: const Color(0xFF16213E),
                                   child: const Icon(Icons.movie, color: Colors.white24),
                                 ),

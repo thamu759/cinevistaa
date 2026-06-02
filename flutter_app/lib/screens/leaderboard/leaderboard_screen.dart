@@ -71,7 +71,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               Text('${entry.reviewCount} reviews',
                                   style: const TextStyle(color: Colors.white70, fontSize: 12)),
                               Text('${entry.averageRating.toStringAsFixed(1)} avg',
-                                  style: const TextStyle(color: const Color(0xFFF5C518), fontSize: 11)),
+                                  style: const TextStyle(color: Color(0xFFF5C518), fontSize: 11)),
                             ],
                           ),
                         ),

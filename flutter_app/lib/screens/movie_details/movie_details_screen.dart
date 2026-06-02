@@ -86,8 +86,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               CachedNetworkImage(
                 imageUrl: movie.backdropUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(color: const Color(0xFF1A1A2E)),
-                errorWidget: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
+                placeholder: (_, _) => Container(color: const Color(0xFF1A1A2E)),
+                errorWidget: (_, _, _) => Container(color: const Color(0xFF1A1A2E)),
               ),
             Container(
               decoration: BoxDecoration(
@@ -125,7 +125,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ? CachedNetworkImage(
                           imageUrl: movie.posterUrl,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(color: const Color(0xFF1A1A2E)),
+                          placeholder: (_, _) => Container(color: const Color(0xFF1A1A2E)),
                         )
                       : Container(color: const Color(0xFF1A1A2E), child: const Icon(Icons.movie, color: Colors.white24)),
                 ),
@@ -365,6 +365,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     _reviewRating = 8;
                   });
                 } catch (e) {
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('$e')),
                   );

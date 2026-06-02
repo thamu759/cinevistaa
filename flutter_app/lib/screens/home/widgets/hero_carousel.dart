@@ -38,8 +38,8 @@ class HeroCarousel extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: movie.backdropUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Container(color: const Color(0xFF1A1A2E)),
-              errorWidget: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
+              placeholder: (_, _) => Container(color: const Color(0xFF1A1A2E)),
+              errorWidget: (_, _, _) => Container(color: const Color(0xFF1A1A2E)),
             ),
           Container(
             decoration: BoxDecoration(
