@@ -25,7 +25,6 @@ class MovieCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
           color: AppColors.bgCard,
         ),
         clipBehavior: Clip.antiAlias,
@@ -59,20 +58,19 @@ class MovieCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceDark.withValues(alpha: 0.85),
+                          gradient: const LinearGradient(
+                            colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                          ),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.star, color: AppColors.accentGold, size: 12),
+                            const Icon(Icons.star, color: Colors.white, size: 12),
                             const SizedBox(width: 2),
                             Text('${movie.rating}',
                                 style: const TextStyle(
-                                    color: AppColors.accentGold,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                                    color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
                           ],
                         ),
                       ),
@@ -85,12 +83,12 @@ class MovieCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceDark.withValues(alpha: 0.6),
+                          color: Colors.black54,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(
                           inWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                          color: inWatchlist ? AppColors.accentGold : Colors.white,
+                          color: inWatchlist ? AppColors.accent : Colors.white,
                           size: 16,
                         ),
                       ),
@@ -107,34 +105,24 @@ class MovieCard extends StatelessWidget {
                   Text(movie.title,
                       style: const TextStyle(
                         fontFamily: 'Outfit',
-                        color: AppColors.textMain,
-                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: (movie.genre.split(',').take(2).toList()
-                          ..addAll(movie.genre.contains('/') ? [] : []))
-                        .map((g) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.border,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(g.trim().toUpperCase(),
-                                  style: const TextStyle(
-                                    fontFamily: 'Outfit',
-                                    color: AppColors.textMuted,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.5,
-                                  )),
-                            ))
-                        .toList(),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(movie.genre.split(',').first.trim(),
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            color: AppColors.textMuted,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                    ],
                   ),
                 ],
               ),

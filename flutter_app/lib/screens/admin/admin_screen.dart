@@ -67,7 +67,7 @@ class AdminScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.accentGold),
+        leading: Icon(icon, color: AppColors.accent),
         title: Text(title, style: const TextStyle(color: AppColors.textMain)),
         subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
         trailing: const Icon(Icons.chevron_right, color: Colors.white38),

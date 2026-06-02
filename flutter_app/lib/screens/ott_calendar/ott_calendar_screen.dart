@@ -23,7 +23,7 @@ class OttCalendarScreen extends StatelessWidget {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
-                    leading: const Icon(Icons.tv, color: AppColors.accentGold),
+                    leading: const Icon(Icons.tv, color: AppColors.accent),
                     title: Text(movie.title, style: const TextStyle(color: AppColors.textMain)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +31,7 @@ class OttCalendarScreen extends StatelessWidget {
                         if (movie.ott?.platform != null)
                           Text('Platform: ${movie.ott!.platform}', style: const TextStyle(color: AppColors.textMuted)),
                         if (movie.ott?.releaseDate != null)
-                          Text('Release: ${movie.ott!.releaseDate}', style: const TextStyle(color: AppColors.accentGold)),
+                          Text('Release: ${movie.ott!.releaseDate}', style: const TextStyle(color: AppColors.accent)),
                       ],
                     ),
                   ),

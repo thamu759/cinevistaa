@@ -69,9 +69,9 @@ class _SpinWheelScreenState extends State<SpinWheelScreen>
                       shape: BoxShape.circle,
                       gradient: SweepGradient(
                         colors: [
-                          AppColors.accentGold,
-                          AppColors.accentGold,
-                          AppColors.accentGold,
+                          AppColors.accent,
+                          AppColors.accent,
+                          AppColors.accent,
                         ],
                       ),
                     ),

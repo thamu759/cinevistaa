@@ -141,13 +141,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: AppColors.accentGold, size: 20),
+                        const Icon(Icons.star, color: AppColors.accent, size: 20),
                         const SizedBox(width: 4),
                         Text('${movie.rating}/10',
                             style: const TextStyle(color: AppColors.textMuted, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 12),
                         Text('${movie.criticScore}',
-                            style: TextStyle(color: AppColors.accentGold, fontSize: 14)),
+                            style: TextStyle(color: AppColors.accent, fontSize: 14)),
                         const SizedBox(width: 4),
                         const Text('Critic Score', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                       ],
@@ -228,8 +228,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               icon: const Icon(Icons.edit),
               label: const Text('Write Review'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.accentGold,
-                side: const BorderSide(color: AppColors.accentGold),
+                foregroundColor: AppColors.accent,
+                side: const BorderSide(color: AppColors.accent),
               ),
             ),
           ),
@@ -256,7 +256,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             TextButton(
               onPressed: () => setState(() => _showFullDescription = !_showFullDescription),
               child: Text(_showFullDescription ? 'Show Less' : 'Read More',
-                  style: const TextStyle(color: AppColors.accentGold)),
+                  style: const TextStyle(color: AppColors.accent)),
             ),
         ],
       ),
@@ -334,7 +334,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   onTap: () => setState(() => _reviewRating = star),
                   child: Icon(
                     star <= _reviewRating ? Icons.star : Icons.star_border,
-                    color: AppColors.accentGold,
+                    color: AppColors.accent,
                     size: 28,
                   ),
                 );

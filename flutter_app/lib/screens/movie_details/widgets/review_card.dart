@@ -70,7 +70,7 @@ class _ReviewCardState extends State<ReviewCard> {
               Row(
                 children: List.generate(10, (i) => Icon(
                   i < r.rating ? Icons.star : Icons.star_border,
-                  color: AppColors.accentGold,
+                  color: AppColors.accent,
                   size: 14,
                 )),
               ),
@@ -85,7 +85,7 @@ class _ReviewCardState extends State<ReviewCard> {
               const Spacer(),
               IconButton(
                 icon: Icon(isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    color: isLiked ? AppColors.accentGold : Colors.white54, size: 18),
+                    color: isLiked ? AppColors.accent : Colors.white54, size: 18),
                 onPressed: widget.onLike,
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(4),
@@ -124,7 +124,7 @@ class _ReviewCardState extends State<ReviewCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(reply.author,
-                                style: const TextStyle(color: AppColors.accentGold, fontSize: 11, fontWeight: FontWeight.w600)),
+                                style: const TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600)),
                             Text(reply.body,
                                 style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                           ],
@@ -152,7 +152,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.send, color: AppColors.accentGold),
+                    icon: const Icon(Icons.send, color: AppColors.accent),
                     onPressed: () {
                       _replyController.clear();
                     },

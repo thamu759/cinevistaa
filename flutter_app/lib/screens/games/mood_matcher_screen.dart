@@ -48,7 +48,7 @@ class _MoodMatcherScreenState extends State<MoodMatcherScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   decoration: BoxDecoration(
                     color: _selectedMood == mood
-                        ? AppColors.accentGold
+                        ? AppColors.accent
                         : AppColors.bgPanel,
                     borderRadius: BorderRadius.circular(20),
                   ),

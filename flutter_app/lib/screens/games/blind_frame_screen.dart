@@ -45,7 +45,7 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                               const Text('Blurred poster', style: TextStyle(color: AppColors.textMuted)),
                               TextButton(
                                 onPressed: () => setState(() => _revealed = true),
-                                child: const Text('Reveal', style: TextStyle(color: AppColors.accentGold)),
+                                child: const Text('Reveal', style: TextStyle(color: AppColors.accent)),
                               ),
                             ],
                           ),

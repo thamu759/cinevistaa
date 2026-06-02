@@ -17,6 +17,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _currentNavIndex = 0;
+
   final _navItems = [
     {'label': 'Movies', 'route': '/'},
     {'label': 'Watchlist', 'route': '/watchlist'},
@@ -54,45 +56,52 @@ class _HomeScreenState extends State<HomeScreen> {
     final movieProvider = context.watch<MovieProvider>();
 
     return Scaffold(
+      bottomNavigationBar: _buildBottomNav(auth),
       drawer: _buildDrawer(auth),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+      body: CustomScrollView(
+        slivers: [
           SliverAppBar(
             pinned: false,
             floating: true,
-            backgroundColor: AppColors.surfaceDark.withValues(alpha: 0.8),
+            backgroundColor: AppColors.bgDark.withValues(alpha: 0.95),
             leading: Builder(
               builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: AppColors.textMuted, size: 22),
+                icon: const Icon(Icons.menu, color: Colors.white, size: 22),
                 onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             ),
-            title: GestureDetector(
-              onTap: () {},
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Thirai',
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('T',
                       style: TextStyle(
                         fontFamily: 'Outfit',
                         fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textMain,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
                       )),
-                  Text('Pedia',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.accentGold,
-                        shadows: [Shadow(color: AppColors.accentGold.withValues(alpha: 0.3), blurRadius: 10)],
-                      )),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                const Text('thiraipedia',
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    )),
+              ],
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.search, color: AppColors.textMuted, size: 20),
+                icon: const Icon(Icons.search, color: Colors.white, size: 20),
                 onPressed: () => _navigateTo('/search'),
               ),
               Padding(
@@ -117,63 +126,101 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-        ],
-        body: RefreshIndicator(
-          onRefresh: () async {
-            await movieProvider.loadMovies();
-            await movieProvider.loadNewReleases();
-          },
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              if (movieProvider.heroMovies.isNotEmpty)
-                SizedBox(
-                  height: 440,
-                  child: HeroCarousel(
-                    movies: movieProvider.heroMovies,
-                    onMovieTap: _navigateToMovie,
-                  ),
-                ),
-              const SizedBox(height: 28),
-              _buildGenreFilter(movieProvider),
-              const SizedBox(height: 16),
-              if (movieProvider.isLoading)
-                _buildShimmerGrid()
-              else
-                _buildMovieGrid(movieProvider.movies, movieProvider),
-              const SizedBox(height: 32),
-              if (movieProvider.newReleases.isNotEmpty)
-                MovieSection(
-                  title: 'New Releases',
-                  movies: movieProvider.newReleases,
-                  onMovieTap: _navigateToMovie,
-                ),
-              const SizedBox(height: 32),
-              if (movieProvider.tamilMovies.isNotEmpty)
-                MovieSection(
-                  title: 'Tamil Cinema',
-                  movies: movieProvider.tamilMovies,
-                  onMovieTap: _navigateToMovie,
-                ),
-              const SizedBox(height: 32),
-              if (movieProvider.malayalamMovies.isNotEmpty)
-                MovieSection(
-                  title: 'Malayalam Cinema',
-                  movies: movieProvider.malayalamMovies,
-                  onMovieTap: _navigateToMovie,
-                ),
-              const SizedBox(height: 32),
-              if (movieProvider.staffPicks.isNotEmpty)
-                MovieSection(
-                  title: 'Staff Picks',
-                  movies: movieProvider.staffPicks,
-                  onMovieTap: _navigateToMovie,
-                ),
-              const SizedBox(height: 32),
-              _buildFooter(),
-            ],
+          SliverToBoxAdapter(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await movieProvider.loadMovies();
+                await movieProvider.loadNewReleases();
+              },
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  if (movieProvider.heroMovies.isNotEmpty)
+                    SizedBox(
+                      height: 440,
+                      child: HeroCarousel(
+                        movies: movieProvider.heroMovies,
+                        onMovieTap: _navigateToMovie,
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  _buildGenreFilter(movieProvider),
+                  const SizedBox(height: 16),
+                  if (movieProvider.isLoading)
+                    _buildShimmerGrid()
+                  else
+                    _buildMovieGrid(movieProvider.movies, movieProvider),
+                  const SizedBox(height: 24),
+                  if (movieProvider.newReleases.isNotEmpty)
+                    MovieSection(
+                      title: 'Trending Now',
+                      movies: movieProvider.newReleases,
+                      onMovieTap: _navigateToMovie,
+                    ),
+                  const SizedBox(height: 24),
+                  if (movieProvider.tamilMovies.isNotEmpty)
+                    MovieSection(
+                      title: 'Tamil Cinema',
+                      movies: movieProvider.tamilMovies,
+                      onMovieTap: _navigateToMovie,
+                    ),
+                  const SizedBox(height: 24),
+                  if (movieProvider.malayalamMovies.isNotEmpty)
+                    MovieSection(
+                      title: 'Malayalam Cinema',
+                      movies: movieProvider.malayalamMovies,
+                      onMovieTap: _navigateToMovie,
+                    ),
+                  const SizedBox(height: 24),
+                  if (movieProvider.staffPicks.isNotEmpty)
+                    MovieSection(
+                      title: 'Popular on thiraipedia',
+                      movies: movieProvider.staffPicks,
+                      onMovieTap: _navigateToMovie,
+                    ),
+                  const SizedBox(height: 24),
+                  _buildFooter(),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNav(AuthProvider auth) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: BottomNavigationBar(
+        currentIndex: _currentNavIndex,
+        onTap: (i) {
+          setState(() => _currentNavIndex = i);
+          switch (i) {
+            case 0: break;
+            case 1: _navigateTo('/search'); break;
+            case 2: _navigateTo('/watchlist'); break;
+            case 3: _navigateTo('/community'); break;
+            case 4:
+              if (!auth.isLoggedIn) {
+                _navigateTo('/auth');
+              } else {
+                _navigateTo('/profile');
+              }
+              break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), activeIcon: Icon(Icons.bookmark), label: 'Watchlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.forum_outlined), activeIcon: Icon(Icons.forum), label: 'Community'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
+        ],
       ),
     );
   }
@@ -191,20 +238,20 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Row(
                   children: [
-                    Text('Thirai',
-                        style: TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMain,
-                        )),
-                    Text('Pedia',
-                        style: TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.accentGold,
-                        )),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('T',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('thiraipedia',
+                        style: TextStyle(fontFamily: 'Outfit', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
                   ],
                 ),
                 const Spacer(),
@@ -224,15 +271,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(auth.currentUser!.username,
-                              style: const TextStyle(
-                                  fontFamily: 'Outfit',
-                                  color: AppColors.textMain,
-                                  fontWeight: FontWeight.w600)),
+                              style: const TextStyle(fontFamily: 'Outfit', color: Colors.white, fontWeight: FontWeight.w600)),
                           Text(auth.currentUser!.role,
-                              style: const TextStyle(
-                                  fontFamily: 'Outfit',
-                                  color: AppColors.textMuted,
-                                  fontSize: 12)),
+                              style: const TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -240,9 +281,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 else
                   TextButton.icon(
                     onPressed: () => Navigator.pushNamed(context, '/auth'),
-                    icon: Icon(Icons.login, color: AppColors.accentGold),
-                    label: Text('Login / Register',
-                        style: TextStyle(color: AppColors.accentGold)),
+                    icon: Icon(Icons.login, color: AppColors.accent),
+                    label: Text('Login / Register', style: TextStyle(color: AppColors.accent)),
                   ),
               ],
             ),
@@ -250,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ..._navItems.map((item) => ListTile(
             leading: Icon(_iconForRoute(item['route']!), color: AppColors.textMuted, size: 20),
             title: Text(item['label']!,
-                style: const TextStyle(fontFamily: 'Outfit', color: AppColors.textMain, fontSize: 14)),
+                style: const TextStyle(fontFamily: 'Outfit', color: Colors.white, fontSize: 14)),
             onTap: () {
               Navigator.pop(context);
               _navigateTo(item['route']!);
@@ -258,9 +298,9 @@ class _HomeScreenState extends State<HomeScreen> {
           )),
           if (auth.isAdmin)
             ListTile(
-              leading: Icon(Icons.admin_panel_settings, color: AppColors.accentGold, size: 20),
+              leading: Icon(Icons.admin_panel_settings, color: AppColors.accent, size: 20),
               title: const Text('Admin Control',
-                  style: TextStyle(fontFamily: 'Outfit', color: AppColors.accentGold, fontSize: 14)),
+                  style: TextStyle(fontFamily: 'Outfit', color: AppColors.accent, fontSize: 14)),
               onTap: () {
                 Navigator.pop(context);
                 _navigateTo('/admin');
@@ -270,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.info_outline, color: AppColors.textMuted, size: 20),
             title: const Text('About',
-                style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMain, fontSize: 14)),
+                style: TextStyle(fontFamily: 'Outfit', color: Colors.white, fontSize: 14)),
             onTap: () {
               Navigator.pop(context);
               _navigateTo('/about');
@@ -328,16 +368,14 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.accentGold : AppColors.bgCard,
+            color: isSelected ? AppColors.accent : AppColors.bgCard,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppColors.accentGold : AppColors.border,
-            ),
+            border: Border.all(color: isSelected ? AppColors.accent : AppColors.border),
           ),
           child: Text(label,
               style: TextStyle(
                 fontFamily: 'Outfit',
-                color: isSelected ? Colors.black : AppColors.textMuted,
+                color: isSelected ? Colors.white : AppColors.textMuted,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 fontSize: 13,
               )),
@@ -360,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontFamily: 'Outfit',
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textMain,
+                    color: Colors.white,
                   )),
               PopupMenuButton<String>(
                 icon: Icon(Icons.sort, color: AppColors.textMuted, size: 20),
@@ -372,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Rating',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'rating' ? AppColors.accentGold : AppColors.textMain,
+                          color: provider.sortOption == 'rating' ? AppColors.accent : Colors.white,
                         )),
                   ),
                   PopupMenuItem(
@@ -380,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Popular',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'popular' ? AppColors.accentGold : AppColors.textMain,
+                          color: provider.sortOption == 'popular' ? AppColors.accent : Colors.white,
                         )),
                   ),
                   PopupMenuItem(
@@ -388,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Latest',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'release-desc' ? AppColors.accentGold : AppColors.textMain,
+                          color: provider.sortOption == 'release-desc' ? AppColors.accent : Colors.white,
                         )),
                   ),
                 ],
@@ -448,26 +486,21 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Thirai',
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textMain,
-                  )),
-              Text('Pedia',
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.accentGold,
-                  )),
-            ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.gradientStart, AppColors.gradientEnd],
+              ),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Text('T',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
           ),
           const SizedBox(height: 8),
+          const Text('thiraipedia',
+              style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+          const SizedBox(height: 4),
           const Text('Premium Film Critique & Reviews',
               style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12)),
           const SizedBox(height: 16),
@@ -478,28 +511,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TextButton(
                 onPressed: () => _navigateTo('/about'),
-                child: const Text('About',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+                child: const Text('About', style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
               TextButton(
                 onPressed: () => _navigateTo('/privacy'),
-                child: const Text('Privacy',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+                child: const Text('Privacy', style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
               TextButton(
                 onPressed: () => _navigateTo('/terms'),
-                child: const Text('Terms',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+                child: const Text('Terms', style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
               TextButton(
                 onPressed: () => _navigateTo('/contact'),
-                child: const Text('Contact',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
-              TextButton(
-                onPressed: () => _navigateTo('/articles'),
-                child: const Text('Articles',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
-              TextButton(
-                onPressed: () => _navigateTo('/quiz'),
-                child: const Text('Quiz',
-                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+                child: const Text('Contact', style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
             ],
           ),
         ],

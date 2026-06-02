@@ -9,8 +9,8 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.bgDark,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.accentGold,
-        secondary: AppColors.accentGold,
+        primary: AppColors.accent,
+        secondary: AppColors.accentLight,
         surface: AppColors.bgDark,
       ),
       appBarTheme: const AppBarTheme(
@@ -104,15 +104,15 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.accentGold, width: 0.5),
+          borderSide: const BorderSide(color: AppColors.accent, width: 0.5),
         ),
         hintStyle: const TextStyle(color: AppColors.textMuted, fontFamily: 'Outfit'),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accentGold,
-          foregroundColor: Colors.black,
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -135,6 +135,15 @@ class AppTheme {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.bgDark,
+        selectedItemColor: AppColors.accent,
+        unselectedItemColor: AppColors.textMuted,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: TextStyle(fontFamily: 'Outfit', fontSize: 11),
       ),
     );
   }

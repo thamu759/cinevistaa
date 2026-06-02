@@ -59,7 +59,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           ),
                           title: Row(
                             children: [
-                              Text('#${index + 1}', style: const TextStyle(color: AppColors.accentGold, fontWeight: FontWeight.bold)),
+                              Text('#${index + 1}', style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
                               const SizedBox(width: 8),
                               Text(entry.username, style: const TextStyle(color: AppColors.textMain, fontWeight: FontWeight.w600)),
                             ],
@@ -72,7 +72,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               Text('${entry.reviewCount} reviews',
                                   style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                               Text('${entry.averageRating.toStringAsFixed(1)} avg',
-                                  style: const TextStyle(color: AppColors.accentGold, fontSize: 11)),
+                                  style: const TextStyle(color: AppColors.accent, fontSize: 11)),
                             ],
                           ),
                         ),

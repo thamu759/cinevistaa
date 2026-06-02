@@ -58,7 +58,6 @@ class _HeroCarouselState extends State<HeroCarousel> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -86,9 +85,35 @@ class _HeroCarouselState extends State<HeroCarousel> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x800B0C10),
-                    Color(0xCC0B0C10),
-                    Color(0xFF0B0C10),
+                    Colors.transparent,
+                    Color(0xCC0A0A0A),
+                    Color(0xFF0A0A0A),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 16,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                  ),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.star, size: 14, color: AppColors.accentSecondary),
+                    const SizedBox(width: 6),
+                    Text('${movie.rating}/10',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        )),
                   ],
                 ),
               ),
@@ -102,50 +127,30 @@ class _HeroCarouselState extends State<HeroCarousel> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentGold.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: AppColors.accentGold.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('STAFF PICK',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.accentGold,
-                                letterSpacing: 1.2,
-                              )),
-                          const SizedBox(width: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.star, size: 14, color: AppColors.accentGold),
-                              const SizedBox(width: 4),
-                              Text('${movie.rating}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textMain,
-                                  )),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     Text(movie.title.toUpperCase(),
                         style: const TextStyle(
                           fontFamily: 'Outfit',
-                          fontSize: 40,
+                          fontSize: 36,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: -0.5,
                           shadows: [Shadow(color: Color(0x80000000), blurRadius: 10)],
-                        )),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _infoChip(movie.genre),
+                        const SizedBox(width: 8),
+                        Text(movie.releaseYear.toString(),
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        const SizedBox(width: 8),
+                        Text(movie.runtime,
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     Text(
                       movie.description.length > 100
                           ? '${movie.description.substring(0, 100)}...'
@@ -178,27 +183,42 @@ class _HeroCarouselState extends State<HeroCarousel> {
     );
   }
 
+  Widget _infoChip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.border,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(text.toUpperCase(),
+          style: const TextStyle(
+            fontFamily: 'Outfit',
+            color: AppColors.textMuted,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          )),
+    );
+  }
+
   Widget _heroButton(String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.accentGold,
+          gradient: const LinearGradient(
+            colors: [AppColors.gradientStart, AppColors.gradientEnd],
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label,
-                style: const TextStyle(
-                  fontFamily: 'Outfit',
-                  color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                )),
-          ],
-        ),
+        child: Text(label,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            )),
       ),
     );
   }
@@ -233,15 +253,13 @@ class _HeroCarouselState extends State<HeroCarousel> {
           child: Center(
             child: GestureDetector(
               onTap: () {
-                if (_currentIndex > 0) {
-                  setState(() => _currentIndex--);
-                }
+                if (_currentIndex > 0) setState(() => _currentIndex--);
               },
               child: Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDark.withValues(alpha: 0.5),
+                  color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: AppColors.border),
                 ),
@@ -258,15 +276,13 @@ class _HeroCarouselState extends State<HeroCarousel> {
           child: Center(
             child: GestureDetector(
               onTap: () {
-                if (_currentIndex < widget.movies.length - 1) {
-                  setState(() => _currentIndex++);
-                }
+                if (_currentIndex < widget.movies.length - 1) setState(() => _currentIndex++);
               },
               child: Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDark.withValues(alpha: 0.5),
+                  color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: AppColors.border),
                 ),
@@ -286,11 +302,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
       width: isActive ? 36 : 24,
       height: 4,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.accentGold : Colors.white.withValues(alpha: 0.2),
+        color: isActive ? AppColors.accent : AppColors.border,
         borderRadius: BorderRadius.circular(2),
-        boxShadow: isActive
-            ? [BoxShadow(color: AppColors.accentGold.withValues(alpha: 0.5), blurRadius: 8)]
-            : null,
       ),
     );
   }

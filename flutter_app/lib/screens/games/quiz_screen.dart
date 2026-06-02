@@ -69,7 +69,7 @@ class _QuizScreenState extends State<QuizScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Text('Score: $_score', style: const TextStyle(color: AppColors.accentGold, fontSize: 18)),
+            Text('Score: $_score', style: const TextStyle(color: AppColors.accent, fontSize: 18)),
             const SizedBox(height: 32),
             Text(q['q'] as String, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textMain, height: 1.3)),
             const SizedBox(height: 32),

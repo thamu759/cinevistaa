@@ -25,29 +25,49 @@ class MovieSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title.toUpperCase(),
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accentGold,
-                    letterSpacing: 1.5,
-                  )),
+              Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(title,
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      )),
+                ],
+              ),
               GestureDetector(
                 onTap: () {},
-                child: const Text('View All',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      color: AppColors.textMuted,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    )),
+                child: Row(
+                  children: [
+                    Text('See All',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          color: AppColors.accent,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.accent),
+                  ],
+                ),
               ),
             ],
           ),
         ),
         SizedBox(
-          height: 200,
+          height: 210,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -57,11 +77,10 @@ class MovieSection extends StatelessWidget {
               return GestureDetector(
                 onTap: () => onMovieTap(movie.id),
                 child: Container(
-                  width: 130,
-                  margin: const EdgeInsets.only(right: 12),
+                  width: 140,
+                  margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.border),
                     color: AppColors.bgCard,
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -69,21 +88,49 @@ class MovieSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: movie.posterUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: movie.posterUrl,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (_, _) => Container(color: AppColors.bgDark),
-                                errorWidget: (_, _, _) => Container(
-                                  color: AppColors.bgDark,
-                                  child: const Icon(Icons.movie, color: Colors.white24),
+                        child: Stack(
+                          children: [
+                            movie.posterUrl.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: movie.posterUrl,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, _) => Container(color: AppColors.bgDark),
+                                    errorWidget: (_, _, _) => Container(
+                                      color: AppColors.bgDark,
+                                      child: const Icon(Icons.movie, color: Colors.white24),
+                                    ),
+                                  )
+                                : Container(
+                                    color: AppColors.bgDark,
+                                    child: const Icon(Icons.movie, color: Colors.white24),
+                                  ),
+                            if (movie.rating > 0)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                                    ),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.star, color: Colors.white, size: 10),
+                                      const SizedBox(width: 2),
+                                      Text('${movie.rating}',
+                                          style: const TextStyle(
+                                              color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
                                 ),
-                              )
-                            : Container(
-                                color: AppColors.bgDark,
-                                child: const Icon(Icons.movie, color: Colors.white24),
                               ),
+                          ],
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8),
@@ -93,21 +140,19 @@ class MovieSection extends StatelessWidget {
                             Text(movie.title,
                                 style: const TextStyle(
                                     fontFamily: 'Outfit',
-                                    color: AppColors.textMain,
+                                    color: Colors.white,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.star, color: AppColors.accentGold, size: 11),
+                                Icon(Icons.star, color: AppColors.accent, size: 10),
                                 const SizedBox(width: 2),
                                 Text('${movie.rating}',
                                     style: const TextStyle(
-                                        fontFamily: 'Outfit',
-                                        color: AppColors.textMuted,
-                                        fontSize: 11)),
+                                        fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 11)),
                               ],
                             ),
                           ],

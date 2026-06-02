@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(user.username,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             Text(user.role,
-                style: TextStyle(color: AppColors.accentGold, fontSize: 14)),
+                style: TextStyle(color: AppColors.accent, fontSize: 14)),
             const SizedBox(height: 8),
             Text(user.bio.isNotEmpty ? user.bio : 'No bio yet',
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         u.followers.contains(user.username) ? 'Following' : 'Follow',
                         style: TextStyle(
                           color: u.followers.contains(user.username)
-                              ? AppColors.accentGold
+                              ? AppColors.accent
                               : AppColors.textMuted,
                         ),
                       ),

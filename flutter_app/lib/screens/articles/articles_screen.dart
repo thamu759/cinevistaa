@@ -21,7 +21,7 @@ class ArticlesScreen extends StatelessWidget {
           ...staffPicks.map((movie) => Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: const Icon(Icons.article, color: AppColors.accentGold),
+              leading: const Icon(Icons.article, color: AppColors.accent),
               title: Text(movie.title, style: const TextStyle(color: AppColors.textMain)),
               subtitle: Text('Critic Score: ${movie.criticScore}', style: const TextStyle(color: AppColors.textMuted)),
               onTap: () => Navigator.pushNamed(context, '/article-detail', arguments: movie.id),

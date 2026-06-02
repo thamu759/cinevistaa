@@ -15,7 +15,7 @@ class AboutScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Thirai', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textMain)),
-              Text('Pedia', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300, color: AppColors.accentGold)),
+              Text('Pedia', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300, color: AppColors.accent)),
             ],
           ),
           const SizedBox(height: 8),

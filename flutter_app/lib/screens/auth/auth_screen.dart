@@ -46,7 +46,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('Thirai', style: TextStyle(color: AppColors.textMain, fontWeight: FontWeight.bold)),
-            const Text('Pedia', style: TextStyle(color: AppColors.accentGold, fontWeight: FontWeight.w300)),
+            const Text('Pedia', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w300)),
           ],
         ),
       ),
@@ -56,9 +56,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           children: [
             TabBar(
               controller: _tabController,
-              labelColor: AppColors.accentGold,
+              labelColor: AppColors.accent,
               unselectedLabelColor: AppColors.textMuted,
-              indicatorColor: AppColors.accentGold,
+              indicatorColor: AppColors.accent,
               tabs: const [
                 Tab(text: 'Login'),
                 Tab(text: 'Register'),

@@ -170,10 +170,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.accentGold.withValues(alpha: 0.2),
+                  color: AppColors.accent.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(thread.tag, style: const TextStyle(color: AppColors.accentGold, fontSize: 10)),
+                child: Text(thread.tag, style: const TextStyle(color: AppColors.accent, fontSize: 10)),
               ),
             ],
           ),
@@ -214,7 +214,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(reply.author, style: const TextStyle(color: AppColors.accentGold, fontSize: 11, fontWeight: FontWeight.w600)),
+                            Text(reply.author, style: const TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600)),
                             Text(reply.body, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                           ],
                         ),
@@ -241,7 +241,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.send, color: AppColors.accentGold),
+                    icon: const Icon(Icons.send, color: AppColors.accent),
                     onPressed: () async {
                       final controller = _replyControllers[thread.id]!;
                       if (controller.text.trim().isEmpty) return;
