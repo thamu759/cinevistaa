@@ -31,9 +31,7 @@ class MovieSection extends StatelessWidget {
                     width: 3,
                     height: 18,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                      ),
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -43,7 +41,7 @@ class MovieSection extends StatelessWidget {
                         fontFamily: 'Outfit',
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.textMain,
                       )),
                 ],
               ),
@@ -81,6 +79,7 @@ class MovieSection extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.border),
                     color: AppColors.bgCard,
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -112,19 +111,18 @@ class MovieSection extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                                    ),
+                                    color: AppColors.surfaceDark.withValues(alpha: 0.85),
                                     borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(color: AppColors.border),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.star, color: Colors.white, size: 10),
+                                      Icon(Icons.star, color: AppColors.accent, size: 10),
                                       const SizedBox(width: 2),
                                       Text('${movie.rating}',
                                           style: const TextStyle(
-                                              color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                                              color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w700)),
                                     ],
                                   ),
                                 ),
@@ -140,7 +138,7 @@ class MovieSection extends StatelessWidget {
                             Text(movie.title,
                                 style: const TextStyle(
                                     fontFamily: 'Outfit',
-                                    color: Colors.white,
+                                    color: AppColors.textMain,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600),
                                 maxLines: 2,

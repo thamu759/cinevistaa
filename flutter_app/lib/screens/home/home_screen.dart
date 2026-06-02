@@ -19,16 +19,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentNavIndex = 0;
 
-  final _navItems = [
-    {'label': 'Movies', 'route': '/'},
-    {'label': 'Watchlist', 'route': '/watchlist'},
-    {'label': 'Coming Soon', 'route': '/coming-soon'},
-    {'label': 'Top Critics', 'route': '/leaderboard'},
-    {'label': 'Lists', 'route': '/lists'},
-    {'label': 'OTT Calendar', 'route': '/ott-calendar'},
-    {'label': 'Community', 'route': '/community'},
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -57,74 +47,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       bottomNavigationBar: _buildBottomNav(auth),
-      drawer: _buildDrawer(auth),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             pinned: false,
             floating: true,
             backgroundColor: AppColors.bgDark.withValues(alpha: 0.95),
-            leading: Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white, size: 22),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-            ),
+            centerTitle: true,
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                    ),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text('T',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      )),
-                ),
-                const SizedBox(width: 8),
-                const Text('thiraipedia',
+                Text('Thirai',
                     style: TextStyle(
                       fontFamily: 'Outfit',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textMain,
+                    )),
+                Text('Pedia',
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.accent,
+                      shadows: [Shadow(color: AppColors.accent.withValues(alpha: 0.3), blurRadius: 10)],
                     )),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search, color: Colors.white, size: 20),
-                onPressed: () => _navigateTo('/search'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    if (!auth.isLoggedIn) {
-                      _navigateTo('/auth');
-                    }
-                  },
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundImage: auth.currentUser?.avatarUrl.isNotEmpty == true
-                        ? NetworkImage(auth.currentUser!.avatarUrl)
-                        : null,
-                    backgroundColor: AppColors.bgPanel,
-                    child: auth.currentUser == null
-                        ? Icon(Icons.person, size: 18, color: AppColors.textMuted)
-                        : null,
-                  ),
-                ),
-              ),
-            ],
           ),
           SliverToBoxAdapter(
             child: RefreshIndicator(
@@ -225,125 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDrawer(AuthProvider auth) {
-    return Drawer(
-      backgroundColor: AppColors.bgDark,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.bgPanel),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text('T',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('thiraipedia',
-                        style: TextStyle(fontFamily: 'Outfit', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
-                  ],
-                ),
-                const Spacer(),
-                if (auth.isLoggedIn)
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundImage: auth.currentUser!.avatarUrl.isNotEmpty
-                            ? NetworkImage(auth.currentUser!.avatarUrl)
-                            : null,
-                        backgroundColor: AppColors.bgCard,
-                        child: Icon(Icons.person, size: 20, color: AppColors.textMuted),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(auth.currentUser!.username,
-                              style: const TextStyle(fontFamily: 'Outfit', color: Colors.white, fontWeight: FontWeight.w600)),
-                          Text(auth.currentUser!.role,
-                              style: const TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12)),
-                        ],
-                      ),
-                    ],
-                  )
-                else
-                  TextButton.icon(
-                    onPressed: () => Navigator.pushNamed(context, '/auth'),
-                    icon: Icon(Icons.login, color: AppColors.accent),
-                    label: Text('Login / Register', style: TextStyle(color: AppColors.accent)),
-                  ),
-              ],
-            ),
-          ),
-          ..._navItems.map((item) => ListTile(
-            leading: Icon(_iconForRoute(item['route']!), color: AppColors.textMuted, size: 20),
-            title: Text(item['label']!,
-                style: const TextStyle(fontFamily: 'Outfit', color: Colors.white, fontSize: 14)),
-            onTap: () {
-              Navigator.pop(context);
-              _navigateTo(item['route']!);
-            },
-          )),
-          if (auth.isAdmin)
-            ListTile(
-              leading: Icon(Icons.admin_panel_settings, color: AppColors.accent, size: 20),
-              title: const Text('Admin Control',
-                  style: TextStyle(fontFamily: 'Outfit', color: AppColors.accent, fontSize: 14)),
-              onTap: () {
-                Navigator.pop(context);
-                _navigateTo('/admin');
-              },
-            ),
-          Divider(color: AppColors.border),
-          ListTile(
-            leading: Icon(Icons.info_outline, color: AppColors.textMuted, size: 20),
-            title: const Text('About',
-                style: TextStyle(fontFamily: 'Outfit', color: Colors.white, fontSize: 14)),
-            onTap: () {
-              Navigator.pop(context);
-              _navigateTo('/about');
-            },
-          ),
-          if (auth.isLoggedIn)
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red, size: 20),
-              title: const Text('Logout',
-                  style: TextStyle(fontFamily: 'Outfit', color: Colors.red, fontSize: 14)),
-              onTap: () {
-                Navigator.pop(context);
-                auth.logout();
-              },
-            ),
-        ],
-      ),
-    );
-  }
-
-  IconData _iconForRoute(String route) {
-    switch (route) {
-      case '/': return Icons.movie;
-      case '/watchlist': return Icons.bookmark;
-      case '/coming-soon': return Icons.upcoming;
-      case '/leaderboard': return Icons.leaderboard;
-      case '/lists': return Icons.list;
-      case '/ott-calendar': return Icons.calendar_month;
-      case '/community': return Icons.forum;
-      default: return Icons.circle;
-    }
-  }
-
   Widget _buildGenreFilter(MovieProvider provider) {
     final genres = ['Action', 'Drama', 'Sci-Fi', 'Comedy', 'Thriller', 'Tamil', 'Crime'];
     return SizedBox(
@@ -375,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text(label,
               style: TextStyle(
                 fontFamily: 'Outfit',
-                color: isSelected ? Colors.white : AppColors.textMuted,
+                color: isSelected ? Colors.black : AppColors.textMuted,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 fontSize: 13,
               )),
@@ -398,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontFamily: 'Outfit',
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.textMain,
                   )),
               PopupMenuButton<String>(
                 icon: Icon(Icons.sort, color: AppColors.textMuted, size: 20),
@@ -410,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Rating',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'rating' ? AppColors.accent : Colors.white,
+                          color: provider.sortOption == 'rating' ? AppColors.accent : AppColors.textMain,
                         )),
                   ),
                   PopupMenuItem(
@@ -418,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Popular',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'popular' ? AppColors.accent : Colors.white,
+                          color: provider.sortOption == 'popular' ? AppColors.accent : AppColors.textMain,
                         )),
                   ),
                   PopupMenuItem(
@@ -426,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text('Latest',
                         style: TextStyle(
                           fontFamily: 'Outfit',
-                          color: provider.sortOption == 'release-desc' ? AppColors.accent : Colors.white,
+                          color: provider.sortOption == 'release-desc' ? AppColors.accent : AppColors.textMain,
                         )),
                   ),
                 ],
@@ -486,21 +316,26 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.gradientStart, AppColors.gradientEnd],
-              ),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Text('T',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Thirai',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textMain,
+                  )),
+              Text('Pedia',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.accent,
+                  )),
+            ],
           ),
           const SizedBox(height: 8),
-          const Text('thiraipedia',
-              style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
-          const SizedBox(height: 4),
           const Text('Premium Film Critique & Reviews',
               style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12)),
           const SizedBox(height: 16),

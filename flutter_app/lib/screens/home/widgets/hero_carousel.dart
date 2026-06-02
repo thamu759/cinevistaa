@@ -58,6 +58,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -73,10 +74,10 @@ class _HeroCarouselState extends State<HeroCarousel> {
                     ? CachedNetworkImage(
                         imageUrl: movie.backdropUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, _) => Container(color: Colors.black),
-                        errorWidget: (_, _, _) => Container(color: Colors.black),
+                        placeholder: (_, _) => Container(color: AppColors.bgDark),
+                        errorWidget: (_, _, _) => Container(color: AppColors.bgDark),
                       )
-                    : Container(color: Colors.black),
+                    : Container(color: AppColors.bgDark),
               ),
             ),
             Container(
@@ -86,8 +87,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Color(0xCC0A0A0A),
-                    Color(0xFF0A0A0A),
+                    Color(0xCC0B0C10),
+                    Color(0xFF0B0C10),
                   ],
                 ),
               ),
@@ -98,16 +99,15 @@ class _HeroCarouselState extends State<HeroCarousel> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                  ),
+                  color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star, size: 14, color: AppColors.accentSecondary),
-                    const SizedBox(width: 6),
+                    Icon(Icons.star, size: 14, color: AppColors.accent),
+                    const SizedBox(width: 4),
                     Text('${movie.rating}/10',
                         style: const TextStyle(
                           fontSize: 13,
@@ -207,15 +207,13 @@ class _HeroCarouselState extends State<HeroCarousel> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.gradientStart, AppColors.gradientEnd],
-          ),
+          color: AppColors.accent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(label,
             style: const TextStyle(
               fontFamily: 'Outfit',
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             )),
@@ -304,6 +302,9 @@ class _HeroCarouselState extends State<HeroCarousel> {
       decoration: BoxDecoration(
         color: isActive ? AppColors.accent : AppColors.border,
         borderRadius: BorderRadius.circular(2),
+        boxShadow: isActive
+            ? [BoxShadow(color: AppColors.accent.withValues(alpha: 0.5), blurRadius: 8)]
+            : null,
       ),
     );
   }

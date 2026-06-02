@@ -25,6 +25,7 @@ class MovieCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
           color: AppColors.bgCard,
         ),
         clipBehavior: Clip.antiAlias,
@@ -58,19 +59,20 @@ class MovieCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                          ),
+                          color: AppColors.surfaceDark.withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star, color: Colors.white, size: 12),
+                            Icon(Icons.star, color: AppColors.accent, size: 12),
                             const SizedBox(width: 2),
                             Text('${movie.rating}',
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                                    color: AppColors.accent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
                           ],
                         ),
                       ),
@@ -83,7 +85,7 @@ class MovieCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.black54,
+                          color: AppColors.surfaceDark.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(
@@ -105,24 +107,31 @@ class MovieCard extends StatelessWidget {
                   Text(movie.title,
                       style: const TextStyle(
                         fontFamily: 'Outfit',
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMain,
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(movie.genre.split(',').first.trim(),
-                          style: const TextStyle(
-                            fontFamily: 'Outfit',
-                            color: AppColors.textMuted,
-                            fontSize: 11,
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: movie.genre.split(',').take(2).map((g) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.border,
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                    ],
+                          child: Text(g.trim().toUpperCase(),
+                              style: const TextStyle(
+                                fontFamily: 'Outfit',
+                                color: AppColors.textMuted,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              )),
+                        )).toList(),
                   ),
                 ],
               ),
