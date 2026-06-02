@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
@@ -22,9 +23,9 @@ class ContactScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFFE50914)),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        subtitle: Text(subtitle, style: const TextStyle(color: Colors.white54)),
+        leading: Icon(icon, color: AppColors.accentGold),
+        title: Text(title, style: const TextStyle(color: AppColors.textMain)),
+        subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
       ),
     );
   }

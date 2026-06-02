@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/movie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../theme/app_colors.dart';
 
 class CastSection extends StatelessWidget {
   final List<CastMember> cast;
@@ -13,7 +14,7 @@ class CastSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Cast', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Text('Cast', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain)),
           const SizedBox(height: 12),
           SizedBox(
             height: 100,
@@ -32,19 +33,19 @@ class CastSection extends StatelessWidget {
                         backgroundImage: member.avatarUrl.isNotEmpty
                             ? CachedNetworkImageProvider(member.avatarUrl)
                             : null,
-                        backgroundColor: const Color(0xFF16213E),
+                        backgroundColor: AppColors.bgDark,
                         child: member.avatarUrl.isEmpty
                             ? const Icon(Icons.person, color: Colors.white24)
                             : null,
                       ),
                       const SizedBox(height: 6),
                       Text(member.name,
-                          style: const TextStyle(color: Colors.white70, fontSize: 11),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                       Text(member.role,
-                          style: const TextStyle(color: Colors.white38, fontSize: 9),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 9),
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),

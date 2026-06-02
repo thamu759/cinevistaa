@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/community_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/community_thread.dart';
+import '../../theme/app_colors.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -81,7 +82,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -101,10 +102,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
             children: [
               DropdownButton<String>(
                 value: _selectedTag,
-                dropdownColor: const Color(0xFF1A1A2E),
+                dropdownColor: AppColors.bgPanel,
                 items: _tags.map((t) => DropdownMenuItem(
                   value: t,
-                  child: Text(t, style: const TextStyle(color: Colors.white)),
+                  child: Text(t, style: const TextStyle(color: AppColors.textMain)),
                 )).toList(),
                 onChanged: (v) => setState(() => _selectedTag = v!),
               ),
@@ -141,7 +142,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -154,44 +155,44 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 backgroundImage: thread.avatarUrl.isNotEmpty
                     ? CachedNetworkImageProvider(thread.avatarUrl)
                     : null,
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.bgPanel,
                 child: thread.avatarUrl.isEmpty ? const Icon(Icons.person, size: 14, color: Colors.white54) : null,
               ),
               const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(thread.author, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                  Text(thread.role, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                  Text(thread.author, style: const TextStyle(color: AppColors.textMain, fontWeight: FontWeight.w600, fontSize: 13)),
+                  Text(thread.role, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
                 ],
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE50914).withValues(alpha: 0.2),
+                  color: AppColors.accentGold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(thread.tag, style: const TextStyle(color: Color(0xFFE50914), fontSize: 10)),
+                child: Text(thread.tag, style: const TextStyle(color: AppColors.accentGold, fontSize: 10)),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(thread.title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(thread.title, style: const TextStyle(color: AppColors.textMain, fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
-          Text(thread.body, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+          Text(thread.body, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
           const SizedBox(height: 8),
           Row(
             children: [
               const Icon(Icons.thumb_up_outlined, color: Colors.white38, size: 16),
               const SizedBox(width: 4),
-              Text('${thread.likes}', style: const TextStyle(color: Colors.white38, fontSize: 12)),
+              Text('${thread.likes}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
               const SizedBox(width: 16),
               const Icon(Icons.chat_bubble_outline, color: Colors.white38, size: 16),
               const SizedBox(width: 4),
-              Text('${thread.replies.length}', style: const TextStyle(color: Colors.white38, fontSize: 12)),
+              Text('${thread.replies.length}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
               const Spacer(),
-              Text(thread.timestamp, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+              Text(thread.timestamp, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
             ],
           ),
           if (thread.replies.isNotEmpty)
@@ -205,7 +206,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     children: [
                       const CircleAvatar(
                         radius: 10,
-                        backgroundColor: Color(0xFF16213E),
+                        backgroundColor: AppColors.bgDark,
                         child: Icon(Icons.person, size: 10, color: Colors.white38),
                       ),
                       const SizedBox(width: 8),
@@ -213,8 +214,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(reply.author, style: const TextStyle(color: Color(0xFFE50914), fontSize: 11, fontWeight: FontWeight.w600)),
-                            Text(reply.body, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                            Text(reply.author, style: const TextStyle(color: AppColors.accentGold, fontSize: 11, fontWeight: FontWeight.w600)),
+                            Text(reply.body, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -240,7 +241,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xFFE50914)),
+                    icon: const Icon(Icons.send, color: AppColors.accentGold),
                     onPressed: () async {
                       final controller = _replyControllers[thread.id]!;
                       if (controller.text.trim().isEmpty) return;

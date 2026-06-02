@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../models/review.dart';
 import '../../../models/user.dart';
+import '../../../theme/app_colors.dart';
 
 class ReviewCard extends StatefulWidget {
   final Review review;
@@ -40,7 +41,7 @@ class _ReviewCardState extends State<ReviewCard> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -53,7 +54,7 @@ class _ReviewCardState extends State<ReviewCard> {
                 backgroundImage: r.avatarUrl.isNotEmpty
                     ? CachedNetworkImageProvider(r.avatarUrl)
                     : null,
-                backgroundColor: Colors.grey[800],
+                backgroundColor: AppColors.bgPanel,
                 child: r.avatarUrl.isEmpty ? const Icon(Icons.person, size: 16, color: Colors.white54) : null,
               ),
               const SizedBox(width: 10),
@@ -61,36 +62,36 @@ class _ReviewCardState extends State<ReviewCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(r.user, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-                    Text(r.role, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                    Text(r.user, style: const TextStyle(color: AppColors.textMain, fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(r.role, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
                   ],
                 ),
               ),
               Row(
                 children: List.generate(10, (i) => Icon(
                   i < r.rating ? Icons.star : Icons.star_border,
-                  color: const Color(0xFFF5C518),
+                  color: AppColors.accentGold,
                   size: 14,
                 )),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(r.text, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4)),
+          Text(r.text, style: const TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.4)),
           const SizedBox(height: 8),
           Row(
             children: [
-              Text(r.timestamp, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+              Text(r.timestamp, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
               const Spacer(),
               IconButton(
                 icon: Icon(isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    color: isLiked ? const Color(0xFFE50914) : Colors.white54, size: 18),
+                    color: isLiked ? AppColors.accentGold : Colors.white54, size: 18),
                 onPressed: widget.onLike,
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(4),
               ),
               const SizedBox(width: 4),
-              Text('${r.likes}', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              Text('${r.likes}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
               const SizedBox(width: 12),
               IconButton(
                 icon: const Icon(Icons.chat_bubble_outline, color: Colors.white54, size: 18),
@@ -99,7 +100,7 @@ class _ReviewCardState extends State<ReviewCard> {
                 padding: const EdgeInsets.all(4),
               ),
               const SizedBox(width: 4),
-              Text('${r.replies.length}', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              Text('${r.replies.length}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
             ],
           ),
           if (_showReplies && r.replies.isNotEmpty)
@@ -114,7 +115,7 @@ class _ReviewCardState extends State<ReviewCard> {
                     children: [
                       const CircleAvatar(
                         radius: 12,
-                        backgroundColor: Color(0xFF16213E),
+                        backgroundColor: AppColors.bgDark,
                         child: Icon(Icons.person, size: 12, color: Colors.white38),
                       ),
                       const SizedBox(width: 8),
@@ -123,9 +124,9 @@ class _ReviewCardState extends State<ReviewCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(reply.author,
-                                style: const TextStyle(color: Color(0xFFE50914), fontSize: 11, fontWeight: FontWeight.w600)),
+                                style: const TextStyle(color: AppColors.accentGold, fontSize: 11, fontWeight: FontWeight.w600)),
                             Text(reply.body,
-                                style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -151,7 +152,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xFFE50914)),
+                    icon: const Icon(Icons.send, color: AppColors.accentGold),
                     onPressed: () {
                       _replyController.clear();
                     },

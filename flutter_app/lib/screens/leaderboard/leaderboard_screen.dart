@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/api_service.dart';
 import '../../models/watch_provider.dart';
+import '../../theme/app_colors.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -37,7 +38,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _leaderboard.isEmpty
-                ? const Center(child: Text('No critics yet', style: TextStyle(color: Colors.white54)))
+                ? const Center(child: Text('No critics yet', style: TextStyle(color: AppColors.textMuted)))
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _leaderboard.length,
@@ -51,27 +52,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             backgroundImage: entry.avatarUrl.isNotEmpty
                                 ? CachedNetworkImageProvider(entry.avatarUrl)
                                 : null,
-                            backgroundColor: const Color(0xFF1A1A2E),
+                            backgroundColor: AppColors.bgPanel,
                             child: entry.avatarUrl.isEmpty
                                 ? const Icon(Icons.person, color: Colors.white38)
                                 : null,
                           ),
                           title: Row(
                             children: [
-                              Text('#${index + 1}', style: const TextStyle(color: Color(0xFFF5C518), fontWeight: FontWeight.bold)),
+                              Text('#${index + 1}', style: const TextStyle(color: AppColors.accentGold, fontWeight: FontWeight.bold)),
                               const SizedBox(width: 8),
-                              Text(entry.username, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                              Text(entry.username, style: const TextStyle(color: AppColors.textMain, fontWeight: FontWeight.w600)),
                             ],
                           ),
-                          subtitle: Text(entry.role, style: const TextStyle(color: Colors.white54)),
+                          subtitle: Text(entry.role, style: const TextStyle(color: AppColors.textMuted)),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text('${entry.reviewCount} reviews',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                                  style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                               Text('${entry.averageRating.toStringAsFixed(1)} avg',
-                                  style: const TextStyle(color: Color(0xFFF5C518), fontSize: 11)),
+                                  style: const TextStyle(color: AppColors.accentGold, fontSize: 11)),
                             ],
                           ),
                         ),

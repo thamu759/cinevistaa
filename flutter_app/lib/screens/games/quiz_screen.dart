@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../../theme/app_colors.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -43,7 +44,7 @@ class _QuizScreenState extends State<QuizScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Your Score: $_score/${_questions.length}',
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textMain)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => setState(() {
@@ -68,9 +69,9 @@ class _QuizScreenState extends State<QuizScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Text('Score: $_score', style: const TextStyle(color: Color(0xFFF5C518), fontSize: 18)),
+            Text('Score: $_score', style: const TextStyle(color: AppColors.accentGold, fontSize: 18)),
             const SizedBox(height: 32),
-            Text(q['q'] as String, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3)),
+            Text(q['q'] as String, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textMain, height: 1.3)),
             const SizedBox(height: 32),
             ...shuffled.map((option) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -79,7 +80,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 child: OutlinedButton(
                   onPressed: () => _answer(option),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textMain,
                     side: const BorderSide(color: Colors.white24),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/movie_provider.dart';
+import '../../theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -54,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Icon(Icons.person_outline, size: 64, color: Colors.white24),
               const SizedBox(height: 16),
               const Text('Login to view your profile',
-                  style: TextStyle(color: Colors.white54)),
+                  style: TextStyle(color: AppColors.textMuted)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, '/auth'),
@@ -97,19 +98,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundImage: user.avatarUrl.isNotEmpty
                   ? CachedNetworkImageProvider(user.avatarUrl)
                   : null,
-              backgroundColor: const Color(0xFF1A1A2E),
+              backgroundColor: AppColors.bgPanel,
               child: user.avatarUrl.isEmpty
                   ? const Icon(Icons.person, size: 40, color: Colors.white38)
                   : null,
             ),
             const SizedBox(height: 12),
             Text(user.username,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             Text(user.role,
-                style: TextStyle(color: const Color(0xFFF5C518), fontSize: 14)),
+                style: TextStyle(color: AppColors.accentGold, fontSize: 14)),
             const SizedBox(height: 8),
             Text(user.bio.isNotEmpty ? user.bio : 'No bio yet',
-                style: const TextStyle(color: Colors.white54, fontSize: 14),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
                 textAlign: TextAlign.center),
             const SizedBox(height: 20),
             Row(
@@ -124,12 +125,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             if (_editingProfile) _buildEditProfile(profile),
             const SizedBox(height: 24),
-            const Divider(color: Color(0xFF1A1A2E)),
+            const Divider(color: AppColors.border),
             const SizedBox(height: 16),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text('Community Members',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             ),
             const SizedBox(height: 12),
             ...profile.allUsers.map((u) => ListTile(
@@ -140,8 +141,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : null,
                 child: u.avatarUrl.isEmpty ? const Icon(Icons.person, size: 16, color: Colors.white38) : null,
               ),
-              title: Text(u.username, style: const TextStyle(color: Colors.white, fontSize: 14)),
-              subtitle: Text(u.role, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+              title: Text(u.username, style: const TextStyle(color: AppColors.textMain, fontSize: 14)),
+              subtitle: Text(u.role, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
               trailing: u.username != user.username
                   ? TextButton(
                       onPressed: () {
@@ -155,8 +156,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         u.followers.contains(user.username) ? 'Following' : 'Follow',
                         style: TextStyle(
                           color: u.followers.contains(user.username)
-                              ? const Color(0xFFE50914)
-                              : Colors.white70,
+                              ? AppColors.accentGold
+                              : AppColors.textMuted,
                         ),
                       ),
                     )
@@ -171,8 +172,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _statItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textMain)),
+        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
       ],
     );
   }
@@ -182,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -215,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.white54),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.textMuted),
                   onPressed: () => setState(() => _editingProfile = false),
                   child: const Text('Cancel'),
                 ),

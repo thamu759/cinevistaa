@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/movie_provider.dart';
 import '../../models/movie.dart';
+import '../../theme/app_colors.dart';
 import '../movie_details/movie_details_screen.dart';
 import 'widgets/hero_carousel.dart';
 import 'widgets/movie_card.dart';
@@ -16,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final _navItems = [
     {'label': 'Movies', 'route': '/'},
     {'label': 'Watchlist', 'route': '/watchlist'},
@@ -44,9 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToMovie(String movieId) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => MovieDetailsScreen(movieId: movieId),
-      ),
+      MaterialPageRoute(builder: (_) => MovieDetailsScreen(movieId: movieId)),
     );
   }
 
@@ -62,30 +60,39 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverAppBar(
             pinned: false,
             floating: true,
-            backgroundColor: const Color(0xFF0A0A0F),
+            backgroundColor: AppColors.surfaceDark.withValues(alpha: 0.8),
             leading: Builder(
               builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white),
+                icon: const Icon(Icons.menu, color: AppColors.textMuted, size: 22),
                 onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             ),
-            title: Row(
-              children: [
-                Text('Thirai', style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                )),
-                Text('Pedia', style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w300,
-                  color: const Color(0xFFE50914),
-                )),
-              ],
+            title: GestureDetector(
+              onTap: () {},
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Thirai',
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMain,
+                      )),
+                  Text('Pedia',
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.accentGold,
+                        shadows: [Shadow(color: AppColors.accentGold.withValues(alpha: 0.3), blurRadius: 10)],
+                      )),
+                ],
+              ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.search, color: Colors.white),
+                icon: const Icon(Icons.search, color: AppColors.textMuted, size: 20),
                 onPressed: () => _navigateTo('/search'),
               ),
               Padding(
@@ -101,9 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundImage: auth.currentUser?.avatarUrl.isNotEmpty == true
                         ? NetworkImage(auth.currentUser!.avatarUrl)
                         : null,
-                    backgroundColor: Colors.grey[800],
+                    backgroundColor: AppColors.bgPanel,
                     child: auth.currentUser == null
-                        ? const Icon(Icons.person, size: 18, color: Colors.white70)
+                        ? Icon(Icons.person, size: 18, color: AppColors.textMuted)
                         : null,
                   ),
                 ),
@@ -120,46 +127,49 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.zero,
             children: [
               if (movieProvider.heroMovies.isNotEmpty)
-                HeroCarousel(
-                  movies: movieProvider.heroMovies,
-                  onMovieTap: _navigateToMovie,
+                SizedBox(
+                  height: 440,
+                  child: HeroCarousel(
+                    movies: movieProvider.heroMovies,
+                    onMovieTap: _navigateToMovie,
+                  ),
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               _buildGenreFilter(movieProvider),
               const SizedBox(height: 16),
               if (movieProvider.isLoading)
                 _buildShimmerGrid()
               else
                 _buildMovieGrid(movieProvider.movies, movieProvider),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               if (movieProvider.newReleases.isNotEmpty)
                 MovieSection(
                   title: 'New Releases',
                   movies: movieProvider.newReleases,
                   onMovieTap: _navigateToMovie,
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               if (movieProvider.tamilMovies.isNotEmpty)
                 MovieSection(
                   title: 'Tamil Cinema',
                   movies: movieProvider.tamilMovies,
                   onMovieTap: _navigateToMovie,
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               if (movieProvider.malayalamMovies.isNotEmpty)
                 MovieSection(
                   title: 'Malayalam Cinema',
                   movies: movieProvider.malayalamMovies,
                   onMovieTap: _navigateToMovie,
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               if (movieProvider.staffPicks.isNotEmpty)
                 MovieSection(
                   title: 'Staff Picks',
                   movies: movieProvider.staffPicks,
                   onMovieTap: _navigateToMovie,
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               _buildFooter(),
             ],
           ),
@@ -170,27 +180,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawer(AuthProvider auth) {
     return Drawer(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: AppColors.bgDark,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: Color(0xFF1A1A2E)),
+            decoration: BoxDecoration(color: AppColors.bgPanel),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text('Thirai', style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    )),
-                    Text('Pedia', style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w300,
-                      color: const Color(0xFFE50914),
-                    )),
+                    Text('Thirai',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textMain,
+                        )),
+                    Text('Pedia',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.accentGold,
+                        )),
                   ],
                 ),
                 const Spacer(),
@@ -202,16 +216,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         backgroundImage: auth.currentUser!.avatarUrl.isNotEmpty
                             ? NetworkImage(auth.currentUser!.avatarUrl)
                             : null,
-                        child: const Icon(Icons.person, size: 20),
+                        backgroundColor: AppColors.bgCard,
+                        child: Icon(Icons.person, size: 20, color: AppColors.textMuted),
                       ),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(auth.currentUser!.username,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              style: const TextStyle(
+                                  fontFamily: 'Outfit',
+                                  color: AppColors.textMain,
+                                  fontWeight: FontWeight.w600)),
                           Text(auth.currentUser!.role,
-                              style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                              style: const TextStyle(
+                                  fontFamily: 'Outfit',
+                                  color: AppColors.textMuted,
+                                  fontSize: 12)),
                         ],
                       ),
                     ],
@@ -219,16 +240,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 else
                   TextButton.icon(
                     onPressed: () => Navigator.pushNamed(context, '/auth'),
-                    icon: const Icon(Icons.login, color: Color(0xFFE50914)),
-                    label: const Text('Login / Register',
-                        style: TextStyle(color: Color(0xFFE50914))),
+                    icon: Icon(Icons.login, color: AppColors.accentGold),
+                    label: Text('Login / Register',
+                        style: TextStyle(color: AppColors.accentGold)),
                   ),
               ],
             ),
           ),
           ..._navItems.map((item) => ListTile(
-            leading: Icon(_iconForRoute(item['route']!), color: Colors.white70),
-            title: Text(item['label']!, style: const TextStyle(color: Colors.white)),
+            leading: Icon(_iconForRoute(item['route']!), color: AppColors.textMuted, size: 20),
+            title: Text(item['label']!,
+                style: const TextStyle(fontFamily: 'Outfit', color: AppColors.textMain, fontSize: 14)),
             onTap: () {
               Navigator.pop(context);
               _navigateTo(item['route']!);
@@ -236,18 +258,19 @@ class _HomeScreenState extends State<HomeScreen> {
           )),
           if (auth.isAdmin)
             ListTile(
-              leading: const Icon(Icons.admin_panel_settings, color: Color(0xFFF5C518)),
+              leading: Icon(Icons.admin_panel_settings, color: AppColors.accentGold, size: 20),
               title: const Text('Admin Control',
-                  style: TextStyle(color: Color(0xFFF5C518))),
+                  style: TextStyle(fontFamily: 'Outfit', color: AppColors.accentGold, fontSize: 14)),
               onTap: () {
                 Navigator.pop(context);
                 _navigateTo('/admin');
               },
             ),
-          const Divider(color: Colors.grey),
+          Divider(color: AppColors.border),
           ListTile(
-            leading: const Icon(Icons.info_outline, color: Colors.white70),
-            title: const Text('About', style: TextStyle(color: Colors.white)),
+            leading: Icon(Icons.info_outline, color: AppColors.textMuted, size: 20),
+            title: const Text('About',
+                style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMain, fontSize: 14)),
             onTap: () {
               Navigator.pop(context);
               _navigateTo('/about');
@@ -255,8 +278,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (auth.isLoggedIn)
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              leading: const Icon(Icons.logout, color: Colors.red, size: 20),
+              title: const Text('Logout',
+                  style: TextStyle(fontFamily: 'Outfit', color: Colors.red, fontSize: 14)),
               onTap: () {
                 Navigator.pop(context);
                 auth.logout();
@@ -304,14 +328,19 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFE50914) : const Color(0xFF1A1A2E),
+            color: isSelected ? AppColors.accentGold : AppColors.bgCard,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.accentGold : AppColors.border,
+            ),
           ),
-          child: Text(label, style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white70,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
-          )),
+          child: Text(label,
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                color: isSelected ? Colors.black : AppColors.textMuted,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 13,
+              )),
         ),
       ),
     );
@@ -326,22 +355,42 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('All Movies', style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              )),
+              Text('All Movies',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMain,
+                  )),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.sort, color: Colors.white70, size: 20),
-                color: const Color(0xFF1A1A2E),
+                icon: Icon(Icons.sort, color: AppColors.textMuted, size: 20),
+                color: AppColors.bgPanel,
                 onSelected: (value) => provider.setSort(value),
                 itemBuilder: (_) => [
-                  PopupMenuItem(value: 'rating', child: Text('Rating',
-                      style: TextStyle(color: provider.sortOption == 'rating' ? const Color(0xFFE50914) : Colors.white))),
-                  PopupMenuItem(value: 'popular', child: Text('Popular',
-                      style: TextStyle(color: provider.sortOption == 'popular' ? const Color(0xFFE50914) : Colors.white))),
-                  PopupMenuItem(value: 'release-desc', child: Text('Latest',
-                      style: TextStyle(color: provider.sortOption == 'release-desc' ? const Color(0xFFE50914) : Colors.white))),
+                  PopupMenuItem(
+                    value: 'rating',
+                    child: Text('Rating',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          color: provider.sortOption == 'rating' ? AppColors.accentGold : AppColors.textMain,
+                        )),
+                  ),
+                  PopupMenuItem(
+                    value: 'popular',
+                    child: Text('Popular',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          color: provider.sortOption == 'popular' ? AppColors.accentGold : AppColors.textMain,
+                        )),
+                  ),
+                  PopupMenuItem(
+                    value: 'release-desc',
+                    child: Text('Latest',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          color: provider.sortOption == 'release-desc' ? AppColors.accentGold : AppColors.textMain,
+                        )),
+                  ),
                 ],
               ),
             ],
@@ -382,8 +431,9 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: 6,
         itemBuilder: (context, index) => Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.bgCard,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
           ),
         ),
       ),
@@ -393,41 +443,63 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFooter() {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFF1A1A2E))),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Thirai', style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              )),
-              Text('Pedia', style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w300,
-                color: const Color(0xFFE50914),
-              )),
+              Text('Thirai',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textMain,
+                  )),
+              Text('Pedia',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.accentGold,
+                  )),
             ],
           ),
           const SizedBox(height: 8),
-          Text('Premium Film Critique & Reviews',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          const Text('Premium Film Critique & Reviews',
+              style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12)),
           const SizedBox(height: 16),
           Wrap(
             spacing: 16,
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
-              TextButton(onPressed: () => _navigateTo('/about'), child: const Text('About', style: TextStyle(color: Colors.white70, fontSize: 12))),
-              TextButton(onPressed: () => _navigateTo('/privacy'), child: const Text('Privacy', style: TextStyle(color: Colors.white70, fontSize: 12))),
-              TextButton(onPressed: () => _navigateTo('/terms'), child: const Text('Terms', style: TextStyle(color: Colors.white70, fontSize: 12))),
-              TextButton(onPressed: () => _navigateTo('/contact'), child: const Text('Contact', style: TextStyle(color: Colors.white70, fontSize: 12))),
-              TextButton(onPressed: () => _navigateTo('/articles'), child: const Text('Articles', style: TextStyle(color: Colors.white70, fontSize: 12))),
-              TextButton(onPressed: () => _navigateTo('/quiz'), child: const Text('Quiz', style: TextStyle(color: Colors.white70, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/about'),
+                child: const Text('About',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/privacy'),
+                child: const Text('Privacy',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/terms'),
+                child: const Text('Terms',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/contact'),
+                child: const Text('Contact',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/articles'),
+                child: const Text('Articles',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
+              TextButton(
+                onPressed: () => _navigateTo('/quiz'),
+                child: const Text('Quiz',
+                    style: TextStyle(fontFamily: 'Outfit', color: AppColors.textMuted, fontSize: 12))),
             ],
           ),
         ],

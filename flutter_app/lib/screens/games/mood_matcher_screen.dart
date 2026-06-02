@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class MoodMatcherScreen extends StatefulWidget {
   const MoodMatcherScreen({super.key});
@@ -30,7 +31,7 @@ class _MoodMatcherScreenState extends State<MoodMatcherScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('How are you feeling today?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             const SizedBox(height: 32),
             Wrap(
               spacing: 12,
@@ -47,12 +48,12 @@ class _MoodMatcherScreenState extends State<MoodMatcherScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   decoration: BoxDecoration(
                     color: _selectedMood == mood
-                        ? const Color(0xFFE50914)
-                        : const Color(0xFF1A1A2E),
+                        ? AppColors.accentGold
+                        : AppColors.bgPanel,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(mood, style: TextStyle(
-                    color: _selectedMood == mood ? Colors.white : Colors.white70,
+                    color: _selectedMood == mood ? AppColors.textMain : AppColors.textMuted,
                     fontWeight: FontWeight.w600,
                   )),
                 ),
@@ -60,9 +61,9 @@ class _MoodMatcherScreenState extends State<MoodMatcherScreen> {
             ),
             if (_recommendation != null) ...[
               const SizedBox(height: 48),
-              const Text('We recommend:', style: TextStyle(color: Colors.white54, fontSize: 16)),
+              const Text('We recommend:', style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
               const SizedBox(height: 12),
-              Text(_recommendation!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(_recommendation!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             ],
           ],
         ),

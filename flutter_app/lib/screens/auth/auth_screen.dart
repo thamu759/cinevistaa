@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../theme/app_colors.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -44,8 +45,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Thirai', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            const Text('Pedia', style: TextStyle(color: Color(0xFFE50914), fontWeight: FontWeight.w300)),
+            const Text('Thirai', style: TextStyle(color: AppColors.textMain, fontWeight: FontWeight.bold)),
+            const Text('Pedia', style: TextStyle(color: AppColors.accentGold, fontWeight: FontWeight.w300)),
           ],
         ),
       ),
@@ -55,9 +56,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           children: [
             TabBar(
               controller: _tabController,
-              labelColor: const Color(0xFFE50914),
-              unselectedLabelColor: Colors.white54,
-              indicatorColor: const Color(0xFFE50914),
+              labelColor: AppColors.accentGold,
+              unselectedLabelColor: AppColors.textMuted,
+              indicatorColor: AppColors.accentGold,
               tabs: const [
                 Tab(text: 'Login'),
                 Tab(text: 'Register'),

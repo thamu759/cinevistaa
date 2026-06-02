@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../theme/app_colors.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -66,9 +67,9 @@ class AdminScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFFF5C518)),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        subtitle: Text(subtitle, style: const TextStyle(color: Colors.white54)),
+        leading: Icon(icon, color: AppColors.accentGold),
+        title: Text(title, style: const TextStyle(color: AppColors.textMain)),
+        subtitle: Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
         trailing: const Icon(Icons.chevron_right, color: Colors.white38),
         onTap: onTap,
       ),

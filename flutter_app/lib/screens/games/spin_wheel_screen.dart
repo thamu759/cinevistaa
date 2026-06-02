@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class SpinWheelScreen extends StatefulWidget {
   const SpinWheelScreen({super.key});
@@ -66,11 +67,11 @@ class _SpinWheelScreenState extends State<SpinWheelScreen>
                     height: 200,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const SweepGradient(
+                      gradient: SweepGradient(
                         colors: [
-                          Color(0xFFE50914),
-                          Color(0xFFF5C518),
-                          Color(0xFFE50914),
+                          AppColors.accentGold,
+                          AppColors.accentGold,
+                          AppColors.accentGold,
                         ],
                       ),
                     ),
@@ -80,7 +81,7 @@ class _SpinWheelScreenState extends State<SpinWheelScreen>
                         height: 60,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFF0A0A0F),
+                          color: AppColors.bgDark,
                         ),
                         child: const Icon(Icons.movie, color: Colors.white, size: 30),
                       ),
@@ -93,9 +94,9 @@ class _SpinWheelScreenState extends State<SpinWheelScreen>
             if (_result != null)
               Column(
                 children: [
-                  const Text('Your movie:', style: TextStyle(color: Colors.white54, fontSize: 16)),
+                  const Text('Your movie:', style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
                   const SizedBox(height: 8),
-                  Text(_result!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(_result!, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textMain)),
                 ],
               ),
             const SizedBox(height: 32),

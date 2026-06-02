@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class BlindFrameScreen extends StatefulWidget {
   const BlindFrameScreen({super.key});
@@ -25,7 +26,7 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                 height: 350,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.bgPanel,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -33,7 +34,7 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                       ? Image.network(
                           'https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => const Center(child: Text('Poster', style: TextStyle(color: Colors.white54))),
+                          errorBuilder: (_, _, _) => const Center(child: Text('Poster', style: TextStyle(color: AppColors.textMuted))),
                         )
                       : Center(
                           child: Column(
@@ -41,10 +42,10 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                             children: [
                               const Icon(Icons.blur_on, size: 64, color: Colors.white24),
                               const SizedBox(height: 16),
-                              const Text('Blurred poster', style: TextStyle(color: Colors.white38)),
+                              const Text('Blurred poster', style: TextStyle(color: AppColors.textMuted)),
                               TextButton(
                                 onPressed: () => setState(() => _revealed = true),
-                                child: const Text('Reveal', style: TextStyle(color: Color(0xFFE50914))),
+                                child: const Text('Reveal', style: TextStyle(color: AppColors.accentGold)),
                               ),
                             ],
                           ),
@@ -52,7 +53,7 @@ class _BlindFrameScreenState extends State<BlindFrameScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Can you guess the movie?', style: TextStyle(color: Colors.white54, fontSize: 16)),
+              const Text('Can you guess the movie?', style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
             ],
           ),
         ),

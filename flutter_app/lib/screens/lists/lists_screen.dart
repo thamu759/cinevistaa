@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/list_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../theme/app_colors.dart';
 
 class ListsScreen extends StatefulWidget {
   const ListsScreen({super.key});
@@ -53,16 +54,16 @@ class _ListsScreenState extends State<ListsScreen> {
           if (listProvider.isLoading)
             const Center(child: CircularProgressIndicator())
           else if (listProvider.allLists.isEmpty)
-            const Center(child: Text('No lists yet', style: TextStyle(color: Colors.white54)))
+            const Center(child: Text('No lists yet', style: TextStyle(color: AppColors.textMuted)))
           else
             ...listProvider.allLists.map((list) => Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
-                title: Text(list.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                title: Text(list.name, style: const TextStyle(color: AppColors.textMain, fontWeight: FontWeight.w600)),
                 subtitle: Text(list.description.isNotEmpty ? list.description : 'No description',
-                    style: const TextStyle(color: Colors.white54)),
+                    style: const TextStyle(color: AppColors.textMuted)),
                 trailing: Text('${list.movieIds.length} movies',
-                    style: const TextStyle(color: Colors.white38)),
+                    style: const TextStyle(color: AppColors.textMuted)),
                 onTap: () => Navigator.pushNamed(context, '/list-detail', arguments: list.id),
               ),
             )),
@@ -76,7 +77,7 @@ class _ListsScreenState extends State<ListsScreen> {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

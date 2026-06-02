@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../models/movie.dart';
+import '../../../theme/app_colors.dart';
 
 class MovieSection extends StatelessWidget {
   final String title;
@@ -24,15 +25,23 @@ class MovieSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              )),
-              TextButton(
-                onPressed: () {},
+              Text(title.toUpperCase(),
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accentGold,
+                    letterSpacing: 1.5,
+                  )),
+              GestureDetector(
+                onTap: () {},
                 child: const Text('View All',
-                    style: TextStyle(color: Color(0xFFE50914), fontSize: 13)),
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      color: AppColors.textMuted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    )),
               ),
             ],
           ),
@@ -52,7 +61,8 @@ class MovieSection extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xFF1A1A2E),
+                    border: Border.all(color: AppColors.border),
+                    color: AppColors.bgCard,
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
@@ -64,14 +74,14 @@ class MovieSection extends StatelessWidget {
                                 imageUrl: movie.posterUrl,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                placeholder: (_, _) => Container(color: const Color(0xFF16213E)),
+                                placeholder: (_, _) => Container(color: AppColors.bgDark),
                                 errorWidget: (_, _, _) => Container(
-                                  color: const Color(0xFF16213E),
+                                  color: AppColors.bgDark,
                                   child: const Icon(Icons.movie, color: Colors.white24),
                                 ),
                               )
                             : Container(
-                                color: const Color(0xFF16213E),
+                                color: AppColors.bgDark,
                                 child: const Icon(Icons.movie, color: Colors.white24),
                               ),
                       ),
@@ -81,16 +91,23 @@ class MovieSection extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(movie.title,
-                                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                    fontFamily: 'Outfit',
+                                    color: AppColors.textMain,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                const Icon(Icons.star, color: Color(0xFFF5C518), size: 12),
+                                Icon(Icons.star, color: AppColors.accentGold, size: 11),
                                 const SizedBox(width: 2),
                                 Text('${movie.rating}',
-                                    style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                                    style: const TextStyle(
+                                        fontFamily: 'Outfit',
+                                        color: AppColors.textMuted,
+                                        fontSize: 11)),
                               ],
                             ),
                           ],

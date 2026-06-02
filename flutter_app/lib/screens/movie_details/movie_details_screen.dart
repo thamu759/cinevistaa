@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/watchlist_provider.dart';
 import 'widgets/cast_section.dart';
 import 'widgets/review_card.dart';
+import '../../theme/app_colors.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final String movieId;
@@ -77,7 +78,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: AppColors.bgDark,
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,
@@ -86,8 +87,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               CachedNetworkImage(
                 imageUrl: movie.backdropUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, _) => Container(color: const Color(0xFF1A1A2E)),
-                errorWidget: (_, _, _) => Container(color: const Color(0xFF1A1A2E)),
+                placeholder: (_, _) => Container(color: AppColors.bgPanel),
+                errorWidget: (_, _, _) => Container(color: AppColors.bgPanel),
               ),
             Container(
               decoration: BoxDecoration(
@@ -96,7 +97,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    const Color(0xFF0A0A0F).withValues(alpha: 0.9),
+                    AppColors.bgDark.withValues(alpha: 0.9),
                   ],
                 ),
               ),
@@ -125,9 +126,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ? CachedNetworkImage(
                           imageUrl: movie.posterUrl,
                           fit: BoxFit.cover,
-                          placeholder: (_, _) => Container(color: const Color(0xFF1A1A2E)),
+                          placeholder: (_, _) => Container(color: AppColors.bgPanel),
                         )
-                      : Container(color: const Color(0xFF1A1A2E), child: const Icon(Icons.movie, color: Colors.white24)),
+                      : Container(color: AppColors.bgPanel, child: const Icon(Icons.movie, color: Colors.white24)),
                 ),
               ),
               const SizedBox(width: 16),
@@ -136,19 +137,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(movie.title,
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textMain)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFF5C518), size: 20),
+                        const Icon(Icons.star, color: AppColors.accentGold, size: 20),
                         const SizedBox(width: 4),
                         Text('${movie.rating}/10',
-                            style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold)),
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 12),
                         Text('${movie.criticScore}',
-                            style: TextStyle(color: const Color(0xFFE50914), fontSize: 14)),
+                            style: TextStyle(color: AppColors.accentGold, fontSize: 14)),
                         const SizedBox(width: 4),
-                        const Text('Critic Score', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        const Text('Critic Score', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -158,10 +159,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     const SizedBox(height: 4),
                     if (movie.director.isNotEmpty)
                       Text('Director: ${movie.director}',
-                          style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
                     if (movie.studio.isNotEmpty)
                       Text('Studio: ${movie.studio}',
-                          style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                          style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
                   ],
                 ),
               ),
@@ -190,10 +191,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(text, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+      child: Text(text, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
     );
   }
 
@@ -209,7 +210,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               icon: Icon(inWatchlist ? Icons.bookmark : Icons.bookmark_border),
               label: Text(inWatchlist ? 'In Watchlist' : 'Add to Watchlist'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textMain,
                 side: const BorderSide(color: Colors.white24),
               ),
             ),
@@ -227,8 +228,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               icon: const Icon(Icons.edit),
               label: const Text('Write Review'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFF5C518),
-                side: const BorderSide(color: Color(0xFFF5C518)),
+                foregroundColor: AppColors.accentGold,
+                side: const BorderSide(color: AppColors.accentGold),
               ),
             ),
           ),
@@ -243,19 +244,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Synopsis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Text('Synopsis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain)),
           const SizedBox(height: 8),
           Text(
             _showFullDescription || movie.description.length <= 200
                 ? movie.description
                 : '${movie.description.substring(0, 200)}...',
-            style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.5),
           ),
           if (movie.description.length > 200)
             TextButton(
               onPressed: () => setState(() => _showFullDescription = !_showFullDescription),
               child: Text(_showFullDescription ? 'Show Less' : 'Read More',
-                  style: const TextStyle(color: Color(0xFFE50914))),
+                  style: const TextStyle(color: AppColors.accentGold)),
             ),
         ],
       ),
@@ -277,7 +278,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Reviews (${movie.reviews.length})',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain)),
             ],
           ),
           const SizedBox(height: 12),
@@ -285,7 +286,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(child: Text('No reviews yet. Be the first!',
-                  style: TextStyle(color: Colors.white54))),
+                  style: TextStyle(color: AppColors.textMuted))),
             )
           else
             ...movie.reviews.map((r) => ReviewCard(
@@ -306,7 +307,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -316,7 +317,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Write Your Review',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textMain)),
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.white54),
                 onPressed: () => setState(() => _isWriteReviewOpen = false),
@@ -326,14 +327,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Text('Rating: ', style: TextStyle(color: Colors.white70)),
+              const Text('Rating: ', style: TextStyle(color: AppColors.textMuted)),
               ...List.generate(10, (index) {
                 final star = index + 1;
                 return GestureDetector(
                   onTap: () => setState(() => _reviewRating = star),
                   child: Icon(
                     star <= _reviewRating ? Icons.star : Icons.star_border,
-                    color: const Color(0xFFF5C518),
+                    color: AppColors.accentGold,
                     size: 28,
                   ),
                 );
