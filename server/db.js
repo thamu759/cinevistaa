@@ -1883,6 +1883,9 @@ const getTransporter = () => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
     });
   }
   return _transporter;
@@ -1922,22 +1925,33 @@ export const sendOtp = async (email) => {
 
   // Send email via nodemailer if configured, otherwise log to console
   const transporter = getTransporter();
+  let emailSent = false;
   if (transporter) {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: email,
-      subject: 'Your ThiraiPedia OTP Code',
-      text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
-      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2>ThiraiPedia Email Verification</h2>
-        <p>Your OTP code is:</p>
-        <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
-        <p>This code expires in <strong>5 minutes</strong>.</p>
-        <hr>
-        <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
-      </div>`,
-    });
-  } else {
+    try {
+      await Promise.race([
+        transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: email,
+          subject: 'Your ThiraiPedia OTP Code',
+          text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
+          html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+            <h2>ThiraiPedia Email Verification</h2>
+            <p>Your OTP code is:</p>
+            <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
+            <p>This code expires in <strong>5 minutes</strong>.</p>
+            <hr>
+            <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
+          </div>`,
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout")), 10000))
+      ]);
+      emailSent = true;
+    } catch (err) {
+      console.error(`[OTP] Failed to send email to ${email}: ${err.message}. OTP logged as fallback.`);
+    }
+  }
+
+  if (!emailSent) {
     console.log(`\n[OTP] Email to ${email}: Your OTP code is ${otp} (expires in 5 minutes)\n`);
   }
 
