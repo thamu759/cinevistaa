@@ -19,6 +19,8 @@ import {
   registerUser,
   loginUser,
   verifyToken,
+  sendOtp,
+  verifyOtp,
   getCommunityThreads,
   createCommunityThread,
   addCommunityReply,
@@ -91,6 +93,28 @@ app.post('/api/auth/login', async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error("Login error:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/auth/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await sendOtp(email);
+    res.json(result);
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await verifyOtp(email, otp);
+    res.json(result);
+  } catch (error) {
+    console.error("Verify OTP error:", error);
     res.status(400).json({ error: error.message });
   }
 });

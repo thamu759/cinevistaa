@@ -110,6 +110,34 @@ export const handler = async (event) => {
       return r({ username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token });
     }
 
+    if (parts[0] === 'auth' && parts[1] === 'send-otp' && m === 'POST') {
+      const { email } = JSON.parse(event.body || '{}');
+      if (!email) return r({ error: 'Email is required' }, 400);
+      const db = getDb();
+      const user = db.users.find(u => u.email === email);
+      if (!user) return r({ error: 'No account found with this email' }, 400);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otp = otp;
+      user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      console.log(`\n[OTP] Email to ${email}: Your OTP code is ${otp} (expires in 5 minutes)\n`);
+      return r({ message: 'OTP sent successfully' });
+    }
+
+    if (parts[0] === 'auth' && parts[1] === 'verify-otp' && m === 'POST') {
+      const { email, otp } = JSON.parse(event.body || '{}');
+      if (!email || !otp) return r({ error: 'Email and OTP are required' }, 400);
+      const db = getDb();
+      const user = db.users.find(u => u.email === email);
+      if (!user) return r({ error: 'No account found with this email' }, 400);
+      if (!user.otp || !user.otpExpiry) return r({ error: 'No OTP requested. Please request a new OTP.' }, 400);
+      if (new Date() > new Date(user.otpExpiry)) return r({ error: 'OTP has expired. Please request a new one.' }, 400);
+      if (user.otp !== otp) return r({ error: 'Invalid OTP. Please try again.' }, 400);
+      user.emailVerified = true;
+      delete user.otp;
+      delete user.otpExpiry;
+      return r({ username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token: user.token });
+    }
+
     if (parts[0] === 'auth' && parts[1] === 'register' && m === 'POST') {
       const { username, email, password } = JSON.parse(event.body || '{}');
       if (!username || !password) return r({ error: 'Username and password required' }, 400);
@@ -117,7 +145,7 @@ export const handler = async (event) => {
       const salt = crypto.randomBytes(16).toString('hex');
       const passwordHash = hashPwd(password, salt);
       const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=blue,green,purple,orange&textColor=ffffff`;
-      const newUser = { username, email: email || '', passwordHash, salt, role: 'admin', avatarUrl, token: '', createdAt: new Date().toISOString() };
+      const newUser = { username, email: email || '', passwordHash, salt, role: 'admin', avatarUrl, token: '', emailVerified: false, createdAt: new Date().toISOString() };
       db.users.push(newUser);
       const token = makeToken(newUser);
       return r({ username: newUser.username, email: newUser.email, role: newUser.role, avatarUrl: newUser.avatarUrl, token }, 201);

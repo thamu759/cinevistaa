@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 import { generateSynopsisWithAI, generateRatingWithAI } from './openai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1119,7 +1120,10 @@ try {
     bio: { type: String, default: '' },
     followers: [{ type: String }],
     following: [{ type: String }],
-    token: { type: String }
+    token: { type: String },
+    emailVerified: { type: Boolean, default: false },
+    otp: { type: String },
+    otpExpiry: { type: Date }
   });
   UserModel = mongoose.model('User', userSchema);
 } catch (e) {
@@ -1796,7 +1800,10 @@ export const registerUser = async (userData) => {
     salt,
     role,
     avatarUrl,
-    token
+    token,
+    emailVerified: false,
+    otp: null,
+    otpExpiry: null
   };
 
   if (useMongoDB) {
@@ -1860,6 +1867,125 @@ export const verifyToken = async (token) => {
     const user = users.find(u => u.token === token);
     if (!user) return null;
     return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio };
+  }
+};
+
+// Nodemailer transporter (lazy init)
+let _transporter = null;
+const getTransporter = () => {
+  if (_transporter) return _transporter;
+  if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
+    _transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return _transporter;
+};
+
+const generateOtp = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+export const sendOtp = async (email) => {
+  if (!email) throw new Error("Email is required");
+
+  let user;
+  if (useMongoDB) {
+    user = await UserModel.findOne({ email });
+  } else {
+    const { users } = readJsonDb();
+    user = users.find(u => u.email === email);
+  }
+
+  if (!user) throw new Error("No account found with this email");
+
+  const otp = generateOtp();
+  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+  if (useMongoDB) {
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+  } else {
+    const data = readJsonDb();
+    const idx = data.users.findIndex(u => u.email === email);
+    data.users[idx].otp = otp;
+    data.users[idx].otpExpiry = otpExpiry.toISOString();
+    writeJsonDb(data);
+  }
+
+  // Send email via nodemailer if configured, otherwise log to console
+  const transporter = getTransporter();
+  if (transporter) {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'Your ThiraiPedia OTP Code',
+      text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
+      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2>ThiraiPedia Email Verification</h2>
+        <p>Your OTP code is:</p>
+        <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
+        <p>This code expires in <strong>5 minutes</strong>.</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
+      </div>`,
+    });
+  } else {
+    console.log(`\n[OTP] Email to ${email}: Your OTP code is ${otp} (expires in 5 minutes)\n`);
+  }
+
+  return { message: "OTP sent successfully" };
+};
+
+export const verifyOtp = async (email, otp) => {
+  if (!email || !otp) throw new Error("Email and OTP are required");
+
+  let user;
+  if (useMongoDB) {
+    user = await UserModel.findOne({ email });
+  } else {
+    const { users } = readJsonDb();
+    user = users.find(u => u.email === email);
+  }
+
+  if (!user) throw new Error("No account found with this email");
+
+  const storedOtp = useMongoDB ? user.otp : user.otp;
+  const storedExpiry = useMongoDB ? user.otpExpiry : (user.otpExpiry ? new Date(user.otpExpiry) : null);
+
+  if (!storedOtp || !storedExpiry) {
+    throw new Error("No OTP requested. Please request a new OTP.");
+  }
+
+  if (new Date() > storedExpiry) {
+    throw new Error("OTP has expired. Please request a new one.");
+  }
+
+  if (storedOtp !== otp) {
+    throw new Error("Invalid OTP. Please try again.");
+  }
+
+  if (useMongoDB) {
+    user.emailVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+    return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token: user.token };
+  } else {
+    const data = readJsonDb();
+    const idx = data.users.findIndex(u => u.email === email);
+    data.users[idx].emailVerified = true;
+    delete data.users[idx].otp;
+    delete data.users[idx].otpExpiry;
+    writeJsonDb(data);
+    return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token: user.token };
   }
 };
 
