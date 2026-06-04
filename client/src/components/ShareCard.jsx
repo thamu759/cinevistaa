@@ -33,6 +33,18 @@ const styles = {
     inset: 0,
     background: 'linear-gradient(180deg, rgba(15,15,26,0.3) 0%, rgba(15,15,26,0.85) 50%, rgba(15,15,26,1) 100%)',
   },
+  goldenPattern: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 1,
+    opacity: 0.12,
+    backgroundImage: `
+      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(251,191,36,0.15) 40px, rgba(251,191,36,0.15) 41px),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(251,191,36,0.15) 40px, rgba(251,191,36,0.15) 41px),
+      radial-gradient(circle at 30% 40%, rgba(251,191,36,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(251,191,36,0.08) 0%, transparent 50%)
+    `,
+  },
   posterWrap: {
     position: 'relative',
     zIndex: 2,
@@ -138,6 +150,7 @@ export default function ShareCard({ movie, cardRef }) {
         />
       )}
       <div style={styles.gradientOverlay} />
+      <div style={styles.goldenPattern} />
 
       <div style={styles.posterWrap}>
         {posterSrc ? (
