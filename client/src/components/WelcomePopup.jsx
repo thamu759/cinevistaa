@@ -9,8 +9,8 @@ const slides = [
   },
   {
     icon: <Film size={40} />,
-    title: 'Cine Reels',
-    desc: 'Swipe through the latest movie news, rumors, and breaking updates — reels style!',
+    title: 'Cine Pulse',
+    desc: 'Swipe through the latest movie news, rumors, and breaking updates — pulse style!',
   },
   {
     icon: <Gamepad2 size={40} />,

@@ -173,7 +173,7 @@ export default function App() {
     wheel: { title: 'Card Flix — thiraipedia', desc: 'Flip cards to discover your next movie to watch with Card Flix.' },
     'blind-frame': { title: 'Blind Frame — thiraipedia', desc: 'Guess the movie from a blurry poster in Blind Frame on thiraipedia.' },
     'mood-matcher': { title: 'Mood Matcher — thiraipedia', desc: 'Pick your mood and get the perfect movie match on thiraipedia.' },
-    'cine-updates': { title: 'Cine Updates — thiraipedia', desc: 'Latest movie news, rumors, and updates in a reels-style feed on thiraipedia.' },
+    'cine-updates': { title: 'Cine Updates — thiraipedia', desc: 'Latest movie news, rumors, and updates in a pulse-style feed on thiraipedia.' },
   };
 
   const updateMeta = (meta) => {
@@ -1321,7 +1321,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
               style={{ color: 'var(--color-accent-gold)', fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none', font: 'inherit' }}
             >
-              <span className="nav-pulse-dot" /> Cine Reels
+              <span className="nav-pulse-dot" /> Cine Pulse
             </button>
 
             {currentUser && currentUser.role === 'admin' && (
@@ -1527,7 +1527,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
                       <span className="cine-reels-live-dot" />
                       <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--color-accent-gold)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        Cine Reels
+                        Cine Pulse
                       </span>
                     </div>
                     <h2 style={{
@@ -1541,11 +1541,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
                       margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '450px'
                     }}>
-                      Swipe through the latest cinema news, rumors, and breaking updates — reels style!
+                      Swipe through the latest cinema news, rumors, and breaking updates — pulse style!
                     </p>
                     <div className="hero-actions">
                       <button className="btn-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                        <Play size={16} fill="black" /> Watch Reels
+                        <Play size={16} fill="black" /> Watch Pulse
                       </button>
                     </div>
                   </div>
@@ -1593,7 +1593,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         aria-label={`Go to slide ${index + 1}`}
                       />
                     ))}
-                    {/* Cine Reels promo dot */}
+                    {/* Cine Pulse promo dot */}
                     <button
                       className={`hero-indicator-dot ${currentHeroIndex === heroMovies.length ? 'hero-indicator-dot--active' : ''}`}
                       style={{ background: currentHeroIndex === heroMovies.length ? 'var(--color-accent-gold)' : undefined }}
@@ -1601,7 +1601,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         e.stopPropagation();
                         setCurrentHeroIndex(heroMovies.length);
                       }}
-                      aria-label="Go to Cine Reels"
+                      aria-label="Go to Cine Pulse"
                     />
                   </div>
                 )}
@@ -2156,7 +2156,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
                   <div>
                     <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Latest Updates</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Reels</h2>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Pulse</h2>
                   </div>
                   <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
                     onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>

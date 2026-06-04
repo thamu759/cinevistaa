@@ -813,7 +813,7 @@ function CineUpdatesTab({ showSuccess }) {
     <div className="admin-panel">
       <div className="admin-panel-header">
         <Activity size={18} style={{ color: 'var(--color-accent-gold)' }} />
-        <h2>Cine Updates (Reels)</h2>
+        <h2>Cine Updates (Pulse)</h2>
         <span className="admin-panel-count">{updates.length} updates</span>
         <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
           <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
