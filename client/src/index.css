@@ -5924,6 +5924,9 @@ a {
 }
 
 @media (max-width: 640px) {
+  .cine-reels-nav {
+    display: none !important;
+  }
   .cine-reel-headline {
     font-size: 1.2rem;
   }
