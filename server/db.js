@@ -1953,6 +1953,7 @@ export const sendOtp = async (email) => {
 
   if (!emailSent) {
     console.log(`\n[OTP] Email to ${email}: Your OTP code is ${otp} (expires in 5 minutes)\n`);
+    throw new Error("Failed to send OTP email. Check server SMTP configuration.");
   }
 
   return { message: "OTP sent successfully" };
