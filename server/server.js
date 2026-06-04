@@ -53,6 +53,7 @@ import {
   deleteCineUpdate,
   toggleCineUpdateLike
 } from './db.js';
+import { seedTriviaUpdates } from './generateTrivia.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -938,8 +939,30 @@ app.delete('/api/cine-updates/:id', async (req, res) => {
     if (!deleted) return res.status(404).json({ error: "Cine update not found" });
     res.json({ success: true, message: "Cine update deleted successfully" });
   } catch (error) {
-    console.error("Error deleting cine update:", error);
-    res.status(500).json({ error: "Server error deleting cine update" });
+    console.error("Error liking cine update:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ─── TRIVIA SEEDER (admin only) ───
+app.post('/api/seeds/trivia', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin only." });
+    }
+
+    const count = Math.min(req.body.count || 15, 30);
+    const created = await seedTriviaUpdates(count, verified);
+    res.json({ success: true, count: created.length, updates: created });
+  } catch (error) {
+    console.error("Error seeding trivia:", error);
+    res.status(500).json({ error: error.message || "Server error seeding trivia" });
   }
 });
 

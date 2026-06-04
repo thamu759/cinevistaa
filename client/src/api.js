@@ -87,7 +87,24 @@ export const deleteMovie = async (id) => {
   });
   if (!response.ok) {
     const err = await response.json();
-    throw new Error(err.error || 'Failed to delete movie');
+    throw new Error(err.error || 'Failed to toggle like');
+  }
+  return response.json();
+};
+
+// ─── TRIVIA SEEDER ───
+export const seedTriviaUpdates = async (count = 15) => {
+  const response = await fetch(`${API_BASE_URL}/seeds/trivia`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify({ count }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to seed trivia');
   }
   return response.json();
 };

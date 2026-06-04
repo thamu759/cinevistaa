@@ -14,14 +14,14 @@ const DB_FILE = path.resolve(__dirname, 'db.json');
 let useMongoDB = false;
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
-const getTmdbHeaders = () => {
+export const getTmdbHeaders = () => {
   if (process.env.TMDB_ACCESS_TOKEN) {
     return { Authorization: `Bearer ${process.env.TMDB_ACCESS_TOKEN}` };
   }
   return {};
 };
 
-const buildTmdbUrl = (path, params = {}) => {
+export const buildTmdbUrl = (path, params = {}) => {
   const url = new URL(`https://api.themoviedb.org/3/${path}`);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {

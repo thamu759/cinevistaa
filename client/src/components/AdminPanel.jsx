@@ -11,7 +11,8 @@ import {
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
-  bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate
+  bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate,
+  seedTriviaUpdates
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -760,6 +761,7 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
 function CineUpdatesTab({ showSuccess }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [triviaLoading, setTriviaLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
@@ -809,13 +811,26 @@ function CineUpdatesTab({ showSuccess }) {
     } catch (err) { showToast(err.message, 'error'); }
   };
 
+  const handleGenerateTrivia = async () => {
+    setTriviaLoading(true);
+    try {
+      const result = await seedTriviaUpdates(15);
+      showSuccess(`${result.count} trivia updates generated!`);
+      loadUpdates();
+    } catch (err) { showToast(err.message, 'error'); }
+    setTriviaLoading(false);
+  };
+
   return (
     <div className="admin-panel">
       <div className="admin-panel-header">
         <Activity size={18} style={{ color: 'var(--color-accent-gold)' }} />
         <h2>Cine Updates (Pulse)</h2>
         <span className="admin-panel-count">{updates.length} updates</span>
-        <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
+        <button className="btn-secondary" onClick={handleGenerateTrivia} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem' }} disabled={triviaLoading}>
+          <Sparkles size={14} /> {triviaLoading ? 'Generating...' : 'Generate Trivia'}
+        </button>
+        <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
           <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
         </button>
       </div>
