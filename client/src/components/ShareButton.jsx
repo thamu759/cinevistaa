@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
+import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon, Smartphone } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import ShareCard from './ShareCard';
 
@@ -7,8 +7,10 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [capturing, setCapturing] = useState(false);
+  const [format, setFormat] = useState('card');
   const menuRef = useRef(null);
   const cardRef = useRef(null);
+  const storyRef = useRef(null);
 
   useEffect(() => {
     if (!showMenu) return;
@@ -27,11 +29,12 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
     return false;
   };
 
-  const shareCardAsImage = async () => {
-    if (!movie || !cardRef.current) return false;
+  const captureCard = async (ref, suffix) => {
+    if (!movie || !ref.current) return false;
     setCapturing(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      const node = ref.current;
+      const canvas = await html2canvas(node, {
         useCORS: true,
         allowTaint: false,
         scale: 2,
@@ -40,7 +43,7 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
       });
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
       if (!blob) return false;
-      const file = new File([blob], `${movie.title || 'movie'}-thiraipedia.png`, { type: 'image/png' });
+      const file = new File([blob], `${movie.title || 'movie'}-thiraipedia${suffix}.png`, { type: 'image/png' });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: movie.title, text: shareText });
       } else {
@@ -58,10 +61,12 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (fmt) => {
     if (capturing) return;
-    if (await shareCardAsImage()) return;
+    const ref = fmt === 'story' ? storyRef : cardRef;
+    if (await captureCard(ref, fmt === 'story' ? '-story' : '')) return;
     if (await handleNativeShare()) return;
+    setFormat(fmt);
     setShowMenu(true);
   };
 
@@ -89,10 +94,14 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={handleShare} style={btnStyle} aria-label="Share" title="Share" disabled={capturing}>
-        {capturing ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Share2 size={16} />}
-        {variant === 'text' && (label || 'Share')}
-      </button>
+      <div style={{ display: 'flex', gap: '0.35rem' }}>
+        <button onClick={() => handleShare('card')} style={{ ...btnStyle, border: format === 'card' ? '1px solid var(--color-accent-gold)' : undefined }} aria-label="Share as card" title="Share as Letterboxd-style card" disabled={capturing}>
+          {capturing && format === 'card' ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <ImageIcon size={16} />}
+        </button>
+        <button onClick={() => handleShare('story')} style={{ ...btnStyle, border: format === 'story' ? '1px solid var(--color-accent-gold)' : undefined }} aria-label="Share as story" title="Share as story (9:16)" disabled={capturing}>
+          {capturing && format === 'story' ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Smartphone size={16} />}
+        </button>
+      </div>
 
       {showMenu && (
         <div ref={menuRef} style={{
@@ -125,7 +134,8 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
 
       {movie && (
         <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none', opacity: 0 }}>
-          <ShareCard movie={movie} cardRef={cardRef} />
+          <ShareCard movie={movie} cardRef={cardRef} variant="card" />
+          <ShareCard movie={movie} cardRef={storyRef} variant="story" />
         </div>
       )}
     </div>
