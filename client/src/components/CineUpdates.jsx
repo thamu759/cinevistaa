@@ -126,18 +126,14 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
           >
             {/* Background */}
             <div className="cine-reel-bg" style={{
-              background: item.imageUrl
-                ? `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}33, #0f0f1a)`
-                : `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}44, #0f0f1a)`
+              background: `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}55, #0f0f1a)`
             }}>
-              {item.imageUrl ? (
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  className="cine-reel-bg-img"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              ) : null}
+              <img
+                src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/1200`}
+                alt=""
+                className="cine-reel-bg-img"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
               <div className="cine-reel-overlay" />
             </div>
 
