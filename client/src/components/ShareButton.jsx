@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { Share2, Link, Check, X, Globe, MessageCircle } from 'lucide-react';
+import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import ShareCard from './ShareCard';
 
-export default function ShareButton({ title, text, url, variant = 'icon', label }) {
+export default function ShareButton({ title, text, url, variant = 'icon', label, movie }) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const menuRef = useRef(null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     if (!showMenu) return;
@@ -23,7 +27,40 @@ export default function ShareButton({ title, text, url, variant = 'icon', label 
     return false;
   };
 
+  const shareCardAsImage = async () => {
+    if (!movie || !cardRef.current) return false;
+    setCapturing(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        useCORS: true,
+        allowTaint: false,
+        scale: 2,
+        backgroundColor: '#0f0f1a',
+        logging: false,
+      });
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      if (!blob) return false;
+      const file = new File([blob], `${movie.title || 'movie'}-thiraipedia.png`, { type: 'image/png' });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: movie.title, text: shareText });
+      } else {
+        const link = document.createElement('a');
+        link.download = file.name;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setCapturing(false);
+    }
+  };
+
   const handleShare = async () => {
+    if (capturing) return;
+    if (await shareCardAsImage()) return;
     if (await handleNativeShare()) return;
     setShowMenu(true);
   };
@@ -52,8 +89,8 @@ export default function ShareButton({ title, text, url, variant = 'icon', label 
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={handleShare} style={btnStyle} aria-label="Share" title="Share">
-        {copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Share2 size={16} />}
+      <button onClick={handleShare} style={btnStyle} aria-label="Share" title="Share" disabled={capturing}>
+        {capturing ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Share2 size={16} />}
         {variant === 'text' && (label || 'Share')}
       </button>
 
@@ -83,6 +120,12 @@ export default function ShareButton({ title, text, url, variant = 'icon', label 
             <Globe size={16} />
             Facebook
           </button>
+        </div>
+      )}
+
+      {movie && (
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none', opacity: 0 }}>
+          <ShareCard movie={movie} cardRef={cardRef} />
         </div>
       )}
     </div>

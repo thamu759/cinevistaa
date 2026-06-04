@@ -147,6 +147,7 @@ export default function MovieDetailsView({
               <ShareButton
                 title={selectedMovie.title}
                 text={`Check out ${selectedMovie.title} — rating ${selectedMovie.criticScore?.toFixed(1)}/10 on thiraipedia`}
+                movie={selectedMovie}
                 variant="icon"
               />
               {currentUser && (
