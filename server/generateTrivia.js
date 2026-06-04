@@ -230,8 +230,7 @@ export async function fetchIndianMoviesByLang(lang, page = 1) {
     with_original_language: lang,
     sort_by: 'popularity.desc',
     page,
-    'vote_count.gte': 10,
-    'primary_release_date.gte': '2026-05-01',
+    'primary_release_date.gte': '2025-06-01',
   });
   const res = await fetchWithRetry(url);
   if (!res) { console.warn(`TMDB ${lang} page ${page} fetch failed`); return []; }
@@ -289,7 +288,7 @@ export async function generateTriviaUpdates(count = 20) {
     if (!details) continue;
 
     const releaseDate = details.release_date || '';
-    if (releaseDate < '2026-05-01') continue;
+    if (releaseDate < '2025-06-01') continue;
 
     const template = getRandomTemplate(details);
     if (!template) continue;
