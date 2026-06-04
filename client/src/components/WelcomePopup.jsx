@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star, Film, Gamepad2, Bookmark } from 'lucide-react';
 
 const slides = [
@@ -27,6 +27,11 @@ const slides = [
 export default function WelcomePopup({ onClose }) {
   const [current, setCurrent] = useState(0);
   const isLast = current === slides.length - 1;
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = '' };
+  }, []);
 
   const next = () => {
     if (isLast) {
