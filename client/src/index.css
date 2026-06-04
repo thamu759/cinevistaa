@@ -5673,12 +5673,15 @@ a {
   z-index: 50;
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0.75rem 1rem;
   padding-top: max(0.75rem, env(safe-area-inset-top));
   background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
 
 .cine-reels-back {
+  position: absolute;
+  left: 1rem;
   background: rgba(255,255,255,0.1);
   border: none;
   color: #fff;
@@ -5699,7 +5702,6 @@ a {
 }
 
 .cine-reels-title {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5712,6 +5714,7 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-accent-gold);
+  text-align: center;
 }
 
 .cine-reels-count {
@@ -5985,6 +5988,7 @@ a {
     z-index: 70;
   }
   .cine-reels-back {
+    left: 1.25rem;
     width: 40px;
     height: 40px;
     min-width: 40px;
