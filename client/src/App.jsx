@@ -739,11 +739,12 @@ const preRollTimerRef = useRef(null);
     .sort((a, b) => new Date(a.ott.releaseDate) - new Date(b.ott.releaseDate));
 
   // Reset index if out of range when list changes
+  const heroTotalSlides = heroMovies.length + 1;
   useEffect(() => {
-    if (currentHeroIndex >= heroMovies.length && heroMovies.length > 0) {
+    if (currentHeroIndex >= heroTotalSlides && heroMovies.length > 0) {
       setCurrentHeroIndex(0);
     }
-  }, [heroMovies.length, currentHeroIndex]);
+  }, [heroMovies.length, currentHeroIndex, heroTotalSlides]);
 
   // Hero touch swipe handlers
   const handleHeroTouchStart = (e) => {
@@ -754,8 +755,8 @@ const preRollTimerRef = useRef(null);
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
       setCurrentHeroIndex(prev => diff > 0
-        ? (prev + 1) % heroMovies.length
-        : (prev - 1 + heroMovies.length) % heroMovies.length
+        ? (prev + 1) % heroTotalSlides
+        : (prev - 1 + heroTotalSlides) % heroTotalSlides
       );
     }
   };
@@ -766,11 +767,11 @@ const preRollTimerRef = useRef(null);
     if (heroMovies.length <= 1) return;
     const interval = setInterval(() => {
       if (!isHoveringRef.current) {
-        setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+        setCurrentHeroIndex(prev => (prev + 1) % heroTotalSlides);
       }
     }, 6500);
     return () => clearInterval(interval);
-  }, [heroMovies.length]);
+  }, [heroMovies.length, heroTotalSlides]);
 
   // Fetch detailed movie info when selected
   useEffect(() => {
@@ -1015,20 +1016,20 @@ const preRollTimerRef = useRef(null);
 
        // Hero carousel navigation with arrow keys (only on home view)
        if (activeView === 'home' && heroMovies.length > 1) {
-         if (e.key === 'ArrowLeft') {
-           e.preventDefault();
-           setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length) % heroMovies.length);
-         }
-         if (e.key === 'ArrowRight') {
-           e.preventDefault();
-           setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
-         }
-       }
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            setCurrentHeroIndex(prev => (prev - 1 + heroTotalSlides) % heroTotalSlides);
+          }
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            setCurrentHeroIndex(prev => (prev + 1) % heroTotalSlides);
+          }
+        }
      };
 
      window.addEventListener('keydown', handleKeyDown);
      return () => window.removeEventListener('keydown', handleKeyDown);
-   }, [isSearchOpen, isWriteReviewOpen, showTrailer, showCurateModal, isAuthModalOpen, editingProfile, activeView, heroMovies.length, searchInputRef]);
+   }, [isSearchOpen, isWriteReviewOpen, showTrailer, showCurateModal, isAuthModalOpen, editingProfile, activeView, heroMovies.length, heroTotalSlides, searchInputRef]);
 
    useEffect(() => {
      if (!isSessionVerified || activeView !== 'admin') return;
