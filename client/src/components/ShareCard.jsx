@@ -123,7 +123,7 @@ const styles = {
     justifyContent: 'center',
   },
   brandLogoImg: {
-    height: 48,
+    height: 28,
     display: 'block',
   },
 };
