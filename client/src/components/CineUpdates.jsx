@@ -239,17 +239,6 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
         ))}
       </div>
 
-        {/* Progress dots */}
-        <div className="cine-reels-progress">
-          {updates.map((_, idx) => (
-            <div
-              key={idx}
-              className={`cine-reels-dot ${idx === currentIndex ? 'cine-reels-dot-active' : ''}`}
-              onClick={() => { if (!isTransitioning) { setIsTransitioning(true); setCurrentIndex(idx); setTimeout(() => setIsTransitioning(false), 400); } }}
-            />
-          ))}
-        </div>
-
         {/* Desktop nav buttons */}
         <button className="cine-reels-nav cine-reels-nav-up" onClick={goPrev} disabled={currentIndex === 0} aria-label="Previous">
           <ChevronUp size={24} />
