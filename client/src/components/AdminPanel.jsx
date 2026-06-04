@@ -765,6 +765,8 @@ function CineUpdatesTab({ showSuccess }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
+  const [updatePage, setUpdatePage] = useState(0);
+  const UPDATES_PER_PAGE = 10;
   const { showToast } = useToast();
 
   const loadUpdates = async () => {
@@ -880,7 +882,7 @@ function CineUpdatesTab({ showSuccess }) {
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No cine updates yet. Create one!</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {updates.map(update => (
+          {updates.slice(updatePage * UPDATES_PER_PAGE, (updatePage + 1) * UPDATES_PER_PAGE).map(update => (
             <div key={update.id} className="glass-panel" style={{ padding: '0.75rem 1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
               {update.imageUrl && (
                 <img src={proxyImageUrl(update.imageUrl, 'w92')} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
@@ -904,6 +906,17 @@ function CineUpdatesTab({ showSuccess }) {
               </div>
             </div>
           ))}
+          {updates.length > UPDATES_PER_PAGE && (
+            <div className="admin-pagination">
+              <button onClick={() => setUpdatePage(p => Math.max(0, p - 1))} disabled={updatePage === 0} className="admin-page-btn">
+                <ChevronLeft size={14} />
+              </button>
+              <span className="admin-page-info">{updatePage * UPDATES_PER_PAGE + 1}-{Math.min((updatePage + 1) * UPDATES_PER_PAGE, updates.length)} of {updates.length}</span>
+              <button onClick={() => setUpdatePage(p => Math.min(Math.ceil(updates.length / UPDATES_PER_PAGE) - 1, p + 1))} disabled={updatePage >= Math.ceil(updates.length / UPDATES_PER_PAGE) - 1} className="admin-page-btn">
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
