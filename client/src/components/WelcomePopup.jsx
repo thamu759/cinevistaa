@@ -7,28 +7,28 @@ const slides = [
     title: 'Movie Reviews & Ratings',
     desc: 'Rate films out of 10, write detailed reviews, and discover what other critics are saying.',
     gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-    particles: ['✨', '⭐', '🌟'],
+    particles: ['\u2726', '\u2605', '\u272A'],
   },
   {
     icon: <Film size={52} />,
     title: 'Cine Reels',
     desc: 'Swipe through the latest movie news, rumors, and breaking updates — reels style!',
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)',
-    particles: ['🎬', '🎥', '📽️'],
+    particles: ['\u25C8', '\u25C9', '\u2606'],
   },
   {
     icon: <Gamepad2 size={52} />,
     title: 'Fun Activities',
     desc: 'Test your knowledge with Movie Quiz, flip cards in Card Flix, guess blurry posters, and more!',
     gradient: 'linear-gradient(135deg, #10b981 0%, #14b8a6 100%)',
-    particles: ['🎮', '🎯', '🧩'],
+    particles: ['\u25B3', '\u2666', '\u25CB'],
   },
   {
     icon: <Bookmark size={52} />,
     title: 'Watchlist & Curated Lists',
     desc: 'Save movies to your watchlist, create curated lists, and follow other critics.',
     gradient: 'linear-gradient(135deg, #ec4899 0%, #f59e0b 100%)',
-    particles: ['📋', '🎯', '💎'],
+    particles: ['\u25A0', '\u2663', '\u25C6'],
   },
 ];
 
@@ -147,10 +147,10 @@ export default function WelcomePopup({ onClose }) {
                 <p className="welcome-desc">{s.desc}</p>
 
                 <div className="welcome-tagline" style={{ background: s.gradient }}>
-                  {idx === 0 && '🍿 Critic\'s Choice'}
-                  {idx === 1 && '🔥 Trending Now'}
-                  {idx === 2 && '🎯 Play & Explore'}
-                  {idx === 3 && '💫 Your Collection'}
+                  {idx === 0 && "Critic's Choice"}
+                  {idx === 1 && 'Trending Now'}
+                  {idx === 2 && 'Play & Explore'}
+                  {idx === 3 && 'Your Collection'}
                 </div>
               </div>
             ))}
