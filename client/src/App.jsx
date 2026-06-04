@@ -5,7 +5,7 @@ import {
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List, Trash2,
-  AlertTriangle, RefreshCw
+  AlertTriangle, RefreshCw, Heart
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
