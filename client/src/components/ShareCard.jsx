@@ -52,7 +52,7 @@ const styles = {
     height: 330,
     borderRadius: 12,
     overflow: 'hidden',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 2px rgba(251,191,36,0.25)',
     marginBottom: '1.5rem',
   },
   poster: {
