@@ -55,6 +55,7 @@ import QuizGame from './components/QuizGame';
 import BlindFrame from './components/BlindFrame';
 import MoodMatcher from './components/MoodMatcher';
 import CineUpdates from './components/CineUpdates';
+import WelcomePopup from './components/WelcomePopup';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -95,6 +96,7 @@ export default function App() {
   const [sortOption, setSortOption] = useState('rating');
   const [selectedOttPlatform, setSelectedOttPlatform] = useState('');
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [releaseFilterMonth, setReleaseFilterMonth] = useState('');
   const [releaseFilterYear, setReleaseFilterYear] = useState('');
 
@@ -202,6 +204,13 @@ export default function App() {
       updateMeta({ desc });
     }
   }, [activeView, selectedMovie]);
+
+  // Welcome popup on first visit
+  useEffect(() => {
+    if (!localStorage.getItem('welcomeSeen')) {
+      setShowWelcome(true);
+    }
+  }, []);
 
   // Search Overlay State (IMDb-style, decoupled from grid)
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -3239,6 +3248,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             onBack={() => setShowCineReels(false)}
             onNavigate={navigateTo}
           />
+        )}
+
+        {/* WELCOME ONBOARDING POPUP */}
+        {showWelcome && (
+          <WelcomePopup onClose={() => {
+            localStorage.setItem('welcomeSeen', '1');
+            setShowWelcome(false);
+          }} />
         )}
 
         {/* ADMIN CONTROL PANEL VIEW */}
