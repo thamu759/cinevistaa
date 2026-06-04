@@ -6105,7 +6105,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0,0,0,0.7);
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
