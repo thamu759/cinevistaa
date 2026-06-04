@@ -108,20 +108,11 @@ const styles = {
     zIndex: 2,
     display: 'flex',
     alignItems: 'center',
-    gap: '0.4rem',
+    justifyContent: 'center',
   },
-  brandDot: {
-    width: 6,
-    height: 6,
-    borderRadius: '50%',
-    background: '#f5c518',
-  },
-  brandText: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: 'rgba(255,255,255,0.3)',
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
+  brandLogoImg: {
+    height: 48,
+    display: 'block',
   },
 };
 
@@ -174,8 +165,11 @@ export default function ShareCard({ movie, cardRef }) {
       </div>
 
       <div style={styles.branding}>
-        <div style={styles.brandDot} />
-        <span style={styles.brandText}>thiraipedia</span>
+        <img
+          src="https://res.cloudinary.com/di0j4psxz/image/upload/v1780591749/New_Project_3_cn7had.png"
+          alt="ThiraiPedia"
+          style={styles.brandLogoImg}
+        />
       </div>
     </div>
   );
