@@ -1,5 +1,6 @@
 import { buildTmdbUrl, getTmdbHeaders } from './db.js';
 import { createCineUpdate } from './db.js';
+import { generateLocalizedTrivia } from './openai.js';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
@@ -283,7 +284,13 @@ export async function generateTriviaUpdates(count = 20) {
     const template = getRandomTemplate(details);
     if (!template) continue;
 
-    const trivia = template.generate(details);
+    let trivia;
+    if (['ta', 'ml'].includes(details.original_language)) {
+      const localized = await generateLocalizedTrivia(details, template.category, details.original_language);
+      trivia = localized || template.generate(details);
+    } else {
+      trivia = template.generate(details);
+    }
     updates.push(movieToUpdate(details, trivia));
   }
 

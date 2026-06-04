@@ -84,4 +84,54 @@ Respond with ONLY valid JSON in this exact format:
   return null;
 };
 
-export { generateSynopsisWithAI, generateRatingWithAI };
+const LANG_FULL_NAME = {
+  ta: 'Tamil', te: 'Telugu', hi: 'Hindi', ml: 'Malayalam',
+  kn: 'Kannada', bn: 'Bengali', mr: 'Marathi',
+};
+
+const generateLocalizedTrivia = async (movie, category, language) => {
+  if (!openai) return null;
+
+  const langName = LANG_FULL_NAME[language] || 'Tamil';
+
+  const overview = movie.overview || movie.description || '';
+  const budget = movie.budget ? `$${(movie.budget / 1e7).toFixed(1)} Cr` : 'N/A';
+  const revenue = movie.revenue ? `$${(movie.revenue / 1e7).toFixed(1)} Cr` : 'N/A';
+  const runtime = movie.runtime ? `${movie.runtime} min` : 'N/A';
+  const rating = movie.vote_average ? `${movie.vote_average}/10` : 'N/A';
+
+  const prompt = `You are a ${langName} cinema trivia writer. Generate a short, engaging cine update in ${langName} language for the following movie:
+
+Title: ${movie.title}
+Overview: ${overview}
+Rating: ${rating}
+Budget: ${budget}
+Revenue: ${revenue}
+Runtime: ${runtime}
+Category: ${category}
+
+Generate ONE interesting trivia/fact about this movie in ${langName}. Keep it concise and engaging (max 3 sentences).
+Respond with ONLY valid JSON (no markdown):
+{"title": "Short catchy title in ${langName}", "body": "2-3 sentence body in ${langName}"}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 400,
+      temperature: 0.8,
+    });
+    const text = response.choices[0]?.message?.content?.trim();
+    if (!text) return null;
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    return JSON.parse(jsonMatch[0]);
+  } catch (err) {
+    console.warn(`[OpenAI] ${langName} trivia generation failed:`, err.message);
+  }
+  return null;
+};
+
+export { generateSynopsisWithAI, generateRatingWithAI, generateLocalizedTrivia };
