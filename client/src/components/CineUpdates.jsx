@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Heart, Share2, ChevronUp, ChevronDown, MessageSquare, ChevronLeft, Film } from 'lucide-react';
+import { Heart, Share2, ChevronLeft, Film } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
 const CATEGORY_COLORS = {
@@ -18,8 +18,10 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
   const [touchDelta, setTouchDelta] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [likedAnim, setLikedAnim] = useState(null);
+  const [doubleTapHeart, setDoubleTapHeart] = useState(null);
   const containerRef = useRef(null);
   const touchStartY = useRef(null);
+  const lastTapRef = useRef(0);
 
   const update = updates[currentIndex];
 
@@ -76,6 +78,15 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
       } else {
         goPrev();
       }
+    } else if (absDelta < 10) {
+      // Double-tap detection
+      const now = Date.now();
+      if (now - lastTapRef.current < 300 && update) {
+        handleLike(update.id);
+        setDoubleTapHeart(update.id);
+        setTimeout(() => setDoubleTapHeart(null), 700);
+      }
+      lastTapRef.current = now;
     }
     setTouchStart(null);
     setTouchDelta(0);
@@ -165,6 +176,11 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
               <div className="cine-reel-overlay" />
+            </div>
+
+            {/* Double-tap heart burst */}
+            <div className={`cine-reel-doubletap-heart ${doubleTapHeart === item.id ? 'cine-reel-doubletap-active' : ''}`}>
+              <Heart size={80} fill="#ef4444" color="#ef4444" />
             </div>
 
             {/* Content */}
