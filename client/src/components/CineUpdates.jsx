@@ -142,7 +142,6 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
         </button>
         <div className="cine-reels-title">
           <span className="cine-reels-brand">Cine Updates</span>
-          <span className="cine-reels-count">{currentIndex + 1} / {updates.length}</span>
         </div>
       </div>
 

@@ -5589,7 +5589,7 @@ a {
   inset: 0;
   top: 0;
   background: #000;
-  z-index: 50;
+  z-index: 999;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -5764,9 +5764,9 @@ a {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.15) 0%,
-    rgba(0,0,0,0.35) 40%,
-    rgba(0,0,0,0.75) 70%,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.65) 30%,
+    rgba(0,0,0,0.75) 60%,
     rgba(0,0,0,0.92) 100%
   );
 }
