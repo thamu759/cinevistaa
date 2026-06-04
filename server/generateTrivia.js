@@ -3,6 +3,13 @@ import { createCineUpdate } from './db.js';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
+const INDIAN_LANGS = ['ta', 'te', 'hi', 'ml', 'kn', 'bn', 'mr'];
+
+const LANG_NAMES = {
+  ta: 'Tamil', te: 'Telugu', hi: 'Hindi', ml: 'Malayalam',
+  kn: 'Kannada', bn: 'Bengali', mr: 'Marathi',
+};
+
 const TRIVIA_TEMPLATES = [
   {
     category: 'Box Office',
@@ -100,10 +107,21 @@ const TRIVIA_TEMPLATES = [
   },
   {
     category: 'Update',
-    condition: (m) => m.original_language && m.original_language !== 'en',
+    condition: (m) => m.original_language && INDIAN_LANGS.includes(m.original_language),
+    generate: (m) => {
+      const langName = LANG_NAMES[m.original_language] || m.original_language.toUpperCase();
+      return {
+        title: `Hot scoop from ${langName} cinema: ${m.title}`,
+        body: `${m.title} is creating buzz in ${langName} film circles. With its unique storytelling and cultural depth, this ${langName} gem is one to watch out for!`,
+      };
+    },
+  },
+  {
+    category: 'Update',
+    condition: (m) => m.original_language && m.original_language !== 'en' && !INDIAN_LANGS.includes(m.original_language),
     generate: (m) => ({
       title: `${m.title} — a gem from ${m.original_language.toUpperCase()} cinema`,
-      body: `Originally in ${m.original_language.toUpperCase()}, ${m.title} showcases the rich storytelling and cultural depth of ${m.original_language === 'ta' ? 'Tamil' : m.original_language === 'te' ? 'Telugu' : m.original_language === 'hi' ? 'Hindi' : m.original_language === 'ml' ? 'Malayalam' : m.original_language === 'kn' ? 'Kannada' : m.original_language === 'bn' ? 'Bengali' : m.original_language === 'mr' ? 'Marathi' : m.original_language === 'pa' ? 'Punjabi' : m.original_language === 'gu' ? 'Gujarati' : 'regional'} cinema.`,
+      body: `Originally in ${m.original_language.toUpperCase()}, ${m.title} showcases the rich storytelling and cultural depth of international cinema.`,
     }),
   },
   {
@@ -123,6 +141,22 @@ const TRIVIA_TEMPLATES = [
     generate: (m) => ({
       title: `${m.title} was produced by ${m.production_companies[0]?.name || 'a major studio'}`,
       body: `Backed by ${m.production_companies[0]?.name || 'a major production house'}, ${m.title} brought together creative talent to deliver this cinematic experience.`,
+    }),
+  },
+  {
+    category: 'Breaking',
+    condition: (m) => m.original_language === 'ta',
+    generate: (m) => ({
+      title: `Kollywood spotlight: ${m.title}`,
+      body: `${m.title} is making waves in Kollywood! This Tamil film is generating serious buzz among fans and critics alike.`,
+    }),
+  },
+  {
+    category: 'Breaking',
+    condition: (m) => m.original_language === 'te',
+    generate: (m) => ({
+      title: `Tollywood alert: ${m.title}`,
+      body: `${m.title} is the talk of Tollywood! This Telugu film is drawing massive attention from audiences across India.`,
     }),
   },
 ];
@@ -158,10 +192,7 @@ function movieToUpdate(movie, trivia) {
 export async function fetchTrendingMovies(page = 1) {
   const url = buildTmdbUrl('trending/movie/week', { page });
   const res = await fetch(url, { headers: getTmdbHeaders() });
-  if (!res.ok) {
-    console.warn('TMDB trending fetch failed:', res.status);
-    return [];
-  }
+  if (!res.ok) { console.warn('TMDB trending fetch failed:', res.status); return []; }
   const data = await res.json();
   return data.results || [];
 }
@@ -169,10 +200,34 @@ export async function fetchTrendingMovies(page = 1) {
 export async function fetchPopularMovies(page = 1) {
   const url = buildTmdbUrl('movie/popular', { page, region: 'IN', language: 'en-US' });
   const res = await fetch(url, { headers: getTmdbHeaders() });
-  if (!res.ok) {
-    console.warn('TMDB popular fetch failed:', res.status);
-    return [];
-  }
+  if (!res.ok) { console.warn('TMDB popular fetch failed:', res.status); return []; }
+  const data = await res.json();
+  return data.results || [];
+}
+
+export async function fetchIndianMoviesByLang(lang, page = 1) {
+  const url = buildTmdbUrl('discover/movie', {
+    with_original_language: lang,
+    sort_by: 'popularity.desc',
+    page,
+    'vote_count.gte': 10,
+  });
+  const res = await fetch(url, { headers: getTmdbHeaders() });
+  if (!res.ok) { console.warn(`TMDB ${lang} fetch failed:`, res.status); return []; }
+  const data = await res.json();
+  return data.results || [];
+}
+
+export async function fetchUpcomingIndianMovies(page = 1) {
+  const today = new Date().toISOString().split('T')[0];
+  const url = buildTmdbUrl('discover/movie', {
+    with_original_language: 'ta|te|hi|ml',
+    'primary_release_date.gte': today,
+    sort_by: 'popularity.desc',
+    page,
+  });
+  const res = await fetch(url, { headers: getTmdbHeaders() });
+  if (!res.ok) { console.warn('TMDB upcoming Indian fetch failed:', res.status); return []; }
   const data = await res.json();
   return data.results || [];
 }
@@ -185,24 +240,31 @@ export async function fetchMovieDetails(tmdbId) {
 }
 
 export async function generateTriviaUpdates(count = 20) {
-  const movies = [];
+  const allMovies = [];
 
-  const [trending, popular] = await Promise.all([
+  const [trending, popular, ta, te, hi, ml, upcoming] = await Promise.all([
     fetchTrendingMovies(1),
     fetchPopularMovies(1),
+    fetchIndianMoviesByLang('ta', 1),
+    fetchIndianMoviesByLang('te', 1),
+    fetchIndianMoviesByLang('hi', 1),
+    fetchIndianMoviesByLang('ml', 1),
+    fetchUpcomingIndianMovies(1),
   ]);
 
   const seen = new Set();
-  for (const m of [...trending, ...popular]) {
-    if (!seen.has(m.id)) {
-      seen.add(m.id);
-      movies.push(m);
+  for (const batch of [trending, popular, ta, te, hi, ml, upcoming]) {
+    for (const m of batch) {
+      if (!seen.has(m.id)) {
+        seen.add(m.id);
+        allMovies.push(m);
+      }
     }
   }
 
   const updates = [];
 
-  for (const movie of movies) {
+  for (const movie of allMovies) {
     if (updates.length >= count) break;
 
     const details = await fetchMovieDetails(movie.id);
@@ -219,7 +281,7 @@ export async function generateTriviaUpdates(count = 20) {
   return shuffled.slice(0, count);
 }
 
-export async function seedTriviaUpdates(count = 15, adminUser = null) {
+export async function seedTriviaUpdates(count = 20, adminUser = null) {
   const updates = await generateTriviaUpdates(count);
   const created = [];
   for (const u of updates) {
