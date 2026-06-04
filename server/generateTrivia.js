@@ -296,6 +296,9 @@ export async function generateTriviaUpdates(count = 20) {
     const details = await fetchMovieDetails(movie.id);
     if (!details) continue;
 
+    const releaseDate = details.release_date || '';
+    if (releaseDate < '2026-05-01') continue;
+
     const template = getRandomTemplate(details);
     if (!template) continue;
 

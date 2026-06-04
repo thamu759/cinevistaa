@@ -819,8 +819,8 @@ function CineUpdatesTab({ showSuccess }) {
     setTriviaPopup({ status: 'generating', message: 'Generating trivia from TMDB...' });
     try {
       const result = await seedTriviaUpdates(30);
-      setTriviaPopup({ status: 'success', message: `${result.count} trivia updates generated successfully!` });
-      loadUpdates();
+      await loadUpdates();
+      setTriviaPopup({ status: 'success', message: `${result.length} trivia updates generated successfully!` });
     } catch (err) {
       setTriviaPopup({ status: 'error', message: err.message || 'Failed to generate trivia' });
     }
