@@ -1526,7 +1526,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.15,
                       maxWidth: '600px', fontFamily: 'var(--font-sans)'
                     }}>
-                      TikTok Style<br />Movie Updates
+                      Vertical Feed<br />Movie Updates
                     </h2>
                     <p style={{
                       fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
@@ -1537,14 +1537,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     <div className="hero-actions">
                       <button className="btn-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
                         <Play size={16} fill="black" /> Watch Reels
-                      </button>
-                      <button
-                        className="btn-secondary"
-                        onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
-                      >
-                        {cineUpdates.length > 0 && (
-                          <><List size={16} /> {cineUpdates.length} Updates</>
-                        )}
                       </button>
                     </div>
                   </div>
