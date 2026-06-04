@@ -2571,6 +2571,18 @@ export const deleteCineUpdate = async (updateId) => {
   return true;
 };
 
+export const deleteAllCineUpdates = async () => {
+  if (useMongoDB && CineUpdateModel) {
+    const result = await CineUpdateModel.deleteMany({});
+    return result.deletedCount;
+  }
+  const data = readJsonDb();
+  const count = (data.cineUpdates || []).length;
+  data.cineUpdates = [];
+  writeJsonDb(data);
+  return count;
+};
+
 export const toggleCineUpdateLike = async (updateId, username) => {
   if (useMongoDB && CineUpdateModel) {
     const update = await CineUpdateModel.findOne({ id: updateId });

@@ -51,6 +51,7 @@ import {
   createCineUpdate,
   updateCineUpdate,
   deleteCineUpdate,
+  deleteAllCineUpdates,
   toggleCineUpdateLike
 } from './db.js';
 import { seedTriviaUpdates } from './generateTrivia.js';
@@ -920,6 +921,26 @@ app.post('/api/cine-updates', async (req, res) => {
   } catch (error) {
     console.error("Error creating cine update:", error);
     res.status(400).json({ error: error.message || "Server error creating cine update" });
+  }
+});
+
+app.delete('/api/cine-updates', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const count = await deleteAllCineUpdates();
+    res.json({ success: true, message: `${count} cine updates deleted successfully`, count });
+  } catch (error) {
+    console.error("Error deleting all cine updates:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

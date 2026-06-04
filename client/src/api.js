@@ -641,6 +641,18 @@ export const deleteCineUpdate = async (updateId) => {
   return response.json();
 };
 
+export const deleteAllCineUpdates = async () => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to delete all cine updates');
+  }
+  return response.json();
+};
+
 export const toggleCineUpdateLike = async (updateId) => {
   const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}/like`, {
     method: 'POST',

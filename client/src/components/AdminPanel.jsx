@@ -11,7 +11,7 @@ import {
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
-  bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate,
+  bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate, deleteAllCineUpdates,
   seedTriviaUpdates
 } from '../api';
 import ConfirmModal from './ConfirmModal';
@@ -781,6 +781,16 @@ function CineUpdatesTab({ showSuccess }) {
 
   useEffect(() => { loadUpdates(); }, []);
 
+  const handleDeleteAll = async () => {
+    if (!window.confirm(`Delete all ${updates.length} cine updates? This cannot be undone.`)) return;
+    try {
+      await deleteAllCineUpdates();
+      setUpdates([]);
+      setUpdatePage(0);
+      showSuccess('All cine updates deleted.');
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.body.trim()) return;
@@ -835,6 +845,9 @@ function CineUpdatesTab({ showSuccess }) {
         <span className="admin-panel-count">{updates.length} updates</span>
         <button className="btn-secondary" onClick={handleGenerateTrivia} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem' }} disabled={triviaLoading}>
           <Sparkles size={14} /> {triviaLoading ? 'Generating...' : 'Generate Trivia'}
+        </button>
+        <button className="btn-secondary" onClick={handleDeleteAll} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem', color: '#ef4444' }} disabled={updates.length === 0}>
+          <Trash2 size={14} /> Delete All
         </button>
         <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
           <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
