@@ -174,14 +174,14 @@ function formatTimestamp() {
   return `${hrs}${unit} ago`;
 }
 
-function movieToUpdate(movie, trivia) {
+function movieToUpdate(movie, trivia, category = trivia.category) {
   const poster = movie.poster_path
     ? `${TMDB_IMAGE_BASE_URL}/w500${movie.poster_path}`
     : '';
   return {
     title: trivia.title,
     body: trivia.body,
-    category: trivia.category,
+    category,
     movieName: movie.title,
     imageUrl: poster,
     timestamp: formatTimestamp(),
@@ -211,16 +211,30 @@ export async function fetchPopularMovies(page = 1) {
   return data.results || [];
 }
 
+async function fetchWithRetry(url, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url, { headers: getTmdbHeaders() });
+      if (!res.ok) return null;
+      return res;
+    } catch (err) {
+      if (i < retries) await new Promise(r => setTimeout(r, 500));
+      else return null;
+    }
+  }
+  return null;
+}
+
 export async function fetchIndianMoviesByLang(lang, page = 1) {
   const url = buildTmdbUrl('discover/movie', {
     with_original_language: lang,
     sort_by: 'popularity.desc',
     page,
     'vote_count.gte': 10,
-    'primary_release_date.gte': '2026-05-01',
+    'primary_release_date.gte': '2026-01-01',
   });
-  const res = await fetch(url, { headers: getTmdbHeaders() });
-  if (!res.ok) { console.warn(`TMDB ${lang} fetch failed:`, res.status); return []; }
+  const res = await fetchWithRetry(url);
+  if (!res) { console.warn(`TMDB ${lang} page ${page} fetch failed`); return []; }
   const data = await res.json();
   return data.results || [];
 }
@@ -241,30 +255,26 @@ export async function fetchUpcomingIndianMovies(page = 1) {
 
 export async function fetchMovieDetails(tmdbId) {
   const url = buildTmdbUrl(`movie/${tmdbId}`);
-  const res = await fetch(url, { headers: getTmdbHeaders() });
-  if (!res.ok) return null;
+  const res = await fetchWithRetry(url);
+  if (!res || !res.ok) {
+    if (!res) console.warn(`TMDB details fetch failed for ID ${tmdbId}`);
+    return null;
+  }
   return res.json();
 }
 
 export async function generateTriviaUpdates(count = 20) {
   const allMovies = [];
 
-  // Fetch Tamil & Malayalam only for 90%+ dominance
-  const [ta1, ta2, ta3, ta4, ta5, ml1, ml2, ml3, ml4, ml5] = await Promise.all([
-    fetchIndianMoviesByLang('ta', 1),
-    fetchIndianMoviesByLang('ta', 2),
-    fetchIndianMoviesByLang('ta', 3),
-    fetchIndianMoviesByLang('ta', 4),
-    fetchIndianMoviesByLang('ta', 5),
-    fetchIndianMoviesByLang('ml', 1),
-    fetchIndianMoviesByLang('ml', 2),
-    fetchIndianMoviesByLang('ml', 3),
-    fetchIndianMoviesByLang('ml', 4),
-    fetchIndianMoviesByLang('ml', 5),
-  ]);
+  const langs = ['ta', 'ml'];
+  const results = await Promise.allSettled(
+    langs.flatMap(lang => [1, 2, 3, 4, 5].map(page => fetchIndianMoviesByLang(lang, page)))
+  );
 
   const seen = new Set();
-  for (const batch of [ta1, ta2, ta3, ta4, ta5, ml1, ml2, ml3, ml4, ml5]) {
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    const batch = result.value;
     for (const m of batch) {
       if (!seen.has(m.id)) { seen.add(m.id); allMovies.push(m); }
     }
@@ -291,7 +301,7 @@ export async function generateTriviaUpdates(count = 20) {
     } else {
       trivia = template.generate(details);
     }
-    updates.push(movieToUpdate(details, trivia));
+    updates.push(movieToUpdate(details, trivia, template.category));
   }
 
   const shuffled = updates.sort(() => Math.random() - 0.5);
