@@ -231,7 +231,7 @@ export async function fetchIndianMoviesByLang(lang, page = 1) {
     sort_by: 'popularity.desc',
     page,
     'vote_count.gte': 10,
-    'primary_release_date.gte': '2026-01-01',
+    'primary_release_date.gte': '2026-05-01',
   });
   const res = await fetchWithRetry(url);
   if (!res) { console.warn(`TMDB ${lang} page ${page} fetch failed`); return []; }
