@@ -571,3 +571,51 @@ export const fetchLeaderboard = async () => {
   if (!response.ok) throw new Error('Failed to fetch leaderboard');
   return response.json();
 };
+
+// ─── CINE UPDATES ───
+
+export const fetchCineUpdates = async () => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates`);
+  if (!response.ok) throw new Error('Failed to fetch cine updates');
+  return response.json();
+};
+
+export const createCineUpdate = async (updateData) => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(updateData),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to create cine update');
+  }
+  return response.json();
+};
+
+export const deleteCineUpdate = async (updateId) => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to delete cine update');
+  }
+  return response.json();
+};
+
+export const toggleCineUpdateLike = async (updateId) => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}/like`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to toggle like');
+  }
+  return response.json();
+};

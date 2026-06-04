@@ -34,7 +34,9 @@ import {
   fetchWatchProviders,
   deleteReview,
   toggleReviewLike,
-  addReviewReply
+  addReviewReply,
+  fetchCineUpdates,
+  toggleCineUpdateLike
 } from './api';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
@@ -52,6 +54,7 @@ import SpinWheel from './components/SpinWheel';
 import QuizGame from './components/QuizGame';
 import BlindFrame from './components/BlindFrame';
 import MoodMatcher from './components/MoodMatcher';
+import CineUpdates from './components/CineUpdates';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -168,6 +171,7 @@ export default function App() {
     wheel: { title: 'Card Flix — thiraipedia', desc: 'Flip cards to discover your next movie to watch with Card Flix.' },
     'blind-frame': { title: 'Blind Frame — thiraipedia', desc: 'Guess the movie from a blurry poster in Blind Frame on thiraipedia.' },
     'mood-matcher': { title: 'Mood Matcher — thiraipedia', desc: 'Pick your mood and get the perfect movie match on thiraipedia.' },
+    'cine-updates': { title: 'Cine Updates — thiraipedia', desc: 'Latest movie news, rumors, and updates in a reels-style feed on thiraipedia.' },
   };
 
   const updateMeta = (meta) => {
@@ -442,6 +446,8 @@ const preRollTimerRef = useRef(null);
 
   // Leaderboard state
   const [leaderboard, setLeaderboard] = useState([]);
+  const [cineUpdates, setCineUpdates] = useState([]);
+  const [cineUpdatesLoading, setCineUpdatesLoading] = useState(false);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [listsLoading, setListsLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -554,6 +560,35 @@ const preRollTimerRef = useRef(null);
   };
 
   // ─── LEADERBOARD ───
+  const loadCineUpdates = async () => {
+    setCineUpdatesLoading(true);
+    try {
+      const data = await fetchCineUpdates();
+      setCineUpdates(data);
+    } catch (e) {
+      console.error('Failed to load cine updates:', e);
+    }
+    setCineUpdatesLoading(false);
+  };
+
+  const handleCineUpdateLike = async (updateId) => {
+    if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
+    try {
+      const result = await toggleCineUpdateLike(updateId);
+      setCineUpdates(prev => prev.map(u => u.id === updateId ? { ...u, likes: result.likes, likedBy: result.likedBy } : u));
+    } catch (e) {
+      console.error('Failed to toggle like:', e);
+    }
+  };
+
+  const handleCineUpdateShare = (item) => {
+    if (navigator.share) {
+      navigator.share({ title: item.title, text: item.body, url: window.location.href });
+    } else {
+      navigator.clipboard?.writeText(`${item.title} — ${item.body}`).then(() => showToast('Copied to clipboard!')).catch(() => {});
+    }
+  };
+
   const loadLeaderboard = async () => {
     setLeaderboardLoading(true);
     try {
@@ -837,6 +872,7 @@ const preRollTimerRef = useRef(null);
     if (path === '/wheel') return { view: 'wheel' };
     if (path === '/blind-frame') return { view: 'blind-frame' };
     if (path === '/mood-matcher') return { view: 'mood-matcher' };
+    if (path === '/cine-updates') return { view: 'cine-updates' };
     if (path === '/actor') return { view: 'actor' };
     if (path === '/list-detail') return { view: 'list-detail' };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
@@ -868,6 +904,7 @@ const preRollTimerRef = useRef(null);
     if (view === 'wheel') return '/wheel';
     if (view === 'blind-frame') return '/blind-frame';
     if (view === 'mood-matcher') return '/mood-matcher';
+    if (view === 'cine-updates') return '/cine-updates';
     if (view === 'actor') return '/actor';
     if (view === 'list-detail') return '/list-detail';
     if (view === 'article-detail' && movieId) return `/article/${movieId}`;
@@ -1247,6 +1284,15 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               onClick={() => { setIsMobileMenuOpen(false); }}
             >
               Community
+            </Link>
+
+            <Link
+              className={`nav-link cine-updates-link ${activeView === 'cine-updates' ? 'active' : ''}`}
+              to="/cine-updates"
+              onClick={() => { loadCineUpdates(); setIsMobileMenuOpen(false); }}
+              style={{ color: 'var(--color-accent-gold)', fontWeight: 600 }}
+            >
+              <span className="nav-pulse-dot" /> Cine Reels
             </Link>
 
             {currentUser && currentUser.role === 'admin' && (
@@ -3046,6 +3092,18 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
             <MoodMatcher movies={movies} onViewMovie={handleViewMovie} />
           </div>
+        )}
+
+        {/* CINE UPDATES REELS VIEW */}
+        {activeView === 'cine-updates' && (
+          <CineUpdates
+            updates={cineUpdates}
+            onLike={handleCineUpdateLike}
+            onShare={handleCineUpdateShare}
+            currentUser={currentUser}
+            onBack={() => navigateTo('home')}
+            onNavigate={navigateTo}
+          />
         )}
 
         {/* ADMIN CONTROL PANEL VIEW */}

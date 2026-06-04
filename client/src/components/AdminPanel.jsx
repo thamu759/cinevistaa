@@ -11,7 +11,7 @@ import {
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
-  bulkAddMovies
+  bulkAddMovies, fetchCineUpdates, createCineUpdate, deleteCineUpdate
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -103,6 +103,7 @@ export default function AdminPanel({ currentUser }) {
           { id: 'dashboard', label: 'Dashboard', icon: Activity },
           { id: 'movies', label: 'Movies', icon: Film },
           { id: 'users', label: 'Users', icon: Users },
+          { id: 'cine-updates', label: 'Cine Updates', icon: Activity },
 
         ].map(tab => {
           const Icon = tab.icon;
@@ -124,6 +125,9 @@ export default function AdminPanel({ currentUser }) {
       )}
       {activeTab === 'users' && (
         <UsersTab users={users} setUsers={setUsers} currentUser={currentUser} showSuccess={showSuccess} />
+      )}
+      {activeTab === 'cine-updates' && (
+        <CineUpdatesTab showSuccess={showSuccess} />
       )}
 
     </div>
@@ -749,6 +753,125 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
 
       <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)} onConfirm={handleDeleteConfirm}
         title="Delete Movie" message="Delete this movie permanently? This action cannot be undone." confirmLabel="Delete Movie" danger />
+    </div>
+  );
+}
+
+function CineUpdatesTab({ showSuccess }) {
+  const [updates, setUpdates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
+  const { showToast } = useToast();
+
+  const loadUpdates = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchCineUpdates();
+      setUpdates(data);
+    } catch (err) { console.error(err); }
+    setLoading(false);
+  };
+
+  useEffect(() => { loadUpdates(); }, []);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.body.trim()) return;
+    try {
+      await createCineUpdate(formData);
+      setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
+      setShowForm(false);
+      showSuccess('Cine update created!');
+      loadUpdates();
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this cine update?')) return;
+    try {
+      await deleteCineUpdate(id);
+      showSuccess('Cine update deleted.');
+      loadUpdates();
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="admin-panel-header">
+        <Activity size={18} style={{ color: 'var(--color-accent-gold)' }} />
+        <h2>Cine Updates (Reels)</h2>
+        <span className="admin-panel-count">{updates.length} updates</span>
+        <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
+          <Plus size={14} /> New Update
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleCreate} style={{ padding: '1rem', marginBottom: '1rem' }} className="glass-panel">
+          <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="admin-label">Title</label>
+              <input className="admin-input" value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Leo 2 Confirmed!" required />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="admin-label">Body</label>
+              <textarea className="admin-textarea" value={formData.body} onChange={e => setFormData(p => ({ ...p, body: e.target.value }))} rows={3} placeholder="Update details..." required />
+            </div>
+            <div>
+              <label className="admin-label">Category</label>
+              <select className="admin-input" value={formData.category} onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}>
+                <option value="News">News</option>
+                <option value="Rumor">Rumor</option>
+                <option value="Breaking">Breaking</option>
+                <option value="Update">Update</option>
+                <option value="Box Office">Box Office</option>
+                <option value="Interview">Interview</option>
+              </select>
+            </div>
+            <div>
+              <label className="admin-label">Movie Name (optional)</label>
+              <input className="admin-input" value={formData.movieName} onChange={e => setFormData(p => ({ ...p, movieName: e.target.value }))} placeholder="e.g. Leo 2" />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="admin-label">Image URL (optional)</label>
+              <input className="admin-input" value={formData.imageUrl} onChange={e => setFormData(p => ({ ...p, imageUrl: e.target.value }))} placeholder="https://image.tmdb.org/t/p/original/..." />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" className="btn-secondary" onClick={() => setShowForm(false)} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Cancel</button>
+            <button type="submit" className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Publish</button>
+          </div>
+        </form>
+      )}
+
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading...</div>
+      ) : updates.length === 0 ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No cine updates yet. Create one!</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {updates.map(update => (
+            <div key={update.id} className="glass-panel" style={{ padding: '0.75rem 1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              {update.imageUrl && (
+                <img src={proxyImageUrl(update.imageUrl, 'w92')} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', padding: '0.1rem 0.4rem', borderRadius: '3px', color: '#fff', background: update.category === 'Breaking' ? '#ef4444' : update.category === 'Rumor' ? '#f59e0b' : update.category === 'Box Office' ? '#8b5cf6' : '#3b82f6' }}>{update.category}</span>
+                  {update.movieName && <span style={{ fontSize: '0.7rem', color: 'var(--color-accent-gold)', fontWeight: 600 }}>{update.movieName}</span>}
+                  <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{update.timestamp}</span>
+                </div>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.15rem' }}>{update.title}</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>{update.body}</p>
+              </div>
+              <button onClick={() => handleDelete(update.id)} className="btn-danger" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem', flexShrink: 0 }}>
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

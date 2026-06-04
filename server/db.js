@@ -1235,6 +1235,9 @@ export const initDB = async () => {
       if (CommunityThreadModel && await CommunityThreadModel.countDocuments() === 0) {
         await CommunityThreadModel.insertMany(initialCommunityThreads);
       }
+      if (CineUpdateModel && await CineUpdateModel.countDocuments() === 0) {
+        await CineUpdateModel.insertMany(initialCineUpdates);
+      }
     } catch (err) {
       console.warn("Failed to connect to MongoDB. Falling back to local JSON file db.json. Error:", err.message);
       useMongoDB = false;
@@ -2336,6 +2339,222 @@ export const deleteList = async (listId, username) => {
   data.userLists.splice(idx, 1);
   writeJsonDb(data);
   return true;
+};
+
+// ─── CINE UPDATES (Reels) ───
+
+const initialCineUpdates = [
+  {
+    id: 'cu-1',
+    title: 'Leo 2 Confirmed!',
+    body: 'Lokesh Kanagaraj confirms Leo 2 is in early development. Vijay to return as Parthiban. Sources say shooting may begin in late 2026.',
+    category: 'Rumor',
+    movieName: 'Leo 2',
+    imageUrl: 'https://image.tmdb.org/t/p/original/voPOVVfRPWnYd2jWRVQj4m7nMxG.jpg',
+    timestamp: '2h ago',
+    likes: 1240,
+    likedBy: []
+  },
+  {
+    id: 'cu-2',
+    title: 'Thalapathy 69 Title Announcement',
+    body: 'Vijay\'s final film before political entry, directed by Karthik Subbaraj, is rumored to be titled "Thalaivar 170". Official announcement expected next week.',
+    category: 'News',
+    movieName: 'Thalapathy 69',
+    imageUrl: 'https://image.tmdb.org/t/p/original/8x6cQvWIgTrj99XdnAsyBE6KfTe.jpg',
+    timestamp: '5h ago',
+    likes: 2890,
+    likedBy: []
+  },
+  {
+    id: 'cu-3',
+    title: 'Suriya 44 with Karthik Subbaraj',
+    body: 'Breaking: Suriya teams up with Karthik Subbaraj for a pan-India project. Touted to be a period action thriller with a massive budget.',
+    category: 'Breaking',
+    movieName: 'Suriya 44',
+    imageUrl: 'https://image.tmdb.org/t/p/original/zM9rgf04ISm4Ub9BssNVQ9aBArf.jpg',
+    timestamp: '8h ago',
+    likes: 3456,
+    likedBy: []
+  },
+  {
+    id: 'cu-4',
+    title: 'Coolie First Look Breaking Records',
+    body: 'Rajinikanth starrer "Coolie" directed by Lokesh Kanagaraj first look poster crosses 10M+ views in 24 hours. Fans go crazy over Thalaivar\'s new avatar.',
+    category: 'Update',
+    movieName: 'Coolie',
+    imageUrl: 'https://image.tmdb.org/t/p/original/3V4kLQg0kSqPLN3sQNfTipBcLfa.jpg',
+    timestamp: '12h ago',
+    likes: 5670,
+    likedBy: []
+  },
+  {
+    id: 'cu-5',
+    title: 'Vikram 2 Star Cast Revealed',
+    body: 'Kamal Haasan reveals massive star cast for Vikram 2 including Rajinikanth in a cameo role. Anirudh to compose. Shooting starts June 2026.',
+    category: 'Rumor',
+    movieName: 'Vikram 2',
+    imageUrl: 'https://image.tmdb.org/t/p/original/wJXZ3S5UVT8GxAQqqOYB8BMZ4iK.jpg',
+    timestamp: '1d ago',
+    likes: 4321,
+    likedBy: []
+  },
+  {
+    id: 'cu-6',
+    title: 'Animal Park Update',
+    body: 'Sandeep Reddy Vanga confirms Animal Park script is locked. Rashmika Mandanna to reprise her role. Expected release: Summer 2027.',
+    category: 'Update',
+    movieName: 'Animal Park',
+    imageUrl: 'https://image.tmdb.org/t/p/original/cinER0ESKQIeASpBMkkSNZjZAH.jpg',
+    timestamp: '1d ago',
+    likes: 2100,
+    likedBy: []
+  },
+  {
+    id: 'cu-7',
+    title: 'Kantara Chapter 1 Trailer Date',
+    body: 'Rishab Shetty announces Kantara Chapter 1 trailer will release on March 15th. The prequel promises to be bigger and more rooted.',
+    category: 'News',
+    movieName: 'Kantara Chapter 1',
+    imageUrl: 'https://image.tmdb.org/t/p/original/hIY3M7wvTBEW2Hn74QQfIdjj2e4.jpg',
+    timestamp: '2d ago',
+    likes: 1890,
+    likedBy: []
+  },
+  {
+    id: 'cu-8',
+    title: 'Pushpa 2: The Rule Box Office',
+    body: 'Allu Arjun\'s Pushpa 2 enters 2000Cr club worldwide! Highest grossing Indian film of 2025. Hindi version alone contributed 800Cr+.',
+    category: 'Box Office',
+    movieName: 'Pushpa 2',
+    imageUrl: 'https://image.tmdb.org/t/p/original/vGIIFbnJYvSXquFv5IQe27FwJs.jpg',
+    timestamp: '3d ago',
+    likes: 7890,
+    likedBy: []
+  },
+  {
+    id: 'cu-9',
+    title: 'Dhanush 50th Film Announced',
+    body: 'Dhanush\'s 50th film titled "D50" directed by Sekhar Kammula. Joint production by Dhanush and Narayan Das K. Ramoji Film City schedule locked.',
+    category: 'News',
+    movieName: 'D50',
+    imageUrl: 'https://image.tmdb.org/t/p/original/3CxUnd3jvNomtXbq2mxqINIpDSp.jpg',
+    timestamp: '3d ago',
+    likes: 1567,
+    likedBy: []
+  },
+  {
+    id: 'cu-10',
+    title: 'Spirit (Prabhas) Massive Budget',
+    body: 'Sandeep Reddy Vanga\'s "Spirit" starring Prabhas is reportedly budgeted at 500Cr+. The action drama will be shot across 4 countries. Title logo launch soon.',
+    category: 'Breaking',
+    movieName: 'Spirit',
+    imageUrl: 'https://image.tmdb.org/t/p/original/qlc9h2KxS1Y3EOmbMhfEqLREhRj.jpg',
+    timestamp: '4d ago',
+    likes: 6543,
+    likedBy: []
+  },
+];
+
+let CineUpdateModel;
+try {
+  const cineUpdateSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    body: { type: String, required: true },
+    category: { type: String, default: 'News' },
+    movieName: { type: String, default: '' },
+    imageUrl: { type: String, default: '' },
+    timestamp: { type: String, default: 'Just now' },
+    likes: { type: Number, default: 0 },
+    likedBy: [{ type: String }]
+  });
+  CineUpdateModel = mongoose.model('CineUpdate', cineUpdateSchema);
+} catch (e) {}
+
+export const getCineUpdates = async () => {
+  if (useMongoDB && CineUpdateModel) {
+    return await CineUpdateModel.find({}).sort({ _id: -1 });
+  }
+  const data = readJsonDb();
+  if (!data.cineUpdates || data.cineUpdates.length === 0) {
+    data.cineUpdates = initialCineUpdates;
+    writeJsonDb(data);
+  }
+  return data.cineUpdates;
+};
+
+export const createCineUpdate = async (updateData, user) => {
+  const cleanTitle = (updateData.title || '').trim();
+  const cleanBody = (updateData.body || '').trim();
+  if (!cleanTitle || !cleanBody) {
+    throw new Error("Title and body are required");
+  }
+
+  const update = {
+    id: 'cu-' + Date.now(),
+    title: cleanTitle,
+    body: cleanBody,
+    category: updateData.category || 'News',
+    movieName: updateData.movieName || '',
+    imageUrl: updateData.imageUrl || '',
+    timestamp: 'Just now',
+    likes: 0,
+    likedBy: []
+  };
+
+  if (useMongoDB && CineUpdateModel) {
+    const created = new CineUpdateModel(update);
+    return await created.save();
+  }
+  const data = readJsonDb();
+  if (!data.cineUpdates) data.cineUpdates = [];
+  data.cineUpdates.unshift(update);
+  writeJsonDb(data);
+  return update;
+};
+
+export const deleteCineUpdate = async (updateId) => {
+  if (useMongoDB && CineUpdateModel) {
+    const result = await CineUpdateModel.deleteOne({ id: updateId });
+    return result.deletedCount > 0;
+  }
+  const data = readJsonDb();
+  const idx = (data.cineUpdates || []).findIndex(u => u.id === updateId);
+  if (idx === -1) return false;
+  data.cineUpdates.splice(idx, 1);
+  writeJsonDb(data);
+  return true;
+};
+
+export const toggleCineUpdateLike = async (updateId, username) => {
+  if (useMongoDB && CineUpdateModel) {
+    const update = await CineUpdateModel.findOne({ id: updateId });
+    if (!update) return null;
+    const idx = update.likedBy.indexOf(username);
+    if (idx > -1) {
+      update.likedBy.splice(idx, 1);
+      update.likes = Math.max(0, update.likes - 1);
+    } else {
+      update.likedBy.push(username);
+      update.likes = (update.likes || 0) + 1;
+    }
+    await update.save();
+    return { likes: update.likes, likedBy: update.likedBy };
+  }
+  const data = readJsonDb();
+  const update = (data.cineUpdates || []).find(u => u.id === updateId);
+  if (!update) return null;
+  const idx = update.likedBy.indexOf(username);
+  if (idx > -1) {
+    update.likedBy.splice(idx, 1);
+    update.likes = Math.max(0, update.likes - 1);
+  } else {
+    update.likedBy.push(username);
+    update.likes = (update.likes || 0) + 1;
+  }
+  writeJsonDb(data);
+  return { likes: update.likes, likedBy: update.likedBy };
 };
 
 // ─── LEADERBOARD ───
