@@ -816,7 +816,7 @@ function CineUpdatesTab({ showSuccess }) {
   const handleGenerateTrivia = async () => {
     setTriviaLoading(true);
     try {
-      const result = await seedTriviaUpdates(25);
+      const result = await seedTriviaUpdates(30);
       showSuccess(`${result.count} trivia updates generated!`);
       loadUpdates();
     } catch (err) { showToast(err.message, 'error'); }
