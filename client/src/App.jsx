@@ -1468,46 +1468,10 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onTouchStart={handleHeroTouchStart}
                 onTouchEnd={handleHeroTouchEnd}
               >
-                {heroMovies.map((movie, index) => {
-                  const isActive = index === currentHeroIndex;
-                  return (
-                    <div 
-                      key={movie.id} 
-                      className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
-                    >
-                      <div 
-                        className="hero-backdrop" 
-                        style={{ backgroundImage: isActive ? `url(${proxyImageUrl(movie.backdropUrl, 'original')})` : 'none' }}
-                      />
-                      <div className="hero-content">
-                          <MovieLogo movie={movie} />
-                          <div className="hero-rating-badge">
-                            <span className="hero-tag-fav">FEATURED</span>
-                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                            <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
-                          </div>
-                          <p className="hero-description">{movie.description}</p>
-                          <div className="hero-actions">
-                            <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
-                              <Play size={16} fill="black" /> Watch Trailer
-                            </button>
-                            <button 
-                              className="btn-secondary" 
-                              onClick={(e) => handleToggleWatchlist(movie.id, e)}
-                            >
-                              {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
-                              {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
-                            </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* CINE REELS PROMO SLIDE */}
+                {/* CINE PULSE PROMO SLIDE — always first */}
                 <div
                   key="cine-reels-promo"
-                  className={`hero-slide ${currentHeroIndex === heroMovies.length ? 'hero-slide--active' : ''}`}
+                  className={`hero-slide ${currentHeroIndex === 0 ? 'hero-slide--active' : ''}`}
                 >
                   <div
                     className="hero-backdrop"
@@ -1551,6 +1515,42 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   </div>
                 </div>
 
+                {heroMovies.map((movie, index) => {
+                  const isActive = index + 1 === currentHeroIndex;
+                  return (
+                    <div 
+                      key={movie.id} 
+                      className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
+                    >
+                      <div 
+                        className="hero-backdrop" 
+                        style={{ backgroundImage: isActive ? `url(${proxyImageUrl(movie.backdropUrl, 'original')})` : 'none' }}
+                      />
+                      <div className="hero-content">
+                          <MovieLogo movie={movie} />
+                          <div className="hero-rating-badge">
+                            <span className="hero-tag-fav">FEATURED</span>
+                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                            <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                          </div>
+                          <p className="hero-description">{movie.description}</p>
+                          <div className="hero-actions">
+                            <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
+                              <Play size={16} fill="black" /> Watch Trailer
+                            </button>
+                            <button 
+                              className="btn-secondary" 
+                              onClick={(e) => handleToggleWatchlist(movie.id, e)}
+                            >
+                              {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
+                              {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
+                            </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
                 {/* Left Arrow */}
                 {heroMovies.length >= 1 && currentHeroIndex > 0 && (
                   <button 
@@ -1582,27 +1582,27 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 {/* Indicator Dots */}
                 {heroMovies.length >= 1 && (
                   <div className="hero-indicators">
-                    {heroMovies.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`hero-indicator-dot ${index === currentHeroIndex ? 'hero-indicator-dot--active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentHeroIndex(index);
-                        }}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                    {/* Cine Pulse promo dot */}
+                    {/* Cine Pulse promo dot — always first */}
                     <button
-                      className={`hero-indicator-dot ${currentHeroIndex === heroMovies.length ? 'hero-indicator-dot--active' : ''}`}
-                      style={{ background: currentHeroIndex === heroMovies.length ? 'var(--color-accent-gold)' : undefined }}
+                      className={`hero-indicator-dot ${currentHeroIndex === 0 ? 'hero-indicator-dot--active' : ''}`}
+                      style={{ background: currentHeroIndex === 0 ? 'var(--color-accent-gold)' : undefined }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentHeroIndex(heroMovies.length);
+                        setCurrentHeroIndex(0);
                       }}
                       aria-label="Go to Cine Pulse"
                     />
+                    {heroMovies.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`hero-indicator-dot ${index + 1 === currentHeroIndex ? 'hero-indicator-dot--active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentHeroIndex(index + 1);
+                        }}
+                        aria-label={`Go to slide ${index + 2}`}
+                      />
+                    ))}
                   </div>
                 )}
               </header>
