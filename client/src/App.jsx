@@ -2085,11 +2085,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
             {/* CINE REELS SECTION */}
             {cineUpdates.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
+              <section className="movies-section" style={{ marginTop: '3rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>TikTok Style</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Reels</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div>
+                      <p className="section-meta" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="cine-reels-live-dot" />
+                        TikTok Style
+                      </p>
+                      <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Reels</h2>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
@@ -2102,60 +2107,44 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       aria-label="Scroll right">
                       <ChevronRight size={18} />
                     </button>
-                    <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
+                    <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
                       onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                      View All
+                      Open Reels
                     </button>
                   </div>
                 </div>
-                <div className="movie-grid-horizontal" ref={cineReelsScrollRef}>
-                  {cineUpdates.map((update) => (
-                    <div
-                      key={update.id}
-                      className="movie-card-horizontal"
-                      onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
-                      style={{ flex: '0 0 200px' }}
-                    >
-                      <div className="movie-card-poster-wrapper" style={{ height: '200px' }}>
-                        <div style={{
-                          width: '100%', height: '100%', borderRadius: '8px',
-                          background: `linear-gradient(145deg, var(--color-surface-elevated) 0%, #14142a 100%)`,
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                          padding: '1.25rem 1rem', gap: '0.6rem', border: '1px solid rgba(255,255,255,0.06)'
+                <div className="movie-grid-horizontal cine-reels-strip" ref={cineReelsScrollRef}>
+                  {cineUpdates.map((update, idx) => {
+                    const catColor = CATEGORY_COLORS[update.category] || '#6366f1';
+                    return (
+                      <div
+                        key={update.id}
+                        className={`cine-reel-card ${idx === 0 ? 'cine-reel-card-featured' : ''}`}
+                        onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+                      >
+                        <div className="cine-reel-card-img" style={{
+                          backgroundImage: update.imageUrl ? `url(${proxyImageUrl(update.imageUrl, 'w300')})` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
                         }}>
-                          <span style={{
-                            background: CATEGORY_COLORS[update.category] || '#6366f1',
-                            color: '#fff', padding: '0.2rem 0.7rem', borderRadius: '4px',
-                            fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em'
-                          }}>
+                          <div className="cine-reel-card-overlay" style={{
+                            background: `linear-gradient(0deg, rgba(0,0,0,0.85) 0%, ${catColor}22 50%, transparent 100%)`
+                          }} />
+                          <span className="cine-reel-card-badge" style={{ background: catColor }}>
                             {update.category || 'News'}
                           </span>
-                          <span style={{
-                            color: '#fff', fontSize: '0.85rem', fontWeight: 600,
-                            textAlign: 'center', lineHeight: 1.35,
-                            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                          }}>
-                            {update.title}
-                          </span>
-                          <span style={{
-                            color: 'var(--color-text-muted)', fontSize: '0.72rem',
-                            textAlign: 'center', lineHeight: 1.4,
-                            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                          }}>
-                            {update.body}
-                          </span>
+                          <div className="cine-reel-card-likes">
+                            <Heart size={11} fill="#ef4444" color="#ef4444" />
+                            <span>{update.likes || 0}</span>
+                          </div>
+                          <div className="cine-reel-card-bottom">
+                            <h3 className="cine-reel-card-title">{update.title}</h3>
+                            <p className="cine-reel-card-body">{update.body}</p>
+                          </div>
                         </div>
                       </div>
-                      <div className="movie-card-info" style={{ padding: '0.5rem 0.25rem' }}>
-                        <h3 className="movie-card-title" style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {update.title}
-                        </h3>
-                        <div className="movie-card-genre-tags">
-                          <span className="genre-tag">{update.likes || 0} Likes</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
