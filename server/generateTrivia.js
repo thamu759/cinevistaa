@@ -198,7 +198,12 @@ export async function fetchTrendingMovies(page = 1) {
 }
 
 export async function fetchPopularMovies(page = 1) {
-  const url = buildTmdbUrl('movie/popular', { page, region: 'IN', language: 'en-US' });
+  const url = buildTmdbUrl('discover/movie', {
+    sort_by: 'popularity.desc',
+    page,
+    'vote_count.gte': 50,
+    'primary_release_date.gte': '2022-01-01',
+  });
   const res = await fetch(url, { headers: getTmdbHeaders() });
   if (!res.ok) { console.warn('TMDB popular fetch failed:', res.status); return []; }
   const data = await res.json();
@@ -211,6 +216,7 @@ export async function fetchIndianMoviesByLang(lang, page = 1) {
     sort_by: 'popularity.desc',
     page,
     'vote_count.gte': 10,
+    'primary_release_date.gte': '2020-01-01',
   });
   const res = await fetch(url, { headers: getTmdbHeaders() });
   if (!res.ok) { console.warn(`TMDB ${lang} fetch failed:`, res.status); return []; }
