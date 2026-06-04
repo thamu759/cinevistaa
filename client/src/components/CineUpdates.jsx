@@ -124,8 +124,12 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
               transform: idx === currentIndex ? 'translateY(0) scale(1)' : idx < currentIndex ? 'translateY(-100%) scale(0.95)' : 'translateY(100%) scale(0.95)'
             }}
           >
-            {/* Background image */}
-            <div className="cine-reel-bg">
+            {/* Background */}
+            <div className="cine-reel-bg" style={{
+              background: item.imageUrl
+                ? `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}33, #0f0f1a)`
+                : `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}44, #0f0f1a)`
+            }}>
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
