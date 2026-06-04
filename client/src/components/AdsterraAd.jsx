@@ -49,6 +49,7 @@ export default function AdsterraAd({ zoneKey, width, height, format = 'iframe', 
     iframe.scrolling = 'no';
     iframe.title = 'Advertisement';
     iframe.loading = 'lazy';
+    iframe.setAttribute('sandbox', 'allow-scripts');
     el.appendChild(iframe);
 
     const t = setTimeout(() => setFailed(true), 6000);
