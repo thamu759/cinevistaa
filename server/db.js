@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+
 import { generateSynopsisWithAI, generateRatingWithAI } from './openai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1870,25 +1870,29 @@ export const verifyToken = async (token) => {
   }
 };
 
-// Nodemailer transporter (lazy init)
-let _transporter = null;
-const getTransporter = () => {
-  if (_transporter) return _transporter;
-  if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
-    _transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 10000,
-    });
-  }
-  return _transporter;
+// Resend HTTP email client (lightweight, works on Render free tier)
+const sendEmailViaResend = async (to, otp) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'ThiraiPedia <onboarding@resend.dev>',
+      to,
+      subject: 'Your ThiraiPedia OTP Code',
+      text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
+      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2>ThiraiPedia Email Verification</h2>
+        <p>Your OTP code is:</p>
+        <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
+        <p>This code expires in <strong>5 minutes</strong>.</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
+      </div>`
+    })
+  });
+  return res.ok;
 };
 
 const generateOtp = () => {
@@ -1923,33 +1927,8 @@ export const sendOtp = async (email) => {
     writeJsonDb(data);
   }
 
-  // Send email via nodemailer if configured, otherwise log to console
-  const transporter = getTransporter();
-  let emailSent = false;
-  if (transporter) {
-    try {
-      await Promise.race([
-        transporter.sendMail({
-          from: process.env.SMTP_FROM || process.env.SMTP_USER,
-          to: email,
-          subject: 'Your ThiraiPedia OTP Code',
-          text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
-          html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-            <h2>ThiraiPedia Email Verification</h2>
-            <p>Your OTP code is:</p>
-            <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
-            <p>This code expires in <strong>5 minutes</strong>.</p>
-            <hr>
-            <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
-          </div>`,
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("SMTP timeout")), 10000))
-      ]);
-      emailSent = true;
-    } catch (err) {
-      console.error(`[OTP] Failed to send email to ${email}: ${err.message}. OTP logged as fallback.`);
-    }
-  }
+  // Send email via Resend if configured, otherwise log to console
+  const emailSent = await sendEmailViaResend(email, otp);
 
   if (!emailSent) {
     console.log(`\n[OTP] Email to ${email}: Your OTP code is ${otp} (expires in 5 minutes)\n`);
