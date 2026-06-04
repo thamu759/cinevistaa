@@ -248,41 +248,22 @@ export async function fetchMovieDetails(tmdbId) {
 export async function generateTriviaUpdates(count = 20) {
   const allMovies = [];
 
-  // Fetch more pages of Tamil & Malayalam to dominate the pool
-  const [ta1, ta2, ta3, ml1, ml2, ml3, te, hi, trending, popular] = await Promise.all([
+  // Fetch Tamil & Malayalam only for 90%+ dominance
+  const [ta1, ta2, ta3, ta4, ta5, ml1, ml2, ml3, ml4, ml5] = await Promise.all([
     fetchIndianMoviesByLang('ta', 1),
     fetchIndianMoviesByLang('ta', 2),
     fetchIndianMoviesByLang('ta', 3),
+    fetchIndianMoviesByLang('ta', 4),
+    fetchIndianMoviesByLang('ta', 5),
     fetchIndianMoviesByLang('ml', 1),
     fetchIndianMoviesByLang('ml', 2),
     fetchIndianMoviesByLang('ml', 3),
-    fetchIndianMoviesByLang('te', 1),
-    fetchIndianMoviesByLang('hi', 1),
-    fetchTrendingMovies(1),
-    fetchPopularMovies(1),
+    fetchIndianMoviesByLang('ml', 4),
+    fetchIndianMoviesByLang('ml', 5),
   ]);
 
   const seen = new Set();
-  // Tamil first (3 pages worth)
-  for (const batch of [ta1, ta2, ta3]) {
-    for (const m of batch) {
-      if (!seen.has(m.id)) { seen.add(m.id); allMovies.push(m); }
-    }
-  }
-  // Malayalam second (3 pages)
-  for (const batch of [ml1, ml2, ml3]) {
-    for (const m of batch) {
-      if (!seen.has(m.id)) { seen.add(m.id); allMovies.push(m); }
-    }
-  }
-  // Then Telugu, Hindi
-  for (const batch of [te, hi]) {
-    for (const m of batch) {
-      if (!seen.has(m.id)) { seen.add(m.id); allMovies.push(m); }
-    }
-  }
-  // International last
-  for (const batch of [trending, popular]) {
+  for (const batch of [ta1, ta2, ta3, ta4, ta5, ml1, ml2, ml3, ml4, ml5]) {
     for (const m of batch) {
       if (!seen.has(m.id)) { seen.add(m.id); allMovies.push(m); }
     }
