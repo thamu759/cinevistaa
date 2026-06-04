@@ -9,7 +9,7 @@ const styles = {
     height: CARD_HEIGHT,
     position: 'relative',
     overflow: 'hidden',
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     background: '#0f0f1a',
     display: 'flex',
     flexDirection: 'column',
