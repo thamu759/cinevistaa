@@ -128,7 +128,7 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
             <div className="cine-reel-bg">
               {item.imageUrl ? (
                 <img
-                  src={proxyImageUrl(item.imageUrl, 'original')}
+                  src={item.imageUrl}
                   alt=""
                   className="cine-reel-bg-img"
                   onError={(e) => { e.target.style.display = 'none'; }}
