@@ -11,7 +11,7 @@ import {
   refreshMoviePosters, curateMovie, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
-  bulkAddMovies, fetchCineUpdates, createCineUpdate, deleteCineUpdate
+  bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -761,6 +761,7 @@ function CineUpdatesTab({ showSuccess }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
   const { showToast } = useToast();
 
@@ -779,12 +780,24 @@ function CineUpdatesTab({ showSuccess }) {
     e.preventDefault();
     if (!formData.title.trim() || !formData.body.trim()) return;
     try {
-      await createCineUpdate(formData);
+      if (editingId) {
+        await updateCineUpdate(editingId, formData);
+        showSuccess('Cine update updated!');
+      } else {
+        await createCineUpdate(formData);
+        showSuccess('Cine update created!');
+      }
       setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
       setShowForm(false);
-      showSuccess('Cine update created!');
+      setEditingId(null);
       loadUpdates();
     } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const handleEdit = (update) => {
+    setFormData({ title: update.title, body: update.body, category: update.category, movieName: update.movieName || '', imageUrl: update.imageUrl || '' });
+    setEditingId(update.id);
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
@@ -802,13 +815,14 @@ function CineUpdatesTab({ showSuccess }) {
         <Activity size={18} style={{ color: 'var(--color-accent-gold)' }} />
         <h2>Cine Updates (Reels)</h2>
         <span className="admin-panel-count">{updates.length} updates</span>
-        <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
-          <Plus size={14} /> New Update
+        <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
+          <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleCreate} style={{ padding: '1rem', marginBottom: '1rem' }} className="glass-panel">
+          <h3 style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: 'var(--color-accent-gold)' }}>{editingId ? 'Edit Update' : 'New Update'}</h3>
           <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: '1fr 1fr' }}>
             <div style={{ gridColumn: '1 / -1' }}>
               <label className="admin-label">Title</label>
@@ -839,8 +853,8 @@ function CineUpdatesTab({ showSuccess }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn-secondary" onClick={() => setShowForm(false)} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Cancel</button>
-            <button type="submit" className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Publish</button>
+            <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Cancel</button>
+            <button type="submit" className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>{editingId ? 'Save' : 'Publish'}</button>
           </div>
         </form>
       )}
@@ -865,9 +879,14 @@ function CineUpdatesTab({ showSuccess }) {
                 <h3 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.15rem' }}>{update.title}</h3>
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>{update.body}</p>
               </div>
-              <button onClick={() => handleDelete(update.id)} className="btn-danger" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem', flexShrink: 0 }}>
-                <Trash2 size={12} />
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flexShrink: 0 }}>
+                <button onClick={() => handleEdit(update)} className="btn-secondary" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
+                  <Edit size={12} />
+                </button>
+                <button onClick={() => handleDelete(update.id)} className="btn-danger" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

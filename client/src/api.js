@@ -596,6 +596,22 @@ export const createCineUpdate = async (updateData) => {
   return response.json();
 };
 
+export const updateCineUpdate = async (updateId, updateData) => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(updateData),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to update cine update');
+  }
+  return response.json();
+};
+
 export const deleteCineUpdate = async (updateId) => {
   const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}`, {
     method: 'DELETE',

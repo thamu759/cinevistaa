@@ -2534,6 +2534,30 @@ export const createCineUpdate = async (updateData, user) => {
   return update;
 };
 
+export const updateCineUpdate = async (updateId, updateData) => {
+  const cleanTitle = (updateData.title || '').trim();
+  const cleanBody = (updateData.body || '').trim();
+  if (!cleanTitle || !cleanBody) {
+    throw new Error("Title and body are required");
+  }
+
+  if (useMongoDB && CineUpdateModel) {
+    const result = await CineUpdateModel.findOneAndUpdate(
+      { id: updateId },
+      { $set: { title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '' } },
+      { new: true }
+    );
+    if (!result) throw new Error("Cine update not found");
+    return result;
+  }
+  const data = readJsonDb();
+  const idx = (data.cineUpdates || []).findIndex(u => u.id === updateId);
+  if (idx === -1) throw new Error("Cine update not found");
+  data.cineUpdates[idx] = { ...data.cineUpdates[idx], title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '' };
+  writeJsonDb(data);
+  return data.cineUpdates[idx];
+};
+
 export const deleteCineUpdate = async (updateId) => {
   if (useMongoDB && CineUpdateModel) {
     const result = await CineUpdateModel.deleteOne({ id: updateId });

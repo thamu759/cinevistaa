@@ -49,6 +49,7 @@ import {
   seedBotReviewsForMovie,
   getCineUpdates,
   createCineUpdate,
+  updateCineUpdate,
   deleteCineUpdate,
   toggleCineUpdateLike
 } from './db.js';
@@ -939,6 +940,26 @@ app.delete('/api/cine-updates/:id', async (req, res) => {
   } catch (error) {
     console.error("Error deleting cine update:", error);
     res.status(500).json({ error: "Server error deleting cine update" });
+  }
+});
+
+app.put('/api/cine-updates/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const updated = await updateCineUpdate(req.params.id, req.body);
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating cine update:", error);
+    res.status(400).json({ error: error.message || "Server error updating cine update" });
   }
 });
 
