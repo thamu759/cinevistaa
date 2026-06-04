@@ -2350,7 +2350,7 @@ const initialCineUpdates = [
     body: 'Lokesh Kanagaraj confirms Leo 2 is in early development. Vijay to return as Parthiban. Sources say shooting may begin in late 2026.',
     category: 'Rumor',
     movieName: 'Leo 2',
-    imageUrl: 'https://image.tmdb.org/t/p/original/voPOVVfRPWnYd2jWRVQj4m7nMxG.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
     timestamp: '2h ago',
     likes: 1240,
     likedBy: []
@@ -2361,7 +2361,7 @@ const initialCineUpdates = [
     body: 'Vijay\'s final film before political entry, directed by Karthik Subbaraj, is rumored to be titled "Thalaivar 170". Official announcement expected next week.',
     category: 'News',
     movieName: 'Thalapathy 69',
-    imageUrl: 'https://image.tmdb.org/t/p/original/8x6cQvWIgTrj99XdnAsyBE6KfTe.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
     timestamp: '5h ago',
     likes: 2890,
     likedBy: []
@@ -2372,7 +2372,7 @@ const initialCineUpdates = [
     body: 'Breaking: Suriya teams up with Karthik Subbaraj for a pan-India project. Touted to be a period action thriller with a massive budget.',
     category: 'Breaking',
     movieName: 'Suriya 44',
-    imageUrl: 'https://image.tmdb.org/t/p/original/zM9rgf04ISm4Ub9BssNVQ9aBArf.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
     timestamp: '8h ago',
     likes: 3456,
     likedBy: []
@@ -2383,7 +2383,7 @@ const initialCineUpdates = [
     body: 'Rajinikanth starrer "Coolie" directed by Lokesh Kanagaraj first look poster crosses 10M+ views in 24 hours. Fans go crazy over Thalaivar\'s new avatar.',
     category: 'Update',
     movieName: 'Coolie',
-    imageUrl: 'https://image.tmdb.org/t/p/original/3V4kLQg0kSqPLN3sQNfTipBcLfa.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/74xTEgt7R36Fpooo50r9T25onhq.jpg',
     timestamp: '12h ago',
     likes: 5670,
     likedBy: []
@@ -2394,7 +2394,7 @@ const initialCineUpdates = [
     body: 'Kamal Haasan reveals massive star cast for Vikram 2 including Rajinikanth in a cameo role. Anirudh to compose. Shooting starts June 2026.',
     category: 'Rumor',
     movieName: 'Vikram 2',
-    imageUrl: 'https://image.tmdb.org/t/p/original/wJXZ3S5UVT8GxAQqqOYB8BMZ4iK.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
     timestamp: '1d ago',
     likes: 4321,
     likedBy: []
@@ -2405,7 +2405,7 @@ const initialCineUpdates = [
     body: 'Sandeep Reddy Vanga confirms Animal Park script is locked. Rashmika Mandanna to reprise her role. Expected release: Summer 2027.',
     category: 'Update',
     movieName: 'Animal Park',
-    imageUrl: 'https://image.tmdb.org/t/p/original/cinER0ESKQIeASpBMkkSNZjZAH.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/hA2ple9q4qnwxp3hKVNhroipsir.jpg',
     timestamp: '1d ago',
     likes: 2100,
     likedBy: []
@@ -2416,7 +2416,7 @@ const initialCineUpdates = [
     body: 'Rishab Shetty announces Kantara Chapter 1 trailer will release on March 15th. The prequel promises to be bigger and more rooted.',
     category: 'News',
     movieName: 'Kantara Chapter 1',
-    imageUrl: 'https://image.tmdb.org/t/p/original/hIY3M7wvTBEW2Hn74QQfIdjj2e4.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg',
     timestamp: '2d ago',
     likes: 1890,
     likedBy: []
@@ -2427,7 +2427,7 @@ const initialCineUpdates = [
     body: 'Allu Arjun\'s Pushpa 2 enters 2000Cr club worldwide! Highest grossing Indian film of 2025. Hindi version alone contributed 800Cr+.',
     category: 'Box Office',
     movieName: 'Pushpa 2',
-    imageUrl: 'https://image.tmdb.org/t/p/original/vGIIFbnJYvSXquFv5IQe27FwJs.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
     timestamp: '3d ago',
     likes: 7890,
     likedBy: []
@@ -2438,7 +2438,7 @@ const initialCineUpdates = [
     body: 'Dhanush\'s 50th film titled "D50" directed by Sekhar Kammula. Joint production by Dhanush and Narayan Das K. Ramoji Film City schedule locked.',
     category: 'News',
     movieName: 'D50',
-    imageUrl: 'https://image.tmdb.org/t/p/original/3CxUnd3jvNomtXbq2mxqINIpDSp.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg',
     timestamp: '3d ago',
     likes: 1567,
     likedBy: []
@@ -2449,7 +2449,7 @@ const initialCineUpdates = [
     body: 'Sandeep Reddy Vanga\'s "Spirit" starring Prabhas is reportedly budgeted at 500Cr+. The action drama will be shot across 4 countries. Title logo launch soon.',
     category: 'Breaking',
     movieName: 'Spirit',
-    imageUrl: 'https://image.tmdb.org/t/p/original/qlc9h2KxS1Y3EOmbMhfEqLREhRj.jpg',
+    imageUrl: 'https://image.tmdb.org/t/p/original/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg',
     timestamp: '4d ago',
     likes: 6543,
     likedBy: []
