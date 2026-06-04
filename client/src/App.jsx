@@ -448,6 +448,7 @@ const preRollTimerRef = useRef(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [cineUpdates, setCineUpdates] = useState([]);
   const [cineUpdatesLoading, setCineUpdatesLoading] = useState(false);
+  const [showCineReels, setShowCineReels] = useState(false);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [listsLoading, setListsLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -933,6 +934,12 @@ const preRollTimerRef = useRef(null);
     const path = location.pathname.replace(/\/+$/, '') || '/';
     const { view, movieId, articleId } = getRouteFromPath(path);
     setActiveView(view);
+    if (view === 'cine-updates') {
+      setShowCineReels(true);
+      loadCineUpdates();
+    } else {
+      setShowCineReels(false);
+    }
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
     } else if (view === 'article-detail') {
@@ -1286,14 +1293,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               Community
             </Link>
 
-            <Link
-              className={`nav-link cine-updates-link ${activeView === 'cine-updates' ? 'active' : ''}`}
-              to="/cine-updates"
-              onClick={() => { loadCineUpdates(); setIsMobileMenuOpen(false); }}
-              style={{ color: 'var(--color-accent-gold)', fontWeight: 600 }}
+            <button
+              className={`nav-link cine-updates-link ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
+              onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
+              style={{ color: 'var(--color-accent-gold)', fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none', font: 'inherit' }}
             >
               <span className="nav-pulse-dot" /> Cine Reels
-            </Link>
+            </button>
 
             {currentUser && currentUser.role === 'admin' && (
               <Link 
@@ -3094,14 +3100,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           </div>
         )}
 
-        {/* CINE UPDATES REELS VIEW */}
-        {activeView === 'cine-updates' && (
+        {/* CINE UPDATES REELS OVERLAY */}
+        {showCineReels && (
           <CineUpdates
             updates={cineUpdates}
             onLike={handleCineUpdateLike}
             onShare={handleCineUpdateShare}
             currentUser={currentUser}
-            onBack={() => navigateTo('home')}
+            onBack={() => setShowCineReels(false)}
             onNavigate={navigateTo}
           />
         )}

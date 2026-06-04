@@ -45,11 +45,13 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         goPrev();
+      } else if (e.key === 'Escape') {
+        onBack?.();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, onBack]);
 
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
