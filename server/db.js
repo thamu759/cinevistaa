@@ -1237,6 +1237,15 @@ export const initDB = async () => {
       }
       if (CineUpdateModel && await CineUpdateModel.countDocuments() === 0) {
         await CineUpdateModel.insertMany(initialCineUpdates);
+      } else if (CineUpdateModel) {
+        for (const seed of initialCineUpdates) {
+          if (seed.imageUrl) {
+            await CineUpdateModel.updateOne(
+              { id: seed.id, imageUrl: { $ne: seed.imageUrl } },
+              { $set: { imageUrl: seed.imageUrl } }
+            );
+          }
+        }
       }
     } catch (err) {
       console.warn("Failed to connect to MongoDB. Falling back to local JSON file db.json. Error:", err.message);
@@ -2481,11 +2490,12 @@ export const getCineUpdates = async () => {
     data.cineUpdates = initialCineUpdates;
     writeJsonDb(data);
   } else {
+    const seedMap = Object.fromEntries(initialCineUpdates.map(u => [u.id, u.imageUrl]));
     let needsWrite = false;
-    data.cineUpdates = data.cineUpdates.map((u, i) => {
-      if (!u.imageUrl && initialCineUpdates[i]?.imageUrl) {
+    data.cineUpdates = data.cineUpdates.map(u => {
+      if (seedMap[u.id] && u.imageUrl !== seedMap[u.id]) {
         needsWrite = true;
-        return { ...u, imageUrl: initialCineUpdates[i].imageUrl };
+        return { ...u, imageUrl: seedMap[u.id] };
       }
       return u;
     });
