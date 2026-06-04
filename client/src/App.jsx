@@ -1608,16 +1608,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </header>
             )}
 
-            {/* AD BANNER — below hero */}
-            <section className="ad-section" style={{ marginTop: '2rem' }}>
-              <div className="ad-container ad-banner">
-                <span className="ad-label">Advertisement</span>
-                <div className="ad-responsive-wrap">
-                  <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
-                </div>
-              </div>
-            </section>
-
             {/* NEW RELEASES — horizontal slider of recently added movies */}
             <section className="movies-section" style={{ marginTop: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
@@ -3205,6 +3195,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </article>
                   ))
                 )}
+              </div>
+            </section>
+
+            {/* AD BANNER — above footer */}
+            <section className="ad-section" style={{ marginTop: '2rem', marginBottom: '2rem' }}>
+              <div className="ad-container ad-banner">
+                <span className="ad-label">Advertisement</span>
+                <div className="ad-responsive-wrap">
+                  <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
+                </div>
               </div>
             </section>
           </div>
