@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Heart, Share2, ChevronUp, ChevronDown, MessageSquare, ChevronLeft, Film } from 'lucide-react';
-import { proxyImageUrl } from '../api';
 
 const CATEGORY_COLORS = {
   'Breaking': '#ef4444',
@@ -124,9 +123,13 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
               transform: idx === currentIndex ? 'translateY(0) scale(1)' : idx < currentIndex ? 'translateY(-100%) scale(0.95)' : 'translateY(100%) scale(0.95)'
             }}
           >
-            {/* Background */}
+            {/* Background - rich cinematic gradient */}
             <div className="cine-reel-bg" style={{
-              background: `linear-gradient(135deg, ${CATEGORY_COLORS[item.category] || '#6366f1'}55, #0f0f1a)`
+              background: `
+                radial-gradient(ellipse at 30% 20%, ${CATEGORY_COLORS[item.category] || '#6366f1'}44 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, ${CATEGORY_COLORS[item.category] || '#6366f1'}22 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a14 0%, #12121e 40%, #1a1a2e 100%)
+              `
             }}>
               <img
                 src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/1200`}
