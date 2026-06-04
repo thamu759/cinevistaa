@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Heart, Share2, ChevronUp, ChevronDown, MessageSquare, ChevronLeft, Film } from 'lucide-react';
+import { proxyImageUrl } from '../api';
 
 const CATEGORY_COLORS = {
   'Breaking': '#ef4444',
@@ -132,7 +133,7 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
               `
             }}>
               <img
-                src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/1200`}
+                src={item.imageUrl ? proxyImageUrl(item.imageUrl, 'w500') : `https://picsum.photos/seed/${item.id}/800/1200`}
                 alt=""
                 className="cine-reel-bg-img"
                 onError={(e) => { e.target.style.display = 'none'; }}
