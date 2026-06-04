@@ -37,23 +37,22 @@ const styles = {
     position: 'absolute',
     inset: 0,
     zIndex: 1,
-    opacity: 0.12,
-    backgroundImage: `
-      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(251,191,36,0.15) 40px, rgba(251,191,36,0.15) 41px),
-      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(251,191,36,0.15) 40px, rgba(251,191,36,0.15) 41px),
-      radial-gradient(circle at 30% 40%, rgba(251,191,36,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 70% 60%, rgba(251,191,36,0.08) 0%, transparent 50%)
-    `,
+    background: 'radial-gradient(circle at 25% 35%, rgba(251,191,36,0.1) 0%, transparent 55%), radial-gradient(circle at 75% 65%, rgba(251,191,36,0.08) 0%, transparent 50%)',
   },
-  posterWrap: {
+  posterOuter: {
     position: 'relative',
     zIndex: 2,
+    borderRadius: 14,
+    padding: 2,
+    background: 'linear-gradient(135deg, rgba(251,191,36,0.4), rgba(251,191,36,0.15))',
+    marginBottom: '1.5rem',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+  },
+  posterWrap: {
     width: 220,
     height: 330,
     borderRadius: 12,
     overflow: 'hidden',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 2px rgba(251,191,36,0.25)',
-    marginBottom: '1.5rem',
   },
   poster: {
     width: '100%',
@@ -152,14 +151,16 @@ export default function ShareCard({ movie, cardRef }) {
       <div style={styles.gradientOverlay} />
       <div style={styles.goldenPattern} />
 
-      <div style={styles.posterWrap}>
-        {posterSrc ? (
-          <img src={posterSrc} alt={movie?.title} style={styles.poster} crossOrigin="anonymous" />
-        ) : (
-          <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
-            No Poster
-          </div>
-        )}
+      <div style={styles.posterOuter}>
+        <div style={styles.posterWrap}>
+          {posterSrc ? (
+            <img src={posterSrc} alt={movie?.title} style={styles.poster} crossOrigin="anonymous" />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+              No Poster
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={styles.title}>{movie?.title || 'Untitled'}</div>
