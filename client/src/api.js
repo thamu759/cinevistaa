@@ -500,6 +500,12 @@ export const searchTmdbMovies = async (query) => {
   return response.json();
 };
 
+export const fetchOnThisDay = async () => {
+  const response = await fetch(`${API_BASE_URL}/tmdb/onthisday`);
+  if (!response.ok) return [];
+  return response.json();
+};
+
 export const curateMovie = async (movieId, curationData) => {
   const response = await fetch(`${API_BASE_URL}/movies/${movieId}/curate`, {
     method: 'PATCH',
