@@ -54,7 +54,7 @@ import {
   deleteAllCineUpdates,
   toggleCineUpdateLike
 } from './db.js';
-import { seedTriviaUpdates } from './generateTrivia.js';
+import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -984,6 +984,28 @@ app.post('/api/seeds/trivia', async (req, res) => {
   } catch (error) {
     console.error("Error seeding trivia:", error);
     res.status(500).json({ error: error.message || "Server error seeding trivia" });
+  }
+});
+
+// ─── NEWS SEEDER (admin only) ───
+app.post('/api/seeds/news', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin only." });
+    }
+
+    const count = Math.min(req.body.count || 20, 30);
+    const created = await seedNewsUpdates(count, verified);
+    res.json({ success: true, count: created.length, updates: created });
+  } catch (error) {
+    console.error("Error seeding news:", error);
+    res.status(500).json({ error: error.message || "Server error seeding news" });
   }
 });
 

@@ -1,5 +1,6 @@
 import { buildTmdbUrl, getTmdbHeaders } from './db.js';
 import { createCineUpdate } from './db.js';
+import { fetchNewsUpdates } from './newsRss.js';
 
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
@@ -310,6 +311,24 @@ export async function seedTriviaUpdates(count = 20, adminUser = null) {
       created.push(result);
     } catch (e) {
       console.warn('Failed to create trivia update:', e.message);
+    }
+  }
+  return created;
+}
+
+export async function generateNewsUpdates(count = 20) {
+  return fetchNewsUpdates(count);
+}
+
+export async function seedNewsUpdates(count = 20, adminUser = null) {
+  const updates = await generateNewsUpdates(count);
+  const created = [];
+  for (const u of updates) {
+    try {
+      const result = await createCineUpdate(u, adminUser);
+      created.push(result);
+    } catch (e) {
+      console.warn('Failed to create news update:', e.message);
     }
   }
   return created;
