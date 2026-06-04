@@ -1247,7 +1247,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       <div className="navbar-container">
         <nav className="navbar">
           <div className="logo" onClick={() => { navigateTo('home'); }}>
-            <img src="https://res.cloudinary.com/di0j4psxz/image/upload/v1780591749/New_Project_3_cn7had.png" alt="ThiraiPedia" className="logo-img" />
+            Thirai<span>Pedia</span>
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
             <Link 
