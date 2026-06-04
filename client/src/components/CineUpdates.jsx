@@ -17,7 +17,15 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
   const [touchStart, setTouchStart] = useState(null);
   const [touchDelta, setTouchDelta] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [likedAnim, setLikedAnim] = useState(null);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const containerRef = useRef(null);
+  const touchStartY = useRef(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSwipeHint(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const update = updates[currentIndex];
 
@@ -50,21 +58,23 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
   }, [goNext, goPrev]);
 
   const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
     setTouchStart(e.touches[0].clientY);
     setTouchDelta(0);
   };
 
   const handleTouchMove = (e) => {
     if (!touchStart) return;
+    e.preventDefault();
     const delta = touchStart - e.touches[0].clientY;
     setTouchDelta(delta);
   };
 
   const handleTouchEnd = () => {
     if (!touchStart) return;
-    const delta = touchStart - touchDelta;
     const absDelta = Math.abs(touchDelta);
-    if (absDelta > 60) {
+    const velocity = absDelta / 150;
+    if (absDelta > 50 || velocity > 0.5) {
       if (touchDelta > 0) {
         goNext();
       } else {
@@ -73,6 +83,26 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
     }
     setTouchStart(null);
     setTouchDelta(0);
+  };
+
+  const handleLike = (id) => {
+    setLikedAnim(id);
+    setTimeout(() => setLikedAnim(null), 350);
+    onLike?.(id);
+  };
+
+  const handleShare = async (item) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: item.title,
+          text: `${item.title} — ${item.body}`,
+          url: window.location.href
+        });
+      } catch {}
+    } else {
+      onShare?.(item);
+    }
   };
 
   if (!updates || updates.length === 0) {
@@ -160,8 +190,8 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
             {/* Action buttons */}
             <div className="cine-reel-actions">
               <button
-                className="cine-reel-action-btn"
-                onClick={() => onLike?.(item.id)}
+                className={`cine-reel-action-btn ${likedAnim === item.id ? 'cine-reel-like-pop' : ''}`}
+                onClick={() => handleLike(item.id)}
                 title="Like"
               >
                 <Heart
@@ -173,7 +203,7 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
               </button>
               <button
                 className="cine-reel-action-btn"
-                onClick={() => onShare?.(item)}
+                onClick={() => handleShare(item)}
                 title="Share"
               >
                 <Share2 size={24} color="#fff" />
@@ -182,6 +212,18 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
           </div>
         ))}
       </div>
+
+      {/* Swipe hint */}
+      {showSwipeHint && updates.length > 1 && (
+        <div style={{
+          position: 'absolute', bottom: '5rem', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 100, color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem',
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          animation: 'fadeOut 3s forwards', pointerEvents: 'none'
+        }}>
+          <ChevronUp size={16} /> Swipe for more <ChevronDown size={16} />
+        </div>
+      )}
 
       {/* Navigation arrows (desktop) */}
       {currentIndex < updates.length - 1 && (

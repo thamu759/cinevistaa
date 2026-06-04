@@ -5656,6 +5656,74 @@ a {
   touch-action: none;
 }
 
+.cine-reels-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  background: #000;
+}
+
+.cine-reels-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+}
+
+.cine-reels-back {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cine-reels-back:active {
+  background: rgba(255,255,255,0.2);
+}
+
+.cine-reels-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.cine-reels-brand {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent-gold);
+}
+
+.cine-reels-count {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+
+.cine-reels-content {
+  position: absolute;
+  inset: 0;
+}
+
 .cine-reel-slide {
   position: absolute;
   inset: 0;
@@ -5664,12 +5732,15 @@ a {
   justify-content: flex-end;
   will-change: transform, opacity;
 }
+
 .cine-reel-active {
   z-index: 10;
 }
+
 .cine-reel-above {
   z-index: 5;
 }
+
 .cine-reel-below {
   z-index: 5;
 }
@@ -5679,12 +5750,14 @@ a {
   inset: 0;
   z-index: 1;
 }
+
 .cine-reel-bg-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
+
 .cine-reel-overlay {
   position: absolute;
   inset: 0;
@@ -5700,9 +5773,11 @@ a {
 .cine-reel-body {
   position: relative;
   z-index: 20;
-  padding: 2rem 1.5rem 5rem;
+  padding: 2rem 1.5rem 6rem;
+  padding-bottom: max(6rem, env(safe-area-inset-bottom));
   max-width: 600px;
 }
+
 .cine-reel-tag {
   display: inline-block;
   font-size: 0.65rem;
@@ -5714,12 +5789,14 @@ a {
   color: #fff;
   margin-bottom: 0.75rem;
 }
+
 .cine-reel-movie-name {
   font-size: 0.8rem;
   color: var(--color-accent-gold);
   font-weight: 600;
   margin-bottom: 0.35rem;
 }
+
 .cine-reel-headline {
   font-size: 1.5rem;
   font-weight: 800;
@@ -5728,6 +5805,7 @@ a {
   color: #fff;
   max-width: 500px;
 }
+
 .cine-reel-text {
   font-size: 0.9rem;
   line-height: 1.6;
@@ -5735,6 +5813,7 @@ a {
   max-width: 500px;
   margin-bottom: 0.75rem;
 }
+
 .cine-reel-timestamp {
   font-size: 0.75rem;
   color: rgba(255,255,255,0.4);
@@ -5744,12 +5823,14 @@ a {
   position: absolute;
   right: 1rem;
   bottom: 6rem;
+  bottom: max(6rem, env(safe-area-inset-bottom));
   z-index: 25;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   align-items: center;
 }
+
 .cine-reel-action-btn {
   background: none;
   border: none;
@@ -5758,19 +5839,20 @@ a {
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  padding: 0;
+  padding: 0.4rem;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
   opacity: 0.9;
   transition: opacity 0.2s, transform 0.2s;
 }
-.cine-reel-action-btn:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
+
 .cine-reel-action-btn:active {
-  transform: scale(0.9);
+  opacity: 1;
+  transform: scale(1.15);
 }
 
 .cine-reels-nav {
@@ -5789,14 +5871,17 @@ a {
   backdrop-filter: blur(8px);
   transition: background 0.2s;
 }
+
 .cine-reels-nav:hover {
   background: rgba(255,255,255,0.15);
 }
+
 .cine-reels-nav-up {
   top: 4rem;
   left: 50%;
   transform: translateX(-50%);
 }
+
 .cine-reels-nav-down {
   bottom: 1rem;
   left: 50%;
@@ -5806,41 +5891,78 @@ a {
 .cine-reels-progress {
   position: absolute;
   top: 0.75rem;
+  top: max(0.75rem, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
   display: flex;
   gap: 4px;
   max-width: 80%;
-  overflow: hidden;
+  width: 100%;
+  justify-content: center;
+  padding: 0 4.5rem;
 }
+
 .cine-reels-dot {
-  width: 20px;
+  flex: 1;
+  max-width: 24px;
   height: 2.5px;
   border-radius: 2px;
   background: rgba(255,255,255,0.25);
   cursor: pointer;
-  transition: background 0.2s, width 0.2s;
+  transition: background 0.2s, flex 0.2s;
   flex-shrink: 0;
 }
+
 .cine-reels-dot-active {
   background: var(--color-accent-gold);
-  width: 32px;
+  flex: 1.6;
+  max-width: 40px;
 }
 
 @media (max-width: 640px) {
   .cine-reel-headline {
     font-size: 1.2rem;
   }
+  .cine-reel-text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
   .cine-reel-body {
-    padding: 1.5rem 1rem 4rem;
+    padding: 1.5rem 1rem 5rem;
+    padding-bottom: max(5rem, env(safe-area-inset-bottom));
   }
   .cine-reel-actions {
-    right: 0.75rem;
+    right: 0.5rem;
     bottom: 4rem;
-    gap: 1rem;
+    bottom: max(4rem, env(safe-area-inset-bottom));
+    gap: 0.5rem;
+  }
+  .cine-reel-action-btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.3rem;
   }
   .cine-reels-nav {
     display: none;
   }
+  .cine-reels-progress {
+    padding: 0 3.5rem;
+  }
+  .cine-reels-dot {
+    max-width: 16px;
+  }
+  .cine-reels-dot-active {
+    max-width: 28px;
+  }
+}
+
+.cine-reel-like-pop {
+  animation: cineLikePop 0.35s ease-out;
+}
+
+@keyframes cineLikePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
