@@ -255,6 +255,7 @@ const preRollTimerRef = useRef(null);
     const tamilScrollRef = useRef(null);
     const malayalamScrollRef = useRef(null);
     const topRatedScrollRef = useRef(null);
+    const cineReelsScrollRef = useRef(null);
 
 
   const getYoutubeVideoId = (url) => {
@@ -449,6 +450,15 @@ const preRollTimerRef = useRef(null);
   const [cineUpdates, setCineUpdates] = useState([]);
   const [cineUpdatesLoading, setCineUpdatesLoading] = useState(false);
   const [showCineReels, setShowCineReels] = useState(false);
+  const CATEGORY_COLORS = {
+    'Breaking': '#ef4444',
+    'Rumor': '#f59e0b',
+    'News': '#3b82f6',
+    'Update': '#10b981',
+    'Box Office': '#8b5cf6',
+    'Interview': '#ec4899',
+    'Review': '#14b8a6',
+  };
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [listsLoading, setListsLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -939,6 +949,9 @@ const preRollTimerRef = useRef(null);
       loadCineUpdates();
     } else {
       setShowCineReels(false);
+    }
+    if (view === 'home' && cineUpdates.length === 0) {
+      loadCineUpdates();
     }
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
@@ -2069,6 +2082,83 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 </div>
               </div>
             </section>
+
+            {/* CINE REELS SECTION */}
+            {cineUpdates.length > 0 && (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>TikTok Style</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Reels</h2>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => cineReelsScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+                      aria-label="Scroll left">
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
+                      onClick={() => cineReelsScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+                      aria-label="Scroll right">
+                      <ChevronRight size={18} />
+                    </button>
+                    <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
+                      onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
+                      View All
+                    </button>
+                  </div>
+                </div>
+                <div className="movie-grid-horizontal" ref={cineReelsScrollRef}>
+                  {cineUpdates.map((update) => (
+                    <div
+                      key={update.id}
+                      className="movie-card-horizontal"
+                      onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+                      style={{ flex: '0 0 200px' }}
+                    >
+                      <div className="movie-card-poster-wrapper" style={{ height: '200px' }}>
+                        <div style={{
+                          width: '100%', height: '100%', borderRadius: '8px',
+                          background: `linear-gradient(145deg, var(--color-surface-elevated) 0%, #14142a 100%)`,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          padding: '1.25rem 1rem', gap: '0.6rem', border: '1px solid rgba(255,255,255,0.06)'
+                        }}>
+                          <span style={{
+                            background: CATEGORY_COLORS[update.category] || '#6366f1',
+                            color: '#fff', padding: '0.2rem 0.7rem', borderRadius: '4px',
+                            fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em'
+                          }}>
+                            {update.category || 'News'}
+                          </span>
+                          <span style={{
+                            color: '#fff', fontSize: '0.85rem', fontWeight: 600,
+                            textAlign: 'center', lineHeight: 1.35,
+                            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                          }}>
+                            {update.title}
+                          </span>
+                          <span style={{
+                            color: 'var(--color-text-muted)', fontSize: '0.72rem',
+                            textAlign: 'center', lineHeight: 1.4,
+                            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                          }}>
+                            {update.body}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="movie-card-info" style={{ padding: '0.5rem 0.25rem' }}>
+                        <h3 className="movie-card-title" style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {update.title}
+                        </h3>
+                        <div className="movie-card-genre-tags">
+                          <span className="genre-tag">{update.likes || 0} Likes</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
           </div>
         )}
