@@ -38,7 +38,6 @@ import {
   fetchTmdbMovieDetailsFull,
   fetchTmdbMovieLogo,
   fetchTmdbWatchProviders,
-  fetchOnThisDayMovies,
   createList,
   getUserLists,
   getAllLists,
@@ -827,17 +826,6 @@ app.get('/api/tmdb/providers/:tmdbId', async (req, res) => {
   } catch (error) {
     console.error("TMDB providers error:", error);
     res.status(500).json({ error: "Server error fetching watch providers" });
-  }
-});
-
-// TMDB On This Day endpoint (movies released today across years)
-app.get('/api/tmdb/onthisday', async (req, res) => {
-  try {
-    const movies = await fetchOnThisDayMovies();
-    res.json(movies);
-  } catch (error) {
-    console.error("TMDB onthisday error:", error);
-    res.status(500).json({ error: "Server error" });
   }
 });
 

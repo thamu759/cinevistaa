@@ -36,46 +36,6 @@ export const buildTmdbUrl = (path, params = {}) => {
 
 const hasTmdbCredentials = () => Boolean(process.env.TMDB_ACCESS_TOKEN || process.env.TMDB_API_KEY);
 
-export async function fetchOnThisDayMovies() {
-  const seen = new Set();
-  const results = [];
-  const today = new Date();
-  const mmdd = String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-  const currentYear = today.getFullYear();
-
-  for (let y = currentYear - 4; y <= currentYear; y++) {
-    const gte = `${y}-${mmdd}`;
-    const end = new Date(today);
-    end.setDate(end.getDate() + 5);
-    const lte = `${y}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
-
-    try {
-      const url = buildTmdbUrl('discover/movie', {
-        with_original_language: 'ta|ml',
-        'primary_release_date.gte': gte,
-        'primary_release_date.lte': lte,
-        sort_by: 'vote_count.desc',
-        'vote_count.gte': 10,
-        page: 1,
-      });
-      const res = await fetch(url.toString(), { headers: getTmdbHeaders() });
-      if (!res.ok) continue;
-      const data = await res.json();
-      for (const m of (data.results || [])) {
-        if (!seen.has(m.id)) {
-          seen.add(m.id);
-          results.push(m);
-        }
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  results.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
-  return results.slice(0, 30);
-}
-
 const upgradeTamilMdbImageUrl = (url, targetSize) => {
   if (!url || !url.includes('media.tamilmdb.com')) return url;
   return url.replace(/\/175x245\//, `/${targetSize}/`);

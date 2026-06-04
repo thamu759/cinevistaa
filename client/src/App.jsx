@@ -36,8 +36,7 @@ import {
   toggleReviewLike,
   addReviewReply,
   fetchCineUpdates,
-  toggleCineUpdateLike,
-  fetchOnThisDay
+  toggleCineUpdateLike
 } from './api';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
@@ -709,12 +708,6 @@ const preRollTimerRef = useRef(null);
     loadNewReleases();
   }, []);
 
-  const [onThisDayMovies, setOnThisDayMovies] = useState([]);
-
-  useEffect(() => {
-    fetchOnThisDay().then(setOnThisDayMovies).catch(() => {});
-  }, []);
-
   const loadCommunityThreads = useCallback(async () => {
     setIsCommunityLoading(true);
     setCommunityError('');
@@ -1113,15 +1106,6 @@ const preRollTimerRef = useRef(null);
   const handleViewMovie = useCallback((movieId) => {
     navigateTo('movie-details', { movieId });
   }, [navigateTo]);
-
-  const handleViewMovieFromTmdb = useCallback((tmdbMovie) => {
-    const local = movies.find(m => m.tmdbId === tmdbMovie.id || (m.title && tmdbMovie.title && m.title.toLowerCase() === tmdbMovie.title.toLowerCase()));
-    if (local) {
-      navigateTo('movie-details', { movieId: local.id });
-    } else {
-      navigateTo('movie-details', { movieId: tmdbMovie.id });
-    }
-  }, [navigateTo, movies]);
 
   const handleToggleWatchlist = useCallback((movieId, e) => {
     if (e) e.stopPropagation();
@@ -1612,61 +1596,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   </div>
                 )}
               </header>
-            )}
-
-            {/* ON THIS DAY */}
-            {onThisDayMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Today in Cinema History</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>On This Day</h2>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => document.getElementById('onthisday-scroll')?.scrollBy({ left: -400, behavior: 'smooth' })}
-                      aria-label="Scroll left">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => document.getElementById('onthisday-scroll')?.scrollBy({ left: 400, behavior: 'smooth' })}
-                      aria-label="Scroll right">
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal" id="onthisday-scroll">
-                  {onThisDayMovies.map((movie) => {
-                    const poster = movie.poster_path
-                      ? proxyImageUrl(`https://image.tmdb.org/t/p/w500${movie.poster_path}`, 'w300')
-                      : '';
-                    return (
-                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovieFromTmdb(movie)}>
-                        <div className="movie-card-poster-wrapper">
-                          {poster ? (
-                            <img src={poster} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                          ) : (
-                            <div className="movie-card-poster" style={{ background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.75rem' }}>
-                              No Poster
-                            </div>
-                          )}
-                          {movie.release_date && (
-                            <div className="movie-card-rating" style={{ bottom: 'auto', top: '0.5rem' }}>
-                              <span style={{ fontSize: '0.7rem' }}>{movie.release_date.split('-')[0]}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="movie-card-info">
-                          <h3 className="movie-card-title">{movie.title}</h3>
-                          <div className="movie-card-genre-tags">
-                            <span className="genre-tag">{movie.original_language === 'ta' ? 'Tamil' : 'Malayalam'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
             )}
 
             {/* NEW RELEASES — horizontal slider of recently added movies */}
