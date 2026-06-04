@@ -18,14 +18,8 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
   const [touchDelta, setTouchDelta] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [likedAnim, setLikedAnim] = useState(null);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const containerRef = useRef(null);
   const touchStartY = useRef(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSwipeHint(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const update = updates[currentIndex];
 
@@ -213,40 +207,6 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
         ))}
       </div>
 
-      {/* Swipe hint */}
-      {showSwipeHint && updates.length > 1 && (
-        <div style={{
-          position: 'absolute', bottom: '5rem', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 100, color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem',
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          animation: 'fadeOut 3s forwards', pointerEvents: 'none'
-        }}>
-          <ChevronUp size={16} /> Swipe for more <ChevronDown size={16} />
-        </div>
-      )}
-
-      {/* Navigation arrows (desktop) */}
-      {currentIndex < updates.length - 1 && (
-        <button className="cine-reels-nav cine-reels-nav-down" onClick={goNext} aria-label="Next update">
-          <ChevronDown size={24} />
-        </button>
-      )}
-      {currentIndex > 0 && (
-        <button className="cine-reels-nav cine-reels-nav-up" onClick={goPrev} aria-label="Previous update">
-          <ChevronUp size={24} />
-        </button>
-      )}
-
-      {/* Progress dots */}
-      <div className="cine-reels-progress">
-        {updates.map((_, idx) => (
-          <div
-            key={idx}
-            className={`cine-reels-dot ${idx === currentIndex ? 'cine-reels-dot-active' : ''}`}
-            onClick={() => { if (!isTransitioning) { setIsTransitioning(true); setCurrentIndex(idx); setTimeout(() => setIsTransitioning(false), 400); } }}
-          />
-        ))}
-      </div>
     </div>
   );
 }

@@ -5947,13 +5947,7 @@ a {
     display: none;
   }
   .cine-reels-progress {
-    padding: 0 3.5rem;
-  }
-  .cine-reels-dot {
-    max-width: 16px;
-  }
-  .cine-reels-dot-active {
-    max-width: 28px;
+    display: none;
   }
 }
 
