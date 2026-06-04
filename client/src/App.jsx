@@ -459,7 +459,6 @@ const preRollTimerRef = useRef(null);
     'Interview': '#ec4899',
     'Review': '#14b8a6',
   };
-  const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [listsLoading, setListsLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -963,16 +962,6 @@ const preRollTimerRef = useRef(null);
       setSelectedArticleId(null);
     }
   }, [location.pathname]);
-
-   // Cine Reels auto-rotation
-   useEffect(() => {
-     if (cineUpdates.length <= 1 || activeView !== 'home') return;
-     const interval = setInterval(() => {
-       if (window._crHover) return;
-       setCurrentReelIndex(prev => (prev + 1) % cineUpdates.length);
-     }, 5000);
-     return () => clearInterval(interval);
-   }, [cineUpdates.length, activeView]);
 
    // Keyboard shortcuts
    useEffect(() => {
@@ -1505,13 +1494,68 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   );
                 })}
 
+                {/* CINE REELS PROMO SLIDE */}
+                <div
+                  key="cine-reels-promo"
+                  className={`hero-slide ${currentHeroIndex === heroMovies.length ? 'hero-slide--active' : ''}`}
+                >
+                  <div
+                    className="hero-backdrop"
+                    style={{
+                      backgroundImage: cineUpdates[0]?.imageUrl
+                        ? `url(${proxyImageUrl(cineUpdates[0].imageUrl, 'original')})`
+                        : 'none',
+                      filter: 'brightness(0.4) saturate(1.3)',
+                    }}
+                  />
+                  <div className="hero-backdrop" style={{
+                    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0f0f23 100%)',
+                    opacity: 0.7,
+                  }} />
+                  <div className="reels-promo-glow" />
+                  <div className="hero-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                      <span className="cine-reels-live-dot" />
+                      <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--color-accent-gold)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        Cine Reels
+                      </span>
+                    </div>
+                    <h2 style={{
+                      fontSize: 'clamp(1.5rem, 3.5vw, 2.4rem)', fontWeight: 800,
+                      color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.15,
+                      maxWidth: '600px', fontFamily: 'var(--font-sans)'
+                    }}>
+                      TikTok Style<br />Movie Updates
+                    </h2>
+                    <p style={{
+                      fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
+                      margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '450px'
+                    }}>
+                      Swipe through the latest cinema news, rumors, and breaking updates — reels style!
+                    </p>
+                    <div className="hero-actions">
+                      <button className="btn-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
+                        <Play size={16} fill="black" /> Watch Reels
+                      </button>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+                      >
+                        {cineUpdates.length > 0 && (
+                          <><List size={16} /> {cineUpdates.length} Updates</>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Left Arrow */}
-                {heroMovies.length > 1 && (
+                {heroMovies.length >= 1 && currentHeroIndex > 0 && (
                   <button 
                     className="hero-nav-btn hero-nav-btn--left"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length) % heroMovies.length);
+                      setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length + 1) % (heroMovies.length + 1));
                     }}
                     aria-label="Previous slide"
                   >
@@ -1520,12 +1564,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 )}
 
                 {/* Right Arrow */}
-                {heroMovies.length > 1 && (
+                {heroMovies.length >= 1 && currentHeroIndex < heroMovies.length && (
                   <button 
                     className="hero-nav-btn hero-nav-btn--right"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentHeroIndex(prev => (prev + 1) % heroMovies.length);
+                      setCurrentHeroIndex(prev => (prev + 1) % (heroMovies.length + 1));
                     }}
                     aria-label="Next slide"
                   >
@@ -1534,7 +1578,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 )}
 
                 {/* Indicator Dots */}
-                {heroMovies.length > 1 && (
+                {heroMovies.length >= 1 && (
                   <div className="hero-indicators">
                     {heroMovies.map((_, index) => (
                       <button
@@ -1547,6 +1591,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         aria-label={`Go to slide ${index + 1}`}
                       />
                     ))}
+                    {/* Cine Reels promo dot */}
+                    <button
+                      className={`hero-indicator-dot ${currentHeroIndex === heroMovies.length ? 'hero-indicator-dot--active' : ''}`}
+                      style={{ background: currentHeroIndex === heroMovies.length ? 'var(--color-accent-gold)' : undefined }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentHeroIndex(heroMovies.length);
+                      }}
+                      aria-label="Go to Cine Reels"
+                    />
                   </div>
                 )}
               </header>
@@ -2094,90 +2148,61 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             </section>
 
-            {/* CINE REELS HERO CAROUSEL */}
+            {/* CINE REELS STRIP */}
             {cineUpdates.length > 0 && (
-              <section className="hero cine-reels-hero"
-                onMouseEnter={() => { window._crHover = true; }}
-                onMouseLeave={() => { window._crHover = false; }}
-              >
-                {cineUpdates.map((update, index) => {
-                  const isActive = index === currentReelIndex;
-                  const catColor = CATEGORY_COLORS[update.category] || '#6366f1';
-                  return (
+              <section className="movies-section" style={{ marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
+                  <div>
+                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Latest Updates</p>
+                    <h2 className="section-title" style={{ marginBottom: 0 }}>Cine Reels</h2>
+                  </div>
+                  <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
+                    onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
+                    View All
+                  </button>
+                </div>
+                <div className="movie-grid-horizontal" ref={cineReelsScrollRef}>
+                  {cineUpdates.map((update) => (
                     <div
                       key={update.id}
-                      className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
+                      className="movie-card-horizontal"
+                      onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+                      style={{ flex: '0 0 200px' }}
                     >
-                      <div
-                        className="hero-backdrop reels-hero-bg"
-                        style={{
-                          backgroundImage: isActive && update.imageUrl
-                            ? `url(${proxyImageUrl(update.imageUrl, 'original')})`
-                            : 'none',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      />
-                      <div className="reels-hero-glow" style={{
-                        background: `radial-gradient(ellipse at 30% 40%, ${catColor}33 0%, transparent 70%)`
-                      }} />
-                      <div className="hero-content reels-hero-content">
-                        <div className="reels-hero-top">
-                          <span className="cine-reels-live-dot" />
-                          <span className="reels-hero-label">Cine Reels</span>
-                          <span className="reels-hero-count">{index + 1} / {cineUpdates.length}</span>
+                      <div className="movie-card-poster-wrapper" style={{ height: '200px' }}>
+                        <div style={{
+                          width: '100%', height: '100%', borderRadius: '8px',
+                          background: `linear-gradient(145deg, var(--color-surface-elevated) 0%, #14142a 100%)`,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          padding: '1.25rem 1rem', gap: '0.6rem', border: '1px solid rgba(255,255,255,0.06)'
+                        }}>
+                          <span style={{
+                            background: CATEGORY_COLORS[update.category] || '#6366f1',
+                            color: '#fff', padding: '0.2rem 0.7rem', borderRadius: '4px',
+                            fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em'
+                          }}>
+                            {update.category || 'News'}
+                          </span>
+                          <span style={{
+                            color: '#fff', fontSize: '0.85rem', fontWeight: 600,
+                            textAlign: 'center', lineHeight: 1.35,
+                            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                          }}>
+                            {update.title}
+                          </span>
                         </div>
-                        <div className="reels-hero-badge" style={{ background: catColor }}>
-                          {update.category || 'News'}
-                        </div>
-                        <h2 className="reels-hero-title">{update.title}</h2>
-                        <p className="reels-hero-desc">{update.body}</p>
-                        {update.movieName && (
-                          <div className="reels-hero-movie">
-                            <Film size={14} />
-                            <span>{update.movieName}</span>
-                          </div>
-                        )}
-                        <div className="hero-actions" style={{ marginTop: '1.5rem' }}>
-                          <button className="btn-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                            <Play size={16} fill="black" /> Watch Reel
-                          </button>
-                          <button className="btn-secondary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                            <List size={16} /> View All
-                          </button>
+                      </div>
+                      <div className="movie-card-info" style={{ padding: '0.5rem 0.25rem' }}>
+                        <h3 className="movie-card-title" style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {update.title}
+                        </h3>
+                        <div className="movie-card-genre-tags">
+                          <span className="genre-tag">{update.likes || 0} Likes</span>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-
-                {cineUpdates.length > 1 && (
-                  <>
-                    <button
-                      className="hero-nav-btn hero-nav-btn--left"
-                      onClick={() => setCurrentReelIndex(prev => (prev - 1 + cineUpdates.length) % cineUpdates.length)}
-                      aria-label="Previous reel"
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                    <button
-                      className="hero-nav-btn hero-nav-btn--right"
-                      onClick={() => setCurrentReelIndex(prev => (prev + 1) % cineUpdates.length)}
-                      aria-label="Next reel"
-                    >
-                      <ChevronRight size={24} />
-                    </button>
-                    <div className="hero-indicators">
-                      {cineUpdates.map((_, idx) => (
-                        <button
-                          key={idx}
-                          className={`hero-indicator-dot ${idx === currentReelIndex ? 'hero-indicator-dot--active' : ''}`}
-                          onClick={() => setCurrentReelIndex(idx)}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
+                  ))}
+                </div>
               </section>
             )}
 
