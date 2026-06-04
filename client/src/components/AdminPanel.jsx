@@ -762,6 +762,7 @@ function CineUpdatesTab({ showSuccess }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [triviaLoading, setTriviaLoading] = useState(false);
+  const [triviaPopup, setTriviaPopup] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
@@ -815,11 +816,14 @@ function CineUpdatesTab({ showSuccess }) {
 
   const handleGenerateTrivia = async () => {
     setTriviaLoading(true);
+    setTriviaPopup({ status: 'generating', message: 'Generating trivia from TMDB...' });
     try {
       const result = await seedTriviaUpdates(30);
-      showSuccess(`${result.count} trivia updates generated!`);
+      setTriviaPopup({ status: 'success', message: `${result.count} trivia updates generated successfully!` });
       loadUpdates();
-    } catch (err) { showToast(err.message, 'error'); }
+    } catch (err) {
+      setTriviaPopup({ status: 'error', message: err.message || 'Failed to generate trivia' });
+    }
     setTriviaLoading(false);
   };
 
@@ -917,6 +921,62 @@ function CineUpdatesTab({ showSuccess }) {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Trivia generation popup */}
+      {triviaPopup && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 10000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+        }}>
+          <div style={{
+            background: 'var(--color-surface)', borderRadius: '16px',
+            padding: '2rem', maxWidth: '400px', width: '90%',
+            textAlign: 'center', border: '1px solid var(--color-border)',
+            animation: 'welcomeSlideUp 0.3s ease',
+          }}>
+            {triviaPopup.status === 'generating' ? (
+              <>
+                <div className="spinner" style={{
+                  width: 40, height: 40, border: '3px solid rgba(255,255,255,0.1)',
+                  borderTopColor: 'var(--color-accent-gold)', borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem',
+                }} />
+                <h3 style={{ margin: '0 0 0.5rem', color: '#fff' }}>Generating Trivia</h3>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  Fetching movies from TMDB & creating updates...
+                </p>
+              </>
+            ) : triviaPopup.status === 'success' ? (
+              <>
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: '#10b981', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', margin: '0 auto 1rem', fontSize: '1.5rem',
+                }}>&#10003;</div>
+                <h3 style={{ margin: '0 0 0.5rem', color: '#10b981' }}>Success!</h3>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '0 0 1.25rem' }}>
+                  {triviaPopup.message}
+                </p>
+                <button className="btn-primary" onClick={() => setTriviaPopup(null)}>OK</button>
+              </>
+            ) : (
+              <>
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: '#ef4444', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', margin: '0 auto 1rem', fontSize: '1.5rem',
+                }}>&#10007;</div>
+                <h3 style={{ margin: '0 0 0.5rem', color: '#ef4444' }}>Failed</h3>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '0 0 1.25rem' }}>
+                  {triviaPopup.message}
+                </p>
+                <button className="btn-primary" onClick={() => setTriviaPopup(null)}>OK</button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
