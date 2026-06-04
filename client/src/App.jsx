@@ -1535,7 +1535,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.15,
                       maxWidth: '600px', fontFamily: 'var(--font-sans)'
                     }}>
-                      Vertical Feed<br />Movie Updates
+                      Pulse<br />Movie Updates
                     </h2>
                     <p style={{
                       fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
