@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Heart, Share2, ChevronLeft, Film } from 'lucide-react';
+import { Heart, Share2, ChevronLeft, ChevronUp, ChevronDown, Film } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
 const CATEGORY_COLORS = {
@@ -54,6 +54,21 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goNext, goPrev, onBack]);
+
+  // Mouse wheel support (desktop)
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (e.deltaY > 0) {
+        goNext();
+      } else if (e.deltaY < 0) {
+        goPrev();
+      }
+    };
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [goNext, goPrev]);
 
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -223,6 +238,25 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
           </div>
         ))}
       </div>
+
+        {/* Progress dots */}
+        <div className="cine-reels-progress">
+          {updates.map((_, idx) => (
+            <div
+              key={idx}
+              className={`cine-reels-dot ${idx === currentIndex ? 'cine-reels-dot-active' : ''}`}
+              onClick={() => { if (!isTransitioning) { setIsTransitioning(true); setCurrentIndex(idx); setTimeout(() => setIsTransitioning(false), 400); } }}
+            />
+          ))}
+        </div>
+
+        {/* Desktop nav buttons */}
+        <button className="cine-reels-nav cine-reels-nav-up" onClick={goPrev} disabled={currentIndex === 0} aria-label="Previous">
+          <ChevronUp size={24} />
+        </button>
+        <button className="cine-reels-nav cine-reels-nav-down" onClick={goNext} disabled={currentIndex >= updates.length - 1} aria-label="Next">
+          <ChevronDown size={24} />
+        </button>
 
     </div>
   );

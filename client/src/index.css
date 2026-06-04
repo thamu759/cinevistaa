@@ -5857,6 +5857,7 @@ a {
 }
 
 .cine-reels-nav {
+  display: none;
   position: absolute;
   z-index: 55;
   background: rgba(255,255,255,0.08);
@@ -5890,6 +5891,7 @@ a {
 }
 
 .cine-reels-progress {
+  display: none;
   position: absolute;
   top: 0.75rem;
   top: max(0.75rem, env(safe-area-inset-top));
@@ -5944,11 +5946,113 @@ a {
     min-height: 40px;
     padding: 0.3rem;
   }
+}
+
+/* Desktop cinema-mode for Cine Pulse */
+@media (min-width: 1024px) {
+  .cine-reels-container {
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cine-reels-content {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    height: 80vh;
+    max-height: 750px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
+    inset: auto;
+  }
+  .cine-reel-slide {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .cine-reel-bg-img {
+    border-radius: 20px;
+  }
+  .cine-reels-header {
+    padding: 1rem 1.25rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    z-index: 70;
+  }
+  .cine-reels-back {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    background: rgba(255,255,255,0.12);
+  }
+  .cine-reels-back:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  .cine-reel-body {
+    padding: 2rem 1.5rem 7rem;
+  }
+  .cine-reel-actions {
+    right: 1.25rem;
+    bottom: 7rem;
+    gap: 1rem;
+  }
+  .cine-reel-action-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
   .cine-reels-nav {
-    display: none;
+    display: flex !important;
+    position: absolute;
+    z-index: 70;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .cine-reels-nav-up {
+    bottom: 7rem;
+    right: -56px;
+  }
+  .cine-reels-nav-down {
+    bottom: 4rem;
+    right: -56px;
+  }
+  .cine-reels-nav:hover:not(:disabled) {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+  }
+  .cine-reels-nav:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+    transform: none;
   }
   .cine-reels-progress {
-    display: none;
+    display: flex !important;
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 65;
+    gap: 4px;
+    max-width: 60%;
+    padding: 0;
+  }
+  .cine-reels-dot {
+    max-width: 20px;
+    height: 2px;
+  }
+  .cine-reels-dot-active {
+    max-width: 32px;
   }
 }
 
