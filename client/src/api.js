@@ -653,6 +653,41 @@ export const deleteAllCineUpdates = async () => {
   return response.json();
 };
 
+// ─── OTT ALERTS ───
+
+export const addOttAlert = async (alertData) => {
+  const response = await fetch(`${API_BASE_URL}/ott-alerts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(alertData),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to create alert');
+  }
+  return response.json();
+};
+
+export const removeOttAlert = async (movieId) => {
+  const response = await fetch(`${API_BASE_URL}/ott-alerts/${encodeURIComponent(movieId)}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to remove alert');
+  }
+  return response.json();
+};
+
+export const fetchUserOttAlerts = async () => {
+  const response = await fetch(`${API_BASE_URL}/ott-alerts`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) throw new Error('Failed to fetch alerts');
+  return response.json();
+};
+
 export const toggleCineUpdateLike = async (updateId) => {
   const response = await fetch(`${API_BASE_URL}/cine-updates/${updateId}/like`, {
     method: 'POST',

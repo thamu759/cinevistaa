@@ -1123,7 +1123,8 @@ try {
     token: { type: String },
     emailVerified: { type: Boolean, default: false },
     otp: { type: String },
-    otpExpiry: { type: Date }
+    otpExpiry: { type: Date },
+    ottAlerts: [{ type: Object }]
   });
   UserModel = mongoose.model('User', userSchema);
 } catch (e) {
@@ -1815,7 +1816,8 @@ export const registerUser = async (userData) => {
     token,
     emailVerified: false,
     otp: null,
-    otpExpiry: null
+    otpExpiry: null,
+    ottAlerts: []
   };
 
   if (useMongoDB) {
@@ -1883,26 +1885,41 @@ export const verifyToken = async (token) => {
 };
 
 // Resend HTTP email client (lightweight, works on Render free tier)
-const sendEmailViaResend = async (to, otp) => {
+export const sendEmailViaResend = async (to, otp, type) => {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
+
+  let subject, text, html;
+
+  if (type === 'release') {
+    subject = '📺 OTT Release Alert — ThiraiPedia';
+    text = `A movie you subscribed to is now streaming! Check it out on ThiraiPedia.`;
+    html = `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2 style="color: #fbbf24;">🎬 OTT Release Alert</h2>
+      <p>A movie on your watchlist is now streaming!</p>
+      <p style="background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">
+        Visit <a href="https://thiraipedia.com" style="color: #fbbf24; font-weight: bold;">ThiraiPedia</a> to check it out.
+      </p>
+      <hr>
+      <p style="color: #666; font-size: 12px;">You received this because you subscribed to an OTT release alert.</p>
+    </div>`;
+  } else {
+    subject = 'Your ThiraiPedia OTP Code';
+    text = `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`;
+    html = `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2>ThiraiPedia Email Verification</h2>
+      <p>Your OTP code is:</p>
+      <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
+      <p>This code expires in <strong>5 minutes</strong>.</p>
+      <hr>
+      <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
+    </div>`;
+  }
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'ThiraiPedia <onboarding@resend.dev>',
-      to,
-      subject: 'Your ThiraiPedia OTP Code',
-      text: `Your OTP code is: ${otp}\n\nThis code expires in 5 minutes.\n\nIf you did not request this, please ignore this email.`,
-      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2>ThiraiPedia Email Verification</h2>
-        <p>Your OTP code is:</p>
-        <h1 style="letter-spacing: 8px; font-size: 32px; background: #f0f0f0; padding: 12px 24px; text-align: center; border-radius: 8px;">${otp}</h1>
-        <p>This code expires in <strong>5 minutes</strong>.</p>
-        <hr>
-        <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
-      </div>`
-    })
+    body: JSON.stringify({ from: process.env.EMAIL_FROM || 'ThiraiPedia <onboarding@resend.dev>', to, subject, text, html })
   });
   return res.ok;
 };
@@ -1993,6 +2010,94 @@ export const verifyOtp = async (email, otp) => {
     writeJsonDb(data);
     return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token: user.token };
   }
+};
+
+// ─── OTT ALERTS ───
+
+export const addOttAlert = async (username, alertData) => {
+  const { movieId, movieTitle, platform, releaseDate } = alertData;
+  if (!movieId || !platform || !releaseDate) {
+    throw new Error("Movie ID, platform, and release date are required");
+  }
+
+  const alert = { movieId, movieTitle, platform, releaseDate, createdAt: new Date().toISOString() };
+
+  if (useMongoDB) {
+    const user = await UserModel.findOne({ username });
+    if (!user) throw new Error("User not found");
+    const existing = (user.ottAlerts || []).find(a => a.movieId === movieId);
+    if (existing) throw new Error("Alert already exists for this movie");
+    user.ottAlerts = [...(user.ottAlerts || []), alert];
+    await user.save();
+    return { message: "Alert created", ottAlerts: user.ottAlerts };
+  }
+
+  const data = readJsonDb();
+  const idx = data.users.findIndex(u => u.username === username);
+  if (idx === -1) throw new Error("User not found");
+  if (!data.users[idx].ottAlerts) data.users[idx].ottAlerts = [];
+  const existing = data.users[idx].ottAlerts.find(a => a.movieId === movieId);
+  if (existing) throw new Error("Alert already exists for this movie");
+  data.users[idx].ottAlerts.push(alert);
+  writeJsonDb(data);
+  return { message: "Alert created", ottAlerts: data.users[idx].ottAlerts };
+};
+
+export const removeOttAlert = async (username, movieId) => {
+  if (useMongoDB) {
+    const user = await UserModel.findOne({ username });
+    if (!user) throw new Error("User not found");
+    user.ottAlerts = (user.ottAlerts || []).filter(a => a.movieId !== movieId);
+    await user.save();
+    return { message: "Alert removed", ottAlerts: user.ottAlerts };
+  }
+
+  const data = readJsonDb();
+  const idx = data.users.findIndex(u => u.username === username);
+  if (idx === -1) throw new Error("User not found");
+  data.users[idx].ottAlerts = (data.users[idx].ottAlerts || []).filter(a => a.movieId !== movieId);
+  writeJsonDb(data);
+  return { message: "Alert removed", ottAlerts: data.users[idx].ottAlerts };
+};
+
+export const getUserOttAlerts = async (username) => {
+  if (useMongoDB) {
+    const user = await UserModel.findOne({ username });
+    if (!user) return [];
+    return user.ottAlerts || [];
+  }
+
+  const data = readJsonDb();
+  const user = data.users.find(u => u.username === username);
+  return user?.ottAlerts || [];
+};
+
+// Check all user alerts for movies releasing today and return list of users to notify
+export const checkOttAlerts = async () => {
+  const today = new Date().toISOString().split('T')[0];
+  const notifications = [];
+
+  if (useMongoDB) {
+    const users = await UserModel.find({});
+    for (const user of users) {
+      const alerts = user.ottAlerts || [];
+      const matched = alerts.filter(a => a.releaseDate === today);
+      if (matched.length > 0) {
+        notifications.push({ username: user.username, email: user.email, movies: matched });
+      }
+    }
+    return notifications;
+  }
+
+  const { users } = readJsonDb();
+  for (const user of users) {
+    const alerts = user.ottAlerts || [];
+    const matched = alerts.filter(a => a.releaseDate === today);
+    if (matched.length > 0) {
+      notifications.push({ username: user.username, email: user.email, movies: matched });
+    }
+  }
+  return notifications;
 };
 
 export const getCommunityThreads = async () => {

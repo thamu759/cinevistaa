@@ -5,7 +5,7 @@ import {
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List, Trash2,
-  AlertTriangle, RefreshCw, Heart
+  AlertTriangle, RefreshCw, Heart, Bell, BellOff
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
@@ -36,7 +36,10 @@ import {
   toggleReviewLike,
   addReviewReply,
   fetchCineUpdates,
-  toggleCineUpdateLike
+  toggleCineUpdateLike,
+  addOttAlert,
+  removeOttAlert,
+  fetchUserOttAlerts
 } from './api';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
@@ -56,6 +59,7 @@ import BlindFrame from './components/BlindFrame';
 import MoodMatcher from './components/MoodMatcher';
 import CineUpdates from './components/CineUpdates';
 import WelcomePopup from './components/WelcomePopup';
+import ReviewSharePopup from './components/ReviewSharePopup';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -111,6 +115,8 @@ export default function App() {
   const [isSessionVerified, setIsSessionVerified] = useState(false);
 
   const [selectedArticleId, setSelectedArticleId] = useState(null);
+  const [showReviewShare, setShowReviewShare] = useState(false);
+  const [lastReviewShare, setLastReviewShare] = useState(null);
 
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -202,6 +208,14 @@ export default function App() {
         : `Read reviews, watch the trailer, and see ratings for ${selectedMovie.title} on thiraipedia.`;
       document.title = title;
       updateMeta({ desc });
+
+      const posterUrl = selectedMovie.posterUrl
+        ? proxyImageUrl(selectedMovie.posterUrl, 'w500')
+        : '';
+      let el = document.querySelector('meta[property="og:image"]');
+      if (el) el.setAttribute('content', posterUrl);
+      el = document.querySelector('meta[name="twitter:image"]');
+      if (el) el.setAttribute('content', posterUrl);
     }
   }, [activeView, selectedMovie]);
 
@@ -455,6 +469,7 @@ const preRollTimerRef = useRef(null);
 
   // Leaderboard state
   const [leaderboard, setLeaderboard] = useState([]);
+  const [userOttAlerts, setUserOttAlerts] = useState([]);
   const [cineUpdates, setCineUpdates] = useState([]);
   const [cineUpdatesLoading, setCineUpdatesLoading] = useState(false);
   const [showCineReels, setShowCineReels] = useState(false);
@@ -475,6 +490,17 @@ const preRollTimerRef = useRef(null);
   useEffect(() => {
     localStorage.setItem('mc_watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
+
+  // Fetch OTT alerts when user changes
+  useEffect(() => {
+    if (currentUser) {
+      fetchUserOttAlerts()
+        .then(data => setUserOttAlerts(data))
+        .catch(() => {});
+    } else {
+      setUserOttAlerts([]);
+    }
+  }, [currentUser]);
 
   // Fetch profile data and all users when showing profile
   useEffect(() => {
@@ -559,6 +585,31 @@ const preRollTimerRef = useRef(null);
       loadUserLists();
       loadAllLists();
     } catch (e) {}
+  };
+
+  // ─── OTT ALERTS ───
+  const handleToggleOttAlert = async (movie, e) => {
+    if (e) e.stopPropagation();
+    if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); return; }
+    const isAlerted = userOttAlerts.some(a => a.movieId === movie.id);
+    try {
+      if (isAlerted) {
+        await removeOttAlert(movie.id);
+        setUserOttAlerts(prev => prev.filter(a => a.movieId !== movie.id));
+        showToast('Alert removed');
+      } else {
+        const result = await addOttAlert({
+          movieId: movie.id,
+          movieTitle: movie.title,
+          platform: movie.ott?.platform,
+          releaseDate: movie.ott?.releaseDate
+        });
+        setUserOttAlerts(result.ottAlerts);
+        showToast('We\'ll notify you on release day!');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
   };
 
   // ─── CURATION ───
@@ -1139,6 +1190,9 @@ const preRollTimerRef = useRef(null);
       });
       // Refresh global movie list to sync ratings
       loadMoviesList();
+      // Show share popup
+      setLastReviewShare({ movie: selectedMovie, review: newReviewData });
+      setShowReviewShare(true);
     } catch (err) {
       showToast(err.message || "Failed to post review", 'error');
     }
@@ -2550,6 +2604,8 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           addMovieToList={addMovieToList}
           setAuthTab={setAuthTab}
           setIsAuthModalOpen={setIsAuthModalOpen}
+          userOttAlerts={userOttAlerts}
+          onToggleOttAlert={handleToggleOttAlert}
         />
 
         {/* PROFILE VIEW */}
@@ -2938,32 +2994,58 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {upcomingOttMovies.map(movie => (
-                  <div key={movie.id} className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer' }}
-                    onClick={() => handleViewMovie(movie.id)}>
-                    <img src={proxyImageUrl(movie.posterUrl, 'w185')} alt={movie.title}
-                      style={{ width: '60px', borderRadius: '6px', flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>{movie.title}</h3>
-                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-accent-gold)', fontWeight: 700 }}>
-                          {movie.ott.platform}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                          {new Date(movie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
-                        {movie.genre && (
-                          <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
-                            {movie.genre}
+                {upcomingOttMovies.map(movie => {
+                  const isAlerted = userOttAlerts.some(a => a.movieId === movie.id);
+                  return (
+                    <div key={movie.id} className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer' }}
+                      onClick={() => handleViewMovie(movie.id)}>
+                      <img src={proxyImageUrl(movie.posterUrl, 'w185')} alt={movie.title}
+                        style={{ width: '60px', borderRadius: '6px', flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>{movie.title}</h3>
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-accent-gold)', fontWeight: 700 }}>
+                            {movie.ott.platform}
                           </span>
-                        )}
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                            {new Date(movie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          {movie.genre && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                              {movie.genre}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => handleToggleOttAlert(movie, e)}
+                          style={{
+                            background: isAlerted ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.05)',
+                            border: `1px solid ${isAlerted ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255,255,255,0.1)'}`,
+                            borderRadius: '8px',
+                            padding: '0.4rem 0.6rem',
+                            cursor: 'pointer',
+                            color: isAlerted ? 'var(--color-accent-gold)' : 'var(--color-text-muted)',
+                            fontSize: '0.7rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title={isAlerted ? 'Remove alert' : 'Notify me on release'}
+                        >
+                          {isAlerted ? <BellOff size={14} /> : <Bell size={14} />}
+                          {isAlerted ? 'Alert Set' : 'Notify Me'}
+                        </button>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                          {Math.ceil((new Date(movie.ott.releaseDate) - new Date()) / (1000 * 60 * 60 * 24))} days
+                        </span>
                       </div>
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', flexShrink: 0 }}>
-                      {Math.ceil((new Date(movie.ott.releaseDate) - new Date()) / (1000 * 60 * 60 * 24))} days
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -3188,6 +3270,15 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             localStorage.setItem('welcomeSeen', '1');
             setShowWelcome(false);
           }} />
+        )}
+
+        {/* REVIEW SHARE POPUP */}
+        {showReviewShare && lastReviewShare && (
+          <ReviewSharePopup
+            movie={lastReviewShare.movie}
+            reviewData={lastReviewShare.review}
+            onClose={() => setShowReviewShare(false)}
+          />
         )}
 
         {/* ADMIN CONTROL PANEL VIEW */}

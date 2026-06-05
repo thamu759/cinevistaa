@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film } from 'lucide-react';
+import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film, Bell, BellOff } from 'lucide-react';
 import AdsterraAd from './AdsterraAd';
 import ShareButton from './ShareButton';
 import { useToast } from '../context/ToastContext.jsx';
@@ -32,7 +32,8 @@ export default function MovieDetailsView({
   onUpvoteReview, onDeleteReview, onAddReviewReply,
   onWatchTrailer, setIsWriteReviewOpen,
   setShowListMenu, loadUserLists, navigateTo, addMovieToList,
-  setAuthTab, setIsAuthModalOpen
+  setAuthTab, setIsAuthModalOpen,
+  userOttAlerts, onToggleOttAlert
 }) {
   const { showToast } = useToast();
   const [expandedReplies, setExpandedReplies] = useState({});
@@ -273,15 +274,37 @@ export default function MovieDetailsView({
               {selectedMovie.ott?.platform && (
                 <div className="tech-row">
                   <span className="tech-lbl">Streaming on</span>
-                  <div className="tech-val">
+                  <div className="tech-val" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <a href={selectedMovie.ott.url || '#'} target="_blank" rel="noopener noreferrer"
                       style={{ color: 'var(--color-accent-gold)', fontWeight: 700, fontSize: '0.78rem', textDecoration: 'none' }}>
                       {selectedMovie.ott.platform}
                     </a>
                     {selectedMovie.ott.releaseDate && (
-                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem', marginLeft: '0.4rem' }}>
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem' }}>
                         {new Date(selectedMovie.ott.releaseDate) > new Date() ? 'from ' : ''}{new Date(selectedMovie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
+                    )}
+                    {new Date(selectedMovie.ott.releaseDate) > new Date() && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onToggleOttAlert(selectedMovie, e); }}
+                        style={{
+                          background: (userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${(userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255,255,255,0.1)'}`,
+                          borderRadius: '6px',
+                          padding: '0.25rem 0.5rem',
+                          cursor: 'pointer',
+                          color: (userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? 'var(--color-accent-gold)' : 'var(--color-text-muted)',
+                          fontSize: '0.65rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          transition: 'all 0.2s'
+                        }}
+                        title={(userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? 'Remove alert' : 'Notify me on release'}
+                      >
+                        {(userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? <BellOff size={12} /> : <Bell size={12} />}
+                        {(userOttAlerts || []).some(a => a.movieId === selectedMovie.id) ? 'Alert Set' : 'Notify Me'}
+                      </button>
                     )}
                   </div>
                 </div>

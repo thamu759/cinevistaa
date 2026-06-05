@@ -52,7 +52,12 @@ import {
   updateCineUpdate,
   deleteCineUpdate,
   deleteAllCineUpdates,
-  toggleCineUpdateLike
+  toggleCineUpdateLike,
+  addOttAlert,
+  removeOttAlert,
+  getUserOttAlerts,
+  checkOttAlerts,
+  sendEmailViaResend
 } from './db.js';
 import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
@@ -1097,6 +1102,148 @@ app.get('/api/pages/:page', (req, res) => {
   const content = pagesContent[page];
   if (!content) return res.status(404).json({ error: 'Page not found' });
   res.json(content);
+});
+
+// ─── OTT ALERT ENDPOINTS ───
+
+// Subscribe to OTT release alert
+app.post('/api/ott-alerts', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified) return res.status(401).json({ error: "Invalid token" });
+
+    const result = await addOttAlert(verified.username, req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Failed to create alert" });
+  }
+});
+
+// Unsubscribe from OTT release alert
+app.delete('/api/ott-alerts/:movieId', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified) return res.status(401).json({ error: "Invalid token" });
+
+    const result = await removeOttAlert(verified.username, req.params.movieId);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Failed to remove alert" });
+  }
+});
+
+// Get user's OTT alerts
+app.get('/api/ott-alerts', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified) return res.status(401).json({ error: "Invalid token" });
+
+    const alerts = await getUserOttAlerts(verified.username);
+    res.json(alerts);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch alerts" });
+  }
+});
+
+// Check alerts for today's releases (admin only)
+app.get('/api/ott-alerts/check', async (req, res) => {
+  try {
+    const notifications = await checkOttAlerts();
+    const sent = [];
+    for (const n of notifications) {
+      if (n.email && process.env.RESEND_API_KEY) {
+        for (const movie of n.movies) {
+          const sentEmail = await sendEmailViaResend(n.email, null, 'release');
+          if (sentEmail) sent.push({ username: n.username, movie: movie.movieTitle, platform: movie.platform });
+        }
+      }
+    }
+    res.json({ notifications, emailsSent: sent.length, sent });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── CRAWLER DETECTION & SPA STATIC SERVING ───
+
+const clientDist = path.resolve(__dirname, '..', 'client', 'dist');
+const indexHtmlPath = path.join(clientDist, 'index.html');
+
+const crawlerPattern = /bot|facebook|whatsapp|twitterbot|slack|googlebot|telegram|discord|slack|linkedin|pinterest|slurp|bingbot|duckduckbot|applebot|embedly|baiduspider|yandex|semrush/i;
+
+// Check for crawlers on movie pages and serve custom OG tags
+app.get('/movie/:id', async (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  if (!crawlerPattern.test(ua)) {
+    // Not a crawler — serve the SPA normally
+    return res.sendFile(indexHtmlPath);
+  }
+
+  try {
+    const movie = await getMovieById(req.params.id);
+    const posterUrl = movie?.posterUrl
+      ? `${process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p'}/w500${movie.posterUrl.includes('/t/p/') ? '/' + movie.posterUrl.split('/t/p/')[1].split('/').slice(1).join('/') : movie.posterUrl.includes('http') ? movie.posterUrl : '/original' + movie.posterUrl}`
+      : 'https://www.cinevistaa.in/og-image.svg';
+
+    const title = movie?.title || 'Movie';
+    const rating = movie?.criticScore?.toFixed(1) || movie?.rating?.toFixed(1) || '';
+    const desc = movie?.description?.slice(0, 200)
+      ? `${movie.description.slice(0, 200)}...${rating ? ` Rated ${rating}/10.` : ''}`
+      : `Read reviews, watch the trailer, and see ratings for ${title} on thiraipedia.`;
+    const genre = movie?.genre || '';
+
+    const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title} — Review & Rating | thiraipedia</title>
+  <meta name="description" content="${desc}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://www.cinevistaa.in/movie/${req.params.id}" />
+  <meta property="og:title" content="${title}${rating ? ` — ${rating}/10` : ''} | thiraipedia" />
+  <meta property="og:description" content="${desc}" />
+  <meta property="og:image" content="${posterUrl}" />
+  <meta property="og:image:width" content="500" />
+  <meta property="og:image:height" content="750" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title} | thiraipedia" />
+  <meta name="twitter:description" content="${desc}" />
+  <meta name="twitter:image" content="${posterUrl}" />
+  <meta http-equiv="refresh" content="0;url=/" />
+</head>
+<body>
+  <p>${title} on thiraipedia — ${rating ? `Rated ${rating}/10.` : ''} ${genre}</p>
+</body>
+</html>`;
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=7200');
+    res.send(html);
+  } catch {
+    res.sendFile(indexHtmlPath);
+  }
+});
+
+// Serve SPA static files
+app.use(express.static(clientDist));
+
+// SPA fallback — all other routes serve index.html
+app.get('*', (req, res) => {
+  res.sendFile(indexHtmlPath);
 });
 
 app.listen(PORT, () => {
