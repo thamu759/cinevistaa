@@ -4,8 +4,8 @@ import {
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
-  Users, Send, Volume2, Maximize, List, Trash2,
-  AlertTriangle, RefreshCw, Heart, Bell, BellOff
+  Users, Send, Volume2, Maximize, List,
+  AlertTriangle, RefreshCw, Bell, BellOff
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
@@ -27,7 +27,6 @@ import {
   getLists,
   createList,
   addMovieToList,
-  removeMovieFromList,
   deleteList,
   fetchLeaderboard,
   curateMovie,
@@ -50,6 +49,9 @@ import ContactPage from './components/ContactPage';
 import AboutPage from './components/AboutPage';
 import ArticlesPage from './components/ArticlesPage';
 import ArticleDetail from './components/ArticleDetail';
+import MovieCard from './components/MovieCard';
+import MovieGrid, { LoadingGrid } from './components/MovieGrid';
+import MovieSection from './components/MovieSection';
 import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
 import ShareButton from './components/ShareButton';
@@ -127,15 +129,7 @@ export default function App() {
   const SectionLoader = ({ rows = 4, type = 'grid' }) => (
     <div className="fade-in">
       {type === 'grid' ? (
-        <div className="skeleton-grid">
-          {Array.from({ length: rows * 3 }).map((_, i) => (
-            <div key={i} className="skeleton-card">
-              <div className="skeleton skeleton-poster" />
-              <div className="skeleton skeleton-text medium" />
-              <div className="skeleton skeleton-text short" />
-            </div>
-          ))}
-        </div>
+        <LoadingGrid count={rows * 3} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {Array.from({ length: rows }).map((_, i) => (
@@ -436,15 +430,15 @@ const preRollTimerRef = useRef(null);
     return saved ? JSON.parse(saved) : ['dune-part-two', 'the-batman'];
   });
 
-  // User Profile Custom Info (Simulated Login)
+  // User Profile Custom Info
   const [userProfile] = useState({
-    name: "Julian Vane",
-    role: "Gold Critic",
+    name: "Guest",
+    role: "Cinema Enthusiast",
     avatarUrl: DEFAULT_AVATAR,
-    bio: "Searching for the perfect frame in a world of digital noise.",
-    followers: "3.8k",
-    accuracy: "92%",
-    listsCount: 12
+    bio: "Film lover exploring cinema on thiraipedia.",
+    followers: "0",
+    accuracy: "0%",
+    listsCount: 0
   });
 
   const [profileData, setProfileData] = useState(null);
@@ -1464,7 +1458,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       <span>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found</span>
                     </div>
                     <div className="search-results-list">
-                      {searchResults.slice(0, 8).map(movie => (
+                       {searchResults.slice(0, 12).map(movie => (
                         <div
                           key={movie.id}
                           className="search-result-item"
@@ -1486,9 +1480,9 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         </div>
                       ))}
                     </div>
-                    {searchResults.length > 8 && (
+                    {searchResults.length > 12 && (
                       <div className="search-results-footer">
-                        <span>Showing 8 of {searchResults.length} results</span>
+                        <span>Showing 12 of {searchResults.length} results</span>
                       </div>
                     )}
                   </>
@@ -1652,245 +1646,50 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </header>
             )}
 
-            {/* NEW RELEASES — horizontal slider of recently added movies */}
-            <section className="movies-section" style={{ marginTop: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                <div>
-                  <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Now Playing</p>
-                  <h2 className="section-title" style={{ marginBottom: 0 }}>New Releases</h2>
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                    onClick={() => newReleasesScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
-                    aria-label="Scroll left">
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                    onClick={() => newReleasesScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
-                    aria-label="Scroll right">
-                    <ChevronRight size={18} />
-                  </button>
-                  <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('new-releases'); }}>
-                    View All
-                  </button>
-                </div>
-              </div>
-              {newReleases.length === 0 ? (
-                <div className="skeleton-horizontal">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="skeleton-card" style={{ flex: '0 0 160px' }}>
-                      <div className="skeleton skeleton-poster" />
-                      <div className="skeleton skeleton-text medium" />
-                      <div className="skeleton skeleton-text short" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="movie-grid-horizontal" ref={newReleasesScrollRef}>
-                  {newReleases.flatMap((movie, idx) => {
-                    const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-nr-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
-                    items.push(
-                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                       <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                         <div className="movie-card-rating">
-                           <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                           <span>{movie.rating.toFixed(1)}</span>
-                         </div>
-                       </div>
-                       <div className="movie-card-info">
-                         <h3 className="movie-card-title">{movie.title}</h3>
-                         <div className="movie-card-genre-tags">
-                           {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                             <span key={tag} className="genre-tag">{tag.trim()}</span>
-                           ))}
-                         </div>
-                       </div>
-                     </div>
-                    );
-                    return items;
-                  })}
-                </div>
-              )}
-            </section>
+            <MovieSection
+              subtitle="Now Playing"
+              title="New Releases"
+              movies={newReleases}
+              onMovieClick={handleViewMovie}
+              scrollRef={newReleasesScrollRef}
+              onViewAll={() => navigateTo('new-releases')}
+              adZoneKey="6722103adf045d07f8b2009ba2196e96"
+            />
 
-            {/* TAMIL CINEMA SECTION */}
             {tamilMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>தமிழ் சினிமா</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Tamil Cinema</h2>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => tamilScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
-                      aria-label="Scroll left">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => tamilScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
-                      aria-label="Scroll right">
-                      <ChevronRight size={18} />
-                    </button>
-                    <button className="btn-secondary" onClick={() => navigateTo('tamil-cinema')}
-                      style={{ fontSize: '0.7rem', padding: '0.25rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', flexShrink: 0 }}>
-                      View All <ChevronRight size={12} />
-                    </button>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal" ref={tamilScrollRef}>
-                  {tamilMovies.flatMap((movie, idx) => {
-                    const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-ta-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
-                    items.push(
-                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                        <div className="movie-card-poster-wrapper">
-                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                          <div className="movie-card-rating">
-                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                            <span>{movie.rating.toFixed(1)}</span>
-                          </div>
-                        </div>
-                        <div className="movie-card-info">
-                          <h3 className="movie-card-title">{movie.title}</h3>
-                          <div className="movie-card-genre-tags">
-                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                              <span key={tag} className="genre-tag">{tag.trim()}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                    return items;
-                  })}
-                </div>
-              </section>
+              <MovieSection
+                subtitle="தமிழ் சினிமா"
+                title="Tamil Cinema"
+                movies={tamilMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={tamilScrollRef}
+                onViewAll={() => navigateTo('tamil-cinema')}
+                adZoneKey="6722103adf045d07f8b2009ba2196e96"
+              />
             )}
 
-            {/* MALAYALAM CINEMA SECTION */}
             {malayalamMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>മലയാള സിനിമ</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Malayalam Cinema</h2>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => malayalamScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
-                      aria-label="Scroll left">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => malayalamScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
-                      aria-label="Scroll right">
-                      <ChevronRight size={18} />
-                    </button>
-                    <button className="btn-secondary" onClick={() => navigateTo('malayalam-cinema')}
-                      style={{ fontSize: '0.7rem', padding: '0.25rem 0.65rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', flexShrink: 0 }}>
-                      View All <ChevronRight size={12} />
-                    </button>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal" ref={malayalamScrollRef}>
-                  {malayalamMovies.flatMap((movie, idx) => {
-                    const items = [];
-                    if (idx > 0 && idx % 6 === 0) {
-                      items.push(
-                        <div key={`ad-ml-${idx}`} className="ad-card-hscroll">
-                          <span className="ad-label-sm">Ad</span>
-                          <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-                        </div>
-                      );
-                    }
-                    items.push(
-                      <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                        <div className="movie-card-poster-wrapper">
-                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                          <div className="movie-card-rating">
-                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                            <span>{movie.rating.toFixed(1)}</span>
-                          </div>
-                        </div>
-                        <div className="movie-card-info">
-                          <h3 className="movie-card-title">{movie.title}</h3>
-                          <div className="movie-card-genre-tags">
-                            {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                              <span key={tag} className="genre-tag">{tag.trim()}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                    return items;
-                  })}
-                </div>
-              </section>
+              <MovieSection
+                subtitle="മലയാള സിനിമ"
+                title="Malayalam Cinema"
+                movies={malayalamMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={malayalamScrollRef}
+                onViewAll={() => navigateTo('malayalam-cinema')}
+                adZoneKey="6722103adf045d07f8b2009ba2196e96"
+              />
             )}
 
 
-            {/* TOP RATED ON THIRAIPEDIA — horizontal slider */}
             {topRatedMovies.length > 0 && (
-              <section className="movies-section" style={{ marginTop: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-                  <div>
-                    <p className="section-meta" style={{ marginBottom: '0.25rem' }}>Weekly Charts</p>
-                    <h2 className="section-title" style={{ marginBottom: 0 }}>Top Rated on thiraipedia</h2>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
-                      aria-label="Scroll left">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="hero-nav-btn" style={{ position: 'static', width: '32px', height: '32px', opacity: 1, transform: 'none' }}
-                      onClick={() => topRatedScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
-                      aria-label="Scroll right">
-                      <ChevronRight size={18} />
-                    </button>
-                    <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }} onClick={() => { navigateTo('top-rated'); }}>
-                      View All
-                    </button>
-                  </div>
-                </div>
-                <div className="movie-grid-horizontal" ref={topRatedScrollRef}>
-                  {topRatedMovies.map(movie => (
-                    <div key={movie.id} className="movie-card-horizontal" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').slice(0, 2).map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <MovieSection
+                subtitle="Weekly Charts"
+                title="Top Rated on thiraipedia"
+                movies={topRatedMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={topRatedScrollRef}
+                onViewAll={() => navigateTo('top-rated')}
+              />
             )}
 
             {/* APP PROMO — Download section with animated cartoon */}
@@ -2214,15 +2013,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </div>
             )}
              {newReleasesPageLoading ? (
-               <div className="skeleton-grid">
-                 {Array.from({ length: 8 }).map((_, i) => (
-                   <div key={i} className="skeleton-card">
-                     <div className="skeleton skeleton-poster" />
-                     <div className="skeleton skeleton-text medium" />
-                     <div className="skeleton skeleton-text short" />
-                   </div>
-                 ))}
-               </div>
+               <LoadingGrid count={8} />
               ) : filteredReleases.length === 0 ? (
                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
                  <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
@@ -2245,34 +2036,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                  </div>
                </div>
               ) : (
-               <div className="movie-grid">
-                  {filteredReleases.slice(0, visibleCount).map(movie => (
-                   <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                        <div className="movie-card-poster-wrapper">
-                          <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                       <div className="movie-card-rating">
-                         <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                         <span>{(movie.rating || 0).toFixed(1)}</span>
-                       </div>
-                     </div>
-                     <div className="movie-card-info">
-                       <h3 className="movie-card-title">{movie.title}</h3>
-                       <div className="movie-card-genre-tags">
-                         {movie.genre && movie.genre.split('/').map(tag => (
-                           <span key={tag} className="genre-tag">{tag.trim()}</span>
-                         ))}
-                       </div>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             )}
-             {filteredReleases.length > visibleCount && (
-               <div className="load-more-btn-container">
-                 <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
-                   Load More ({filteredReleases.length - visibleCount} remaining)
-                 </button>
-               </div>
+               <MovieGrid
+                 movies={filteredReleases}
+                 onMovieClick={handleViewMovie}
+                 visibleCount={visibleCount}
+                 totalCount={filteredReleases.length}
+                 onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
+               />
              )}
           </div>
         )}
@@ -2285,40 +2055,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Tamil Cinema</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All Tamil language movies in the library.</p>
             </div>
-            {tamilMovies.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                <p>No Tamil movies found.</p>
-              </div>
-            ) : (
-              <div className="movie-grid">
-                {tamilMovies.slice(0, visibleCount).map(movie => (
-                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                    <div className="movie-card-poster-wrapper">
-                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                      <div className="movie-card-rating">
-                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        <span>{(movie.rating || 0).toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <div className="movie-card-info">
-                      <h3 className="movie-card-title">{movie.title}</h3>
-                      <div className="movie-card-genre-tags">
-                        {movie.genre && movie.genre.split('/').map(tag => (
-                          <span key={tag} className="genre-tag">{tag.trim()}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {tamilMovies.length > visibleCount && (
-              <div className="load-more-btn-container">
-                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
-                  Load More ({tamilMovies.length - visibleCount} remaining)
-                </button>
-              </div>
-            )}
+            <MovieGrid
+              movies={tamilMovies}
+              onMovieClick={handleViewMovie}
+              emptyTitle="No Tamil movies found."
+              visibleCount={visibleCount}
+              totalCount={tamilMovies.length}
+              onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
+            />
           </div>
         )}
 
@@ -2330,40 +2074,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Malayalam Cinema</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>All Malayalam language movies in the library.</p>
             </div>
-            {malayalamMovies.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                <p>No Malayalam movies found.</p>
-              </div>
-            ) : (
-              <div className="movie-grid">
-                {malayalamMovies.slice(0, visibleCount).map(movie => (
-                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                    <div className="movie-card-poster-wrapper">
-                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                      <div className="movie-card-rating">
-                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        <span>{(movie.rating || 0).toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <div className="movie-card-info">
-                      <h3 className="movie-card-title">{movie.title}</h3>
-                      <div className="movie-card-genre-tags">
-                        {movie.genre && movie.genre.split('/').map(tag => (
-                          <span key={tag} className="genre-tag">{tag.trim()}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {malayalamMovies.length > visibleCount && (
-              <div className="load-more-btn-container">
-                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
-                  Load More ({malayalamMovies.length - visibleCount} remaining)
-                </button>
-              </div>
-            )}
+            <MovieGrid
+              movies={malayalamMovies}
+              onMovieClick={handleViewMovie}
+              emptyTitle="No Malayalam movies found."
+              visibleCount={visibleCount}
+              totalCount={malayalamMovies.length}
+              onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
+            />
           </div>
         )}
 
@@ -2375,60 +2093,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Top Rated</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Every movie rated 7 and above, ranked by score.</p>
             </div>
-            {topRatedPageLoading ? (
-              <div className="skeleton-grid">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="skeleton-card">
-                    <div className="skeleton skeleton-poster" />
-                    <div className="skeleton skeleton-text medium" />
-                    <div className="skeleton skeleton-text short" />
-                  </div>
-                ))}
-              </div>
-            ) : topRatedPage.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                  No top rated movies yet
-                </p>
-                <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                  Movies with a rating of 7 or higher will appear here.
-                </p>
-                <button onClick={() => navigateTo('home')}
-                  className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
-                  Browse All Movies
-                </button>
-              </div>
-            ) : (
-              <div className="movie-grid">
-                {topRatedPage.slice(0, visibleCount).map(movie => (
-                  <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                    <div className="movie-card-poster-wrapper">
-                      <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                      <div className="movie-card-rating">
-                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        <span>{(movie.rating || 0).toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <div className="movie-card-info">
-                      <h3 className="movie-card-title">{movie.title}</h3>
-                      <div className="movie-card-genre-tags">
-                        {movie.genre && movie.genre.split('/').map(tag => (
-                          <span key={tag} className="genre-tag">{tag.trim()}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {topRatedPage.length > visibleCount && (
-              <div className="load-more-btn-container">
-                <button className="btn-outline load-more-btn" onClick={() => setVisibleCount(prev => prev + LOAD_STEP)}>
-                  Load More ({topRatedPage.length - visibleCount} remaining)
-                </button>
-              </div>
-            )}
+            <MovieGrid
+              movies={topRatedPage}
+              onMovieClick={handleViewMovie}
+              loading={topRatedPageLoading}
+              emptyTitle="No top rated movies yet"
+              emptyMessage="Movies with a rating of 7 or higher will appear here."
+              visibleCount={visibleCount}
+              totalCount={topRatedPage.length}
+              onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
+            />
           </div>
         )}
 
@@ -2440,48 +2114,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Watchlist</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Movies you've saved to watch later.</p>
             </div>
-             {(() => {
-               const watchlistMovies = movies.filter(m => watchlist.includes(m.id));
-               return watchlistMovies.length === 0 ? (
-                 <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                   <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                   <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                     Your watchlist is empty
-                   </p>
-                   <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                     Start building your personal collection by browsing movies and clicking the 
-                     '+ Add to Watchlist' button on any movie card.
-                   </p>
-                   <button onClick={() => { setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
-                     className="btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }}>
-                     <Plus size={16} /> Explore Movies
-                   </button>
-                 </div>
-               ) : (
-                 <div className="movie-grid">
-
-                  {watchlistMovies.map(movie => (
-                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{(movie.rating || 0).toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre && movie.genre.split('/').map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+             <MovieGrid
+              movies={movies.filter(m => watchlist.includes(m.id))}
+              onMovieClick={handleViewMovie}
+              emptyTitle="Your watchlist is empty"
+              emptyMessage={"Start building your personal collection by browsing movies and clicking the '+ Add to Watchlist' button on any movie card."}
+            />
           </div>
         )}
 
@@ -2493,38 +2131,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <h2 className="section-title" style={{ marginBottom: '0.25rem' }}>Coming Soon</h2>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Anticipated films marked as upcoming releases.</p>
             </div>
-            {(() => {
-              const upcoming = movies.filter(m => m.isUpcoming);
-              return upcoming.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  <p style={{ marginBottom: '0.5rem' }}>No upcoming releases scheduled.</p>
-                  <p style={{ fontSize: '0.85rem' }}>Check back later for new additions.</p>
-                </div>
-              ) : (
-                <div className="movie-grid">
-                  {upcoming.map(movie => (
-                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" loading="lazy" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{(movie.rating || 0).toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
-                          {movie.genre && movie.genre.split('/').map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+            <MovieGrid
+              movies={movies.filter(m => m.isUpcoming)}
+              onMovieClick={handleViewMovie}
+              emptyTitle="No upcoming releases scheduled."
+              emptyMessage="Check back later for new additions."
+            />
           </div>
         )}
 
@@ -2547,33 +2159,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 m.director === selectedActor ||
                 m.writer === selectedActor
               );
-              return actorMovies.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  <p>No movies found for this actor.</p>
-                </div>
-              ) : (
-                <div className="movie-grid">
-                  {actorMovies.map(movie => (
-                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{(movie.rating || 0).toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
-                          {movie.genre && movie.genre.split('/').map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              return (
+                <MovieGrid
+                  movies={actorMovies}
+                  onMovieClick={handleViewMovie}
+                  emptyTitle="No movies found for this actor."
+                />
               );
             })()}
           </div>
@@ -2691,44 +2282,17 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </section>
             )}
 
-            {/* Watchlist */}
             <section className="movies-section" style={{ marginTop: '2.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.5rem' }}>My Watchlist</h2>
                 <span className="critique-movie-link" onClick={() => showToast("Already viewing all records")}>View All <ChevronRight size={12} /></span>
               </div>
-
-              {watchlist.length === 0 ? (
-                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }} className="glass-panel">
-                  Your Watchlist is empty. Browse movies and click '+ Add to Watchlist' to save entries.
-                </div>
-              ) : (
-                <div className="movie-grid">
-                  {movies.filter(m => watchlist.includes(m.id)).map(movie => (
-                    <div 
-                      key={movie.id} 
-                      className="movie-card"
-                      onClick={() => handleViewMovie(movie.id)}
-                    >
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{movie.rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          {movie.genre.split('/').map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <MovieGrid
+                movies={movies.filter(m => watchlist.includes(m.id))}
+                onMovieClick={handleViewMovie}
+                emptyTitle="Your watchlist is empty"
+                emptyMessage={"Browse movies and click '+ Add to Watchlist' to save entries."}
+              />
             </section>
 
             {/* Recent reviews written by this user */}
@@ -2944,37 +2508,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 />
               </div>
             </div>
-            {(() => {
-              const listMovies = movies.filter(m => selectedList.movieIds.includes(m.id));
-              return listMovies.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                  <p>No movies in this list yet.</p>
-                </div>
-              ) : (
-                <div className="movie-grid">
-                  {listMovies.map(movie => (
-                    <div key={movie.id} className="movie-card" onClick={() => handleViewMovie(movie.id)}>
-                      <div className="movie-card-poster-wrapper">
-                        <img src={proxyImageUrl(movie.posterUrl, 'w300')} alt={movie.title} className="movie-card-poster" />
-                        <div className="movie-card-rating">
-                          <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                          <span>{(movie.rating || 0).toFixed(1)}</span>
-                        </div>
-                      </div>
-                      <div className="movie-card-info">
-                        <h3 className="movie-card-title">{movie.title}</h3>
-                        <div className="movie-card-genre-tags">
-                          <span className="genre-tag" style={{ color: 'var(--color-accent-gold)', borderColor: 'rgba(251,191,36,0.2)' }}>{movie.releaseYear}</span>
-                          {movie.genre && movie.genre.split('/').map(tag => (
-                            <span key={tag} className="genre-tag">{tag.trim()}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+            <MovieGrid
+              movies={movies.filter(m => selectedList.movieIds.includes(m.id))}
+              onMovieClick={handleViewMovie}
+              emptyTitle="No movies in this list yet."
+            />
           </div>
         )}
 

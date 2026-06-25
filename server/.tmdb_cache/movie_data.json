@@ -1,0 +1,40 @@
+{
+  "leo-2023_2023": {
+    "id": "leo-2023",
+    "title": "Leo",
+    "description": "A mild-mannered cafe owner is dragged into a violent past when gangsters insist he is a missing crime heir. Vijay anchors Lokesh Kanagaraj's icy action drama.",
+    "rating": 7.2,
+    "criticScore": 7.1,
+    "audienceScore": 82,
+    "genre": "Tamil / Action / Crime / Drama",
+    "releaseYear": 2023,
+    "runtime": "2h 44m",
+    "director": "Lokesh Kanagaraj",
+    "writer": "Lokesh Kanagaraj",
+    "studio": "Seven Screen Studio",
+    "releaseDate": "October 19, 2023",
+    "language": "Tamil",
+    "tmdbId": 1075794,
+    "posterUrl": "https://image.tmdb.org/t/p/w780/gSOVog7ydsaF1YpgAqBqnKYFGY.jpg",
+    "backdropUrl": "https://image.tmdb.org/t/p/original/auXrHU6O17n9Tz11SHReoorjrU6.jpg",
+    "isHero": false,
+    "isStaffPick": false,
+    "staffPickType": "",
+    "cast": [
+      {
+        "name": "Vijay",
+        "role": "Parthiban / Leo",
+        "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+      },
+      {
+        "name": "Trisha",
+        "role": "Sathya",
+        "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+      }
+    ],
+    "reviews": [],
+    "createdAt": "2026-06-25T04:55:26.653Z",
+    "trailerUrl": "https://www.youtube.com/watch?v=G_AEL-Xo5l8",
+    "trailerChannelName": "Official Trailer"
+  }
+}
