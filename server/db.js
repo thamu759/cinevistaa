@@ -1033,7 +1033,7 @@ const initialCommunityThreads = [
 
 const readJsonDb = () => {
   if (!fs.existsSync(DB_FILE)) {
-    writeJsonDb({ movies: tamilPriorityMovies, users: [], communityThreads: initialCommunityThreads });
+    writeJsonDb({ movies: [...tamilPriorityMovies, ...initialMovies], users: [], communityThreads: initialCommunityThreads });
   }
   try {
     const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
@@ -1046,8 +1046,8 @@ const readJsonDb = () => {
     return parsed;
   } catch (err) {
     console.error("Error reading JSON database, resetting...", err);
-    writeJsonDb({ movies: tamilPriorityMovies, users: [], communityThreads: initialCommunityThreads });
-    return { movies: tamilPriorityMovies, users: [], communityThreads: initialCommunityThreads };
+    writeJsonDb({ movies: [...tamilPriorityMovies, ...initialMovies], users: [], communityThreads: initialCommunityThreads });
+    return { movies: [...tamilPriorityMovies, ...initialMovies], users: [], communityThreads: initialCommunityThreads };
   }
 };
 
@@ -1229,9 +1229,10 @@ export const initDB = async () => {
       useMongoDB = true;
       const count = await MovieModel.countDocuments();
       if (count === 0) {
-        const seededMovies = await cachedEnrichMoviesWithTmdbImages(tamilPriorityMovies);
+        const allSeedMovies = [...tamilPriorityMovies, ...initialMovies];
+        const seededMovies = await cachedEnrichMoviesWithTmdbImages(allSeedMovies);
         await MovieModel.insertMany(seededMovies.map(ensureCreatedAt));
-        console.log("MongoDB seeded with Tamil priority movies.");
+        console.log("MongoDB seeded with all movies.");
       }
       if (CommunityThreadModel && await CommunityThreadModel.countDocuments() === 0) {
         await CommunityThreadModel.insertMany(initialCommunityThreads);

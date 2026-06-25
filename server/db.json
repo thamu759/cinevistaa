@@ -51,7 +51,9 @@
         }
       ],
       "tmdbId": 743563,
-      "createdAt": "2026-05-30T17:00:33.004Z"
+      "createdAt": "2026-05-30T17:00:33.004Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
     },
     {
       "id": "jai-bhim",
@@ -92,7 +94,9 @@
       ],
       "reviews": [],
       "tmdbId": 855400,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
     },
     {
       "id": "kaithi",
@@ -133,8 +137,8 @@
       ],
       "reviews": [],
       "tmdbId": 587030,
-      "trailerUrl": "https://youtu.be/g79CvhHaj5I?si=Em8wcq6-86J58Qzj",
-      "trailerChannelName": "Dream Warrior Pictures",
+      "trailerUrl": "https://www.youtube.com/watch?v=tP_dh_s27iw",
+      "trailerChannelName": "Khaidi - Official Trailer (Telugu) | Karthi | Lokesh Kanagaraj | Sam CS | S R Prabhu | 4K",
       "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
@@ -176,7 +180,9 @@
       ],
       "reviews": [],
       "tmdbId": 432011,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=DWwvAmVbuEI",
+      "trailerChannelName": "Super Deluxe - Official Trailer (Telugu)"
     },
     {
       "id": "asuran",
@@ -212,7 +218,9 @@
       ],
       "reviews": [],
       "tmdbId": 576928,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
     },
     {
       "id": "karnan",
@@ -248,7 +256,9 @@
       ],
       "reviews": [],
       "tmdbId": 680652,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=6WzOtGgXF9g",
+      "trailerChannelName": "KARNAN - Official Teaser (Tamil) | Dhanush, Lal, Rajisha Vijayan | Amazon Prime Video"
     },
     {
       "id": "96-2018",
@@ -284,7 +294,9 @@
       ],
       "reviews": [],
       "tmdbId": 441717,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=r0synl-lI4I",
+      "trailerChannelName": "96 Trailer | Vijay Sethupathi, Trisha | Madras Enterprises | C.Prem Kumar | Govind Vasantha"
     },
     {
       "id": "ponniyin-selvan-1",
@@ -325,7 +337,9 @@
       ],
       "reviews": [],
       "tmdbId": 660046,
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
     },
     {
       "title": "Master",
@@ -392,7 +406,510 @@
       ],
       "tmdbId": 626392,
       "trailerUrl": "https://youtu.be/UTiXQcrLlv4?si=WpuAeMfLkEsPZJwM",
-      "createdAt": "2026-05-30T17:00:33.006Z"
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "leo-2023",
+      "title": "Leo",
+      "description": "A mild-mannered cafe owner is dragged into a violent past when gangsters insist he is a missing crime heir. Vijay anchors Lokesh Kanagaraj's icy action drama.",
+      "rating": 7.2,
+      "criticScore": 7.1,
+      "audienceScore": 82,
+      "genre": "Tamil / Action / Crime / Drama",
+      "releaseYear": 2023,
+      "runtime": "2h 44m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Seven Screen Studio",
+      "releaseDate": "October 19, 2023",
+      "language": "Tamil",
+      "tmdbId": 1075794,
+      "posterUrl": "https://image.tmdb.org/t/p/w780/gSOVog7ydsaF1YpgAqBqnKYFGY.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/auXrHU6O17n9Tz11SHReoorjrU6.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vijay",
+          "role": "Parthiban / Leo",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Trisha",
+          "role": "Sathya",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.653Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=G_AEL-Xo5l8",
+      "trailerChannelName": "Official Trailer"
+    },
+    {
+      "id": "blade-runner-2049",
+      "title": "Blade Runner 2049",
+      "description": "A new blade runner, LAPD Officer K, unearths a long-buried secret that has the potential to plunge what's left of society into chaos.",
+      "rating": 8,
+      "criticScore": 9.4,
+      "audienceScore": 95,
+      "genre": "Sci-Fi / Noir",
+      "releaseYear": 2017,
+      "runtime": "2h 44m",
+      "director": "Denis Villeneuve",
+      "writer": "Hampton Fancher",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "Oct 6, 2017",
+      "language": "English (Atmos)",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/sAtoMqDVhNDQBc3QJL3RF6hlhGq.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Ryan Gosling",
+          "role": "Officer K",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Harrison Ford",
+          "role": "Rick Deckard",
+          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Ana de Armas",
+          "role": "Joi",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Denis Villeneuve",
+          "role": "Director",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-neon-1",
+          "user": "Alexander Thorne",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+          "role": "Top Critic",
+          "rating": 10,
+          "text": "A visual masterpiece that redefines the sci-fi genre.",
+          "timestamp": "2h ago",
+          "likes": 1240,
+          "comments": 42,
+          "replies": [
+            {
+              "id": "rev-reply-n1",
+              "author": "Priya Karthik",
+              "body": "Totally agree about the sound design.",
+              "timestamp": "1h ago"
+            },
+            {
+              "id": "rev-reply-n2",
+              "author": "Rajesh Menon",
+              "body": "I felt the pacing was a bit slow though.",
+              "timestamp": "45m ago"
+            }
+          ]
+        },
+        {
+          "id": "rev-neon-2",
+          "user": "Elena Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+          "role": "Reviewer",
+          "rating": 8,
+          "text": "The pacing is slow and deliberate, but the performance by Gosling is breathtaking.",
+          "timestamp": "5h ago",
+          "likes": 420,
+          "comments": 12
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "dune-part-two",
+      "title": "Dune: Part Two",
+      "description": "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+      "rating": 8.4,
+      "criticScore": 9,
+      "audienceScore": 95,
+      "genre": "Sci-Fi Thriller",
+      "releaseYear": 2024,
+      "runtime": "2h 46m",
+      "director": "Denis Villeneuve",
+      "writer": "Jon Spaihts",
+      "studio": "Legendary Pictures",
+      "releaseDate": "March 1, 2024",
+      "language": "English (Atmos)",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Timothée Chalamet",
+          "role": "Paul Atreides",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Zendaya",
+          "role": "Chani",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Austin Butler",
+          "role": "Feyd-Rautha Harkonnen",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Denis Villeneuve",
+          "role": "Director",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-ge-1",
+          "user": "James Dalton",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop",
+          "role": "Verified Critic",
+          "rating": 9,
+          "text": "An absolute masterclass in blockbuster filmmaking.",
+          "timestamp": "1d ago",
+          "likes": 1200,
+          "comments": 42
+        },
+        {
+          "id": "rev-ge-2",
+          "user": "Maya Kovic",
+          "avatarUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop",
+          "role": "Cinema Enthusiast",
+          "rating": 8,
+          "text": "Visually stunning, though the middle act drags a bit.",
+          "timestamp": "3d ago",
+          "likes": 850,
+          "comments": 16
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "interstellar",
+      "title": "Interstellar",
+      "description": "In Earth's future, a global crop blight and second Dust Bowl are slowly rendering the planet uninhabitable.",
+      "rating": 8.7,
+      "criticScore": 8.7,
+      "audienceScore": 86,
+      "genre": "Sci-Fi / Space",
+      "releaseYear": 2014,
+      "runtime": "2h 49m",
+      "director": "Christopher Nolan",
+      "writer": "Jonathan Nolan",
+      "studio": "Paramount Pictures",
+      "releaseDate": "Nov 7, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/pbrkL804c8yAv3zBZR4QPEafpAR.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Matthew McConaughey",
+          "role": "Cooper",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Anne Hathaway",
+          "role": "Brand",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-cr-1",
+          "user": "Julian Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+          "role": "Gold Critic",
+          "rating": 8,
+          "text": "Nolan weaves a brilliant narrative that balances hard space science with profound human emotion.",
+          "timestamp": "3h ago",
+          "likes": 248,
+          "comments": 42
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "the-batman",
+      "title": "The Batman",
+      "description": "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler.",
+      "rating": 7.7,
+      "criticScore": 9.1,
+      "audienceScore": 89,
+      "genre": "Thriller / Noir",
+      "releaseYear": 2022,
+      "runtime": "2h 56m",
+      "director": "Matt Reeves",
+      "writer": "Matt Reeves",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "March 4, 2022",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/IYUD7rAIXzBM91TT3Z5fILUS7n.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Robert Pattinson",
+          "role": "Bruce Wayne / Batman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/3qZ09UE7lN6AtorfXFRYpEtSY93.jpg"
+        },
+        {
+          "name": "Zoë Kravitz",
+          "role": "Selina Kyle / Catwoman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/n0mhAgmY6eJQmA7kaugsTZEJgHo.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 414906,
+      "trailerUrl": "https://www.youtube.com/watch?v=vc7_mH2PWHs",
+      "trailerChannelName": "Official HBO Max Trailer"
+    },
+    {
+      "id": "oppenheimer",
+      "title": "Oppenheimer",
+      "description": "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
+      "rating": 8.3,
+      "criticScore": 8,
+      "audienceScore": 78,
+      "genre": "History / Indie",
+      "releaseYear": 2023,
+      "runtime": "3h 00m",
+      "director": "Christopher Nolan",
+      "writer": "Christopher Nolan",
+      "studio": "Universal Pictures",
+      "releaseDate": "July 21, 2023",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/neeNHeXjMF5fXoCJRsOmkNGC7q.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Cillian Murphy",
+          "role": "J. Robert Oppenheimer",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/2lKs67r7FI4bPu0AXxMUJZxmUXn.jpg"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-pr-1",
+          "user": "Julian Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+          "role": "Gold Critic",
+          "rating": 8,
+          "text": "A towering achievement in filmmaking.",
+          "timestamp": "Oct 28, 2023",
+          "likes": 248,
+          "comments": 42
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 872585,
+      "trailerUrl": "https://www.youtube.com/watch?v=qiuSBWVdgLI",
+      "trailerChannelName": "Review"
+    },
+    {
+      "id": "mad-max-fury-road",
+      "title": "Mad Max: Fury Road",
+      "description": "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search of her homeland.",
+      "rating": 8.1,
+      "criticScore": 8.2,
+      "audienceScore": 88,
+      "genre": "Action / Retro",
+      "releaseYear": 2015,
+      "runtime": "2h 00m",
+      "director": "George Miller",
+      "writer": "George Miller",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "May 15, 2015",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/hA2ple9q4qnwxp3hKVNhroipsir.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/uT895WNwm0aIJRtGizcQhrejWUo.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Charlize Theron",
+          "role": "Imperator Furiosa",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/gd7ShD0yt4bsR2STeQ19KQ6hvXL.jpg"
+        },
+        {
+          "name": "Tom Hardy",
+          "role": "Max Rockatansky",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/d81K0RH8UX7tZj49tZaQhZ9ewH.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 76341,
+      "trailerUrl": "https://www.youtube.com/watch?v=MonFNCgK4WE",
+      "trailerChannelName": "Official Retaliate Trailer"
+    },
+    {
+      "id": "la-la-land",
+      "title": "La La Land",
+      "description": "While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future.",
+      "rating": 8,
+      "criticScore": 8.9,
+      "audienceScore": 85,
+      "genre": "History / Drama",
+      "releaseYear": 2016,
+      "runtime": "2h 08m",
+      "director": "Damien Chazelle",
+      "writer": "Damien Chazelle",
+      "studio": "Summit Entertainment",
+      "releaseDate": "Dec 9, 2016",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/nlPCdZlHtRNcF6C9hzUH4ebmV1w.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "cast": [
+        {
+          "name": "Ryan Gosling",
+          "role": "Sebastian",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Emma Stone",
+          "role": "Mia",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "inception",
+      "title": "Inception",
+      "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+      "rating": 8.8,
+      "criticScore": 7.5,
+      "audienceScore": 70,
+      "genre": "Sci-Fi / Action",
+      "releaseYear": 2010,
+      "runtime": "2h 28m",
+      "director": "Christopher Nolan",
+      "writer": "Christopher Nolan",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "July 16, 2010",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Leonardo DiCaprio",
+          "role": "Cobb",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "whiplash",
+      "title": "Whiplash",
+      "description": "A promising young drummer enrolls at a cut-throat music conservatory where his dreams of greatness are mentored by an instructor who will stop at nothing to realize a student's potential.",
+      "rating": 8.5,
+      "criticScore": 8.5,
+      "audienceScore": 81,
+      "genre": "Drama / Music",
+      "releaseYear": 2014,
+      "runtime": "1h 46m",
+      "director": "Damien Chazelle",
+      "writer": "Damien Chazelle",
+      "studio": "Sony Pictures Classics",
+      "releaseDate": "Oct 10, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/wbQa0EnWUyRzQ5d1pHLNRlmsCUP.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Miles Teller",
+          "role": "Andrew Neiman",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "J.K. Simmons",
+          "role": "Terence Fletcher",
+          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 244786,
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "the-grand-budapest-hotel",
+      "title": "The Grand Budapest Hotel",
+      "description": "A writer relates his adventures at a renowned European resort hotel between the first and second World Wars with a concierge who is wrongly framed for murder.",
+      "rating": 8.1,
+      "criticScore": 7.9,
+      "audienceScore": 74,
+      "genre": "Comedy / Drama",
+      "releaseYear": 2014,
+      "runtime": "1h 39m",
+      "director": "Wes Anderson",
+      "writer": "Wes Anderson",
+      "studio": "Searchlight Pictures",
+      "releaseDate": "March 28, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/9udCLTxTFl28RxnK8Q05E154ZGa.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Ralph Fiennes",
+          "role": "Monsieur Gustave H.",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/pCnVXH1Uo2ODoOit4UXni8OD9VB.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.657Z",
+      "tmdbId": 120467,
+      "trailerUrl": "https://www.youtube.com/watch?v=G1jG8HUY4zI",
+      "trailerChannelName": "Official Red Band Trailer"
     }
   ],
   "users": [
