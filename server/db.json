@@ -142,6 +142,162 @@
       "createdAt": "2026-05-30T17:00:33.006Z"
     },
     {
+      "id": "blade-runner-2049",
+      "title": "Blade Runner 2049",
+      "description": "A new blade runner, LAPD Officer K, unearths a long-buried secret that has the potential to plunge what's left of society into chaos.",
+      "rating": 8,
+      "criticScore": 9.4,
+      "audienceScore": 95,
+      "genre": "Sci-Fi / Noir",
+      "releaseYear": 2017,
+      "runtime": "2h 44m",
+      "director": "Denis Villeneuve",
+      "writer": "Hampton Fancher",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "Oct 6, 2017",
+      "language": "English (Atmos)",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/sAtoMqDVhNDQBc3QJL3RF6hlhGq.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Ryan Gosling",
+          "role": "Officer K",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Harrison Ford",
+          "role": "Rick Deckard",
+          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Ana de Armas",
+          "role": "Joi",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Denis Villeneuve",
+          "role": "Director",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-neon-1",
+          "user": "Alexander Thorne",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+          "role": "Top Critic",
+          "rating": 10,
+          "text": "A visual masterpiece that redefines the sci-fi genre.",
+          "timestamp": "2h ago",
+          "likes": 1240,
+          "comments": 42,
+          "replies": [
+            {
+              "id": "rev-reply-n1",
+              "author": "Priya Karthik",
+              "body": "Totally agree about the sound design.",
+              "timestamp": "1h ago"
+            },
+            {
+              "id": "rev-reply-n2",
+              "author": "Rajesh Menon",
+              "body": "I felt the pacing was a bit slow though.",
+              "timestamp": "45m ago"
+            }
+          ]
+        },
+        {
+          "id": "rev-neon-2",
+          "user": "Elena Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+          "role": "Reviewer",
+          "rating": 8,
+          "text": "The pacing is slow and deliberate, but the performance by Gosling is breathtaking.",
+          "timestamp": "5h ago",
+          "likes": 420,
+          "comments": 12
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "patriot-2026",
+      "title": "Patriot",
+      "description": "A massive political thriller starring Mohanlal and Mammootty together on screen, directed by Joshiy. The film follows a political saga that shakes the nation to its core.",
+      "rating": 8.2,
+      "criticScore": 8.2,
+      "audienceScore": 88,
+      "genre": "Political / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 40m",
+      "director": "Joshiy",
+      "writer": "Murali Gopy",
+      "studio": "Anto Joseph Film Company",
+      "releaseDate": "May 1, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Mohanlal",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Mammootty",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
+    },
+    {
+      "id": "drishyam-3-2026",
+      "title": "Drishyam 3",
+      "description": "Georgekutty returns in the third installment of the blockbuster franchise. Mohanlal reprises his iconic role in this crime thriller that became the highest-grossing Malayalam film of 2026.",
+      "rating": 8.5,
+      "criticScore": 8.5,
+      "audienceScore": 92,
+      "genre": "Crime / Thriller / Drama",
+      "releaseYear": 2026,
+      "runtime": "2h 35m",
+      "director": "Jeethu Joseph",
+      "writer": "Jeethu Joseph",
+      "studio": "Aashirvad Cinemas",
+      "releaseDate": "May 21, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": true,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Mohanlal",
+          "role": "Georgekutty",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Meena",
+          "role": "Rani",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
+    },
+    {
       "id": "super-deluxe",
       "title": "Super Deluxe",
       "description": "Interlocking stories of desire, shame, faith, and absurd fate collide across one wild day in Chennai. Thiagarajan Kumararaja's film is playful, strange, and deeply humane.",
@@ -446,90 +602,6 @@
       "createdAt": "2026-06-25T04:55:26.653Z",
       "trailerUrl": "https://www.youtube.com/watch?v=G_AEL-Xo5l8",
       "trailerChannelName": "Official Trailer"
-    },
-    {
-      "id": "blade-runner-2049",
-      "title": "Blade Runner 2049",
-      "description": "A new blade runner, LAPD Officer K, unearths a long-buried secret that has the potential to plunge what's left of society into chaos.",
-      "rating": 8,
-      "criticScore": 9.4,
-      "audienceScore": 95,
-      "genre": "Sci-Fi / Noir",
-      "releaseYear": 2017,
-      "runtime": "2h 44m",
-      "director": "Denis Villeneuve",
-      "writer": "Hampton Fancher",
-      "studio": "Warner Bros. Pictures",
-      "releaseDate": "Oct 6, 2017",
-      "language": "English (Atmos)",
-      "posterUrl": "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
-      "backdropUrl": "https://image.tmdb.org/t/p/original/sAtoMqDVhNDQBc3QJL3RF6hlhGq.jpg",
-      "isHero": true,
-      "isStaffPick": false,
-      "staffPickType": "",
-      "cast": [
-        {
-          "name": "Ryan Gosling",
-          "role": "Officer K",
-          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-          "name": "Harrison Ford",
-          "role": "Rick Deckard",
-          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-          "name": "Ana de Armas",
-          "role": "Joi",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
-        },
-        {
-          "name": "Denis Villeneuve",
-          "role": "Director",
-          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
-        }
-      ],
-      "reviews": [
-        {
-          "id": "rev-neon-1",
-          "user": "Alexander Thorne",
-          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
-          "role": "Top Critic",
-          "rating": 10,
-          "text": "A visual masterpiece that redefines the sci-fi genre.",
-          "timestamp": "2h ago",
-          "likes": 1240,
-          "comments": 42,
-          "replies": [
-            {
-              "id": "rev-reply-n1",
-              "author": "Priya Karthik",
-              "body": "Totally agree about the sound design.",
-              "timestamp": "1h ago"
-            },
-            {
-              "id": "rev-reply-n2",
-              "author": "Rajesh Menon",
-              "body": "I felt the pacing was a bit slow though.",
-              "timestamp": "45m ago"
-            }
-          ]
-        },
-        {
-          "id": "rev-neon-2",
-          "user": "Elena Vane",
-          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
-          "role": "Reviewer",
-          "rating": 8,
-          "text": "The pacing is slow and deliberate, but the performance by Gosling is breathtaking.",
-          "timestamp": "5h ago",
-          "likes": 420,
-          "comments": 12
-        }
-      ],
-      "createdAt": "2026-06-25T04:55:26.656Z",
-      "trailerUrl": "",
-      "trailerChannelName": ""
     },
     {
       "id": "dune-part-two",
@@ -910,6 +982,186 @@
       "tmdbId": 120467,
       "trailerUrl": "https://www.youtube.com/watch?v=G1jG8HUY4zI",
       "trailerChannelName": "Official Red Band Trailer"
+    },
+    {
+      "id": "karuppu-2026",
+      "title": "Karuppu",
+      "description": "Suriya stars in a dual role in this action-drama with fantasy elements, where a man discovers his connection to a mysterious past. Directed by RJ Balaji, the film blends courtroom drama with supernatural themes, featuring Trisha as a lawyer.",
+      "rating": 8,
+      "criticScore": 8,
+      "audienceScore": 85,
+      "genre": "Action / Drama / Fantasy",
+      "releaseYear": 2026,
+      "runtime": "2h 30m",
+      "director": "RJ Balaji",
+      "writer": "RJ Balaji",
+      "studio": "2D Entertainment",
+      "releaseDate": "May 15, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Suriya",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Trisha",
+          "role": "Lawyer",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.340Z"
+    },
+    {
+      "id": "dhruva-natchathiram-2026",
+      "title": "Dhruva Natchathiram",
+      "description": "A high-octane spy thriller directed by Gautham Vasudev Menon, starring Vikram as a secret agent on a mission filled with international intrigue, stylish action sequences, and emotional depth.",
+      "rating": 8,
+      "criticScore": 8,
+      "audienceScore": 85,
+      "genre": "Action / Spy / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 35m",
+      "director": "Gautham Vasudev Menon",
+      "writer": "Gautham Vasudev Menon",
+      "studio": "Sony Pictures",
+      "releaseDate": "May 24, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Vikram",
+          "role": "Agent",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Ritu Varma",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
+    },
+    {
+      "id": "demonte-colony-3-2026",
+      "title": "Demonte Colony 3",
+      "description": "The cult horror-thriller franchise returns with more eerie atmospheres and psychological tension. Arulnidhi reprises his role as the protagonist trapped in a nightmarish mansion with dark secrets.",
+      "rating": 7.5,
+      "criticScore": 7.5,
+      "audienceScore": 80,
+      "genre": "Horror / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 10m",
+      "director": "Ajay Gnanamuthu",
+      "writer": "Ajay Gnanamuthu",
+      "studio": "Gnanamuthu Films",
+      "releaseDate": "May 14, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Arulnidhi",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Priya Bhavani Shankar",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
+    },
+    {
+      "id": "athiradi-2026",
+      "title": "Athiradi",
+      "description": "Tovino Thomas and Basil Joseph team up for this high-energy action thriller that became one of the biggest Malayalam hits of 2026.",
+      "rating": 7.8,
+      "criticScore": 7.8,
+      "audienceScore": 83,
+      "genre": "Action / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 15m",
+      "director": "Basil Joseph",
+      "writer": "Basil Joseph",
+      "studio": "Basil Joseph Entertainment",
+      "releaseDate": "May 14, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Tovino Thomas",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Basil Joseph",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
+    },
+    {
+      "id": "sattendru-maarudhu-vaanilai-2026",
+      "title": "Sattendru Maarudhu Vaanilai",
+      "description": "A romantic thriller directed by Nalan Kumarasamy, starring Jai and Meenakshi Govindarajan in a story about love and fate set against changing seasons.",
+      "rating": 7.5,
+      "criticScore": 7.5,
+      "audienceScore": 78,
+      "genre": "Drama / Romance / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 05m",
+      "director": "Nalan Kumarasamy",
+      "writer": "Nalan Kumarasamy",
+      "studio": "SR Films",
+      "releaseDate": "May 15, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Jai",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Meenakshi Govindarajan",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z"
     }
   ],
   "users": [

@@ -2173,7 +2173,9 @@ const malayalamMovies = [
 ];
 
 const writeJsonDb = (data) => {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  const tmpFile = DB_FILE + '.tmp';
+  fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+  fs.renameSync(tmpFile, DB_FILE);
 };
 
 const initialCommunityThreads = [
@@ -2225,7 +2227,10 @@ const readJsonDb = () => {
     }
     return parsed;
   } catch (err) {
-    console.error("Error reading JSON database, resetting...", err);
+    console.error("Error reading JSON database, backing up and using fresh seed...", err);
+    try {
+      fs.renameSync(DB_FILE, DB_FILE + '.backup-' + Date.now());
+    } catch (_) {}
     writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
     return { movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads };
   }
@@ -2365,7 +2370,9 @@ const readTmdbCache = () => {
 const writeTmdbCache = (cache) => {
   ensureCacheDir();
   const cacheFile = path.join(CACHE_DIR, 'movie_data.json');
-  fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2), 'utf-8');
+  const tmpFile = cacheFile + '.tmp';
+  fs.writeFileSync(tmpFile, JSON.stringify(cache, null, 2), 'utf-8');
+  fs.renameSync(tmpFile, cacheFile);
 };
 
 const cachedEnrichMovieWithTmdbImages = async (movie) => {
@@ -2383,7 +2390,8 @@ const cachedEnrichMovieWithTmdbImages = async (movie) => {
 
 const cachedEnrichMoviesWithTmdbImages = async (movies) => {
   if (!hasTmdbCredentials()) return movies.map(applyLocalHdImageFallback);
-  return Promise.all(movies.map(m => cachedEnrichMovieWithTmdbImages(m)));
+  const results = await Promise.allSettled(movies.map(m => cachedEnrichMovieWithTmdbImages(m)));
+  return results.map((r, i) => r.status === 'fulfilled' ? r.value : applyLocalHdImageFallback(movies[i]));
 };
 
 export const initDB = async () => {
