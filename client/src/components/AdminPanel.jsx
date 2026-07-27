@@ -122,7 +122,7 @@ export default function AdminPanel({ currentUser }) {
         <DashboardTab movies={movies} totalReviews={totalReviews} heroCount={heroCount} staffPickCount={staffPickCount} featuredCount={featuredCount} gridPickCount={gridPickCount} currentUser={currentUser} onRefreshPosters={handleRefreshPosters} />
       )}
       {activeTab === 'movies' && (
-        <MoviesTab movies={movies} setMovies={setMovies} showSuccess={showSuccess} proxyImageUrl={proxyImageUrl} updateMovie={updateMovie} addMovie={addMovie} deleteMovie={deleteMovie} />
+        <MoviesTab movies={movies} setMovies={setMovies} showSuccess={showSuccess} showToast={showToast} loadMovies={loadMovies} proxyImageUrl={proxyImageUrl} updateMovie={updateMovie} addMovie={addMovie} deleteMovie={deleteMovie} />
       )}
       {activeTab === 'users' && (
         <UsersTab users={users} setUsers={setUsers} currentUser={currentUser} showSuccess={showSuccess} />
@@ -176,7 +176,7 @@ function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, feature
   );
 }
 
-function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie, addMovie, deleteMovie }) {
+function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, proxyImageUrl, updateMovie, addMovie, deleteMovie }) {
   const [loading, setLoading] = useState(false);
   const [editingMovie, setEditingMovie] = useState(null);
   const [editPreview, setEditPreview] = useState(null);
