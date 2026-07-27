@@ -1168,8 +1168,8 @@
     {
       "username": "admin",
       "email": "admin@gmail.com",
-      "passwordHash": "a0358583e86ad2642f2cdf1b1065afd0d609ea97d0c0c6d0d41dd1a77022b165e7ab915a87643a8457d73575653efea0b61b8ad4520a8edfabf9a917ea991de9",
-      "salt": "845067aefd8a36cf5b5b033c366bf202",
+      "passwordHash": "ae3cd34be0b0884635f10c98de38f70e27f7903d7cb1c7c20e6544a752136c6b8f44547c63647127375fff79fa5274119ac16cad950ae518cbfd06c7549e200e",
+      "salt": "ccbad56600c3d48e8a3e588c9fc5e7ed",
       "role": "admin",
       "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
       "token": "9ed58fe770a0d6f1d46fe90c1ef2cfe6ac5eeef9527177e824a1ade27502e07b"
