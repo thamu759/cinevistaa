@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import ShareCard from './ShareCard';
 
 export default function ShareButton({ title, text, url, variant = 'icon', label, movie }) {
@@ -31,6 +30,7 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
     if (!movie || !cardRef.current) return false;
     setCapturing(true);
     try {
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true,
         allowTaint: false,

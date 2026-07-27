@@ -36,6 +36,11 @@ export const fetchMovies = async (filters = {}) => {
   if (filters.genre) params.append('genre', filters.genre);
   if (filters.sort) params.append('sort', filters.sort);
   if (filters.ottPlatform) params.append('ottPlatform', filters.ottPlatform);
+  if (filters.language) params.append('language', filters.language);
+  if (filters.yearFrom) params.append('yearFrom', filters.yearFrom);
+  if (filters.yearTo) params.append('yearTo', filters.yearTo);
+  if (filters.ratingMin) params.append('ratingMin', filters.ratingMin);
+  if (filters.ratingMax) params.append('ratingMax', filters.ratingMax);
 
   const url = `${API_BASE_URL}/movies?${params.toString()}`;
   const response = await fetch(url);

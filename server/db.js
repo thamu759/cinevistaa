@@ -2176,7 +2176,10 @@ const writeJsonDb = (data) => {
   const tmpFile = DB_FILE + '.tmp';
   fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
   fs.renameSync(tmpFile, DB_FILE);
+  _jsonDbCache = null;
 };
+
+let _jsonDbCache = null;
 
 const initialCommunityThreads = [
   {
@@ -2214,6 +2217,7 @@ const initialCommunityThreads = [
 
 const readJsonDb = () => {
   const allSeedMovies = [...tamilPriorityMovies, ...malayalamMovies, ...initialMovies];
+  if (_jsonDbCache) return _jsonDbCache;
   if (!fs.existsSync(DB_FILE)) {
     writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
   }
@@ -2225,6 +2229,7 @@ const readJsonDb = () => {
       parsed.communityThreads = initialCommunityThreads;
       writeJsonDb(parsed);
     }
+    _jsonDbCache = parsed;
     return parsed;
   } catch (err) {
     console.error("Error reading JSON database, backing up and using fresh seed...", err);
@@ -2232,7 +2237,8 @@ const readJsonDb = () => {
       fs.renameSync(DB_FILE, DB_FILE + '.backup-' + Date.now());
     } catch (_) {}
     writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
-    return { movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads };
+    _jsonDbCache = { movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads };
+    return _jsonDbCache;
   }
 };
 
@@ -2464,7 +2470,7 @@ export const initDB = async () => {
 };
 
 export const getMovies = async (query = {}) => {
-  const { search, genre, sort, ottPlatform } = query;
+  const { search, genre, sort, ottPlatform, language, yearFrom, yearTo, ratingMin, ratingMax } = query;
 
   if (useMongoDB) {
     let mongoQuery = {};
@@ -2476,6 +2482,19 @@ export const getMovies = async (query = {}) => {
     }
     if (ottPlatform) {
       mongoQuery['ott.platform'] = ottPlatform;
+    }
+    if (language) {
+      mongoQuery.language = { $regex: language, $options: 'i' };
+    }
+    if (yearFrom || yearTo) {
+      mongoQuery.releaseYear = {};
+      if (yearFrom) mongoQuery.releaseYear.$gte = parseInt(yearFrom);
+      if (yearTo) mongoQuery.releaseYear.$lte = parseInt(yearTo);
+    }
+    if (ratingMin || ratingMax) {
+      mongoQuery.rating = {};
+      if (ratingMin) mongoQuery.rating.$gte = parseFloat(ratingMin);
+      if (ratingMax) mongoQuery.rating.$lte = parseFloat(ratingMax);
     }
 
     let sortOption = {};
@@ -2510,6 +2529,30 @@ export const getMovies = async (query = {}) => {
 
     if (ottPlatform) {
       movies = movies.filter(m => m.ott?.platform === ottPlatform);
+    }
+
+    if (language) {
+      const langLower = language.toLowerCase();
+      movies = movies.filter(m => m.language?.toLowerCase().includes(langLower));
+    }
+
+    if (yearFrom || yearTo) {
+      movies = movies.filter(m => {
+        const year = m.releaseYear || parseInt(m.releaseDate?.split('-')[0]);
+        if (!year) return false;
+        if (yearFrom && year < parseInt(yearFrom)) return false;
+        if (yearTo && year > parseInt(yearTo)) return false;
+        return true;
+      });
+    }
+
+    if (ratingMin || ratingMax) {
+      movies = movies.filter(m => {
+        const r = m.rating || 0;
+        if (ratingMin && r < parseFloat(ratingMin)) return false;
+        if (ratingMax && r > parseFloat(ratingMax)) return false;
+        return true;
+      });
     }
 
     if (sort === 'rating') {

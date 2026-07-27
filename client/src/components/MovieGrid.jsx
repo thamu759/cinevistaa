@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Film } from 'lucide-react';
 import MovieCard from './MovieCard';
 
@@ -26,7 +27,7 @@ export function EmptyState({ icon: Icon = Film, title, message, action }) {
   );
 }
 
-export default function MovieGrid({ movies, onMovieClick, loading, loadingCount = 8, emptyTitle, emptyMessage, emptyAction, visibleCount, onLoadMore, totalCount }) {
+function MovieGrid({ movies, onMovieClick, loading, loadingCount = 8, emptyTitle, emptyMessage, emptyAction, visibleCount, onLoadMore, totalCount }) {
   if (loading) return <LoadingGrid count={loadingCount} />;
 
   const displayMovies = visibleCount ? movies.slice(0, visibleCount) : movies;
@@ -52,3 +53,5 @@ export default function MovieGrid({ movies, onMovieClick, loading, loadingCount 
     </>
   );
 }
+
+export default memo(MovieGrid);

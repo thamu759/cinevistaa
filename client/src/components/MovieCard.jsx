@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { Star } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 
-export default function MovieCard({ movie, onClick, variant = 'grid', maxGenreTags }) {
+function MovieCard({ movie, onClick, variant = 'grid', maxGenreTags }) {
   const className = variant === 'horizontal' ? 'movie-card-horizontal' : 'movie-card';
   const genreTags = movie.genre
     ? movie.genre.split('/').slice(0, maxGenreTags).map(tag => tag.trim())
@@ -32,3 +33,5 @@ export default function MovieCard({ movie, onClick, variant = 'grid', maxGenreTa
     </div>
   );
 }
+
+export default memo(MovieCard);

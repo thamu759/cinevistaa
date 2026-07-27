@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -68,6 +69,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.use(compression());
 app.use(cors());
 app.use(express.json());
 
@@ -90,7 +92,29 @@ await initDB();
 // Auth Endpoints
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const user = await registerUser(req.body);
+    const { username, email, password } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ error: 'Username is required.' });
+    }
+    if (username.trim().length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters.' });
+    }
+    if (username.trim().length > 30) {
+      return res.status(400).json({ error: 'Username must be under 30 characters.' });
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+      return res.status(400).json({ error: 'Username can only contain letters, numbers, and underscores.' });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    if (password.length > 128) {
+      return res.status(400).json({ error: 'Password must be under 128 characters.' });
+    }
+    const user = await registerUser({ username: username.trim(), email: email.trim(), password });
     res.status(201).json(user);
   } catch (error) {
     console.error("Registration error:", error);
@@ -98,9 +122,27 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// Simple in-memory rate limiter for auth endpoints
+const _authRateLimit = {};
+const _rateLimitCheck = (key, maxAttempts = 5, windowMs = 300000) => {
+  const now = Date.now();
+  if (!_authRateLimit[key]) _authRateLimit[key] = [];
+  _authRateLimit[key] = _authRateLimit[key].filter(t => now - t < windowMs);
+  if (_authRateLimit[key].length >= maxAttempts) return false;
+  _authRateLimit[key].push(now);
+  return true;
+};
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required.' });
+    }
+    const rateKey = `login:${(username || '').toLowerCase().trim()}`;
+    if (!_rateLimitCheck(rateKey)) {
+      return res.status(429).json({ error: 'Too many login attempts. Please wait a few minutes.' });
+    }
     const user = await loginUser(username, password);
     res.json(user);
   } catch (error) {
@@ -542,12 +584,20 @@ app.post('/api/movies/:id/reviews', async (req, res) => {
     if (!user || !rating || !text) {
       return res.status(400).json({ error: "User, rating, and review text are required" });
     }
+    const trimmedText = text.trim();
+    if (trimmedText.length < 10) {
+      return res.status(400).json({ error: "Review must be at least 10 characters." });
+    }
+    if (trimmedText.length > 2000) {
+      return res.status(400).json({ error: "Review must be under 2000 characters." });
+    }
+    const parsedRating = Math.min(10, Math.max(1, parseFloat(rating) || 5));
 
     const updatedMovie = await addReview(req.params.id, {
       user,
       role: role || "Cinema Enthusiast",
-      rating: parseFloat(rating), // Rating should be out of 10
-      text,
+      rating: parsedRating,
+      text: trimmedText,
       avatarUrl
     });
 
@@ -1319,7 +1369,23 @@ app.get('/movie/:id', async (req, res) => {
   <meta name="twitter:title" content="${title} | thiraipedia" />
   <meta name="twitter:description" content="${desc}" />
   <meta name="twitter:image" content="${posterUrl}" />
-  <meta http-equiv="refresh" content="0;url=/" />
+  <link rel="canonical" href="https://www.cinevistaa.in/movie/${req.params.id}" />
+  <script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    "name": title,
+    "description": movie?.description || '',
+    "image": posterUrl,
+    "genre": genre ? genre.split(',').map(g => g.trim()) : [],
+    "datePublished": movie?.releaseDate || undefined,
+    "aggregateRating": rating ? { "@type": "AggregateRating", "ratingValue": movie?.rating, "bestRating": 10, "ratingCount": movie?.reviews?.length || 1 } : undefined,
+    "review": (movie?.reviews || []).slice(0, 5).map(r => ({
+      "@type": "Review",
+      "author": { "@type": "Person", "name": r.user },
+      "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": 10 },
+      "reviewBody": r.text
+    }))
+  })}</script>
 </head>
 <body>
   <p>${title} on thiraipedia — ${rating ? `Rated ${rating}/10.` : ''} ${genre}</p>
@@ -1332,12 +1398,53 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
+// robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Sitemap: https://www.cinevistaa.in/sitemap.xml`);
+});
+
+// sitemap.xml
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const movies = await getMovies();
+    const now = new Date().toISOString().split('T')[0];
+    const urls = [
+      `  <url><loc>https://www.cinevistaa.in/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/contact</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
+      ...movies.map(m => `  <url><loc>https://www.cinevistaa.in/movie/${m.id}</loc><lastmod>${m.updatedAt ? new Date(m.updatedAt).toISOString().split('T')[0] : now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`)
+    ];
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>`;
+    res.type('application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.send(xml);
+  } catch {
+    res.status(500).send('<?xml version="1.0"?><urlset/>');
+  }
+});
+
 // Serve SPA static files
 app.use(express.static(clientDist));
 
 // SPA fallback — all other routes serve index.html
 app.get('*', (req, res) => {
   res.sendFile(indexHtmlPath);
+});
+
+// Global error handler
+app.use((err, req, res, _next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error. Please try again later.' });
 });
 
 app.listen(PORT, () => {

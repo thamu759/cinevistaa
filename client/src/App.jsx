@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, Link, ScrollRestoration } from 'react-router-dom';
 import { 
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List,
-  AlertTriangle, RefreshCw, Bell, BellOff
+  AlertTriangle, RefreshCw, Bell, BellOff, SlidersHorizontal, RotateCcw
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
@@ -44,24 +44,25 @@ import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
 import Footer from './components/Footer';
 import MovieDetailsView from './components/MovieDetailsView';
-import LegalPage from './components/LegalPage';
-import ContactPage from './components/ContactPage';
-import AboutPage from './components/AboutPage';
-import ArticlesPage from './components/ArticlesPage';
-import ArticleDetail from './components/ArticleDetail';
 import MovieCard from './components/MovieCard';
 import MovieGrid, { LoadingGrid } from './components/MovieGrid';
 import MovieSection from './components/MovieSection';
 import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
-import ShareButton from './components/ShareButton';
-import SpinWheel from './components/SpinWheel';
-import QuizGame from './components/QuizGame';
-import BlindFrame from './components/BlindFrame';
-import MoodMatcher from './components/MoodMatcher';
-import CineUpdates from './components/CineUpdates';
 import WelcomePopup from './components/WelcomePopup';
-import ReviewSharePopup from './components/ReviewSharePopup';
+
+const LegalPage = lazy(() => import('./components/LegalPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const ArticlesPage = lazy(() => import('./components/ArticlesPage'));
+const ArticleDetail = lazy(() => import('./components/ArticleDetail'));
+const ShareButton = lazy(() => import('./components/ShareButton'));
+const SpinWheel = lazy(() => import('./components/SpinWheel'));
+const QuizGame = lazy(() => import('./components/QuizGame'));
+const BlindFrame = lazy(() => import('./components/BlindFrame'));
+const MoodMatcher = lazy(() => import('./components/MoodMatcher'));
+const CineUpdates = lazy(() => import('./components/CineUpdates'));
+const ReviewSharePopup = lazy(() => import('./components/ReviewSharePopup'));
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -101,6 +102,12 @@ export default function App() {
   const [selectedGenre, setSelectedGenre] = useState('');
   const [sortOption, setSortOption] = useState('rating');
   const [selectedOttPlatform, setSelectedOttPlatform] = useState('');
+  const [filterLanguage, setFilterLanguage] = useState('');
+  const [filterYearFrom, setFilterYearFrom] = useState('');
+  const [filterYearTo, setFilterYearTo] = useState('');
+  const [filterRatingMin, setFilterRatingMin] = useState('');
+  const [filterRatingMax, setFilterRatingMax] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
   const [releaseFilterMonth, setReleaseFilterMonth] = useState('');
@@ -272,6 +279,8 @@ const preRollTimerRef = useRef(null);
     const tamilScrollRef = useRef(null);
     const malayalamScrollRef = useRef(null);
     const topRatedScrollRef = useRef(null);
+    const trendingScrollRef = useRef(null);
+    const recommendedScrollRef = useRef(null);
 
 
   const getYoutubeVideoId = (url) => {
@@ -720,24 +729,29 @@ const preRollTimerRef = useRef(null);
    const loadMoviesList = async () => {
      setIsLoading(true);
      try {
-       const data = await fetchMovies({
-         genre: selectedGenre,
-         sort: sortOption,
-         ottPlatform: selectedOttPlatform
-       });
-       setMovies(data);
-       setError(null);
-     } catch (err) {
-       console.error('Error loading movies:', err);
-       setError(err.message || 'Failed to load movies');
-     } finally {
-       setIsLoading(false);
-     }
-   };
+        const data = await fetchMovies({
+          genre: selectedGenre,
+          sort: sortOption,
+          ottPlatform: selectedOttPlatform,
+          language: filterLanguage,
+          yearFrom: filterYearFrom,
+          yearTo: filterYearTo,
+          ratingMin: filterRatingMin,
+          ratingMax: filterRatingMax,
+        });
+        setMovies(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading movies:', err);
+        setError(err.message || 'Failed to load movies');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   useEffect(() => {
     loadMoviesList();
-  }, [selectedGenre, sortOption, selectedOttPlatform]);
+  }, [selectedGenre, sortOption, selectedOttPlatform, filterLanguage, filterYearFrom, filterYearTo, filterRatingMin, filterRatingMax]);
 
   // Fetch new releases separately (most recent release dates first)
   const loadNewReleases = async () => {
@@ -781,6 +795,44 @@ const preRollTimerRef = useRef(null);
   const upcomingOttMovies = movies
     .filter(m => m.ott?.platform && m.ott?.releaseDate && new Date(m.ott.releaseDate) > new Date())
     .sort((a, b) => new Date(a.ott.releaseDate) - new Date(b.ott.releaseDate));
+
+  // Trending Now: recently added movies sorted by review count then rating
+  const trendingMovies = useMemo(() => {
+    const recent = [...movies]
+      .filter(m => !m.isUpcoming)
+      .sort((a, b) => {
+        const aCount = a.reviews?.length || 0;
+        const bCount = b.reviews?.length || 0;
+        if (bCount !== aCount) return bCount - aCount;
+        return b.rating - a.rating;
+      });
+    return recent.slice(0, 12);
+  }, [movies]);
+
+  // Recommendations: genres from watchlist movies, find similar not-yet-in-watchlist
+  const recommendedMovies = useMemo(() => {
+    if (!watchlist.length) return [];
+    const watchlistMovies = movies.filter(m => watchlist.includes(m.id));
+    const preferredGenres = new Set();
+    watchlistMovies.forEach(m => {
+      (m.genre || '').split(',').map(g => g.trim()).forEach(g => preferredGenres.add(g));
+    });
+    const preferredLangs = new Set();
+    watchlistMovies.forEach(m => { if (m.language) preferredLangs.add(m.language.toLowerCase()); });
+    const wlIds = new Set(watchlist);
+    const scored = movies
+      .filter(m => !wlIds.has(m.id) && !m.isUpcoming)
+      .map(m => {
+        let score = 0;
+        (m.genre || '').split(',').map(g => g.trim()).forEach(g => { if (preferredGenres.has(g)) score += 2; });
+        if (preferredLangs.has((m.language || '').toLowerCase())) score += 1;
+        score += m.rating / 5;
+        return { ...m, _recScore: score };
+      })
+      .filter(m => m._recScore > 0)
+      .sort((a, b) => b._recScore - a._recScore);
+    return scored.slice(0, 12);
+  }, [movies, watchlist]);
 
   // Reset index if out of range when list changes
   const heroTotalSlides = heroMovies.length + 1;
@@ -1113,21 +1165,42 @@ const preRollTimerRef = useRef(null);
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
+    const username = authFormData.username.trim();
+    const email = authFormData.email.trim();
+    const password = authFormData.password;
+    if (!username) {
+      setAuthError('Username is required.');
+      return;
+    }
+    if (username.length < 3) {
+      setAuthError('Username must be at least 3 characters.');
+      return;
+    }
+    if (authTab === 'register') {
+      if (!email) {
+        setAuthError('Email is required.');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setAuthError('Please enter a valid email address.');
+        return;
+      }
+    }
+    if (password.length < 6) {
+      setAuthError('Password must be at least 6 characters.');
+      return;
+    }
     setIsAuthLoading(true);
     try {
       if (authTab === 'login') {
-        const user = await loginUser(authFormData.username, authFormData.password);
+        const user = await loginUser(username, password);
         localStorage.setItem('mc_token', user.token);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
         showToast('Login successful!');
       } else {
-        const user = await registerUser(
-          authFormData.username,
-          authFormData.email,
-          authFormData.password
-        );
+        const user = await registerUser(username, email, password);
         localStorage.setItem('mc_token', user.token);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
@@ -1162,10 +1235,25 @@ const preRollTimerRef = useRef(null);
   // Submit review form
   const handleCreateReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!newReviewData.text) return;
+    const text = (newReviewData.text || '').trim();
+    if (!text) {
+      showToast('Please write a review before submitting.', 'error');
+      return;
+    }
+    if (text.length < 10) {
+      showToast('Review must be at least 10 characters.', 'error');
+      return;
+    }
+    if (text.length > 2000) {
+      showToast('Review must be under 2000 characters.', 'error');
+      return;
+    }
+    const rating = Math.min(10, Math.max(1, Number(newReviewData.rating) || 5));
 
     const reviewPayload = {
       ...newReviewData,
+      text,
+      rating,
       user: currentUser ? currentUser.username : "Anonymous",
       role: currentUser ? currentUser.role : "Cinema Enthusiast",
       avatarUrl: currentUser ? currentUser.avatarUrl : ""
@@ -1646,6 +1734,113 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </header>
             )}
 
+            {/* ADVANCED FILTERS BAR */}
+            <div className="advanced-filters-bar">
+              <div className="advanced-filters-row">
+                <select
+                  className="filter-select"
+                  value={selectedGenre}
+                  onChange={e => setSelectedGenre(e.target.value)}
+                  aria-label="Genre"
+                >
+                  <option value="">All Genres</option>
+                  {['Action','Comedy','Drama','Horror','Thriller','Romance','Sci-Fi','Animation','Fantasy','Mystery','Crime','Adventure','Family','Historical','Musical','Biography','War','Documentary','Psychological','Supernatural'].map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+                <select
+                  className="sort-select"
+                  value={sortOption}
+                  onChange={e => setSortOption(e.target.value)}
+                  aria-label="Sort"
+                >
+                  <option value="rating">Top Rated</option>
+                  <option value="newest">Latest</option>
+                  <option value="popular">Most Popular</option>
+                  <option value="release-desc">Newest Release</option>
+                  <option value="release-asc">Earliest Release</option>
+                </select>
+                <select
+                  className="filter-select"
+                  value={selectedOttPlatform}
+                  onChange={e => setSelectedOttPlatform(e.target.value)}
+                  aria-label="OTT Platform"
+                >
+                  <option value="">All Platforms</option>
+                  {['Netflix','Amazon Prime','Disney+ Hotstar','SonyLIV','Zee5','Aha','Sun NXT','MX Player','JioCinema','Apple TV+','YouTube','Theaters'].map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+                <button
+                  className={`btn-advanced-filters ${showAdvancedFilters ? 'btn-advanced-filters--active' : ''}`}
+                  onClick={() => setShowAdvancedFilters(prev => !prev)}
+                  aria-label="Toggle advanced filters"
+                >
+                  <SlidersHorizontal size={16} />
+                  <span>Filters</span>
+                </button>
+                {(filterLanguage || filterYearFrom || filterYearTo || filterRatingMin || filterRatingMax) && (
+                  <button
+                    className="btn-reset-filters"
+                    onClick={() => { setFilterLanguage(''); setFilterYearFrom(''); setFilterYearTo(''); setFilterRatingMin(''); setFilterRatingMax(''); setSelectedGenre(''); setSelectedOttPlatform(''); setSortOption('rating'); }}
+                    aria-label="Reset all filters"
+                  >
+                    <RotateCcw size={14} />
+                    <span>Reset</span>
+                  </button>
+                )}
+              </div>
+              {showAdvancedFilters && (
+                <div className="advanced-filters-panel">
+                  <div className="advanced-filter-group">
+                    <label className="advanced-filter-label">Language</label>
+                    <select className="filter-select" value={filterLanguage} onChange={e => setFilterLanguage(e.target.value)}>
+                      <option value="">All Languages</option>
+                      {['Tamil','Telugu','Hindi','Malayalam','Kannada','English','Korean','Japanese','French','Spanish'].map(l => (
+                        <option key={l} value={l}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="advanced-filter-group">
+                    <label className="advanced-filter-label">Year From</label>
+                    <select className="filter-select" value={filterYearFrom} onChange={e => setFilterYearFrom(e.target.value)}>
+                      <option value="">Any</option>
+                      {[2026,2025,2024,2023,2022,2021,2020,2019,2018,2015,2010,2000,1990].map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="advanced-filter-group">
+                    <label className="advanced-filter-label">Year To</label>
+                    <select className="filter-select" value={filterYearTo} onChange={e => setFilterYearTo(e.target.value)}>
+                      <option value="">Any</option>
+                      {[2026,2025,2024,2023,2022,2021,2020,2019,2018,2015,2010,2000,1990].map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="advanced-filter-group">
+                    <label className="advanced-filter-label">Min Rating</label>
+                    <select className="filter-select" value={filterRatingMin} onChange={e => setFilterRatingMin(e.target.value)}>
+                      <option value="">Any</option>
+                      {[1,2,3,4,5,6,7,8,9].map(r => (
+                        <option key={r} value={r}>{r}+</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="advanced-filter-group">
+                    <label className="advanced-filter-label">Max Rating</label>
+                    <select className="filter-select" value={filterRatingMax} onChange={e => setFilterRatingMax(e.target.value)}>
+                      <option value="">Any</option>
+                      {[2,3,4,5,6,7,8,9,10].map(r => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <MovieSection
               subtitle="Now Playing"
               title="New Releases"
@@ -1827,6 +2022,28 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   </div>
                 </div>
               </section>
+            )}
+
+            {/* TRENDING NOW */}
+            {trendingMovies.length > 0 && (
+              <MovieSection
+                subtitle="Trending"
+                title="Trending Now"
+                movies={trendingMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={trendingScrollRef}
+              />
+            )}
+
+            {/* RECOMMENDED FOR YOU */}
+            {recommendedMovies.length > 0 && (
+              <MovieSection
+                subtitle="For You"
+                title="Recommended For You"
+                movies={recommendedMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={recommendedScrollRef}
+              />
             )}
 
             {/* FUN SECTION: Quiz & Spin Wheel Promo */}
@@ -2765,41 +2982,51 @@ const handleDeleteReview = useCallback(async (reviewId) => {
         {/* QUIZ VIEW */}
         {activeView === 'quiz' && (
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-            <QuizGame movies={movies} onViewMovie={handleViewMovie} />
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+              <QuizGame movies={movies} onViewMovie={handleViewMovie} />
+            </Suspense>
           </div>
         )}
 
         {/* SPIN WHEEL VIEW */}
         {activeView === 'wheel' && (
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
-            <SpinWheel movies={movies} onViewMovie={handleViewMovie} />
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+              <SpinWheel movies={movies} onViewMovie={handleViewMovie} />
+            </Suspense>
           </div>
         )}
 
         {/* BLIND FRAME VIEW */}
         {activeView === 'blind-frame' && (
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-            <BlindFrame movies={movies} onViewMovie={handleViewMovie} />
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+              <BlindFrame movies={movies} onViewMovie={handleViewMovie} />
+            </Suspense>
           </div>
         )}
 
         {/* MOOD MATCHER VIEW */}
         {activeView === 'mood-matcher' && (
           <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-            <MoodMatcher movies={movies} onViewMovie={handleViewMovie} />
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+              <MoodMatcher movies={movies} onViewMovie={handleViewMovie} />
+            </Suspense>
           </div>
         )}
 
         {/* CINE UPDATES REELS OVERLAY */}
         {showCineReels && (
-          <CineUpdates
-            updates={cineUpdates}
-            onLike={handleCineUpdateLike}
-            onShare={handleCineUpdateShare}
-            currentUser={currentUser}
-            onBack={() => setShowCineReels(false)}
-            onNavigate={navigateTo}
-          />
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+            <CineUpdates
+              updates={cineUpdates}
+              onLike={handleCineUpdateLike}
+              onShare={handleCineUpdateShare}
+              currentUser={currentUser}
+              onBack={() => setShowCineReels(false)}
+              onNavigate={navigateTo}
+            />
+          </Suspense>
         )}
 
         {/* WELCOME ONBOARDING POPUP */}
@@ -2812,11 +3039,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* REVIEW SHARE POPUP */}
         {showReviewShare && lastReviewShare && (
-          <ReviewSharePopup
-            movie={lastReviewShare.movie}
-            reviewData={lastReviewShare.review}
-            onClose={() => setShowReviewShare(false)}
-          />
+          <Suspense fallback={null}>
+            <ReviewSharePopup
+              movie={lastReviewShare.movie}
+              reviewData={lastReviewShare.review}
+              onClose={() => setShowReviewShare(false)}
+            />
+          </Suspense>
         )}
 
         {/* ADMIN CONTROL PANEL VIEW */}
@@ -2825,12 +3054,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
         )}
 
         {/* LEGAL PAGES */}
-        {activeView === 'privacy' && <LegalPage page="privacy" onNavigate={navigateTo} />}
-        {activeView === 'terms' && <LegalPage page="terms" onNavigate={navigateTo} />}
-        {activeView === 'contact' && <ContactPage onNavigate={navigateTo} />}
-        {activeView === 'about' && <AboutPage onNavigate={navigateTo} />}
-        {activeView === 'articles' && <ArticlesPage onNavigate={navigateTo} />}
-        {activeView === 'article-detail' && selectedArticleId && <ArticleDetail articleId={selectedArticleId} onNavigate={navigateTo} />}
+        <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
+          {activeView === 'privacy' && <LegalPage page="privacy" onNavigate={navigateTo} />}
+          {activeView === 'terms' && <LegalPage page="terms" onNavigate={navigateTo} />}
+          {activeView === 'contact' && <ContactPage onNavigate={navigateTo} />}
+          {activeView === 'about' && <AboutPage onNavigate={navigateTo} />}
+          {activeView === 'articles' && <ArticlesPage onNavigate={navigateTo} />}
+          {activeView === 'article-detail' && selectedArticleId && <ArticleDetail articleId={selectedArticleId} onNavigate={navigateTo} />}
+        </Suspense>
       </div>
 
       {/* FOOTER SECTION */}

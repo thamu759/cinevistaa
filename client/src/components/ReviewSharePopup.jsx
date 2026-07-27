@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { Share2, X, Download, Check, MessageCircle, Image as ImageIcon } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import ShareCard from './ShareCard';
 
 export default function ReviewSharePopup({ movie, reviewData, onClose }) {
@@ -17,6 +16,7 @@ export default function ReviewSharePopup({ movie, reviewData, onClose }) {
     if (!captureRef.current || capturing) return;
     setCapturing(true);
     try {
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(captureRef.current, {
         useCORS: true,
         allowTaint: false,
