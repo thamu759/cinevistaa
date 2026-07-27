@@ -237,6 +237,37 @@ app.post('/api/movies', async (req, res) => {
   }
 });
 
+// Bulk delete movies (Admin Only)
+app.delete('/api/movies/bulk', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "ids array is required" });
+    }
+
+    let deletedCount = 0;
+    for (const id of ids) {
+      const deleted = await deleteMovie(id);
+      if (deleted) deletedCount++;
+    }
+
+    res.json({ success: true, message: `${deletedCount} movies deleted successfully`, count: deletedCount });
+  } catch (error) {
+    console.error("Error bulk deleting movies:", error);
+    res.status(500).json({ error: "Server error bulk deleting movies" });
+  }
+});
+
 // Delete a movie (Admin Only)
 app.delete('/api/movies/:id', async (req, res) => {
   try {
@@ -349,6 +380,38 @@ app.get('/api/admin/users', async (req, res) => {
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ error: "Server error fetching users" });
+  }
+});
+
+// Bulk delete users (Admin Only)
+app.delete('/api/admin/users/bulk', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const { usernames } = req.body;
+    if (!Array.isArray(usernames) || usernames.length === 0) {
+      return res.status(400).json({ error: "usernames array is required" });
+    }
+
+    let deletedCount = 0;
+    for (const username of usernames) {
+      if (username === verified.username) continue;
+      const deleted = await deleteUser(username);
+      if (deleted) deletedCount++;
+    }
+
+    res.json({ success: true, message: `${deletedCount} users deleted successfully`, count: deletedCount });
+  } catch (error) {
+    console.error("Error bulk deleting users:", error);
+    res.status(500).json({ error: "Server error bulk deleting users" });
   }
 });
 
@@ -946,6 +1009,37 @@ app.delete('/api/cine-updates', async (req, res) => {
   } catch (error) {
     console.error("Error deleting all cine updates:", error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Bulk delete cine updates (Admin Only)
+app.delete('/api/cine-updates/bulk', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "ids array is required" });
+    }
+
+    let deletedCount = 0;
+    for (const id of ids) {
+      const deleted = await deleteCineUpdate(id);
+      if (deleted) deletedCount++;
+    }
+
+    res.json({ success: true, message: `${deletedCount} cine updates deleted successfully`, count: deletedCount });
+  } catch (error) {
+    console.error("Error bulk deleting cine updates:", error);
+    res.status(500).json({ error: "Server error bulk deleting cine updates" });
   }
 });
 

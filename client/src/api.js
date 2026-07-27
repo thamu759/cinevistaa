@@ -92,6 +92,22 @@ export const deleteMovie = async (id) => {
   return response.json();
 };
 
+export const bulkDeleteMovies = async (ids) => {
+  const token = localStorage.getItem('mc_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const response = await fetch(`${API_BASE_URL}/movies/bulk`, {
+    method: 'DELETE',
+    headers,
+    body: JSON.stringify({ ids }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to bulk delete movies');
+  }
+  return response.json();
+};
+
 // ─── TRIVIA SEEDER ───
 export const seedTriviaUpdates = async (count = 15) => {
   const response = await fetch(`${API_BASE_URL}/seeds/trivia`, {
@@ -361,6 +377,19 @@ export const deleteUser = async (username) => {
   if (!response.ok) {
     const err = await response.json();
     throw new Error(err.error || 'Failed to delete user');
+  }
+  return response.json();
+};
+
+export const bulkDeleteUsers = async (usernames) => {
+  const response = await fetch(`${API_BASE_URL}/admin/users/bulk`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ usernames }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to bulk delete users');
   }
   return response.json();
 };
@@ -637,6 +666,19 @@ export const deleteCineUpdate = async (updateId) => {
   if (!response.ok) {
     const err = await response.json();
     throw new Error(err.error || 'Failed to delete cine update');
+  }
+  return response.json();
+};
+
+export const bulkDeleteCineUpdates = async (ids) => {
+  const response = await fetch(`${API_BASE_URL}/cine-updates/bulk`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ ids }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to bulk delete cine updates');
   }
   return response.json();
 };

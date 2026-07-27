@@ -3625,6 +3625,76 @@ a {
   margin-bottom: 0.45rem;
 }
 
+/* ─── BULK SELECTION ─── */
+.admin-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1rem;
+  margin-bottom: 0.6rem;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 8px;
+  animation: adminFadeIn 0.15s ease;
+}
+.admin-bulk-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+.admin-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.admin-checkbox:checked {
+  background: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+}
+.admin-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.admin-select-all-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.3rem 0;
+  user-select: none;
+}
+.admin-movie-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 5;
+  cursor: pointer;
+}
+.admin-movie-grid-card.selected {
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.15);
+}
+.admin-row-selected {
+  background: rgba(239, 68, 68, 0.04) !important;
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 700px) {
   .admin-tabs {

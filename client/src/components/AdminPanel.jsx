@@ -12,7 +12,7 @@ import {
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
   bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate, deleteAllCineUpdates,
-  seedTriviaUpdates
+  seedTriviaUpdates, bulkDeleteMovies, bulkDeleteUsers, bulkDeleteCineUpdates
 } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
@@ -198,6 +198,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const [bulkInput, setBulkInput] = useState('');
   const [bulkProgress, setBulkProgress] = useState([]);
   const [bulkRunning, setBulkRunning] = useState(false);
+  const [selectedMovieIds, setSelectedMovieIds] = useState([]);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
   useEffect(() => {
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
@@ -402,6 +404,26 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
+  const toggleMovieSelection = (id) => {
+    setSelectedMovieIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+  const toggleAllMovies = () => {
+    const pagedIds = paged.map(m => m.id);
+    const allSelected = pagedIds.every(id => selectedMovieIds.includes(id));
+    setSelectedMovieIds(allSelected ? [] : pagedIds);
+  };
+  const handleBulkDeleteMovies = async () => {
+    setLoading(true);
+    try {
+      const result = await bulkDeleteMovies(selectedMovieIds);
+      setMovies(prev => prev.filter(m => !selectedMovieIds.includes(m.id)));
+      setSelectedMovieIds([]);
+      setConfirmBulkDelete(false);
+      showSuccess(`${result.count || selectedMovieIds.length} movies deleted.`);
+    } catch (err) { showToast(err.message, 'error'); }
+    setLoading(false);
+  };
+
   return (
     <div className="admin-panel">
       <div className="admin-panel-header">
@@ -435,11 +457,31 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
         </button>
       </div>
 
+      {selectedMovieIds.length > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="admin-bulk-count">{selectedMovieIds.length} selected</span>
+          <button className="btn-danger" onClick={() => setConfirmBulkDelete(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+            <Trash2 size={13} /> Delete Selected
+          </button>
+          <button className="btn-secondary" onClick={() => setSelectedMovieIds([])}
+            style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>Clear</button>
+        </div>
+      )}
+
       <div className="admin-movie-grid">
+        {paged.length > 0 && (
+          <label className="admin-select-all-wrap" onClick={e => e.preventDefault()}>
+            <input type="checkbox" checked={paged.every(m => selectedMovieIds.includes(m.id))} onChange={toggleAllMovies} className="admin-checkbox" />
+            <span>Select all on page</span>
+          </label>
+        )}
         {paged.map(movie => (
-          <div key={movie.id} className="admin-movie-grid-card">
+          <div key={movie.id} className={`admin-movie-grid-card ${selectedMovieIds.includes(movie.id) ? 'selected' : ''}`}>
             <div className="admin-movie-grid-poster-wrap">
               <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt={movie.title} className="admin-movie-grid-poster" />
+              <input type="checkbox" checked={selectedMovieIds.includes(movie.id)}
+                onChange={() => toggleMovieSelection(movie.id)} className="admin-movie-checkbox" />
               <div className="admin-movie-grid-overlay">
                 <button onClick={() => { setEditingMovie({ ...movie }); setEditPreview(null); setEditTmdbQuery(''); setEditTmdbResults([]); }} disabled={loading}
                   className="admin-movie-grid-action edit">
@@ -754,6 +796,8 @@ function MoviesTab({ movies, setMovies, showSuccess, proxyImageUrl, updateMovie,
 
       <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)} onConfirm={handleDeleteConfirm}
         title="Delete Movie" message="Delete this movie permanently? This action cannot be undone." confirmLabel="Delete Movie" danger />
+      <ConfirmModal isOpen={confirmBulkDelete} onClose={() => setConfirmBulkDelete(false)} onConfirm={handleBulkDeleteMovies}
+        title="Delete Movies" message={`Delete ${selectedMovieIds.length} selected movies permanently? This action cannot be undone.`} confirmLabel={`Delete ${selectedMovieIds.length} Movies`} danger />
     </div>
   );
 }
@@ -769,6 +813,8 @@ function CineUpdatesTab({ showSuccess }) {
   const [updatePage, setUpdatePage] = useState(0);
   const UPDATES_PER_PAGE = 10;
   const { showToast } = useToast();
+  const [selectedUpdates, setSelectedUpdates] = useState([]);
+  const [confirmBulkUpdateDelete, setConfirmBulkUpdateDelete] = useState(false);
 
   const loadUpdates = async () => {
     setLoading(true);
@@ -837,6 +883,24 @@ function CineUpdatesTab({ showSuccess }) {
     setTriviaLoading(false);
   };
 
+  const toggleUpdateSelection = (id) => {
+    setSelectedUpdates(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+  const toggleAllUpdates = () => {
+    const visibleIds = updates.slice(updatePage * UPDATES_PER_PAGE, (updatePage + 1) * UPDATES_PER_PAGE).map(u => u.id);
+    const allSelected = visibleIds.every(id => selectedUpdates.includes(id));
+    setSelectedUpdates(allSelected ? [] : visibleIds);
+  };
+  const handleBulkDeleteUpdates = async () => {
+    try {
+      const result = await bulkDeleteCineUpdates(selectedUpdates);
+      setSelectedUpdates([]);
+      setConfirmBulkUpdateDelete(false);
+      showSuccess(`${result.count || selectedUpdates.length} cine updates deleted.`);
+      loadUpdates();
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
   return (
     <div className="admin-panel">
       <div className="admin-panel-header">
@@ -853,6 +917,18 @@ function CineUpdatesTab({ showSuccess }) {
           <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
         </button>
       </div>
+
+      {selectedUpdates.length > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="admin-bulk-count">{selectedUpdates.length} selected</span>
+          <button className="btn-danger" onClick={() => setConfirmBulkUpdateDelete(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+            <Trash2 size={13} /> Delete Selected
+          </button>
+          <button className="btn-secondary" onClick={() => setSelectedUpdates([])}
+            style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>Clear</button>
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={handleCreate} style={{ padding: '1rem', marginBottom: '1rem' }} className="glass-panel">
@@ -899,8 +975,15 @@ function CineUpdatesTab({ showSuccess }) {
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No cine updates yet. Create one!</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {updates.length > 0 && (
+            <label className="admin-select-all-wrap" onClick={e => e.preventDefault()}>
+              <input type="checkbox" checked={updates.slice(updatePage * UPDATES_PER_PAGE, (updatePage + 1) * UPDATES_PER_PAGE).every(u => selectedUpdates.includes(u.id))} onChange={toggleAllUpdates} className="admin-checkbox" />
+              <span>Select all on page</span>
+            </label>
+          )}
           {updates.slice(updatePage * UPDATES_PER_PAGE, (updatePage + 1) * UPDATES_PER_PAGE).map(update => (
-            <div key={update.id} className="glass-panel" style={{ padding: '0.75rem 1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+            <div key={update.id} className={`glass-panel ${selectedUpdates.includes(update.id) ? 'admin-row-selected' : ''}`} style={{ padding: '0.75rem 1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <input type="checkbox" checked={selectedUpdates.includes(update.id)} onChange={() => toggleUpdateSelection(update.id)} className="admin-checkbox" style={{ marginTop: '0.2rem' }} />
               {update.imageUrl && (
                 <img src={proxyImageUrl(update.imageUrl, 'w92')} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
               )}
@@ -992,6 +1075,9 @@ function CineUpdatesTab({ showSuccess }) {
           </div>
         </div>
       )}
+
+      <ConfirmModal isOpen={confirmBulkUpdateDelete} onClose={() => setConfirmBulkUpdateDelete(false)} onConfirm={handleBulkDeleteUpdates}
+        title="Delete Cine Updates" message={`Delete ${selectedUpdates.length} selected cine updates permanently? This action cannot be undone.`} confirmLabel={`Delete ${selectedUpdates.length} Updates`} danger />
     </div>
   );
 }
@@ -1000,6 +1086,8 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
   const [loading, setLoading] = useState(false);
   const [confirmUserDelete, setConfirmUserDelete] = useState(null);
   const [confirmRoleChange, setConfirmRoleChange] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [confirmBulkUserDelete, setConfirmBulkUserDelete] = useState(false);
 
   const handleDeleteUser = (username) => {
     setConfirmUserDelete(username);
@@ -1036,6 +1124,25 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
     setConfirmRoleChange(null);
   };
 
+  const toggleUserSelection = (username) => {
+    setSelectedUsers(prev => prev.includes(username) ? prev.filter(x => x !== username) : [...prev, username]);
+  };
+  const toggleAllUsers = () => {
+    const allSelected = users.every(u => selectedUsers.includes(u.username));
+    setSelectedUsers(allSelected ? [] : users.map(u => u.username));
+  };
+  const handleBulkDeleteUsers = async () => {
+    setLoading(true);
+    try {
+      const result = await bulkDeleteUsers(selectedUsers);
+      setUsers(prev => prev.filter(u => !selectedUsers.includes(u.username)));
+      setSelectedUsers([]);
+      setConfirmBulkUserDelete(false);
+      showSuccess(`${result.count || selectedUsers.length} users deleted.`);
+    } catch (err) { showToast(err.message, 'error'); }
+    setLoading(false);
+  };
+
   return (
     <>
     <div className="admin-panel">
@@ -1046,9 +1153,23 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
       </div>
 
       <div className="admin-table-wrap">
+        {selectedUsers.length > 0 && (
+          <div className="admin-bulk-bar">
+            <span className="admin-bulk-count">{selectedUsers.length} selected</span>
+            <button className="btn-danger" onClick={() => setConfirmBulkUserDelete(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+              <Trash2 size={13} /> Delete Selected
+            </button>
+            <button className="btn-secondary" onClick={() => setSelectedUsers([])}
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>Clear</button>
+          </div>
+        )}
         <table className="admin-table">
           <thead>
             <tr>
+              <th style={{ width: '40px' }}>
+                <input type="checkbox" checked={users.length > 0 && users.every(u => selectedUsers.includes(u.username))} onChange={toggleAllUsers} className="admin-checkbox" />
+              </th>
               <th>User</th>
               <th>Email</th>
               <th>Role</th>
@@ -1057,7 +1178,10 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
           </thead>
           <tbody>
             {users.map(user => (
-              <tr key={user.username}>
+              <tr key={user.username} className={selectedUsers.includes(user.username) ? 'admin-row-selected' : ''}>
+                <td>
+                  <input type="checkbox" checked={selectedUsers.includes(user.username)} onChange={() => toggleUserSelection(user.username)} className="admin-checkbox" />
+                </td>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <img src={user.avatarUrl || DEFAULT_AVATAR} alt={user.username} style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -1086,6 +1210,9 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
 
     <ConfirmModal isOpen={!!confirmUserDelete} onClose={() => setConfirmUserDelete(null)} onConfirm={handleDeleteUserConfirm}
       title="Delete User" message="Delete this user permanently? They will lose all access." confirmLabel="Delete User" danger />
+
+    <ConfirmModal isOpen={confirmBulkUserDelete} onClose={() => setConfirmBulkUserDelete(false)} onConfirm={handleBulkDeleteUsers}
+      title="Delete Users" message={`Delete ${selectedUsers.length} selected users permanently? They will lose all access.`} confirmLabel={`Delete ${selectedUsers.length} Users`} danger />
 
     <ConfirmModal isOpen={!!confirmRoleChange} onClose={() => setConfirmRoleChange(null)}
       onConfirm={() => handleRoleChangeConfirm(confirmRoleChange?.username, confirmRoleChange?.newRole)}
