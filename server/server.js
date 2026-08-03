@@ -236,7 +236,7 @@ app.post('/api/movies', async (req, res) => {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
-    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, isHero, isStaffPick, staffPickType, isUpcoming, trailerUrl, trailerChannelName, ott, cast, criticScore, audienceScore, rating } = req.body;
+    const { title, description, genre, releaseYear, runtime, director, writer, studio, releaseDate, language, posterUrl, titleLogoUrl, isHero, isStaffPick, staffPickType, isUpcoming, trailerUrl, trailerChannelName, ott, cast, criticScore, audienceScore, rating } = req.body;
     if (!title || !description) {
       return res.status(400).json({ error: "Title and description are required" });
     }
@@ -259,6 +259,7 @@ app.post('/api/movies', async (req, res) => {
       language: language || "English",
       posterUrl: posterUrl || "/assets/placeholder.jpg",
       backdropUrl: posterUrl || "/assets/placeholder.jpg",
+      titleLogoUrl: titleLogoUrl || '',
       isHero: isHero || false,
       isStaffPick: isStaffPick || false,
       staffPickType: staffPickType || '',

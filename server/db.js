@@ -2261,6 +2261,7 @@ try {
     language: { type: String },
     posterUrl: { type: String },
     backdropUrl: { type: String },
+    titleLogoUrl: { type: String },
     tmdbId: { type: Number },
     isHero: { type: Boolean, default: false },
     isStaffPick: { type: Boolean, default: false },

@@ -187,7 +187,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
   const [page, setPage] = useState(0);
   const [filterText, setFilterText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
+  const [addForm, setAddForm] = useState({ title: '', description: '', posterUrl: '', titleLogoUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
   const [addCast, setAddCast] = useState([]);
   const [addTmdbQuery, setAddTmdbQuery] = useState('');
   const [addTmdbResults, setAddTmdbResults] = useState([]);
@@ -316,6 +316,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
       title: m.title || '',
       description: m.description || '',
       posterUrl: m.posterUrl || '',
+      titleLogoUrl: '',
       releaseDate: m.releaseDate || '',
       language: (m.language || '').toUpperCase(),
       director: '',
@@ -361,7 +362,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
       };
       const created = await addMovie(payload);
       setMovies(prev => [...prev, created]);
-      setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
+      setAddForm({ title: '', description: '', posterUrl: '', titleLogoUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' });
       setAddCast([]);
       setAddTmdbQuery('');
       setAddTmdbResults([]);
@@ -535,7 +536,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
       )}
 
       {/* Add Movie Modal */}
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', titleLogoUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }} title="Add New Movie" width="720px">
         <div className="admin-add-modal-tmdb">
           <label className="admin-label" style={{ marginBottom: '0.25rem' }}>Quick fill from TMDB</label>
           <div style={{ position: 'relative' }}>
@@ -562,6 +563,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
           <div><label className="admin-label">Release Date</label><input className="admin-input" value={addForm.releaseDate} onChange={e => setAddForm(prev => ({ ...prev, releaseDate: e.target.value }))} /></div>
           <div className="admin-edit-full"><label className="admin-label">Description</label><textarea className="admin-textarea" value={addForm.description} onChange={e => setAddForm(prev => ({ ...prev, description: e.target.value }))} rows={2} /></div>
           <div><label className="admin-label">Poster URL</label><input className="admin-input" value={addForm.posterUrl} onChange={e => setAddForm(prev => ({ ...prev, posterUrl: e.target.value }))} /></div>
+          <div className="admin-edit-full"><label className="admin-label">Title Logo URL</label><input className="admin-input" value={addForm.titleLogoUrl} onChange={e => setAddForm(prev => ({ ...prev, titleLogoUrl: e.target.value }))} placeholder="https://... (shown in hero, fallback: TMDB logo)" /></div>
           <div><label className="admin-label">Language</label><input className="admin-input" value={addForm.language} onChange={e => setAddForm(prev => ({ ...prev, language: e.target.value }))} /></div>
           <div><label className="admin-label">Director</label><input className="admin-input" value={addForm.director} onChange={e => setAddForm(prev => ({ ...prev, director: e.target.value }))} /></div>
           <div><label className="admin-label">Writer</label><input className="admin-input" value={addForm.writer} onChange={e => setAddForm(prev => ({ ...prev, writer: e.target.value }))} /></div>
@@ -631,7 +633,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
+          <button onClick={() => { setShowAddModal(false); setAddForm({ title: '', description: '', posterUrl: '', titleLogoUrl: '', releaseDate: '', language: '', director: '', writer: '', studio: '', genre: '', runtime: '', isHero: false, isStaffPick: false, staffPickType: '', isUpcoming: false, trailerUrl: '', trailerChannelName: '', ottPlatform: '', ottReleaseDate: '', ottUrl: '', criticScore: '', audienceScore: '', rating: '' }); setAddCast([]); setAddTmdbQuery(''); setAddTmdbResults([]); setAddAutoSearching(false); setLastAutoFetchedTitle(''); }}
             className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Cancel</button>
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -721,6 +723,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
             <div><label className="admin-label">Runtime</label><input className="admin-input" value={editingMovie?.runtime || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, runtime: e.target.value } : prev)} placeholder="e.g. 2h 44m" /></div>
             <div className="admin-edit-full"><label className="admin-label">Description</label><textarea className="admin-textarea" value={editingMovie?.description || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, description: e.target.value } : prev)} rows={2} /></div>
             <div><label className="admin-label">Poster URL</label><input className="admin-input" value={editingMovie?.posterUrl || ''} onChange={e => { setEditingMovie(prev => prev ? { ...prev, posterUrl: e.target.value } : prev); setEditPreview(e.target.value); }} /></div>
+            <div className="admin-edit-full"><label className="admin-label">Title Logo URL</label><input className="admin-input" value={editingMovie?.titleLogoUrl || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, titleLogoUrl: e.target.value } : prev)} placeholder="https://... (shown in hero, fallback: TMDB logo)" /></div>
             <div className="admin-edit-full"><label className="admin-label">Trailer URL (YouTube)</label><input className="admin-input" value={editingMovie?.trailerUrl || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, trailerUrl: e.target.value } : prev)} placeholder="https://www.youtube.com/watch?v=..." /></div>
             <div className="admin-edit-full"><label className="admin-label">YouTube Channel Name</label><input className="admin-input" value={editingMovie?.trailerChannelName || ''} onChange={e => setEditingMovie(prev => prev ? { ...prev, trailerChannelName: e.target.value } : prev)} placeholder="e.g. Sony Pictures Entertainment" /></div>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', alignItems: 'end', flexWrap: 'wrap', paddingTop: '0.3rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
