@@ -92,3 +92,8 @@ flutter_app/android/.gradle/
 flutter_app/ios/Pods/
 flutter_app/ios/.symlinks/
 flutter_app/coverage/
+
+# Runtime data (never commit live databases)
+server/db.json
+server/db.json.backup-*
+server/.tmdb_cache/

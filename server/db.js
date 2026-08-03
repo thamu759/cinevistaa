@@ -2418,8 +2418,20 @@ export const initDB = async () => {
   };
 
   if (mongoUri) {
-    try {
-      await mongoose.connect(mongoUri);
+    let connected = false;
+    const MAX_ATTEMPTS = 3;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 15000 });
+        connected = true;
+        break;
+      } catch (err) {
+        console.warn(`MongoDB connection attempt ${attempt}/${MAX_ATTEMPTS} failed: ${err.message}`);
+        if (attempt < MAX_ATTEMPTS) await new Promise(res => setTimeout(res, 2500 * attempt));
+      }
+    }
+
+    if (connected) {
       console.log("Connected to MongoDB successfully.");
       useMongoDB = true;
       const count = await MovieModel.countDocuments();
@@ -2444,8 +2456,8 @@ export const initDB = async () => {
           }
         }
       }
-    } catch (err) {
-      console.warn("Failed to connect to MongoDB. Falling back to local JSON file db.json. Error:", err.message);
+    } else {
+      console.warn("WARNING: Failed to connect to MongoDB after all attempts. Falling back to local JSON file db.json. Movies added on this instance will NOT survive restarts/deploys. Set MONGO_URI to persist data.");
       useMongoDB = false;
       const data = readJsonDb();
       const moviesToRefresh = (data.movies || []).filter(needsTmdbImageRefresh);
