@@ -1594,6 +1594,10 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onTouchStart={handleHeroTouchStart}
                 onTouchEnd={handleHeroTouchEnd}
               >
+                <div
+                  className="hero-track"
+                  style={{ '--track-offset': `${-(currentHeroIndex * 100)}%` }}
+                >
                 {/* CINE PULSE PROMO SLIDE — always first */}
                 <div
                   key="cine-reels-promo"
@@ -1650,7 +1654,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     >
                       <div 
                         className="hero-backdrop" 
-                        style={{ backgroundImage: isActive ? `url(${proxyImageUrl(movie.backdropUrl, 'original')})` : 'none' }}
+                        style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
                       />
                       <div className="hero-rating-badge hero-rating-badge--corner">
                         <span className="hero-tag-fav">FEATURED</span>
@@ -1676,11 +1680,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                               {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
                               {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
                             </button>
-                        </div>
+                          </div>
                       </div>
                     </div>
                   );
                 })}
+                </div>
 
                 {/* Left Arrow */}
                 {heroMovies.length >= 1 && currentHeroIndex > 0 && (
@@ -1737,41 +1742,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   </div>
                 )}
               </header>
-            )}
-
-            {/* MOBILE HERO — horizontal snap-scroll poster slider */}
-            {heroMovies.length > 0 && (
-              <div className="hero-mobile">
-                <div className="hero-mobile-track">
-                  <div
-                    className="hero-mobile-card hero-mobile-card--promo"
-                    onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
-                  >
-                    <span className="hero-mobile-promo-dot" />
-                    <span className="hero-mobile-promo-title">Cine<br />Pulse</span>
-                    <span className="hero-mobile-promo-sub">Movie Updates</span>
-                  </div>
-                  {heroMovies.map((movie) => (
-                    <div
-                      key={movie.id}
-                      className="hero-mobile-card"
-                      onClick={() => handleViewMovie(movie.id)}
-                    >
-                      <img
-                        className="hero-mobile-poster"
-                        src={proxyImageUrl(movie.posterUrl, 'w500')}
-                        alt={movie.title}
-                        loading="lazy"
-                      />
-                      <span className="hero-mobile-rating">
-                        <Star size={10} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        {movie.rating.toFixed(1)}
-                      </span>
-                      <span className="hero-mobile-title">{movie.title}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             )}
 
             {/* ADVANCED FILTERS BAR */}
