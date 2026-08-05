@@ -4127,6 +4127,14 @@ a {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   }
 
+  .hero-rating-badge--corner .hero-tag-fav {
+    display: none;
+  }
+
+  .hero-actions .btn-secondary {
+    display: none;
+  }
+
   .hero-slide--active .hero-backdrop {
     animation: heroBackdropSlideM 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -4143,21 +4151,6 @@ a {
   @keyframes heroContentSlideM {
     from { opacity: 0; transform: translateX(44px); }
     to { opacity: 1; transform: translateX(0); }
-  }
-
-  .hero-indicators {
-    display: flex;
-    gap: 0.45rem;
-    bottom: 0.6rem;
-  }
-
-  .hero-indicator-dot {
-    width: 16px;
-    height: 3px;
-  }
-
-  .hero-indicator-dot--active {
-    width: 24px;
   }
 
   .movie-card-horizontal {
