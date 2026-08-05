@@ -270,6 +270,10 @@ const preRollTimerRef = useRef(null);
     const newReleasesScrollRef = useRef(null);
     const tamilScrollRef = useRef(null);
     const malayalamScrollRef = useRef(null);
+    const teluguScrollRef = useRef(null);
+    const kannadaScrollRef = useRef(null);
+    const hindiScrollRef = useRef(null);
+    const englishScrollRef = useRef(null);
     const topRatedScrollRef = useRef(null);
     const trendingScrollRef = useRef(null);
     const recommendedScrollRef = useRef(null);
@@ -777,6 +781,10 @@ const preRollTimerRef = useRef(null);
   const streamingMovies = movies.filter(m => m.ott?.platform);
   const tamilMovies = movies.filter(m => normalizeLang(m.language) === 'TAMIL');
   const malayalamMovies = movies.filter(m => normalizeLang(m.language) === 'MALAYALAM');
+  const teluguMovies = movies.filter(m => normalizeLang(m.language) === 'TELUGU');
+  const kannadaMovies = movies.filter(m => normalizeLang(m.language) === 'KANNADA');
+  const hindiMovies = movies.filter(m => normalizeLang(m.language) === 'HINDI');
+  const englishMovies = movies.filter(m => normalizeLang(m.language) === 'ENGLISH');
   const topRatedMovies = [...movies].filter(m => m.rating >= 7).sort((a, b) => b.rating - a.rating);
   const upcomingOttMovies = movies
     .filter(m => m.ott?.platform && m.ott?.releaseDate && new Date(m.ott.releaseDate) > new Date())
@@ -1758,6 +1766,46 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onMovieClick={handleViewMovie}
                 scrollRef={malayalamScrollRef}
                 onViewAll={() => navigateTo('malayalam-cinema')}
+              />
+            )}
+
+            {teluguMovies.length > 0 && (
+              <MovieSection
+                subtitle="తెలుగు సినిమా"
+                title="Telugu Cinema"
+                movies={teluguMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={teluguScrollRef}
+              />
+            )}
+
+            {kannadaMovies.length > 0 && (
+              <MovieSection
+                subtitle="ಕನ್ನಡ ಸಿನಿಮಾ"
+                title="Kannada Cinema"
+                movies={kannadaMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={kannadaScrollRef}
+              />
+            )}
+
+            {hindiMovies.length > 0 && (
+              <MovieSection
+                subtitle="हिंदी सिनेमा"
+                title="Hindi Cinema"
+                movies={hindiMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={hindiScrollRef}
+              />
+            )}
+
+            {englishMovies.length > 0 && (
+              <MovieSection
+                subtitle="English Movies"
+                title="English Cinema"
+                movies={englishMovies}
+                onMovieClick={handleViewMovie}
+                scrollRef={englishScrollRef}
               />
             )}
 
