@@ -1739,6 +1739,41 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </header>
             )}
 
+            {/* MOBILE HERO — horizontal snap-scroll poster slider */}
+            {heroMovies.length > 0 && (
+              <div className="hero-mobile">
+                <div className="hero-mobile-track">
+                  <div
+                    className="hero-mobile-card hero-mobile-card--promo"
+                    onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+                  >
+                    <span className="hero-mobile-promo-dot" />
+                    <span className="hero-mobile-promo-title">Cine<br />Pulse</span>
+                    <span className="hero-mobile-promo-sub">Movie Updates</span>
+                  </div>
+                  {heroMovies.map((movie) => (
+                    <div
+                      key={movie.id}
+                      className="hero-mobile-card"
+                      onClick={() => handleViewMovie(movie.id)}
+                    >
+                      <img
+                        className="hero-mobile-poster"
+                        src={proxyImageUrl(movie.posterUrl, 'w500')}
+                        alt={movie.title}
+                        loading="lazy"
+                      />
+                      <span className="hero-mobile-rating">
+                        <Star size={10} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        {movie.rating.toFixed(1)}
+                      </span>
+                      <span className="hero-mobile-title">{movie.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* ADVANCED FILTERS BAR */}
             <div className="advanced-filters-bar">
               <div className="advanced-filters-row">
