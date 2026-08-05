@@ -1,4 +1,4 @@
-import{t as e}from"./vendor-react-BPx13xc_.js";var t=e(),n={"art-of-film-criticism":{title:`The Art of Film Criticism: Beyond Good or Bad`,content:`Film criticism is often misunderstood as simply deciding whether a movie is "good" or "bad." In reality, meaningful criticism is a craft that combines technical knowledge, cultural awareness, and personal perspective.
+import{t as e}from"./vendor-react-C3b0ow_4.js";var t=e(),n={"art-of-film-criticism":{title:`The Art of Film Criticism: Beyond Good or Bad`,content:`Film criticism is often misunderstood as simply deciding whether a movie is "good" or "bad." In reality, meaningful criticism is a craft that combines technical knowledge, cultural awareness, and personal perspective.
 
 At thiraipedia, we believe every review should go beyond surface-level judgment. A well-written critique examines multiple dimensions of a film — the visual language, narrative structure, sound design, and performances.
 

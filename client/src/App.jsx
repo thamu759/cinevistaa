@@ -5,7 +5,7 @@ import {
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List,
-  AlertTriangle, RefreshCw, Bell, BellOff, SlidersHorizontal, RotateCcw
+  AlertTriangle, RefreshCw, Bell, BellOff
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
@@ -100,13 +100,6 @@ export default function App() {
   // Filter State (for the movie grid only)
   const [selectedGenre, setSelectedGenre] = useState('');
   const [sortOption, setSortOption] = useState('rating');
-  const [selectedOttPlatform, setSelectedOttPlatform] = useState('');
-  const [filterLanguage, setFilterLanguage] = useState('');
-  const [filterYearFrom, setFilterYearFrom] = useState('');
-  const [filterYearTo, setFilterYearTo] = useState('');
-  const [filterRatingMin, setFilterRatingMin] = useState('');
-  const [filterRatingMax, setFilterRatingMax] = useState('');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
   const [releaseFilterMonth, setReleaseFilterMonth] = useState('');
@@ -731,12 +724,6 @@ const preRollTimerRef = useRef(null);
         const data = await fetchMovies({
           genre: selectedGenre,
           sort: sortOption,
-          ottPlatform: selectedOttPlatform,
-          language: filterLanguage,
-          yearFrom: filterYearFrom,
-          yearTo: filterYearTo,
-          ratingMin: filterRatingMin,
-          ratingMax: filterRatingMax,
         });
         setMovies(data);
         setError(null);
@@ -750,7 +737,7 @@ const preRollTimerRef = useRef(null);
 
   useEffect(() => {
     loadMoviesList();
-  }, [selectedGenre, sortOption, selectedOttPlatform, filterLanguage, filterYearFrom, filterYearTo, filterRatingMin, filterRatingMax]);
+  }, [selectedGenre, sortOption]);
 
   // Fetch new releases separately (most recent release dates first)
   const loadNewReleases = async () => {
@@ -1742,102 +1729,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 )}
               </header>
             )}
-
-            {/* ADVANCED FILTERS BAR */}
-            <div className="advanced-filters-bar">
-              <div className="advanced-filters-row">
-                <select
-                  className="sort-select"
-                  value={sortOption}
-                  onChange={e => setSortOption(e.target.value)}
-                  aria-label="Sort"
-                >
-                  <option value="rating">Top Rated</option>
-                  <option value="newest">Latest</option>
-                  <option value="popular">Most Popular</option>
-                  <option value="release-desc">Newest Release</option>
-                  <option value="release-asc">Earliest Release</option>
-                </select>
-                <select
-                  className="filter-select"
-                  value={selectedOttPlatform}
-                  onChange={e => setSelectedOttPlatform(e.target.value)}
-                  aria-label="OTT Platform"
-                >
-                  <option value="">All Platforms</option>
-                  {['Netflix','Amazon Prime','Disney+ Hotstar','SonyLIV','Zee5','Aha','Sun NXT','MX Player','JioCinema','Apple TV+','YouTube','Theaters'].map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-                <button
-                  className={`btn-advanced-filters ${showAdvancedFilters ? 'btn-advanced-filters--active' : ''}`}
-                  onClick={() => setShowAdvancedFilters(prev => !prev)}
-                  aria-label="Toggle advanced filters"
-                >
-                  <SlidersHorizontal size={16} />
-                  <span>Filters</span>
-                </button>
-                {(filterLanguage || filterYearFrom || filterYearTo || filterRatingMin || filterRatingMax) && (
-                  <button
-                    className="btn-reset-filters"
-                    onClick={() => { setFilterLanguage(''); setFilterYearFrom(''); setFilterYearTo(''); setFilterRatingMin(''); setFilterRatingMax(''); setSelectedGenre(''); setSelectedOttPlatform(''); setSortOption('rating'); }}
-                    aria-label="Reset all filters"
-                  >
-                    <RotateCcw size={14} />
-                    <span>Reset</span>
-                  </button>
-                )}
-              </div>
-              {showAdvancedFilters && (
-                <div className="advanced-filters-panel">
-                  <div className="advanced-filter-group">
-                    <label className="advanced-filter-label">Language</label>
-                    <select className="filter-select" value={filterLanguage} onChange={e => setFilterLanguage(e.target.value)}>
-                      <option value="">All Languages</option>
-                      {['Tamil','Telugu','Hindi','Malayalam','Kannada','English','Korean','Japanese','French','Spanish'].map(l => (
-                        <option key={l} value={l}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="advanced-filter-group">
-                    <label className="advanced-filter-label">Year From</label>
-                    <select className="filter-select" value={filterYearFrom} onChange={e => setFilterYearFrom(e.target.value)}>
-                      <option value="">Any</option>
-                      {[2026,2025,2024,2023,2022,2021,2020,2019,2018,2015,2010,2000,1990].map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="advanced-filter-group">
-                    <label className="advanced-filter-label">Year To</label>
-                    <select className="filter-select" value={filterYearTo} onChange={e => setFilterYearTo(e.target.value)}>
-                      <option value="">Any</option>
-                      {[2026,2025,2024,2023,2022,2021,2020,2019,2018,2015,2010,2000,1990].map(y => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="advanced-filter-group">
-                    <label className="advanced-filter-label">Min Rating</label>
-                    <select className="filter-select" value={filterRatingMin} onChange={e => setFilterRatingMin(e.target.value)}>
-                      <option value="">Any</option>
-                      {[1,2,3,4,5,6,7,8,9].map(r => (
-                        <option key={r} value={r}>{r}+</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="advanced-filter-group">
-                    <label className="advanced-filter-label">Max Rating</label>
-                    <select className="filter-select" value={filterRatingMax} onChange={e => setFilterRatingMax(e.target.value)}>
-                      <option value="">Any</option>
-                      {[2,3,4,5,6,7,8,9,10].map(r => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
 
             <MovieSection
               subtitle="Now Playing"
