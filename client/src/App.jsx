@@ -1747,17 +1747,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <div className="advanced-filters-bar">
               <div className="advanced-filters-row">
                 <select
-                  className="filter-select"
-                  value={selectedGenre}
-                  onChange={e => setSelectedGenre(e.target.value)}
-                  aria-label="Genre"
-                >
-                  <option value="">All Genres</option>
-                  {['Action','Comedy','Drama','Horror','Thriller','Romance','Sci-Fi','Animation','Fantasy','Mystery','Crime','Adventure','Family','Historical','Musical','Biography','War','Documentary','Psychological','Supernatural'].map(g => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-                <select
                   className="sort-select"
                   value={sortOption}
                   onChange={e => setSortOption(e.target.value)}
