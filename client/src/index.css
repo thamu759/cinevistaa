@@ -4147,6 +4147,10 @@ a {
     background: linear-gradient(#0b0c1020 0%, #0b0c1080 55%, #0b0c10e0 100%);
   }
 
+  .advanced-filters-bar {
+    display: none;
+  }
+
   .movie-card-horizontal {
     flex: 0 0 160px;
   }
