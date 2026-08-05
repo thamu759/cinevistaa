@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Shield, Film, MessageSquare, Database, Check, Plus, Search, X,
   Trash2, Users, Star, Sparkles, ChevronLeft, ChevronRight,
-  Activity, RefreshCw, BarChart3, Save, Edit
+  Activity, RefreshCw, BarChart3, Save, Edit, Newspaper
 } from 'lucide-react';
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 import {
-  fetchMovies, fetchMovieById, addMovie, deleteMovie, updateMovie,
-  refreshMoviePosters, curateMovie, proxyImageUrl,
+  fetchMovies, addMovie, deleteMovie, updateMovie,
+  refreshMoviePosters, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
   bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate, deleteAllCineUpdates,
@@ -26,6 +26,7 @@ export default function AdminPanel({ currentUser }) {
   const [movies, setMovies] = useState([]);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   const showSuccess = (msg) => {
@@ -46,10 +47,12 @@ export default function AdminPanel({ currentUser }) {
   };
 
   const loadUsers = async () => {
+    setUsersLoading(true);
     try {
       const data = await fetchUsers();
       setUsers(data);
     } catch (err) { console.error(err); }
+    setUsersLoading(false);
   };
 
   const handleRefreshPosters = async () => {
@@ -58,16 +61,6 @@ export default function AdminPanel({ currentUser }) {
       const updated = await refreshMoviePosters();
       setMovies(updated);
       showSuccess('Posters refreshed.');
-    } catch (err) { showToast(err.message, 'error'); }
-    setIsLoading(false);
-  };
-
-  const handleCurate = async (movieId, data) => {
-    setIsLoading(true);
-    try {
-      const updated = await curateMovie(movieId, data);
-      setMovies(prev => prev.map(m => m.id === movieId ? { ...m, ...updated } : m));
-      showSuccess('Curation updated.');
     } catch (err) { showToast(err.message, 'error'); }
     setIsLoading(false);
   };
@@ -104,8 +97,7 @@ export default function AdminPanel({ currentUser }) {
           { id: 'dashboard', label: 'Dashboard', icon: Activity },
           { id: 'movies', label: 'Movies', icon: Film },
           { id: 'users', label: 'Users', icon: Users },
-          { id: 'cine-updates', label: 'Cine Updates', icon: Activity },
-
+          { id: 'cine-updates', label: 'Cine Updates', icon: Newspaper },
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -119,13 +111,13 @@ export default function AdminPanel({ currentUser }) {
       </div>
 
       {activeTab === 'dashboard' && (
-        <DashboardTab movies={movies} totalReviews={totalReviews} heroCount={heroCount} staffPickCount={staffPickCount} featuredCount={featuredCount} gridPickCount={gridPickCount} currentUser={currentUser} onRefreshPosters={handleRefreshPosters} />
+        <DashboardTab movies={movies} isLoading={isLoading} totalReviews={totalReviews} heroCount={heroCount} staffPickCount={staffPickCount} featuredCount={featuredCount} gridPickCount={gridPickCount} currentUser={currentUser} onRefreshPosters={handleRefreshPosters} />
       )}
       {activeTab === 'movies' && (
-        <MoviesTab movies={movies} setMovies={setMovies} showSuccess={showSuccess} showToast={showToast} loadMovies={loadMovies} proxyImageUrl={proxyImageUrl} updateMovie={updateMovie} addMovie={addMovie} deleteMovie={deleteMovie} />
+        <MoviesTab movies={movies} setMovies={setMovies} isLoading={isLoading} showSuccess={showSuccess} showToast={showToast} loadMovies={loadMovies} proxyImageUrl={proxyImageUrl} updateMovie={updateMovie} addMovie={addMovie} deleteMovie={deleteMovie} />
       )}
       {activeTab === 'users' && (
-        <UsersTab users={users} setUsers={setUsers} currentUser={currentUser} showSuccess={showSuccess} />
+        <UsersTab users={users} setUsers={setUsers} usersLoading={usersLoading} currentUser={currentUser} showSuccess={showSuccess} showToast={showToast} />
       )}
       {activeTab === 'cine-updates' && (
         <CineUpdatesTab showSuccess={showSuccess} />
@@ -135,7 +127,7 @@ export default function AdminPanel({ currentUser }) {
   );
 }
 
-function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, featuredCount, gridPickCount, currentUser, onRefreshPosters }) {
+function DashboardTab({ movies, isLoading, totalReviews, heroCount, staffPickCount, featuredCount, gridPickCount, currentUser, onRefreshPosters }) {
   const stats = [
     { label: 'Total Movies', value: movies.length, icon: Film, bg: 'rgba(251,191,36,0.06)', iconBg: 'rgba(251,191,36,0.1)' },
     { label: 'Total Reviews', value: totalReviews, icon: MessageSquare, bg: 'rgba(99,102,241,0.06)', iconBg: 'rgba(99,102,241,0.1)' },
@@ -159,7 +151,7 @@ function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, feature
                 <Icon size={16} style={{ color: 'var(--color-accent-gold)' }} />
               </div>
               <div className="admin-stat-label">{s.label}</div>
-              <div className="admin-stat-value">{s.value}</div>
+              <div className="admin-stat-value">{isLoading ? '…' : s.value}</div>
             </div>
           );
         })}
@@ -167,8 +159,8 @@ function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, feature
       <div className="admin-actions">
         <div className="admin-actions-title">Quick Actions</div>
         <div className="admin-actions-row">
-          <button onClick={onRefreshPosters} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-            <RefreshCw size={14} /> Refresh All From TMDB
+          <button onClick={onRefreshPosters} disabled={isLoading} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+            <RefreshCw size={14} className={isLoading ? 'admin-spin' : ''} /> {isLoading ? 'Refreshing...' : 'Refresh All From TMDB'}
           </button>
         </div>
       </div>
@@ -176,7 +168,7 @@ function DashboardTab({ movies, totalReviews, heroCount, staffPickCount, feature
   );
 }
 
-function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, proxyImageUrl, updateMovie, addMovie, deleteMovie }) {
+function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadMovies, proxyImageUrl, updateMovie, addMovie, deleteMovie }) {
   const [loading, setLoading] = useState(false);
   const [editingMovie, setEditingMovie] = useState(null);
   const [editPreview, setEditPreview] = useState(null);
@@ -394,6 +386,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
       }, existingTitles);
       setBulkProgress(results.map(r => ({ ...r, current: 0, total: 0 })));
       showSuccess(`Added ${results.filter(r => r.status === 'added').length}/${titles.length} movies.`);
+      setSelectedMovieIds([]);
       loadMovies();
     } catch (err) { showToast(err.message, 'error'); }
     setBulkRunning(false);
@@ -440,7 +433,7 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
             className="admin-movies-search-input"
             placeholder="Search movies..."
             value={filterText}
-            onChange={e => { setFilterText(e.target.value); setPage(0); }}
+            onChange={e => { setFilterText(e.target.value); setPage(0); setSelectedMovieIds([]); }}
           />
           {filterText && (
             <button className="admin-movies-search-clear" onClick={() => { setFilterText(''); setPage(0); }}>
@@ -509,19 +502,22 @@ function MoviesTab({ movies, setMovies, showSuccess, showToast, loadMovies, prox
         ))}
       </div>
 
-      {filtered.length === 0 && !filterText && (
+      {isLoading && movies.length === 0 ? (
+        <div className="admin-loading">
+          <div className="admin-spinner" />
+          <p>Loading movies...</p>
+        </div>
+      ) : filtered.length === 0 && !filterText ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
           <Film size={32} style={{ marginBottom: '0.75rem', opacity: 0.3 }} />
           <p>No movies yet. Click "Add Movie" to get started.</p>
         </div>
-      )}
-
-      {filtered.length === 0 && filterText && (
+      ) : filtered.length === 0 && filterText ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
           <Search size={32} style={{ marginBottom: '0.75rem', opacity: 0.3 }} />
           <p>No movies match "{filterText}"</p>
         </div>
-      )}
+      ) : null}
 
       {totalPages > 1 && (
         <div className="admin-pagination">
@@ -818,6 +814,8 @@ function CineUpdatesTab({ showSuccess }) {
   const { showToast } = useToast();
   const [selectedUpdates, setSelectedUpdates] = useState([]);
   const [confirmBulkUpdateDelete, setConfirmBulkUpdateDelete] = useState(false);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const loadUpdates = async () => {
     setLoading(true);
@@ -830,13 +828,23 @@ function CineUpdatesTab({ showSuccess }) {
 
   useEffect(() => { loadUpdates(); }, []);
 
-  const handleDeleteAll = async () => {
-    if (!window.confirm(`Delete all ${updates.length} cine updates? This cannot be undone.`)) return;
+  const handleDeleteAllConfirm = async () => {
     try {
       await deleteAllCineUpdates();
       setUpdates([]);
       setUpdatePage(0);
+      setConfirmDeleteAll(false);
       showSuccess('All cine updates deleted.');
+    } catch (err) { showToast(err.message, 'error'); }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!confirmDeleteId) return;
+    try {
+      await deleteCineUpdate(confirmDeleteId);
+      setConfirmDeleteId(null);
+      showSuccess('Cine update deleted.');
+      loadUpdates();
     } catch (err) { showToast(err.message, 'error'); }
   };
 
@@ -864,13 +872,8 @@ function CineUpdatesTab({ showSuccess }) {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this cine update?')) return;
-    try {
-      await deleteCineUpdate(id);
-      showSuccess('Cine update deleted.');
-      loadUpdates();
-    } catch (err) { showToast(err.message, 'error'); }
+  const handleDelete = (id) => {
+    setConfirmDeleteId(id);
   };
 
   const handleGenerateTrivia = async () => {
@@ -913,7 +916,7 @@ function CineUpdatesTab({ showSuccess }) {
         <button className="btn-secondary" onClick={handleGenerateTrivia} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem' }} disabled={triviaLoading}>
           <Sparkles size={14} /> {triviaLoading ? 'Generating...' : 'Generate Trivia'}
         </button>
-        <button className="btn-secondary" onClick={handleDeleteAll} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem', color: '#ef4444' }} disabled={updates.length === 0}>
+        <button className="btn-secondary" onClick={() => setConfirmDeleteAll(true)} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem', color: '#ef4444' }} disabled={updates.length === 0}>
           <Trash2 size={14} /> Delete All
         </button>
         <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
@@ -1000,10 +1003,10 @@ function CineUpdatesTab({ showSuccess }) {
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>{update.body}</p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flexShrink: 0 }}>
-                <button onClick={() => handleEdit(update)} className="btn-secondary" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
+                <button onClick={() => handleEdit(update)} aria-label={`Edit ${update.title}`} className="btn-secondary" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
                   <Edit size={12} />
                 </button>
-                <button onClick={() => handleDelete(update.id)} className="btn-danger" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
+                <button onClick={() => handleDelete(update.id)} aria-label={`Delete ${update.title}`} className="btn-danger" style={{ fontSize: '0.7rem', padding: '0.3rem 0.5rem' }}>
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -1081,16 +1084,27 @@ function CineUpdatesTab({ showSuccess }) {
 
       <ConfirmModal isOpen={confirmBulkUpdateDelete} onClose={() => setConfirmBulkUpdateDelete(false)} onConfirm={handleBulkDeleteUpdates}
         title="Delete Cine Updates" message={`Delete ${selectedUpdates.length} selected cine updates permanently? This action cannot be undone.`} confirmLabel={`Delete ${selectedUpdates.length} Updates`} danger />
+      <ConfirmModal isOpen={confirmDeleteAll} onClose={() => setConfirmDeleteAll(false)} onConfirm={handleDeleteAllConfirm}
+        title="Delete All Cine Updates" message={`Delete all ${updates.length} cine updates permanently? This action cannot be undone.`} confirmLabel="Delete All" danger />
+      <ConfirmModal isOpen={!!confirmDeleteId} onClose={() => setConfirmDeleteId(null)} onConfirm={handleDeleteConfirm}
+        title="Delete Cine Update" message="Delete this cine update permanently? This action cannot be undone." confirmLabel="Delete Update" danger />
     </div>
   );
 }
 
-function UsersTab({ users, setUsers, currentUser, showSuccess }) {
+function UsersTab({ users, setUsers, usersLoading, currentUser, showSuccess, showToast }) {
   const [loading, setLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
   const [confirmUserDelete, setConfirmUserDelete] = useState(null);
   const [confirmRoleChange, setConfirmRoleChange] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [confirmBulkUserDelete, setConfirmBulkUserDelete] = useState(false);
+
+  const filteredUsers = userSearch.trim()
+    ? users.filter(u =>
+        (u.username || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+        (u.email || '').toLowerCase().includes(userSearch.toLowerCase()))
+    : users;
 
   const handleDeleteUser = (username) => {
     setConfirmUserDelete(username);
@@ -1131,8 +1145,8 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
     setSelectedUsers(prev => prev.includes(username) ? prev.filter(x => x !== username) : [...prev, username]);
   };
   const toggleAllUsers = () => {
-    const allSelected = users.every(u => selectedUsers.includes(u.username));
-    setSelectedUsers(allSelected ? [] : users.map(u => u.username));
+    const allSelected = filteredUsers.every(u => selectedUsers.includes(u.username));
+    setSelectedUsers(allSelected ? [] : filteredUsers.map(u => u.username));
   };
   const handleBulkDeleteUsers = async () => {
     setLoading(true);
@@ -1155,6 +1169,23 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
         <span className="admin-panel-count">{users.length} total users</span>
       </div>
 
+      <div className="admin-movies-toolbar" style={{ marginBottom: '0.75rem' }}>
+        <div className="admin-movies-search">
+          <Search size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+          <input
+            className="admin-movies-search-input"
+            placeholder="Search users by name or email..."
+            value={userSearch}
+            onChange={e => { setUserSearch(e.target.value); setSelectedUsers([]); }}
+          />
+          {userSearch && (
+            <button className="admin-movies-search-clear" onClick={() => { setUserSearch(''); setSelectedUsers([]); }}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="admin-table-wrap">
         {selectedUsers.length > 0 && (
           <div className="admin-bulk-bar">
@@ -1171,7 +1202,7 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
           <thead>
             <tr>
               <th style={{ width: '40px' }}>
-                <input type="checkbox" checked={users.length > 0 && users.every(u => selectedUsers.includes(u.username))} onChange={toggleAllUsers} className="admin-checkbox" />
+                <input type="checkbox" checked={filteredUsers.length > 0 && filteredUsers.every(u => selectedUsers.includes(u.username))} onChange={toggleAllUsers} className="admin-checkbox" />
               </th>
               <th>User</th>
               <th>Email</th>
@@ -1180,7 +1211,19 @@ function UsersTab({ users, setUsers, currentUser, showSuccess }) {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {usersLoading ? (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                  <div className="admin-spinner" style={{ margin: '0 auto 0.5rem' }} /> Loading users...
+                </td>
+              </tr>
+            ) : filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>
+                  {userSearch ? `No users match "${userSearch}"` : 'No users yet.'}
+                </td>
+              </tr>
+            ) : filteredUsers.map(user => (
               <tr key={user.username} className={selectedUsers.includes(user.username) ? 'admin-row-selected' : ''}>
                 <td>
                   <input type="checkbox" checked={selectedUsers.includes(user.username)} onChange={() => toggleUserSelection(user.username)} className="admin-checkbox" />

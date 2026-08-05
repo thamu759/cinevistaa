@@ -92,7 +92,7 @@ export const deleteMovie = async (id) => {
   });
   if (!response.ok) {
     const err = await response.json();
-    throw new Error(err.error || 'Failed to toggle like');
+    throw new Error(err.error || 'Failed to delete movie');
   }
   return response.json();
 };
