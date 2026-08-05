@@ -1,0 +1,1225 @@
+{
+  "movies": [
+    {
+      "id": "vikram-2022",
+      "title": "Vikram",
+      "description": "A black-ops squad investigates a string of masked killings and uncovers a narcotics network tied to a feared underground kingpin. Lokesh Kanagaraj builds a hard-edged action thriller around Kamal Haasan's comeback performance.",
+      "rating": 8.4,
+      "criticScore": 8.4,
+      "audienceScore": 92,
+      "genre": "Tamil / Action / Crime / Thriller",
+      "releaseYear": 2022,
+      "runtime": "2h 55m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Raaj Kamal Films International",
+      "releaseDate": "June 3, 2022",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/774UV1aCURb4s4JfEFg3IEMu5Zj.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/dkIX4dSMuVqjfrPGunBJUR7K3LQ.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Kamal Haasan",
+          "role": "Karnan / Vikram",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/xqnKeA127YoXfjDPjPKIJF8Kd2C.jpg"
+        },
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Sandhanam",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Fahadh Faasil",
+          "role": "Amar",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-vikram-1",
+          "user": "Arun Prakash",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+          "role": "Tamil Cinema Critic",
+          "rating": 9,
+          "text": "A thunderous theatrical experience with razor-sharp staging, a roaring Anirudh score, and a superb Kamal Haasan presence.",
+          "timestamp": "2h ago",
+          "likes": 1420,
+          "comments": 68
+        }
+      ],
+      "tmdbId": 743563,
+      "createdAt": "2026-05-30T17:00:33.004Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "jai-bhim",
+      "title": "Jai Bhim",
+      "description": "A crusading lawyer fights for an Irular tribal woman after her husband disappears from police custody. The film blends legal drama with a forceful indictment of caste violence and institutional abuse.",
+      "rating": 8.7,
+      "criticScore": 9.1,
+      "audienceScore": 94,
+      "genre": "Tamil / Crime / Drama / Legal",
+      "releaseYear": 2021,
+      "runtime": "2h 44m",
+      "director": "T. J. Gnanavel",
+      "writer": "T. J. Gnanavel",
+      "studio": "2D Entertainment",
+      "releaseDate": "November 2, 2021",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/ehybiOtBUtrMkmtB39zQEtq1Jie.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/40lmQ5vzKJhj5k7i0hvZuglneyj.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Suriya",
+          "role": "Advocate Chandru",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/hIFXv3gIjlNS78gJmaguEOxvfPH.jpg"
+        },
+        {
+          "name": "Lijomol Jose",
+          "role": "Sengeni",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/vXFBgF6NMON7L4RzZ6B35lOVYOu.jpg"
+        },
+        {
+          "name": "Manikandan",
+          "role": "Rajakannu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/x54nrbLPVxUaStUt5I2om0WuE6j.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 855400,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "kaithi",
+      "title": "Kaithi",
+      "description": "An ex-prisoner on his way to meet his daughter is pulled into a desperate overnight mission to save poisoned police officers from a ruthless drug syndicate.",
+      "rating": 8.4,
+      "criticScore": 8.5,
+      "audienceScore": 90,
+      "genre": "Tamil / Action / Crime / Thriller",
+      "releaseYear": 2019,
+      "runtime": "2h 25m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Dream Warrior Pictures",
+      "releaseDate": "October 25, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/mxvOvom5zKRp4WPURKrhjoatt4P.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/seTFDq1iKyJ6YHr7HePbC20DMsy.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Karthi",
+          "role": "Dilli",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
+        },
+        {
+          "name": "Narain",
+          "role": "Bejoy",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/d0ApUGeFuGXpBkODIc6eLbBkb7B.jpg"
+        },
+        {
+          "name": "Arjun Das",
+          "role": "Anbu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/20RDzfTjpfRHxLYBfnIYXs7vcri.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 587030,
+      "trailerUrl": "https://www.youtube.com/watch?v=tP_dh_s27iw",
+      "trailerChannelName": "Khaidi - Official Trailer (Telugu) | Karthi | Lokesh Kanagaraj | Sam CS | S R Prabhu | 4K",
+      "createdAt": "2026-05-30T17:00:33.006Z"
+    },
+    {
+      "id": "blade-runner-2049",
+      "title": "Blade Runner 2049",
+      "description": "A new blade runner, LAPD Officer K, unearths a long-buried secret that has the potential to plunge what's left of society into chaos.",
+      "rating": 8,
+      "criticScore": 9.4,
+      "audienceScore": 95,
+      "genre": "Sci-Fi / Noir",
+      "releaseYear": 2017,
+      "runtime": "2h 44m",
+      "director": "Denis Villeneuve",
+      "writer": "Hampton Fancher",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "Oct 6, 2017",
+      "language": "English (Atmos)",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/sAtoMqDVhNDQBc3QJL3RF6hlhGq.jpg",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Ryan Gosling",
+          "role": "Officer K",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Harrison Ford",
+          "role": "Rick Deckard",
+          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Ana de Armas",
+          "role": "Joi",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Denis Villeneuve",
+          "role": "Director",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-neon-1",
+          "user": "Alexander Thorne",
+          "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+          "role": "Top Critic",
+          "rating": 10,
+          "text": "A visual masterpiece that redefines the sci-fi genre.",
+          "timestamp": "2h ago",
+          "likes": 1240,
+          "comments": 42,
+          "replies": [
+            {
+              "id": "rev-reply-n1",
+              "author": "Priya Karthik",
+              "body": "Totally agree about the sound design.",
+              "timestamp": "1h ago"
+            },
+            {
+              "id": "rev-reply-n2",
+              "author": "Rajesh Menon",
+              "body": "I felt the pacing was a bit slow though.",
+              "timestamp": "45m ago"
+            }
+          ]
+        },
+        {
+          "id": "rev-neon-2",
+          "user": "Elena Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+          "role": "Reviewer",
+          "rating": 8,
+          "text": "The pacing is slow and deliberate, but the performance by Gosling is breathtaking.",
+          "timestamp": "5h ago",
+          "likes": 420,
+          "comments": 12
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "patriot-2026",
+      "title": "Patriot",
+      "description": "A massive political thriller starring Mohanlal and Mammootty together on screen, directed by Joshiy. The film follows a political saga that shakes the nation to its core.",
+      "rating": 8.2,
+      "criticScore": 8.2,
+      "audienceScore": 88,
+      "genre": "Political / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 40m",
+      "director": "Joshiy",
+      "writer": "Murali Gopy",
+      "studio": "Anto Joseph Film Company",
+      "releaseDate": "May 1, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": true,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Mohanlal",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Mammootty",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "drishyam-3-2026",
+      "title": "Drishyam 3",
+      "description": "Georgekutty returns in the third installment of the blockbuster franchise. Mohanlal reprises his iconic role in this crime thriller that became the highest-grossing Malayalam film of 2026.",
+      "rating": 8.5,
+      "criticScore": 8.5,
+      "audienceScore": 92,
+      "genre": "Crime / Thriller / Drama",
+      "releaseYear": 2026,
+      "runtime": "2h 35m",
+      "director": "Jeethu Joseph",
+      "writer": "Jeethu Joseph",
+      "studio": "Aashirvad Cinemas",
+      "releaseDate": "May 21, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": true,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Mohanlal",
+          "role": "Georgekutty",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Meena",
+          "role": "Rani",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "super-deluxe",
+      "title": "Super Deluxe",
+      "description": "Interlocking stories of desire, shame, faith, and absurd fate collide across one wild day in Chennai. Thiagarajan Kumararaja's film is playful, strange, and deeply humane.",
+      "rating": 8.2,
+      "criticScore": 8.8,
+      "audienceScore": 86,
+      "genre": "Tamil / Comedy / Crime / Drama",
+      "releaseYear": 2019,
+      "runtime": "2h 56m",
+      "director": "Thiagarajan Kumararaja",
+      "writer": "Thiagarajan Kumararaja",
+      "studio": "Tyler Durden and Kino Fist",
+      "releaseDate": "March 29, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/rTsYDdFWyw87CTk4YgJO6nYmVcJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/trBGubNu0WWBGQMLxMBOJe4DylV.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "cast": [
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Shilpa",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Fahadh Faasil",
+          "role": "Mugil",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/wmkwZWFHqMptqdt4HacMIAe8OBP.jpg"
+        },
+        {
+          "name": "Samantha",
+          "role": "Vaembu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/iGQ0AT1bNULlrJwSOGSRqLDSfGG.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 432011,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=DWwvAmVbuEI",
+      "trailerChannelName": "Super Deluxe - Official Trailer (Telugu)"
+    },
+    {
+      "id": "asuran",
+      "title": "Asuran",
+      "description": "A farmer from an oppressed community goes on the run with his son after a violent land dispute explodes. Vetrimaaran turns Poomani's Vekkai into a searing revenge drama.",
+      "rating": 8.4,
+      "criticScore": 8.7,
+      "audienceScore": 89,
+      "genre": "Tamil / Action / Drama",
+      "releaseYear": 2019,
+      "runtime": "2h 21m",
+      "director": "Vetrimaaran",
+      "writer": "Vetrimaaran",
+      "studio": "V Creations",
+      "releaseDate": "October 4, 2019",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/Elnp3XrAlMM30dil8rbL7D9XeP.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/oxl1w7sICYDJfaD9PM06HfPUmOi.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Dhanush",
+          "role": "Sivasaami",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
+        },
+        {
+          "name": "Manju Warrier",
+          "role": "Pachaiyamma",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7u1WgUHnwIW9mtL6aTdo1cRXmCM.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 576928,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "karnan",
+      "title": "Karnan",
+      "description": "A fiery young man from a neglected village rises against systems that deny his people dignity, mobility, and justice. Mari Selvaraj crafts a mythic rural protest drama.",
+      "rating": 8,
+      "criticScore": 8.3,
+      "audienceScore": 84,
+      "genre": "Tamil / Action / Drama",
+      "releaseYear": 2021,
+      "runtime": "2h 38m",
+      "director": "Mari Selvaraj",
+      "writer": "Mari Selvaraj",
+      "studio": "V Creations",
+      "releaseDate": "April 9, 2021",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/z5SxDcVWa9nokynVqBHb2IKk78J.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/t4BafoETA8JKbB9x5cbqEA5gLMU.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Dhanush",
+          "role": "Karnan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/7bI9oy1BXIk58hsOK8WfN5g0i1P.jpg"
+        },
+        {
+          "name": "Lal",
+          "role": "Yeman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/ds3eeWA56YFeeuWP6WUs1ok58FK.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 680652,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=6WzOtGgXF9g",
+      "trailerChannelName": "KARNAN - Official Teaser (Tamil) | Dhanush, Lal, Rajisha Vijayan | Amazon Prime Video"
+    },
+    {
+      "id": "96-2018",
+      "title": "96",
+      "description": "A school reunion brings two former classmates face to face with an unfinished love story. C. Prem Kumar's romance is gentle, restrained, and quietly devastating.",
+      "rating": 8.5,
+      "criticScore": 8.6,
+      "audienceScore": 88,
+      "genre": "Tamil / Drama / Romance",
+      "releaseYear": 2018,
+      "runtime": "2h 38m",
+      "director": "C. Prem Kumar",
+      "writer": "C. Prem Kumar",
+      "studio": "Madras Enterprises",
+      "releaseDate": "October 4, 2018",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/nrVloCa2hCFOztRF1DZU2jnWIiQ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/qzu94AvnZ1az30sTUuibx2bXpfs.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Ram",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Trisha",
+          "role": "Jaanu",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 441717,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=r0synl-lI4I",
+      "trailerChannelName": "96 Trailer | Vijay Sethupathi, Trisha | Madras Enterprises | C.Prem Kumar | Govind Vasantha"
+    },
+    {
+      "id": "ponniyin-selvan-1",
+      "title": "Ponniyin Selvan 1",
+      "description": "Vandiyadevan travels across the Chola kingdom carrying secret messages as a royal succession conspiracy threatens the empire. Mani Ratnam adapts Kalki's epic with a sprawling ensemble.",
+      "rating": 7.6,
+      "criticScore": 8,
+      "audienceScore": 78,
+      "genre": "Tamil / Action / Adventure / Drama",
+      "releaseYear": 2022,
+      "runtime": "2h 47m",
+      "director": "Mani Ratnam",
+      "writer": "Mani Ratnam",
+      "studio": "Madras Talkies",
+      "releaseDate": "September 30, 2022",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/zSNyZUeqDdii0doQ9970E90kCkb.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/nrVpYaBw0kqm2ySiwbxo33LnRkr.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vikram",
+          "role": "Aditha Karikalan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/c171LQMyHtULZC0RmuIHiiFDOjv.jpg"
+        },
+        {
+          "name": "Karthi",
+          "role": "Vandiyadevan",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/npZUMAZBru1wgFefkv5kS3Ezl1z.jpg"
+        },
+        {
+          "name": "Trisha",
+          "role": "Kundavai",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/jfeAV0VeAQhKONzIv1UEYbklJGn.jpg"
+        }
+      ],
+      "reviews": [],
+      "tmdbId": 660046,
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "title": "Master",
+      "description": "An alcoholic professor is sent to a juvenile school, where he clashes with a gangster, who uses the children of the school for criminal activities.",
+      "genre": "Drama",
+      "releaseYear": 2021,
+      "runtime": "2h",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Unknown Writer",
+      "studio": "Indie",
+      "releaseDate": "2021-01-13",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/wjbOlovDadOdPKkSAMohLCjbIsc.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/x1I63Mm5KU2DXjL4HdBy6JaGTms.jpg",
+      "rating": 10,
+      "criticScore": 10,
+      "audienceScore": 100,
+      "id": "master",
+      "reviews": [],
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vijay",
+          "role": "John 'JD' Durairaj",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/zbQ1sDRVRHkroWwvrnqYKMerl66.jpg"
+        },
+        {
+          "name": "Vijay Sethupathi",
+          "role": "Bhavani / Young Bhavani (voice)",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/6qaMCgZ4MMBMYvTYEKCjLIdq0B5.jpg"
+        },
+        {
+          "name": "Arjun Das",
+          "role": "Das",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/20RDzfTjpfRHxLYBfnIYXs7vcri.jpg"
+        },
+        {
+          "name": "Malavika Mohanan",
+          "role": "Chaarulatha 'Chaaru' Prasad",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/5Uy1sP3RMabzZeG2P7zi8cPavqY.jpg"
+        },
+        {
+          "name": "Andrea Jeremiah",
+          "role": "Vanathi",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/rYuhyicWBWguymMQ5B02IfENdvI.jpg"
+        },
+        {
+          "name": "Nassar",
+          "role": "College Founder",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/p3I0tSQY3C5qZW3NzFfbpjKPNL6.jpg"
+        },
+        {
+          "name": "Shanthanu Bhagyaraj",
+          "role": "Bhargav",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/sbNZuxJr7XCCXPxx9lcXMPKVvVF.jpg"
+        },
+        {
+          "name": "Mahendran",
+          "role": "Young Bhavani",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/eqv9gaikHJkzrTA78VdWxVcnbyo.jpg"
+        }
+      ],
+      "tmdbId": 626392,
+      "trailerUrl": "https://youtu.be/UTiXQcrLlv4?si=WpuAeMfLkEsPZJwM",
+      "createdAt": "2026-05-30T17:00:33.006Z",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "leo-2023",
+      "title": "Leo",
+      "description": "A mild-mannered cafe owner is dragged into a violent past when gangsters insist he is a missing crime heir. Vijay anchors Lokesh Kanagaraj's icy action drama.",
+      "rating": 7.2,
+      "criticScore": 7.1,
+      "audienceScore": 82,
+      "genre": "Tamil / Action / Crime / Drama",
+      "releaseYear": 2023,
+      "runtime": "2h 44m",
+      "director": "Lokesh Kanagaraj",
+      "writer": "Lokesh Kanagaraj",
+      "studio": "Seven Screen Studio",
+      "releaseDate": "October 19, 2023",
+      "language": "Tamil",
+      "tmdbId": 1075794,
+      "posterUrl": "https://image.tmdb.org/t/p/w780/gSOVog7ydsaF1YpgAqBqnKYFGY.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/auXrHU6O17n9Tz11SHReoorjrU6.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Vijay",
+          "role": "Parthiban / Leo",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Trisha",
+          "role": "Sathya",
+          "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.653Z",
+      "trailerUrl": "https://www.youtube.com/watch?v=G_AEL-Xo5l8",
+      "trailerChannelName": "Official Trailer"
+    },
+    {
+      "id": "dune-part-two",
+      "title": "Dune: Part Two",
+      "description": "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
+      "rating": 8.4,
+      "criticScore": 9,
+      "audienceScore": 95,
+      "genre": "Sci-Fi Thriller",
+      "releaseYear": 2024,
+      "runtime": "2h 46m",
+      "director": "Denis Villeneuve",
+      "writer": "Jon Spaihts",
+      "studio": "Legendary Pictures",
+      "releaseDate": "March 1, 2024",
+      "language": "English (Atmos)",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Timothée Chalamet",
+          "role": "Paul Atreides",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Zendaya",
+          "role": "Chani",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Austin Butler",
+          "role": "Feyd-Rautha Harkonnen",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Denis Villeneuve",
+          "role": "Director",
+          "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-ge-1",
+          "user": "James Dalton",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop",
+          "role": "Verified Critic",
+          "rating": 9,
+          "text": "An absolute masterclass in blockbuster filmmaking.",
+          "timestamp": "1d ago",
+          "likes": 1200,
+          "comments": 42
+        },
+        {
+          "id": "rev-ge-2",
+          "user": "Maya Kovic",
+          "avatarUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop",
+          "role": "Cinema Enthusiast",
+          "rating": 8,
+          "text": "Visually stunning, though the middle act drags a bit.",
+          "timestamp": "3d ago",
+          "likes": 850,
+          "comments": 16
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "interstellar",
+      "title": "Interstellar",
+      "description": "In Earth's future, a global crop blight and second Dust Bowl are slowly rendering the planet uninhabitable.",
+      "rating": 8.7,
+      "criticScore": 8.7,
+      "audienceScore": 86,
+      "genre": "Sci-Fi / Space",
+      "releaseYear": 2014,
+      "runtime": "2h 49m",
+      "director": "Christopher Nolan",
+      "writer": "Jonathan Nolan",
+      "studio": "Paramount Pictures",
+      "releaseDate": "Nov 7, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/pbrkL804c8yAv3zBZR4QPEafpAR.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Matthew McConaughey",
+          "role": "Cooper",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Anne Hathaway",
+          "role": "Brand",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-cr-1",
+          "user": "Julian Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+          "role": "Gold Critic",
+          "rating": 8,
+          "text": "Nolan weaves a brilliant narrative that balances hard space science with profound human emotion.",
+          "timestamp": "3h ago",
+          "likes": 248,
+          "comments": 42
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "the-batman",
+      "title": "The Batman",
+      "description": "In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler.",
+      "rating": 7.7,
+      "criticScore": 9.1,
+      "audienceScore": 89,
+      "genre": "Thriller / Noir",
+      "releaseYear": 2022,
+      "runtime": "2h 56m",
+      "director": "Matt Reeves",
+      "writer": "Matt Reeves",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "March 4, 2022",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/IYUD7rAIXzBM91TT3Z5fILUS7n.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Robert Pattinson",
+          "role": "Bruce Wayne / Batman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/3qZ09UE7lN6AtorfXFRYpEtSY93.jpg"
+        },
+        {
+          "name": "Zoë Kravitz",
+          "role": "Selina Kyle / Catwoman",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/n0mhAgmY6eJQmA7kaugsTZEJgHo.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 414906,
+      "trailerUrl": "https://www.youtube.com/watch?v=vc7_mH2PWHs",
+      "trailerChannelName": "Official HBO Max Trailer"
+    },
+    {
+      "id": "oppenheimer",
+      "title": "Oppenheimer",
+      "description": "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
+      "rating": 8.3,
+      "criticScore": 8,
+      "audienceScore": 78,
+      "genre": "History / Indie",
+      "releaseYear": 2023,
+      "runtime": "3h 00m",
+      "director": "Christopher Nolan",
+      "writer": "Christopher Nolan",
+      "studio": "Universal Pictures",
+      "releaseDate": "July 21, 2023",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/neeNHeXjMF5fXoCJRsOmkNGC7q.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Cillian Murphy",
+          "role": "J. Robert Oppenheimer",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/2lKs67r7FI4bPu0AXxMUJZxmUXn.jpg"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "rev-pr-1",
+          "user": "Julian Vane",
+          "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+          "role": "Gold Critic",
+          "rating": 8,
+          "text": "A towering achievement in filmmaking.",
+          "timestamp": "Oct 28, 2023",
+          "likes": 248,
+          "comments": 42
+        }
+      ],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 872585,
+      "trailerUrl": "https://www.youtube.com/watch?v=qiuSBWVdgLI",
+      "trailerChannelName": "Review"
+    },
+    {
+      "id": "mad-max-fury-road",
+      "title": "Mad Max: Fury Road",
+      "description": "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search of her homeland.",
+      "rating": 8.1,
+      "criticScore": 8.2,
+      "audienceScore": 88,
+      "genre": "Action / Retro",
+      "releaseYear": 2015,
+      "runtime": "2h 00m",
+      "director": "George Miller",
+      "writer": "George Miller",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "May 15, 2015",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/hA2ple9q4qnwxp3hKVNhroipsir.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/uT895WNwm0aIJRtGizcQhrejWUo.jpg",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "cast": [
+        {
+          "name": "Charlize Theron",
+          "role": "Imperator Furiosa",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/gd7ShD0yt4bsR2STeQ19KQ6hvXL.jpg"
+        },
+        {
+          "name": "Tom Hardy",
+          "role": "Max Rockatansky",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/d81K0RH8UX7tZj49tZaQhZ9ewH.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 76341,
+      "trailerUrl": "https://www.youtube.com/watch?v=MonFNCgK4WE",
+      "trailerChannelName": "Official Retaliate Trailer"
+    },
+    {
+      "id": "la-la-land",
+      "title": "La La Land",
+      "description": "While navigating their careers in Los Angeles, a pianist and an actress fall in love while attempting to reconcile their aspirations for the future.",
+      "rating": 8,
+      "criticScore": 8.9,
+      "audienceScore": 85,
+      "genre": "History / Drama",
+      "releaseYear": 2016,
+      "runtime": "2h 08m",
+      "director": "Damien Chazelle",
+      "writer": "Damien Chazelle",
+      "studio": "Summit Entertainment",
+      "releaseDate": "Dec 9, 2016",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/nlPCdZlHtRNcF6C9hzUH4ebmV1w.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "featured",
+      "cast": [
+        {
+          "name": "Ryan Gosling",
+          "role": "Sebastian",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "Emma Stone",
+          "role": "Mia",
+          "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "inception",
+      "title": "Inception",
+      "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+      "rating": 8.8,
+      "criticScore": 7.5,
+      "audienceScore": 70,
+      "genre": "Sci-Fi / Action",
+      "releaseYear": 2010,
+      "runtime": "2h 28m",
+      "director": "Christopher Nolan",
+      "writer": "Christopher Nolan",
+      "studio": "Warner Bros. Pictures",
+      "releaseDate": "July 16, 2010",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Leonardo DiCaprio",
+          "role": "Cobb",
+          "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "whiplash",
+      "title": "Whiplash",
+      "description": "A promising young drummer enrolls at a cut-throat music conservatory where his dreams of greatness are mentored by an instructor who will stop at nothing to realize a student's potential.",
+      "rating": 8.5,
+      "criticScore": 8.5,
+      "audienceScore": 81,
+      "genre": "Drama / Music",
+      "releaseYear": 2014,
+      "runtime": "1h 46m",
+      "director": "Damien Chazelle",
+      "writer": "Damien Chazelle",
+      "studio": "Sony Pictures Classics",
+      "releaseDate": "Oct 10, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/wbQa0EnWUyRzQ5d1pHLNRlmsCUP.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Miles Teller",
+          "role": "Andrew Neiman",
+          "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop"
+        },
+        {
+          "name": "J.K. Simmons",
+          "role": "Terence Fletcher",
+          "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.656Z",
+      "tmdbId": 244786,
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "the-grand-budapest-hotel",
+      "title": "The Grand Budapest Hotel",
+      "description": "A writer relates his adventures at a renowned European resort hotel between the first and second World Wars with a concierge who is wrongly framed for murder.",
+      "rating": 8.1,
+      "criticScore": 7.9,
+      "audienceScore": 74,
+      "genre": "Comedy / Drama",
+      "releaseYear": 2014,
+      "runtime": "1h 39m",
+      "director": "Wes Anderson",
+      "writer": "Wes Anderson",
+      "studio": "Searchlight Pictures",
+      "releaseDate": "March 28, 2014",
+      "language": "English",
+      "posterUrl": "https://image.tmdb.org/t/p/w780/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/9udCLTxTFl28RxnK8Q05E154ZGa.jpg",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "cast": [
+        {
+          "name": "Ralph Fiennes",
+          "role": "Monsieur Gustave H.",
+          "avatarUrl": "https://image.tmdb.org/t/p/w185/pCnVXH1Uo2ODoOit4UXni8OD9VB.jpg"
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-25T04:55:26.657Z",
+      "tmdbId": 120467,
+      "trailerUrl": "https://www.youtube.com/watch?v=G1jG8HUY4zI",
+      "trailerChannelName": "Official Red Band Trailer"
+    },
+    {
+      "id": "karuppu-2026",
+      "title": "Karuppu",
+      "description": "Suriya stars in a dual role in this action-drama with fantasy elements, where a man discovers his connection to a mysterious past. Directed by RJ Balaji, the film blends courtroom drama with supernatural themes, featuring Trisha as a lawyer.",
+      "rating": 8,
+      "criticScore": 8,
+      "audienceScore": 85,
+      "genre": "Action / Drama / Fantasy",
+      "releaseYear": 2026,
+      "runtime": "2h 30m",
+      "director": "RJ Balaji",
+      "writer": "RJ Balaji",
+      "studio": "2D Entertainment",
+      "releaseDate": "May 15, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Suriya",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Trisha",
+          "role": "Lawyer",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.340Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "dhruva-natchathiram-2026",
+      "title": "Dhruva Natchathiram",
+      "description": "A high-octane spy thriller directed by Gautham Vasudev Menon, starring Vikram as a secret agent on a mission filled with international intrigue, stylish action sequences, and emotional depth.",
+      "rating": 8,
+      "criticScore": 8,
+      "audienceScore": 85,
+      "genre": "Action / Spy / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 35m",
+      "director": "Gautham Vasudev Menon",
+      "writer": "Gautham Vasudev Menon",
+      "studio": "Sony Pictures",
+      "releaseDate": "May 24, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Vikram",
+          "role": "Agent",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Ritu Varma",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "demonte-colony-3-2026",
+      "title": "Demonte Colony 3",
+      "description": "The cult horror-thriller franchise returns with more eerie atmospheres and psychological tension. Arulnidhi reprises his role as the protagonist trapped in a nightmarish mansion with dark secrets.",
+      "rating": 7.5,
+      "criticScore": 7.5,
+      "audienceScore": 80,
+      "genre": "Horror / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 10m",
+      "director": "Ajay Gnanamuthu",
+      "writer": "Ajay Gnanamuthu",
+      "studio": "Gnanamuthu Films",
+      "releaseDate": "May 14, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Arulnidhi",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Priya Bhavani Shankar",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "athiradi-2026",
+      "title": "Athiradi",
+      "description": "Tovino Thomas and Basil Joseph team up for this high-energy action thriller that became one of the biggest Malayalam hits of 2026.",
+      "rating": 7.8,
+      "criticScore": 7.8,
+      "audienceScore": 83,
+      "genre": "Action / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 15m",
+      "director": "Basil Joseph",
+      "writer": "Basil Joseph",
+      "studio": "Basil Joseph Entertainment",
+      "releaseDate": "May 14, 2026",
+      "language": "Malayalam",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": true,
+      "staffPickType": "grid",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Tovino Thomas",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Basil Joseph",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    },
+    {
+      "id": "sattendru-maarudhu-vaanilai-2026",
+      "title": "Sattendru Maarudhu Vaanilai",
+      "description": "A romantic thriller directed by Nalan Kumarasamy, starring Jai and Meenakshi Govindarajan in a story about love and fate set against changing seasons.",
+      "rating": 7.5,
+      "criticScore": 7.5,
+      "audienceScore": 78,
+      "genre": "Drama / Romance / Thriller",
+      "releaseYear": 2026,
+      "runtime": "2h 05m",
+      "director": "Nalan Kumarasamy",
+      "writer": "Nalan Kumarasamy",
+      "studio": "SR Films",
+      "releaseDate": "May 15, 2026",
+      "language": "Tamil",
+      "posterUrl": "https://image.tmdb.org/t/p/w500",
+      "backdropUrl": "https://image.tmdb.org/t/p/original",
+      "isHero": false,
+      "isStaffPick": false,
+      "staffPickType": "",
+      "isUpcoming": false,
+      "cast": [
+        {
+          "name": "Jai",
+          "role": "Lead",
+          "avatarUrl": ""
+        },
+        {
+          "name": "Meenakshi Govindarajan",
+          "role": "Lead",
+          "avatarUrl": ""
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-06-27T14:34:27.356Z",
+      "trailerUrl": "",
+      "trailerChannelName": ""
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@gmail.com",
+      "passwordHash": "ae3cd34be0b0884635f10c98de38f70e27f7903d7cb1c7c20e6544a752136c6b8f44547c63647127375fff79fa5274119ac16cad950ae518cbfd06c7549e200e",
+      "salt": "ccbad56600c3d48e8a3e588c9fc5e7ed",
+      "role": "admin",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+      "token": "9ed58fe770a0d6f1d46fe90c1ef2cfe6ac5eeef9527177e824a1ade27502e07b"
+    }
+  ],
+  "communityThreads": [
+    {
+      "id": "thread-dune-soundscape",
+      "title": "Dune: Part Two sound design still feels unreal",
+      "body": "That first thumper sequence is the kind of theater moment people remember for years. Curious how everyone ranks it against Blade Runner 2049.",
+      "tag": "Sound Design",
+      "author": "Elena Vane",
+      "role": "Reviewer",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
+      "timestamp": "2h ago",
+      "likes": 34,
+      "replies": [
+        {
+          "id": "reply-dune-1",
+          "author": "Julian Vane",
+          "body": "The mix has that rare pressure without becoming muddy. IMAX carried it beautifully.",
+          "timestamp": "1h ago"
+        }
+      ]
+    },
+    {
+      "id": "thread-modern-noir",
+      "title": "Best modern noir entries after The Batman?",
+      "body": "Looking for slow-burn detective films with strong visual language. Bonus points for rain, neon, and morally exhausted leads.",
+      "tag": "Recommendations",
+      "author": "Marcus Vale",
+      "role": "Cinema Enthusiast",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
+      "timestamp": "5h ago",
+      "likes": 21,
+      "replies": []
+    }
+  ]
+}

@@ -2436,13 +2436,16 @@ export const initDB = async () => {
       useMongoDB = true;
       const count = await MovieModel.countDocuments();
       if (count === 0) {
-        const allSeedMovies = [...tamilPriorityMovies, ...malayalamMovies, ...initialMovies];
+        const jsonData = readJsonDb();
+        const allSeedMovies = (jsonData.movies && jsonData.movies.length > 0)
+          ? jsonData.movies
+          : [...tamilPriorityMovies, ...malayalamMovies, ...initialMovies];
         const seededMovies = await cachedEnrichMoviesWithTmdbImages(allSeedMovies);
         await MovieModel.insertMany(seededMovies.map(ensureCreatedAt));
-        console.log("MongoDB seeded with all movies.");
+        console.log(`MongoDB seeded with ${seededMovies.length} movies from db.json.`);
       }
       if (CommunityThreadModel && await CommunityThreadModel.countDocuments() === 0) {
-        await CommunityThreadModel.insertMany(initialCommunityThreads);
+        await CommunityThreadModel.insertMany(readJsonDb().communityThreads || initialCommunityThreads);
       }
       if (CineUpdateModel && await CineUpdateModel.countDocuments() === 0) {
         await CineUpdateModel.insertMany(initialCineUpdates);

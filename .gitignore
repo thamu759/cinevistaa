@@ -94,6 +94,6 @@ flutter_app/ios/.symlinks/
 flutter_app/coverage/
 
 # Runtime data (never commit live databases)
-server/db.json
+# NOTE: server/db.json IS committed on purpose so movie data ships with every deploy
 server/db.json.backup-*
 server/.tmdb_cache/
