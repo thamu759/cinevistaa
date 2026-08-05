@@ -47,7 +47,6 @@ import MovieDetailsView from './components/MovieDetailsView';
 import MovieCard from './components/MovieCard';
 import MovieGrid, { LoadingGrid } from './components/MovieGrid';
 import MovieSection from './components/MovieSection';
-import AdsterraAd from './components/AdsterraAd';
 import MovieLogo from './components/MovieLogo';
 import WelcomePopup from './components/WelcomePopup';
 
@@ -1858,7 +1857,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               onMovieClick={handleViewMovie}
               scrollRef={newReleasesScrollRef}
               onViewAll={() => navigateTo('new-releases')}
-              adZoneKey="6722103adf045d07f8b2009ba2196e96"
             />
 
             {tamilMovies.length > 0 && (
@@ -1869,7 +1867,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onMovieClick={handleViewMovie}
                 scrollRef={tamilScrollRef}
                 onViewAll={() => navigateTo('tamil-cinema')}
-                adZoneKey="6722103adf045d07f8b2009ba2196e96"
               />
             )}
 
@@ -1881,7 +1878,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onMovieClick={handleViewMovie}
                 scrollRef={malayalamScrollRef}
                 onViewAll={() => navigateTo('malayalam-cinema')}
-                adZoneKey="6722103adf045d07f8b2009ba2196e96"
               />
             )}
 
@@ -2974,16 +2970,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     </article>
                   ))
                 )}
-              </div>
-            </section>
-
-            {/* AD BANNER — above footer */}
-            <section className="ad-section" style={{ marginTop: '2rem', marginBottom: '2rem' }}>
-              <div className="ad-container ad-banner">
-                <span className="ad-label">Advertisement</span>
-                <div className="ad-responsive-wrap">
-                  <AdsterraAd zoneKey="a8788b6a4ad2d42dfd9ae792efaef14e" width={728} height={90} />
-                </div>
               </div>
             </section>
           </div>

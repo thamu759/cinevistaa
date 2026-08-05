@@ -1,8 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import MovieCard from './MovieCard';
-import AdsterraAd from './AdsterraAd';
 
-export default function MovieSection({ subtitle, title, movies, onMovieClick, scrollRef, onViewAll, adZoneKey }) {
+export default function MovieSection({ subtitle, title, movies, onMovieClick, scrollRef, onViewAll }) {
   return (
     <section className="movies-section" style={{ marginTop: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
@@ -40,21 +39,9 @@ export default function MovieSection({ subtitle, title, movies, onMovieClick, sc
         </div>
       ) : (
         <div className="movie-grid-horizontal" ref={scrollRef}>
-          {movies.flatMap((movie, idx) => {
-            const items = [];
-            if (adZoneKey && idx > 0 && idx % 6 === 0) {
-              items.push(
-                <div key={`ad-${idx}`} className="ad-card-hscroll">
-                  <span className="ad-label-sm">Ad</span>
-                  <AdsterraAd zoneKey={adZoneKey} width={300} height={250} />
-                </div>
-              );
-            }
-            items.push(
-              <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} variant="horizontal" maxGenreTags={2} />
-            );
-            return items;
-          })}
+          {movies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} variant="horizontal" maxGenreTags={2} />
+          ))}
         </div>
       )}
     </section>

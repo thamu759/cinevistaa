@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film, Bell, BellOff } from 'lucide-react';
-import AdsterraAd from './AdsterraAd';
 import ShareButton from './ShareButton';
 import { useToast } from '../context/ToastContext.jsx';
 
@@ -194,14 +193,6 @@ export default function MovieDetailsView({
             <div>
               <h3 className="details-section-title">Synopsis</h3>
               <p className="synopsis-text">{selectedMovie.description}</p>
-            </div>
-
-            {/* Native Ad Card */}
-            <div className="ad-container" style={{ marginBottom: '1.5rem' }}>
-              <span className="ad-label">Advertisement</span>
-              <div className="ad-placeholder" style={{ display: 'flex', justifyContent: 'center', minHeight: '250px', alignItems: 'center', background: '#0b0c10', border: '1px solid var(--color-border)' }}>
-                <AdsterraAd zoneKey="6722103adf045d07f8b2009ba2196e96" width={300} height={250} />
-              </div>
             </div>
 
             {selectedMovie.cast && selectedMovie.cast.length > 0 && (
