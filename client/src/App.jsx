@@ -1652,9 +1652,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         className="hero-backdrop" 
                         style={{ backgroundImage: isActive ? `url(${proxyImageUrl(movie.backdropUrl, 'original')})` : 'none' }}
                       />
+                      <div className="hero-rating-badge hero-rating-badge--corner">
+                        <span className="hero-tag-fav">FEATURED</span>
+                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
+                        <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
+                      </div>
                       <div className="hero-content">
                           <MovieLogo movie={movie} />
-                          <div className="hero-rating-badge">
+                          <div className="hero-rating-badge hero-rating-badge--in-flow">
                             <span className="hero-tag-fav">FEATURED</span>
                             <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
                             <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>

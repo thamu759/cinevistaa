@@ -534,6 +534,9 @@ a {
   padding: 0.35rem 0.75rem;
   display: inline-flex;
 }
+.hero-rating-badge--corner {
+  display: none;
+}
 .hero-tag-fav {
   letter-spacing: 0.05em;
   color: var(--color-accent-gold);
@@ -4106,6 +4109,55 @@ a {
   .hero-logo {
     max-height: 60px;
     max-width: 70%;
+  }
+
+  .hero-rating-badge--in-flow {
+    display: none;
+  }
+
+  .hero-rating-badge--corner {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    z-index: 6;
+    display: inline-flex;
+    background: rgba(11, 12, 16, 0.7);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .hero-slide--active .hero-backdrop {
+    animation: heroBackdropSlideM 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes heroBackdropSlideM {
+    from { transform: translateX(48px) scale(1.08); }
+    to { transform: translateX(0) scale(1.05); }
+  }
+
+  .hero-slide--active .hero-content {
+    animation: heroContentSlideM 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+  }
+
+  @keyframes heroContentSlideM {
+    from { opacity: 0; transform: translateX(44px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .hero-indicators {
+    display: flex;
+    gap: 0.45rem;
+    bottom: 0.6rem;
+  }
+
+  .hero-indicator-dot {
+    width: 16px;
+    height: 3px;
+  }
+
+  .hero-indicator-dot--active {
+    width: 24px;
   }
 
   .movie-card-horizontal {
