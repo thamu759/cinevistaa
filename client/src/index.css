@@ -4135,6 +4135,19 @@ a {
     display: none;
   }
 
+  .hero-nav-btn {
+    display: none;
+  }
+
+  .hero-backdrop {
+    filter: blur(28px) saturate(1.25) brightness(0.8);
+    transform: scale(1.2);
+  }
+
+  .hero-backdrop:after {
+    background: linear-gradient(#0b0c1040 0%, #0b0c10a0 55%, #0b0c10e6 100%);
+  }
+
   .hero-slide--active .hero-backdrop {
     animation: heroBackdropSlideM 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
