@@ -173,7 +173,7 @@ function daysAgoISO(days) {
   return new Date(Date.now() - days * 864e5).toISOString().split('T')[0];
 }
 
-function movieToUpdate(movie, trivia, category = trivia.category) {
+function movieToUpdate(movie, trivia, category = trivia.category, videoUrl = '') {
   const poster = movie.poster_path
     ? `${TMDB_IMAGE_BASE_URL}/w500${movie.poster_path}`
     : '';
@@ -183,11 +183,27 @@ function movieToUpdate(movie, trivia, category = trivia.category) {
     category,
     movieName: movie.title,
     imageUrl: poster,
+    videoUrl,
     timestamp: 'Just now',
     createdAt: new Date().toISOString(),
     likes: Math.floor(Math.random() * 500) + 50,
     likedBy: [],
   };
+}
+
+async function fetchMovieTrailerUrl(tmdbId) {
+  try {
+    const url = buildTmdbUrl(`movie/${tmdbId}/videos`);
+    const res = await fetch(url, { headers: getTmdbHeaders() });
+    if (!res.ok) return '';
+    const data = await res.json();
+    const videos = data.results || [];
+    const pick = videos.find(v => v.site === 'YouTube' && /Trailer|Teaser/i.test(v.name || ''))
+      || videos.find(v => v.site === 'YouTube');
+    return pick && pick.key ? `https://www.youtube.com/watch?v=${pick.key}` : '';
+  } catch (e) {
+    return '';
+  }
 }
 
 export async function fetchTrendingMovies(page = 1) {
@@ -294,7 +310,8 @@ export async function generateTriviaUpdates(count = 20) {
     if (!template) continue;
 
     const trivia = template.generate(details);
-    updates.push(movieToUpdate(details, trivia, template.category));
+    const videoUrl = await fetchMovieTrailerUrl(movie.id);
+    updates.push(movieToUpdate(details, trivia, template.category, videoUrl));
   }
 
   const shuffled = updates.sort(() => Math.random() - 0.5);

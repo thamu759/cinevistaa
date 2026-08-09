@@ -6009,6 +6009,15 @@ a {
   object-position: center;
 }
 
+.cine-reel-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+
 .cine-reel-overlay {
   position: absolute;
   inset: 0;
@@ -6226,7 +6235,8 @@ a {
     border-radius: 20px;
     overflow: hidden;
   }
-  .cine-reel-bg-img {
+  .cine-reel-bg-img,
+  .cine-reel-bg-video {
     border-radius: 20px;
   }
   .cine-reels-header {

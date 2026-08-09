@@ -12,6 +12,11 @@ const CATEGORY_COLORS = {
   'Review': '#14b8a6',
 };
 
+const getYouTubeEmbedUrl = (url) => {
+  const match = String(url || '').match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
+
 export default function CineUpdates({ updates = [], onLike, onShare, currentUser, onBack, onNavigate }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
@@ -183,12 +188,39 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
                 linear-gradient(180deg, #0a0a14 0%, #12121e 40%, #1a1a2e 100%)
               `
             }}>
-              <img
-                src={item.imageUrl ? proxyImageUrl(item.imageUrl, 'w500') : `https://picsum.photos/seed/${item.id}/800/1200`}
-                alt=""
-                className="cine-reel-bg-img"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
+              {item.videoUrl ? (() => {
+                const embed = getYouTubeEmbedUrl(item.videoUrl);
+                if (embed) {
+                  return (
+                    <iframe
+                      className="cine-reel-bg-video"
+                      src={`${embed}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&playlist=${encodeURIComponent(embed.split('/').pop())}`}
+                      title={item.title}
+                      style={{ border: 0 }}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                    />
+                  );
+                }
+                return (
+                  <video
+                    className="cine-reel-bg-video"
+                    src={item.videoUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                );
+              })() : (
+                <img
+                  src={item.imageUrl ? proxyImageUrl(item.imageUrl, 'w500') : `https://picsum.photos/seed/${item.id}/800/1200`}
+                  alt=""
+                  className="cine-reel-bg-img"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              )}
               <div className="cine-reel-overlay" />
             </div>
 

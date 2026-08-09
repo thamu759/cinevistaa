@@ -32,6 +32,64 @@ function extractImageFromDescription(description) {
   return imgMatch ? imgMatch[1] : '';
 }
 
+const isVideoUrl = (url, type = '') => {
+  return /video|mp4|webm|mpegurl/i.test(type) || /\.(mp4|webm|m3u8|mov|mkv)(\?|#|$)/i.test(url);
+};
+
+function extractImageUrl(item) {
+  const fromDesc = extractImageFromDescription(item.description || '');
+  if (fromDesc) return fromDesc;
+  const thumb = item['media:thumbnail'];
+  if (thumb) {
+    const list = Array.isArray(thumb) ? thumb : [thumb];
+    for (const t of list) if (t['@_url']) return t['@_url'];
+  }
+  const content = item['media:content'];
+  if (content) {
+    const list = Array.isArray(content) ? content : [content];
+    for (const c of list) {
+      const url = c['@_url'] || '';
+      const type = c['@_type'] || '';
+      if (url && !isVideoUrl(url, type)) return url;
+    }
+  }
+  return '';
+}
+
+function extractVideoUrl(item) {
+  const enclosure = item.enclosure;
+  if (enclosure) {
+    const list = Array.isArray(enclosure) ? enclosure : [enclosure];
+    for (const e of list) {
+      const url = e['@_url'] || e.url || '';
+      const type = e['@_type'] || e.type || '';
+      if (url && isVideoUrl(url, type)) return url;
+    }
+  }
+  const media = item['media:content'];
+  if (media) {
+    const list = Array.isArray(media) ? media : [media];
+    for (const m of list) {
+      const url = m['@_url'] || '';
+      const type = m['@_type'] || '';
+      if (url && isVideoUrl(url, type)) return url;
+    }
+  }
+  const group = item['media:group'];
+  if (group) {
+    const content = group['media:content'];
+    if (content) {
+      const list = Array.isArray(content) ? content : [content];
+      for (const c of list) {
+        const url = c['@_url'] || '';
+        const type = c['@_type'] || '';
+        if (url && isVideoUrl(url, type)) return url;
+      }
+    }
+  }
+  return '';
+}
+
 function cleanDescription(description) {
   return description
     .replace(/<[^>]+>/g, '')
@@ -100,7 +158,8 @@ export async function fetchNewsUpdates(count = 20) {
         if (existingTitles.has(titleKey)) continue;
 
         const description = item.description || '';
-        const imageUrl = extractImageFromDescription(description);
+        const imageUrl = extractImageUrl(item);
+        const videoUrl = extractVideoUrl(item);
         const body = cleanDescription(description).slice(0, 300) || title;
         const movieName = guessMovieName(title);
 
@@ -116,6 +175,7 @@ export async function fetchNewsUpdates(count = 20) {
           category: source.category,
           movieName,
           imageUrl,
+          videoUrl,
           timestamp: validPub ? relativeTime(pubDate) : 'Just now',
           createdAt: validPub ? pubDate.toISOString() : new Date().toISOString(),
           likes: Math.floor(Math.random() * 200) + 10,

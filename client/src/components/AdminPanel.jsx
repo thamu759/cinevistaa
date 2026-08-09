@@ -910,7 +910,7 @@ function CineUpdatesTab({ showSuccess }) {
   const [triviaPopup, setTriviaPopup] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
+  const [formData, setFormData] = useState({ title: '', body: '', category: 'News', movieName: '', imageUrl: '', videoUrl: '' });
   const [updatePage, setUpdatePage] = useState(0);
   const UPDATES_PER_PAGE = 10;
   const { showToast } = useToast();
@@ -961,7 +961,7 @@ function CineUpdatesTab({ showSuccess }) {
         await createCineUpdate(formData);
         showSuccess('Cine update created!');
       }
-      setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' });
+      setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '', videoUrl: '' });
       setShowForm(false);
       setEditingId(null);
       loadUpdates();
@@ -969,7 +969,7 @@ function CineUpdatesTab({ showSuccess }) {
   };
 
   const handleEdit = (update) => {
-    setFormData({ title: update.title, body: update.body, category: update.category, movieName: update.movieName || '', imageUrl: update.imageUrl || '' });
+    setFormData({ title: update.title, body: update.body, category: update.category, movieName: update.movieName || '', imageUrl: update.imageUrl || '', videoUrl: update.videoUrl || '' });
     setEditingId(update.id);
     setShowForm(true);
   };
@@ -1021,7 +1021,7 @@ function CineUpdatesTab({ showSuccess }) {
         <button className="btn-secondary" onClick={() => setConfirmDeleteAll(true)} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem', color: '#ef4444' }} disabled={updates.length === 0}>
           <Trash2 size={14} /> Delete All
         </button>
-        <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }}} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
+        <button className="btn-primary" onClick={() => { setShowForm(!showForm); if (!showForm) { setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '', videoUrl: '' }); }}} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>
           <Plus size={14} /> {editingId ? 'Cancel' : 'New Update'}
         </button>
       </div>
@@ -1069,9 +1069,13 @@ function CineUpdatesTab({ showSuccess }) {
               <label className="admin-label">Image URL (optional)</label>
               <input className="admin-input" value={formData.imageUrl} onChange={e => setFormData(p => ({ ...p, imageUrl: e.target.value }))} placeholder="https://image.tmdb.org/t/p/original/..." />
             </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="admin-label">Video URL (optional — .mp4/.webm or YouTube link)</label>
+              <input className="admin-input" value={formData.videoUrl} onChange={e => setFormData(p => ({ ...p, videoUrl: e.target.value }))} placeholder="https://example.com/clip.mp4 or https://youtube.com/watch?v=..." />
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '' }); }} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Cancel</button>
+            <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); setFormData({ title: '', body: '', category: 'News', movieName: '', imageUrl: '', videoUrl: '' }); }} style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>Cancel</button>
             <button type="submit" className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}>{editingId ? 'Save' : 'Publish'}</button>
           </div>
         </form>

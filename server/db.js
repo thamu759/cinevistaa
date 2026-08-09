@@ -3910,6 +3910,7 @@ try {
     category: { type: String, default: 'News' },
     movieName: { type: String, default: '' },
     imageUrl: { type: String, default: '' },
+    videoUrl: { type: String, default: '' },
     timestamp: { type: String, default: 'Just now' },
     createdAt: { type: String, default: '' },
     likes: { type: Number, default: 0 },
@@ -4002,6 +4003,7 @@ export const createCineUpdate = async (updateData, user) => {
     category: updateData.category || 'News',
     movieName: updateData.movieName || '',
     imageUrl: updateData.imageUrl || '',
+    videoUrl: updateData.videoUrl || '',
     timestamp: updateData.timestamp || 'Just now',
     createdAt: updateData.createdAt || new Date().toISOString(),
     likes: 0,
@@ -4029,7 +4031,7 @@ export const updateCineUpdate = async (updateId, updateData) => {
   if (useMongoDB && CineUpdateModel) {
     const result = await CineUpdateModel.findOneAndUpdate(
       { id: updateId },
-      { $set: { title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '' } },
+      { $set: { title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '', videoUrl: updateData.videoUrl || '' } },
       { new: true }
     );
     if (!result) throw new Error("Cine update not found");
@@ -4038,7 +4040,7 @@ export const updateCineUpdate = async (updateId, updateData) => {
   const data = readJsonDb();
   const idx = (data.cineUpdates || []).findIndex(u => u.id === updateId);
   if (idx === -1) throw new Error("Cine update not found");
-  data.cineUpdates[idx] = { ...data.cineUpdates[idx], title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '' };
+  data.cineUpdates[idx] = { ...data.cineUpdates[idx], title: cleanTitle, body: cleanBody, category: updateData.category || 'News', movieName: updateData.movieName || '', imageUrl: updateData.imageUrl || '', videoUrl: updateData.videoUrl || '' };
   writeJsonDb(data);
   return data.cineUpdates[idx];
 };
