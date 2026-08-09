@@ -7193,6 +7193,8 @@ a {
 }
 
 .mm-card {
+  position: relative;
+  overflow: hidden;
   background: var(--lux-surface);
   border: 1px solid var(--lux-border);
   border-radius: 16px;
@@ -7292,4 +7294,92 @@ a {
 .fun-promo-card:hover .fun-promo-cta {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(201,163,70,0.4);
+}
+
+/* ── Luxury card entrance + sheen sweep ── */
+@keyframes luxCardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.965);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes luxSheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  55% { transform: translateX(220%) skewX(-18deg); }
+  100% { transform: translateX(220%) skewX(-18deg); }
+}
+
+.quiz-card,
+.bf-frame,
+.mm-card {
+  animation: luxCardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quiz-card::after,
+.bf-frame::after,
+.mm-card::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 46%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(249,236,196,0.10) 45%,
+    rgba(249,236,196,0.16) 50%,
+    rgba(249,236,196,0.10) 55%,
+    transparent 100%
+  );
+  transform: translateX(-120%) skewX(-18deg);
+  animation: luxSheen 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.quiz-card::before {
+  z-index: 3;
+}
+
+/* ── Feedback / streak badges: align SVG icons ── */
+.quiz-feedback-badge,
+.quiz-streak-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.quiz-feedback-correct svg,
+.quiz-feedback-wrong svg {
+  flex-shrink: 0;
+}
+
+.quiz-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.3rem;
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.bf-option-check,
+.bf-option-cross {
+  display: inline-flex;
+  align-items: center;
+  animation: qiconpop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

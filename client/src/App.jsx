@@ -3203,7 +3203,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                      <>
                        <div className="preroll-content">
                          <div className="preroll-badge">Ad</div>
-                         <div className="preroll-icon">🎬</div>
+                         <div className="preroll-icon"><Film size={26} /></div>
                          <p className="preroll-text">Sponsored Content</p>
                          <p className="preroll-sub">This ad will end in 5 seconds</p>
                          <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>

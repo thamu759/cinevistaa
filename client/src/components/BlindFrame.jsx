@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Eye, EyeOff, Trophy, Star, RefreshCw, Zap } from 'lucide-react';
+import { Eye, EyeOff, Trophy, Star, RefreshCw, Zap, CheckCircle2, XCircle, ScanEye, Clapperboard, Check, X } from 'lucide-react';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -127,9 +127,13 @@ export default function BlindFrame({ movies, onViewMovie }) {
           </div>
           <div className="quiz-pct">{Math.round((score / (7 * 8)) * 100)}% accuracy</div>
           <div className="quiz-result-msg" style={{ marginTop: '0.75rem' }}>
-            {score >= 40 ? '👁️ Eagle eye! You see through the blur!' :
-             score >= 20 ? '👀 Good vision! Almost there!' :
-             '😅 Time to watch more movies!'}
+            {score >= 40 ? (
+              <><ScanEye size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Eagle eye! You see through the blur!</>
+            ) : score >= 20 ? (
+              <><Eye size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Good vision! Almost there!</>
+            ) : (
+              <><Clapperboard size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Time to watch more movies!</>
+            )}
           </div>
           <button className="quiz-btn-play" onClick={restart}>
             <RefreshCw size={16} /> Play Again
@@ -205,8 +209,8 @@ export default function BlindFrame({ movies, onViewMovie }) {
               >
                 <span className="bf-option-letter">{String.fromCharCode(65 + i)}</span>
                 <span className="bf-option-text">{title}</span>
-                {selected && title === current.title && <span className="bf-option-check">✓</span>}
-                {selected && title === selected && title !== current.title && <span className="bf-option-cross">✕</span>}
+                {selected && title === current.title && <span className="bf-option-check"><Check size={14} /></span>}
+                {selected && title === selected && title !== current.title && <span className="bf-option-cross"><X size={14} /></span>}
               </button>
             );
           })}
@@ -216,8 +220,8 @@ export default function BlindFrame({ movies, onViewMovie }) {
           <div className="quiz-feedback animated-pop-fast">
             <div className={`quiz-feedback-badge ${selected === current.title ? 'quiz-feedback-correct' : 'quiz-feedback-wrong'}`}>
               {selected === current.title
-                ? <>✅ Spot on! +{1 + Math.max(0, Math.floor((20 - blur) / 4))} pts</>
-                : <>❌ That was <strong>{current.title}</strong></>}
+                ? <><CheckCircle2 size={16} /> Spot on! +{1 + Math.max(0, Math.floor((20 - blur) / 4))} pts</>
+                : <><XCircle size={16} /> That was <strong>{current.title}</strong></>}
             </div>
             <div className="bf-after">
               <button className="quiz-btn-next" onClick={() => onViewMovie?.(current.id)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--color-text-muted)' }}>

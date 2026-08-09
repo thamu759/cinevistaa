@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Brain, Trophy, Star, RotateCcw, Calendar, User, RefreshCw, Sparkles, Zap } from 'lucide-react';
+import { Brain, Trophy, Star, RotateCcw, Calendar, User, RefreshCw, Sparkles, Zap, CheckCircle2, XCircle, Flame, Award, ThumbsUp, Clapperboard, X } from 'lucide-react';
 import ShareButton from './ShareButton';
 
 const QUESTIONS_PER_GAME = 7;
@@ -196,9 +196,13 @@ export default function QuizGame({ movies, onViewMovie }) {
             <Zap size={14} /> Best streak: {bestStreak}
           </div>
           <div className="quiz-result-msg">
-            {pct >= 80 ? '🎉 Movie Master! You really know your cinema!' :
-             pct >= 50 ? '👏 Good job! Keep watching and learning!' :
-             '🎬 Time to watch more movies! Try again!'}
+            {pct >= 80 ? (
+              <><Award size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Movie Master! You really know your cinema!</>
+            ) : pct >= 50 ? (
+              <><ThumbsUp size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Good job! Keep watching and learning!</>
+            ) : (
+              <><Clapperboard size={16} style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} /> Time to watch more movies! Try again!</>
+            )}
           </div>
           <button className="quiz-btn-play" onClick={startGame}>
             <RefreshCw size={16} /> Play Again
@@ -296,7 +300,9 @@ export default function QuizGame({ movies, onViewMovie }) {
                     </span>
                   )}
                   {selected !== null && opt === selected && opt !== q.correctAnswer && (
-                    <span className="quiz-option-icon quiz-option-icon-wrong">✕</span>
+                    <span className="quiz-option-icon quiz-option-icon-wrong">
+                      <X size={12} />
+                    </span>
                   )}
                 </button>
               );
@@ -307,9 +313,9 @@ export default function QuizGame({ movies, onViewMovie }) {
             <div className="quiz-feedback animated-pop-fast">
               <div className={`quiz-feedback-badge ${selected === q.correctAnswer ? 'quiz-feedback-correct' : 'quiz-feedback-wrong'}`}>
                 {selected === q.correctAnswer ? (
-                  <>✅ Correct! {streak > 1 && <span className="quiz-streak-badge">🔥 x{streak}</span>}</>
+                  <><CheckCircle2 size={16} /> Correct! {streak > 1 && <span className="quiz-streak-badge"><Flame size={14} /> x{streak}</span>}</>
                 ) : (
-                  <>❌ Oops! Answer: <strong>{q.correctAnswer}</strong></>
+                  <><XCircle size={16} /> Oops! Answer: <strong>{q.correctAnswer}</strong></>
                 )}
               </div>
               <button className="quiz-btn-next" onClick={nextQuestion}>

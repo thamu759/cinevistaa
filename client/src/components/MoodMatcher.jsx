@@ -3,32 +3,32 @@ import { Smile, Frown, Zap, Heart, Skull, Sparkles, Shuffle, Star, Play } from '
 
 const MOODS = [
   {
-    key: 'happy', icon: Smile, label: 'Happy', emoji: '😊', color: '#fbbf24',
+    key: 'happy', icon: Smile, label: 'Happy', color: '#fbbf24',
     genres: ['Comedy', 'Family', 'Animation', 'Musical', 'Adventure'],
     minRating: 6,
   },
   {
-    key: 'sad', icon: Frown, label: 'Sad', emoji: '😢', color: '#818cf8',
+    key: 'sad', icon: Frown, label: 'Sad', color: '#818cf8',
     genres: ['Drama', 'Romance', 'Biography'],
     minRating: 0,
   },
   {
-    key: 'thriller', icon: Zap, label: 'Thriller', emoji: '⚡', color: '#f472b6',
+    key: 'thriller', icon: Zap, label: 'Thriller', color: '#f472b6',
     genres: ['Action', 'Thriller', 'Crime', 'Mystery'],
     minRating: 6.5,
   },
   {
-    key: 'romantic', icon: Heart, label: 'Romantic', emoji: '❤️', color: '#fb7185',
+    key: 'romantic', icon: Heart, label: 'Romantic', color: '#fb7185',
     genres: ['Romance', 'Drama', 'Comedy'],
     minRating: 0,
   },
   {
-    key: 'scary', icon: Skull, label: 'Scary', emoji: '👻', color: '#a78bfa',
+    key: 'scary', icon: Skull, label: 'Scary', color: '#a78bfa',
     genres: ['Horror', 'Thriller', 'Mystery'],
     minRating: 0,
   },
   {
-    key: 'inspiring', icon: Sparkles, label: 'Inspiring', emoji: '✨', color: '#34d399',
+    key: 'inspiring', icon: Sparkles, label: 'Inspiring', color: '#34d399',
     genres: ['Biography', 'Drama', 'History', 'War', 'Sport'],
     minRating: 7,
   },
@@ -144,7 +144,7 @@ export default function MoodMatcher({ movies, onViewMovie }) {
         {showMovie && movie && (
           <div className="mm-result animated-pop">
             <div className="mm-mood-tag" style={{ background: `${selectedMood.color}15`, borderColor: `${selectedMood.color}30`, color: selectedMood.color }}>
-              {selectedMood.emoji} Feeling {selectedMood.label}
+              {(() => { const TagIcon = selectedMood.icon; return <TagIcon size={14} />; })()} Feeling {selectedMood.label}
             </div>
             <div className="mm-card">
               <div className="mm-poster-wrap" onClick={() => onViewMovie?.(movie.id)}>
