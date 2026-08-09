@@ -1,5 +1,5 @@
 import { buildTmdbUrl, getTmdbHeaders } from './db.js';
-import { createCineUpdate } from './db.js';
+import { createCineUpdate, getCineUpdates } from './db.js';
 import { fetchNewsUpdates } from './newsRss.js';
 
 
@@ -169,10 +169,8 @@ function getRandomTemplate(movie) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function formatTimestamp() {
-  const hrs = Math.floor(Math.random() * 12) + 1;
-  const unit = Math.random() > 0.5 ? 'h' : 'd';
-  return `${hrs}${unit} ago`;
+function daysAgoISO(days) {
+  return new Date(Date.now() - days * 864e5).toISOString().split('T')[0];
 }
 
 function movieToUpdate(movie, trivia, category = trivia.category) {
@@ -185,7 +183,8 @@ function movieToUpdate(movie, trivia, category = trivia.category) {
     category,
     movieName: movie.title,
     imageUrl: poster,
-    timestamp: formatTimestamp(),
+    timestamp: 'Just now',
+    createdAt: new Date().toISOString(),
     likes: Math.floor(Math.random() * 500) + 50,
     likedBy: [],
   };
@@ -204,7 +203,7 @@ export async function fetchPopularMovies(page = 1) {
     sort_by: 'popularity.desc',
     page,
     'vote_count.gte': 50,
-    'primary_release_date.gte': '2026-05-01',
+    'primary_release_date.gte': daysAgoISO(90),
   });
   const res = await fetch(url, { headers: getTmdbHeaders() });
   if (!res.ok) { console.warn('TMDB popular fetch failed:', res.status); return []; }
@@ -231,7 +230,7 @@ export async function fetchIndianMoviesByLang(lang, page = 1) {
     with_original_language: lang,
     sort_by: 'popularity.desc',
     page,
-    'primary_release_date.gte': '2025-06-01',
+    'primary_release_date.gte': daysAgoISO(90),
   });
   const res = await fetchWithRetry(url);
   if (!res) { console.warn(`TMDB ${lang} page ${page} fetch failed`); return []; }
@@ -289,7 +288,7 @@ export async function generateTriviaUpdates(count = 20) {
     if (!details) continue;
 
     const releaseDate = details.release_date || '';
-    if (releaseDate < '2025-06-01') continue;
+    if (releaseDate < daysAgoISO(90)) continue;
 
     const template = getRandomTemplate(details);
     if (!template) continue;
@@ -302,10 +301,22 @@ export async function generateTriviaUpdates(count = 20) {
   return shuffled.slice(0, count);
 }
 
+async function existingUpdateTitles() {
+  try {
+    return new Set((await getCineUpdates()).map(u => (u.title || '').toLowerCase()));
+  } catch (e) {
+    return new Set();
+  }
+}
+
 export async function seedTriviaUpdates(count = 20, adminUser = null) {
   const updates = await generateTriviaUpdates(count);
+  const existingTitles = await existingUpdateTitles();
   const created = [];
   for (const u of updates) {
+    const key = (u.title || '').toLowerCase();
+    if (existingTitles.has(key)) continue;
+    existingTitles.add(key);
     try {
       const result = await createCineUpdate(u, adminUser);
       created.push(result);
@@ -322,8 +333,12 @@ export async function generateNewsUpdates(count = 20) {
 
 export async function seedNewsUpdates(count = 20, adminUser = null) {
   const updates = await generateNewsUpdates(count);
+  const existingTitles = await existingUpdateTitles();
   const created = [];
   for (const u of updates) {
+    const key = (u.title || '').toLowerCase();
+    if (existingTitles.has(key)) continue;
+    existingTitles.add(key);
     try {
       const result = await createCineUpdate(u, adminUser);
       created.push(result);

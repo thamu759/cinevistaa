@@ -241,9 +241,80 @@ export const fetchCurrentUser = async (token) => {
   return response.json();
 };
 
+export const loginWithGoogle = async (idToken) => {
+  const response = await fetch(`${API_BASE_URL}/auth/google`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ idToken }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Google login failed');
+  }
+  return response.json();
+};
+
 const authHeaders = () => {
   const token = localStorage.getItem('mc_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+export const fetchWatchlist = async () => {
+  const response = await fetch(`${API_BASE_URL}/watchlist`, { headers: authHeaders() });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to fetch watchlist');
+  }
+  return response.json();
+};
+
+export const addMovieToWatchlist = async (movieId) => {
+  const response = await fetch(`${API_BASE_URL}/watchlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ movieId }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to update watchlist');
+  }
+  return response.json();
+};
+
+export const removeMovieFromWatchlist = async (movieId) => {
+  const response = await fetch(`${API_BASE_URL}/watchlist/${encodeURIComponent(movieId)}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to update watchlist');
+  }
+  return response.json();
+};
+
+export const mergeWatchlist = async (watchlist) => {
+  const response = await fetch(`${API_BASE_URL}/watchlist/merge`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ watchlist }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to sync watchlist');
+  }
+  return response.json();
+};
+
+export const fetchAnalytics = async () => {
+  const response = await fetch(`${API_BASE_URL}/admin/analytics`, { headers: authHeaders() });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to fetch analytics');
+  }
+  return response.json();
 };
 
 export const fetchCommunityThreads = async () => {

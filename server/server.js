@@ -53,12 +53,20 @@ import {
   updateCineUpdate,
   deleteCineUpdate,
   deleteAllCineUpdates,
+  pruneOldCineUpdates,
   toggleCineUpdateLike,
   addOttAlert,
   removeOttAlert,
   getUserOttAlerts,
   checkOttAlerts,
-  sendEmailViaResend
+  sendEmailViaResend,
+  getUserWatchlist,
+  setUserWatchlist,
+  addToWatchlist,
+  removeFromWatchlist,
+  mergeWatchlist,
+  loginWithGoogle,
+  getAnalytics
 } from './db.js';
 import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
@@ -188,6 +196,123 @@ app.get('/api/auth/me', async (req, res) => {
   } catch (error) {
     console.error("Auth verify error:", error);
     res.status(500).json({ error: "Server authentication error" });
+  }
+});
+
+// Google Sign-In (verify ID token via Google, then find-or-create user)
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ error: "Google ID token is required." });
+    }
+    if (req.headers.authorization && !req.headers.authorization.startsWith('Bearer ')) {
+      return res.status(400).json({ error: "Invalid authorization header." });
+    }
+
+    const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
+    if (!verifyRes.ok) {
+      const errBody = await verifyRes.text().catch(() => '');
+      return res.status(401).json({ error: "Google token verification failed." });
+    }
+    const payload = await verifyRes.json();
+    if (!payload.email) {
+      return res.status(401).json({ error: "Google account has no verified email." });
+    }
+
+    const user = await loginWithGoogle({
+      email: payload.email,
+      name: payload.name || payload.email.split('@')[0],
+      picture: payload.picture || ''
+    });
+    res.json(user);
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ─── Watchlist (requires auth) ───
+
+const requireAuthUser = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: "No authentication token provided" });
+    return null;
+  }
+  const token = authHeader.split(' ')[1];
+  const user = await verifyToken(token);
+  if (!user) {
+    res.status(401).json({ error: "Session expired or invalid token" });
+    return null;
+  }
+  return user;
+};
+
+app.get('/api/watchlist', async (req, res) => {
+  try {
+    const user = await requireAuthUser(req, res);
+    if (!user) return;
+    const watchlist = await getUserWatchlist(user.username);
+    res.json({ watchlist });
+  } catch (error) {
+    console.error("Error fetching watchlist:", error);
+    res.status(500).json({ error: "Server error fetching watchlist" });
+  }
+});
+
+app.post('/api/watchlist', async (req, res) => {
+  try {
+    const user = await requireAuthUser(req, res);
+    if (!user) return;
+    const { movieId } = req.body;
+    if (!movieId) return res.status(400).json({ error: "Movie ID is required" });
+    const result = await addToWatchlist(user.username, movieId);
+    res.json(result);
+  } catch (error) {
+    console.error("Error adding to watchlist:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/watchlist/:movieId', async (req, res) => {
+  try {
+    const user = await requireAuthUser(req, res);
+    if (!user) return;
+    const result = await removeFromWatchlist(user.username, req.params.movieId);
+    res.json(result);
+  } catch (error) {
+    console.error("Error removing from watchlist:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/watchlist/merge', async (req, res) => {
+  try {
+    const user = await requireAuthUser(req, res);
+    if (!user) return;
+    const { watchlist } = req.body;
+    const result = await mergeWatchlist(user.username, Array.isArray(watchlist) ? watchlist : []);
+    res.json(result);
+  } catch (error) {
+    console.error("Error merging watchlist:", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Admin analytics
+app.get('/api/admin/analytics', async (req, res) => {
+  try {
+    const user = await requireAuthUser(req, res);
+    if (!user) return;
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+    const analytics = await getAnalytics();
+    res.json(analytics);
+  } catch (error) {
+    console.error("Error fetching analytics:", error);
+    res.status(500).json({ error: "Server error fetching analytics" });
   }
 });
 
@@ -1451,3 +1576,25 @@ app.use((err, req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`thiraipedia Server running on port ${PORT}`);
 });
+
+// ─── CINE PULSE AUTO-REFRESH ───
+// Prunes stale updates and seeds fresh news/trivia so the feed never goes stale.
+const CINE_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000;
+let cineRefreshRunning = false;
+
+const autoRefreshCineUpdates = async () => {
+  if (cineRefreshRunning) return;
+  cineRefreshRunning = true;
+  try {
+    const pruned = await pruneOldCineUpdates(7, 40);
+    const news = await seedNewsUpdates(12, null);
+    const trivia = await seedTriviaUpdates(8, null);
+    console.log(`[Cine Pulse] auto-refresh done — pruned ${pruned}, added ${news.length} news + ${trivia.length} trivia.`);
+  } catch (err) {
+    console.warn('[Cine Pulse] auto-refresh failed:', err.message);
+  }
+  cineRefreshRunning = false;
+};
+
+setTimeout(() => { autoRefreshCineUpdates(); }, 15 * 1000);
+setInterval(autoRefreshCineUpdates, CINE_REFRESH_INTERVAL_MS);

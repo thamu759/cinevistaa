@@ -38,7 +38,12 @@ import {
   toggleCineUpdateLike,
   addOttAlert,
   removeOttAlert,
-  fetchUserOttAlerts
+  fetchUserOttAlerts,
+  loginWithGoogle,
+  fetchWatchlist,
+  addMovieToWatchlist,
+  removeMovieFromWatchlist,
+  mergeWatchlist
 } from './api';
 import AdminPanel from './components/AdminPanel';
 import Modal from './components/Modal';
@@ -490,6 +495,78 @@ const preRollTimerRef = useRef(null);
     localStorage.setItem('mc_watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
+  // Merge localStorage watchlist with the logged-in user's server watchlist
+  const syncWatchlistFromServer = useCallback(async () => {
+    try {
+      const { watchlist: serverList } = await fetchWatchlist();
+      const saved = localStorage.getItem('mc_watchlist');
+      const local = saved ? JSON.parse(saved) : [];
+      const merged = [...new Set([...(serverList || []), ...(Array.isArray(local) ? local : [])])];
+      setWatchlist(merged);
+      localStorage.setItem('mc_watchlist', JSON.stringify(merged));
+      try {
+        await mergeWatchlist(merged);
+      } catch (syncErr) {
+        console.warn('Watchlist merge to server failed:', syncErr);
+      }
+    } catch (err) {
+      console.warn('Watchlist fetch failed:', err);
+    }
+  }, []);
+
+  // ─── Google Sign-In ───
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const googleBtnRef = useRef(null);
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response?.credential) return;
+    setIsAuthLoading(true);
+    setAuthError('');
+    try {
+      const user = await loginWithGoogle(response.credential);
+      localStorage.setItem('mc_token', user.token);
+      setCurrentUser(user);
+      setIsAuthModalOpen(false);
+      setAuthFormData({ username: '', email: '', password: '' });
+      showToast(user.isNew ? 'Account created successfully!' : 'Login successful!');
+      syncWatchlistFromServer();
+    } catch (err) {
+      setAuthError(err.message || 'Google login failed.');
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || !isAuthModalOpen) return;
+    let cancelled = false;
+    const initGoogle = () => {
+      if (cancelled || !googleBtnRef.current || !window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse,
+      });
+      if (googleBtnRef.current.firstChild) googleBtnRef.current.innerHTML = '';
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'outline',
+        size: 'large',
+        width: 300,
+        text: 'continue_with',
+        shape: 'pill',
+      });
+    };
+    if (window.google?.accounts?.id) {
+      initGoogle();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.body.appendChild(script);
+    }
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [GOOGLE_CLIENT_ID, isAuthModalOpen]);
+
   // Fetch OTT alerts when user changes
   useEffect(() => {
     if (currentUser) {
@@ -937,6 +1014,7 @@ const preRollTimerRef = useRef(null);
         try {
           const user = await fetchCurrentUser(token);
           setCurrentUser(user);
+          syncWatchlistFromServer();
         } catch (err) {
           console.warn("Session token expired, clearing...", err);
           localStorage.removeItem('mc_token');
@@ -948,7 +1026,7 @@ const preRollTimerRef = useRef(null);
     } else {
       setIsSessionVerified(true);
     }
-  }, []);
+  }, [syncWatchlistFromServer]);
 
   const getRouteFromPath = (pathname) => {
     const path = pathname.replace(/\/+$/, '') || '/';
@@ -1193,6 +1271,7 @@ const preRollTimerRef = useRef(null);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
         showToast('Login successful!');
+        syncWatchlistFromServer();
       } else {
         const user = await registerUser(username, email, password);
         localStorage.setItem('mc_token', user.token);
@@ -1200,6 +1279,7 @@ const preRollTimerRef = useRef(null);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
         showToast('Account created successfully!');
+        syncWatchlistFromServer();
       }
     } catch (err) {
       setAuthError(err.message || 'Authentication failed. Please check credentials.');
@@ -1221,10 +1301,16 @@ const preRollTimerRef = useRef(null);
 
   const handleToggleWatchlist = useCallback((movieId, e) => {
     if (e) e.stopPropagation();
-    setWatchlist(prev => 
-      prev.includes(movieId) ? prev.filter(id => id !== movieId) : [...prev, movieId]
-    );
-  }, []);
+    const isAdding = !watchlist.includes(movieId);
+    setWatchlist(prev => isAdding ? [...prev, movieId] : prev.filter(id => id !== movieId));
+    if (currentUser) {
+      const op = isAdding ? addMovieToWatchlist(movieId) : removeMovieFromWatchlist(movieId);
+      op.catch(() => {
+        setWatchlist(prev => isAdding ? prev.filter(id => id !== movieId) : [...prev, movieId]);
+        showToast('Watchlist sync failed. Please try again.', 'error');
+      });
+    }
+  }, [watchlist, currentUser, showToast]);
 
   // Submit review form
   const handleCreateReviewSubmit = async (e) => {
@@ -3279,6 +3365,28 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 Sign Up
               </button>
             </div>
+
+            {GOOGLE_CLIENT_ID && (
+              <>
+                <div style={{ margin: '1rem 0 0.5rem' }}>
+                  <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', minHeight: '44px' }} />
+                </div>
+                <div className="auth-divider" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  margin: '0.5rem 0 1rem',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.72rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em'
+                }}>
+                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                  or
+                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                </div>
+              </>
+            )}
 
             <form onSubmit={handleAuthSubmit}>
               <div className="modal-body" style={{ padding: '0 0.25rem' }}>

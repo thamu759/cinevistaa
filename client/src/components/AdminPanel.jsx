@@ -192,6 +192,9 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
   const [bulkRunning, setBulkRunning] = useState(false);
   const [selectedMovieIds, setSelectedMovieIds] = useState([]);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [showHeroModal, setShowHeroModal] = useState(false);
+  const [heroSearch, setHeroSearch] = useState('');
+  const [heroLoading, setHeroLoading] = useState(false);
 
   useEffect(() => {
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
@@ -274,6 +277,17 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
       showSuccess("Movie updated.");
     } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
+  };
+
+  const handleSetHero = async (movie, isHero) => {
+    setHeroLoading(true);
+    try {
+      const updated = await updateMovie(movie.id, { ...movie, isHero });
+      setMovies(prev => prev.map(m => m.id === updated.id ? updated : m));
+      if (editingMovie?.id === updated.id) setEditingMovie(updated);
+      showSuccess(isHero ? `"${updated.title}" added to Hero Cards.` : `"${updated.title}" removed from Hero Cards.`);
+    } catch (err) { showToast(err.message, 'error'); }
+    setHeroLoading(false);
   };
 
   const applyEditTmdb = async (m) => {
@@ -398,6 +412,11 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
+  const heroMovies = movies.filter(m => m.isHero);
+  const addableHeroMovies = heroSearch.trim()
+    ? movies.filter(m => !m.isHero && m.title.toLowerCase().includes(heroSearch.trim().toLowerCase()))
+    : [];
+
   const toggleMovieSelection = (id) => {
     setSelectedMovieIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
@@ -449,6 +468,10 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
           className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>
           <Database size={14} /> Bulk Add
         </button>
+        <button onClick={() => { setShowHeroModal(true); setHeroSearch(''); }}
+          className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0, color: '#fbbf24' }}>
+          <Star size={14} /> Hero Cards
+        </button>
       </div>
 
       {selectedMovieIds.length > 0 && (
@@ -474,6 +497,11 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
           <div key={movie.id} className={`admin-movie-grid-card ${selectedMovieIds.includes(movie.id) ? 'selected' : ''}`}>
             <div className="admin-movie-grid-poster-wrap">
               <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt={movie.title} className="admin-movie-grid-poster" />
+              {movie.isHero && (
+                <div style={{ position: 'absolute', top: '6px', left: '6px', zIndex: 3, background: 'rgba(251,191,36,0.92)', color: '#0a0a1a', fontSize: '0.58rem', fontWeight: 800, padding: '0.15rem 0.45rem', borderRadius: '4px', letterSpacing: '0.03em' }}>
+                  ★ HERO
+                </div>
+              )}
               <input type="checkbox" checked={selectedMovieIds.includes(movie.id)}
                 onChange={() => toggleMovieSelection(movie.id)} className="admin-movie-checkbox" />
               <div className="admin-movie-grid-overlay">
@@ -790,6 +818,80 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
             <Save size={14} /> {loading ? 'Saving...' : 'Save'}
           </button>
+        </div>
+      </Modal>
+
+      {/* Hero Cards Modal */}
+      <Modal isOpen={showHeroModal} onClose={() => setShowHeroModal(false)} title="Hero Cards" width="640px">
+        <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+          Movies here appear in the home page hero carousel. Click <strong>Edit</strong> to change a card's backdrop, title logo, description, or rating.
+        </div>
+
+        <label className="admin-label" style={{ marginBottom: '0.3rem' }}>Current Hero Cards ({heroMovies.length})</label>
+        {heroMovies.length === 0 ? (
+          <div style={{ padding: '1.25rem', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '8px', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+            No hero cards yet. Use "Add to Hero" below.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+            {heroMovies.map((movie, i) => (
+              <div key={movie.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '0.6rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
+                {movie.posterUrl || movie.imageUrl ? (
+                  <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt={movie.title} style={{ width: '34px', height: '48px', borderRadius: '5px', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '34px', height: '48px', borderRadius: '5px', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{movie.title}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>★ {movie.rating?.toFixed(1) || '—'}/10</div>
+                </div>
+                <button onClick={() => { setShowHeroModal(false); setEditingMovie({ ...movie }); setEditPreview(null); setEditTmdbQuery(''); setEditTmdbResults([]); }} disabled={heroLoading}
+                  className="btn-secondary" style={{ fontSize: '0.68rem', padding: '0.3rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Edit size={12} /> Edit
+                </button>
+                <button onClick={() => handleSetHero(movie, false)} disabled={heroLoading}
+                  className="btn-danger" style={{ fontSize: '0.68rem', padding: '0.3rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <X size={12} /> Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '0.85rem 0' }} />
+
+        <label className="admin-label" style={{ marginBottom: '0.3rem' }}>Add to Hero</label>
+        <div style={{ position: 'relative' }}>
+          <input className="admin-input" placeholder="Search movies to add..." value={heroSearch} onChange={e => setHeroSearch(e.target.value)} />
+          <Search size={13} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+        </div>
+        {heroSearch.trim() && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+            {addableHeroMovies.length === 0 ? (
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', padding: '0.5rem', textAlign: 'center' }}>No matches — all matching movies are already hero cards.</div>
+            ) : addableHeroMovies.map(movie => (
+              <div key={movie.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.35rem 0.6rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                {movie.posterUrl || movie.imageUrl ? (
+                  <img src={proxyImageUrl(movie.posterUrl || movie.imageUrl)} alt={movie.title} style={{ width: '28px', height: '40px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '28px', height: '40px', borderRadius: '4px', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{movie.title}</div>
+                  <div style={{ fontSize: '0.62rem', color: 'var(--color-text-muted)' }}>{movie.year || movie.releaseDate?.split('-')[0] || '—'}</div>
+                </div>
+                <button onClick={() => handleSetHero(movie, true)} disabled={heroLoading}
+                  className="btn-primary" style={{ fontSize: '0.68rem', padding: '0.3rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Plus size={12} /> Add
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+          <button onClick={() => setShowHeroModal(false)} className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>Done</button>
         </div>
       </Modal>
 

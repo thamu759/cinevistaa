@@ -2268,6 +2268,7 @@ try {
     staffPickType: { type: String, default: "" },
     isUpcoming: { type: Boolean, default: false },
     createdAt: { type: String, default: () => new Date().toISOString() },
+    views: { type: Number, default: 0 },
     trailerUrl: { type: String },
     trailerChannelName: { type: String },
     ott: {
@@ -2316,7 +2317,8 @@ try {
     emailVerified: { type: Boolean, default: false },
     otp: { type: String },
     otpExpiry: { type: Date },
-    ottAlerts: [{ type: Object }]
+    ottAlerts: [{ type: Object }],
+    watchlist: [{ type: String }]
   });
   UserModel = mongoose.model('User', userSchema);
 } catch (e) {
@@ -2447,18 +2449,6 @@ export const initDB = async () => {
       if (CommunityThreadModel && await CommunityThreadModel.countDocuments() === 0) {
         await CommunityThreadModel.insertMany(readJsonDb().communityThreads || initialCommunityThreads);
       }
-      if (CineUpdateModel && await CineUpdateModel.countDocuments() === 0) {
-        await CineUpdateModel.insertMany(initialCineUpdates);
-      } else if (CineUpdateModel) {
-        for (const seed of initialCineUpdates) {
-          if (seed.imageUrl) {
-            await CineUpdateModel.updateOne(
-              { id: seed.id, imageUrl: { $ne: seed.imageUrl } },
-              { $set: { imageUrl: seed.imageUrl } }
-            );
-          }
-        }
-      }
     } else {
       console.warn("WARNING: Failed to connect to MongoDB after all attempts. Falling back to local JSON file db.json. Movies added on this instance will NOT survive restarts/deploys. Set MONGO_URI to persist data.");
       useMongoDB = false;
@@ -2483,6 +2473,20 @@ export const initDB = async () => {
     }
     writeJsonAfterMigration(data);
   }
+};
+
+// A movie stays "upcoming" only until its release date arrives. Once the
+// release date has passed (or is today), it is automatically treated as
+// released so it moves out of Coming Soon and into New Releases.
+const releaseHasPassed = (movie) => {
+  if (!movie || !movie.releaseDate) return false;
+  const release = new Date(movie.releaseDate);
+  return !isNaN(release) && release <= new Date();
+};
+
+const markReleasedUpcoming = (movie) => {
+  if (movie.isUpcoming && releaseHasPassed(movie)) movie.isUpcoming = false;
+  return movie;
 };
 
 export const getMovies = async (query = {}) => {
@@ -2529,9 +2533,18 @@ export const getMovies = async (query = {}) => {
     }
 
     const movies = await MovieModel.find(mongoQuery).sort(sortOption);
-    return movies.map(movie => applyLocalHdImageFallback(movie.toObject()));
+    const plainMovies = movies.map(movie => movie.toObject());
+    const toRelease = plainMovies.filter(m => m.isUpcoming && releaseHasPassed(m));
+    if (toRelease.length > 0) {
+      await MovieModel.updateMany(
+        { id: { $in: toRelease.map(m => m.id) } },
+        { $set: { isUpcoming: false } }
+      ).catch(() => {});
+    }
+    return plainMovies.map(m => markReleasedUpcoming(applyLocalHdImageFallback(m)));
   } else {
-    let { movies } = readJsonDb();
+    const data = readJsonDb();
+    let movies = data.movies;
     
     if (search) {
       const searchLower = search.toLowerCase();
@@ -2585,6 +2598,15 @@ export const getMovies = async (query = {}) => {
       movies.sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
     }
 
+    let changed = false;
+    movies.forEach(m => {
+      if (m.isUpcoming && releaseHasPassed(m)) {
+        m.isUpcoming = false;
+        changed = true;
+      }
+    });
+    if (changed) writeJsonDb(data);
+
     return movies.map(applyLocalHdImageFallback);
   }
 };
@@ -2610,6 +2632,8 @@ export const getMovieById = async (id) => {
   if (useMongoDB) {
     const movie = await MovieModel.findOne({ id });
     if (!movie) return null;
+    movie.views = (movie.views || 0) + 1;
+    await movie.save().catch(() => {});
     const plain = movie.toObject();
     if (needsTmdbImageRefresh(plain) && plain.tmdbId) {
       const enriched = await cachedEnrichMovieWithTmdbImages(plain);
@@ -2622,6 +2646,7 @@ export const getMovieById = async (id) => {
     const data = readJsonDb();
     const index = data.movies.findIndex(m => m.id === id);
     if (index === -1) return null;
+    data.movies[index].views = (data.movies[index].views || 0) + 1;
     const movie = data.movies[index];
     if (needsTmdbImageRefresh(movie) && movie.tmdbId) {
       const enriched = await cachedEnrichMovieWithTmdbImages(movie);
@@ -2629,6 +2654,7 @@ export const getMovieById = async (id) => {
       writeJsonDb(data);
       return applyLocalHdImageFallback(enriched);
     }
+    writeJsonDb(data);
     return applyLocalHdImageFallback(movie);
   }
 };
@@ -2787,7 +2813,7 @@ const recalcScores = (movie) => {
   const total = movie.reviews.reduce((s, r) => s + (r.rating || 0), 0);
   const avg = total / movie.reviews.length;
   movie.criticScore = parseFloat(avg.toFixed(1));
-  movie.rating = parseFloat((avg / 2).toFixed(1));
+  movie.rating = parseFloat(avg.toFixed(1));
   movie.audienceScore = Math.min(99, Math.max(40, Math.round(avg * 9.5)));
 };
 
@@ -2943,7 +2969,7 @@ export const addReview = async (movieId, reviewData) => {
     const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
     const avg = totalRating / movie.reviews.length;
     movie.criticScore = parseFloat(avg.toFixed(1));
-    movie.rating = parseFloat((avg / 2).toFixed(1));
+    movie.rating = parseFloat(avg.toFixed(1));
     
     await movie.save();
     return movie;
@@ -2958,7 +2984,7 @@ export const addReview = async (movieId, reviewData) => {
     const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
     const avg = totalRating / movie.reviews.length;
     movie.criticScore = parseFloat(avg.toFixed(1));
-    movie.rating = parseFloat((avg / 2).toFixed(1));
+    movie.rating = parseFloat(avg.toFixed(1));
     
     writeJsonDb(data);
     return movie;
@@ -2976,7 +3002,7 @@ export const deleteReview = async (movieId, reviewId, username) => {
     const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
     const avg = movie.reviews.length > 0 ? totalRating / movie.reviews.length : 0;
     movie.criticScore = parseFloat(avg.toFixed(1));
-    movie.rating = parseFloat((avg / 2).toFixed(1));
+    movie.rating = parseFloat(avg.toFixed(1));
     await movie.save();
     return movie;
   } else {
@@ -2991,7 +3017,7 @@ export const deleteReview = async (movieId, reviewId, username) => {
     const totalRating = movie.reviews.reduce((sum, r) => sum + r.rating, 0);
     const avg = movie.reviews.length > 0 ? totalRating / movie.reviews.length : 0;
     movie.criticScore = parseFloat(avg.toFixed(1));
-    movie.rating = parseFloat((avg / 2).toFixed(1));
+    movie.rating = parseFloat(avg.toFixed(1));
     writeJsonDb(data);
     return movie;
   }
@@ -3318,6 +3344,176 @@ export const getUserOttAlerts = async (username) => {
   const data = readJsonDb();
   const user = data.users.find(u => u.username === username);
   return user?.ottAlerts || [];
+};
+
+// ─── WATCHLIST (server-synced) ───
+
+const findUserByUsername = async (username) => {
+  if (useMongoDB) {
+    return await UserModel.findOne({ username });
+  }
+  const { users } = readJsonDb();
+  return users.find(u => u.username === username);
+};
+
+const saveUser = async (user) => {
+  if (useMongoDB) {
+    await user.save();
+    return;
+  }
+  const data = readJsonDb();
+  const idx = data.users.findIndex(u => u.username === user.username);
+  if (idx !== -1) data.users[idx] = user;
+  writeJsonDb(data);
+};
+
+export const getUserWatchlist = async (username) => {
+  const user = await findUserByUsername(username);
+  if (!user) throw new Error("User not found");
+  return Array.isArray(user.watchlist) ? user.watchlist : [];
+};
+
+export const setUserWatchlist = async (username, movieIds) => {
+  const user = await findUserByUsername(username);
+  if (!user) throw new Error("User not found");
+  const clean = Array.isArray(movieIds) ? [...new Set(movieIds.filter(Boolean))] : [];
+  if (useMongoDB) {
+    user.watchlist = clean;
+    await user.save();
+  } else {
+    user.watchlist = clean;
+    await saveUser(user);
+  }
+  return { watchlist: clean };
+};
+
+export const addToWatchlist = async (username, movieId) => {
+  if (!movieId) throw new Error("Movie ID is required");
+  const user = await findUserByUsername(username);
+  if (!user) throw new Error("User not found");
+  const current = Array.isArray(user.watchlist) ? user.watchlist : [];
+  if (!current.includes(movieId)) current.push(movieId);
+  if (useMongoDB) {
+    user.watchlist = current;
+    await user.save();
+  } else {
+    user.watchlist = current;
+    await saveUser(user);
+  }
+  return { watchlist: current };
+};
+
+export const removeFromWatchlist = async (username, movieId) => {
+  const user = await findUserByUsername(username);
+  if (!user) throw new Error("User not found");
+  const current = (Array.isArray(user.watchlist) ? user.watchlist : []).filter(id => id !== movieId);
+  if (useMongoDB) {
+    user.watchlist = current;
+    await user.save();
+  } else {
+    user.watchlist = current;
+    await saveUser(user);
+  }
+  return { watchlist: current };
+};
+
+export const mergeWatchlist = async (username, movieIds) => {
+  const user = await findUserByUsername(username);
+  if (!user) throw new Error("User not found");
+  const current = new Set(Array.isArray(user.watchlist) ? user.watchlist : []);
+  (Array.isArray(movieIds) ? movieIds : []).forEach(id => id && current.add(id));
+  const merged = [...current];
+  if (useMongoDB) {
+    user.watchlist = merged;
+    await user.save();
+  } else {
+    user.watchlist = merged;
+    await saveUser(user);
+  }
+  return { watchlist: merged };
+};
+
+// ─── GOOGLE LOGIN ───
+
+export const loginWithGoogle = async (profile) => {
+  const { email, name, picture } = profile;
+  if (!email) throw new Error("Google account email is required");
+
+  if (useMongoDB) {
+    let user = await UserModel.findOne({ email });
+    if (!user) {
+      const username = await generateUniqueUsername(name || email.split('@')[0]);
+      const salt = generateSalt();
+      const passwordHash = crypto.randomBytes(32).toString('hex');
+      const token = crypto.randomBytes(32).toString('hex');
+      user = new UserModel({
+        username,
+        email,
+        passwordHash,
+        salt,
+        role: 'Cinema Enthusiast',
+        avatarUrl: picture || '',
+        token,
+        emailVerified: true,
+        ottAlerts: [],
+        watchlist: []
+      });
+      await user.save();
+      return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token, isNew: true };
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    user.token = token;
+    if (picture && !user.avatarUrl) user.avatarUrl = picture;
+    await user.save();
+    return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token, isNew: false };
+  }
+
+  const data = readJsonDb();
+  let user = data.users.find(u => u.email === email);
+  if (!user) {
+    const username = await generateUniqueUsername(name || email.split('@')[0]);
+    const salt = generateSalt();
+    const newUser = {
+      username,
+      email,
+      passwordHash: crypto.randomBytes(32).toString('hex'),
+      salt,
+      role: 'Cinema Enthusiast',
+      avatarUrl: picture || '',
+      token: crypto.randomBytes(32).toString('hex'),
+      emailVerified: true,
+      ottAlerts: [],
+      watchlist: []
+    };
+    data.users.push(newUser);
+    writeJsonDb(data);
+    return { username: newUser.username, email: newUser.email, role: newUser.role, avatarUrl: newUser.avatarUrl, bio: newUser.bio, token: newUser.token, isNew: true };
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  user.token = token;
+  if (picture && !user.avatarUrl) user.avatarUrl = picture;
+  writeJsonDb(data);
+  return { username: user.username, email: user.email, role: user.role, avatarUrl: user.avatarUrl, bio: user.bio, token, isNew: false };
+};
+
+const generateUniqueUsername = async (base) => {
+  const slug = (base || 'user').toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 20) || 'user';
+  let candidate = slug;
+  let counter = 1;
+  while (await usernameExists(candidate)) {
+    const suffix = counter.toString();
+    candidate = slug.slice(0, 20 - suffix.length) + suffix;
+    counter++;
+  }
+  return candidate;
+};
+
+const usernameExists = async (username) => {
+  if (useMongoDB) {
+    return Boolean(await UserModel.findOne({ username }));
+  }
+  const { users } = readJsonDb();
+  return users.some(u => u.username.toLowerCase() === username.toLowerCase());
 };
 
 // Check all user alerts for movies releasing today and return list of users to notify
@@ -3705,119 +3901,6 @@ export const deleteList = async (listId, username) => {
 
 // ─── CINE UPDATES (Reels) ───
 
-const initialCineUpdates = [
-  {
-    id: 'cu-1',
-    title: 'Leo 2 Confirmed!',
-    body: 'Lokesh Kanagaraj confirms Leo 2 is in early development. Vijay to return as Parthiban. Sources say shooting may begin in late 2026.',
-    category: 'Rumor',
-    movieName: 'Leo 2',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
-    timestamp: '2h ago',
-    likes: 1240,
-    likedBy: []
-  },
-  {
-    id: 'cu-2',
-    title: 'Thalapathy 69 Title Announcement',
-    body: 'Vijay\'s final film before political entry, directed by Karthik Subbaraj, is rumored to be titled "Thalaivar 170". Official announcement expected next week.',
-    category: 'News',
-    movieName: 'Thalapathy 69',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
-    timestamp: '5h ago',
-    likes: 2890,
-    likedBy: []
-  },
-  {
-    id: 'cu-3',
-    title: 'Suriya 44 with Karthik Subbaraj',
-    body: 'Breaking: Suriya teams up with Karthik Subbaraj for a pan-India project. Touted to be a period action thriller with a massive budget.',
-    category: 'Breaking',
-    movieName: 'Suriya 44',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    timestamp: '8h ago',
-    likes: 3456,
-    likedBy: []
-  },
-  {
-    id: 'cu-4',
-    title: 'Coolie First Look Breaking Records',
-    body: 'Rajinikanth starrer "Coolie" directed by Lokesh Kanagaraj first look poster crosses 10M+ views in 24 hours. Fans go crazy over Thalaivar\'s new avatar.',
-    category: 'Update',
-    movieName: 'Coolie',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg',
-    timestamp: '12h ago',
-    likes: 5670,
-    likedBy: []
-  },
-  {
-    id: 'cu-5',
-    title: 'Vikram 2 Star Cast Revealed',
-    body: 'Kamal Haasan reveals massive star cast for Vikram 2 including Rajinikanth in a cameo role. Anirudh to compose. Shooting starts June 2026.',
-    category: 'Rumor',
-    movieName: 'Vikram 2',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
-    timestamp: '1d ago',
-    likes: 4321,
-    likedBy: []
-  },
-  {
-    id: 'cu-6',
-    title: 'Animal Park Update',
-    body: 'Sandeep Reddy Vanga confirms Animal Park script is locked. Rashmika Mandanna to reprise her role. Expected release: Summer 2027.',
-    category: 'Update',
-    movieName: 'Animal Park',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/hA2ple9q4qnwxp3hKVNhroipsir.jpg',
-    timestamp: '1d ago',
-    likes: 2100,
-    likedBy: []
-  },
-  {
-    id: 'cu-7',
-    title: 'Kantara Chapter 1 Trailer Date',
-    body: 'Rishab Shetty announces Kantara Chapter 1 trailer will release on March 15th. The prequel promises to be bigger and more rooted.',
-    category: 'News',
-    movieName: 'Kantara Chapter 1',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg',
-    timestamp: '2d ago',
-    likes: 1890,
-    likedBy: []
-  },
-  {
-    id: 'cu-8',
-    title: 'Pushpa 2: The Rule Box Office',
-    body: 'Allu Arjun\'s Pushpa 2 enters 2000Cr club worldwide! Highest grossing Indian film of 2025. Hindi version alone contributed 800Cr+.',
-    category: 'Box Office',
-    movieName: 'Pushpa 2',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-    timestamp: '3d ago',
-    likes: 7890,
-    likedBy: []
-  },
-  {
-    id: 'cu-9',
-    title: 'Dhanush 50th Film Announced',
-    body: 'Dhanush\'s 50th film titled "D50" directed by Sekhar Kammula. Joint production by Dhanush and Narayan Das K. Ramoji Film City schedule locked.',
-    category: 'News',
-    movieName: 'D50',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg',
-    timestamp: '3d ago',
-    likes: 1567,
-    likedBy: []
-  },
-  {
-    id: 'cu-10',
-    title: 'Spirit (Prabhas) Massive Budget',
-    body: 'Sandeep Reddy Vanga\'s "Spirit" starring Prabhas is reportedly budgeted at 500Cr+. The action drama will be shot across 4 countries. Title logo launch soon.',
-    category: 'Breaking',
-    movieName: 'Spirit',
-    imageUrl: 'https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWXpWHDrrPo.jpg',
-    timestamp: '4d ago',
-    likes: 6543,
-    likedBy: []
-  },
-];
-
 let CineUpdateModel;
 try {
   const cineUpdateSchema = new mongoose.Schema({
@@ -3828,33 +3911,81 @@ try {
     movieName: { type: String, default: '' },
     imageUrl: { type: String, default: '' },
     timestamp: { type: String, default: 'Just now' },
+    createdAt: { type: String, default: '' },
     likes: { type: Number, default: 0 },
     likedBy: [{ type: String }]
   });
   CineUpdateModel = mongoose.model('CineUpdate', cineUpdateSchema);
 } catch (e) {}
 
+const displayIso = (timestamp, now = Date.now()) => {
+  const str = String(timestamp || '');
+  let m;
+  if (/just now/i.test(str)) return new Date(now - 5 * 60e3).toISOString();
+  if ((m = str.match(/^(\d+)\s*m(?:in)?\s*ago$/i))) return new Date(now - parseInt(m[1], 10) * 60e3).toISOString();
+  if ((m = str.match(/^(\d+)\s*h(?:rs?)?\s*ago$/i))) return new Date(now - parseInt(m[1], 10) * 36e5).toISOString();
+  if ((m = str.match(/^(\d+)\s*d(?:ays?)?\s*ago$/i))) return new Date(now - parseInt(m[1], 10) * 864e5).toISOString();
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d.toISOString();
+  return new Date(now - 8 * 864e5).toISOString();
+};
+
+const withCreatedAt = (u, now = Date.now()) => {
+  if (u.createdAt && !isNaN(new Date(u.createdAt).getTime())) return u;
+  return { ...u, createdAt: displayIso(u.timestamp, now) };
+};
+
+const cineUpdateAge = (u, now = Date.now()) => {
+  const iso = u.createdAt && !isNaN(new Date(u.createdAt).getTime()) ? u.createdAt : displayIso(u.timestamp, now);
+  return Math.max(0, now - new Date(iso).getTime());
+};
+
 export const getCineUpdates = async () => {
+  const now = Date.now();
+  let updates;
   if (useMongoDB && CineUpdateModel) {
-    return await CineUpdateModel.find({}).sort({ _id: -1 });
-  }
-  const data = readJsonDb();
-  if (!data.cineUpdates || data.cineUpdates.length === 0) {
-    data.cineUpdates = initialCineUpdates;
-    writeJsonDb(data);
+    const docs = await CineUpdateModel.find({});
+    updates = docs.map(d => (typeof d.toObject === 'function' ? d.toObject() : d));
   } else {
-    const seedMap = Object.fromEntries(initialCineUpdates.map(u => [u.id, u.imageUrl]));
-    let needsWrite = false;
-    data.cineUpdates = data.cineUpdates.map(u => {
-      if (seedMap[u.id] && u.imageUrl !== seedMap[u.id]) {
-        needsWrite = true;
-        return { ...u, imageUrl: seedMap[u.id] };
-      }
-      return u;
-    });
-    if (needsWrite) writeJsonDb(data);
+    const data = readJsonDb();
+    updates = data.cineUpdates || [];
+    const enriched = updates.map(u => withCreatedAt(u, now));
+    if (enriched.some((u, i) => u.createdAt !== updates[i].createdAt)) {
+      data.cineUpdates = enriched;
+      writeJsonDb(data);
+    }
+    updates = enriched;
   }
-  return data.cineUpdates;
+  return [...updates]
+    .sort((a, b) => new Date(withCreatedAt(b, now).createdAt).getTime() - new Date(withCreatedAt(a, now).createdAt).getTime());
+};
+
+export const pruneOldCineUpdates = async (maxAgeDays = 7, maxCount = 40) => {
+  const now = Date.now();
+  const maxAgeMs = maxAgeDays * 864e5;
+  let removed = 0;
+
+  const removeOne = async (id) => {
+    if (useMongoDB && CineUpdateModel) {
+      const result = await CineUpdateModel.deleteOne({ id });
+      removed += result.deletedCount || 0;
+    } else {
+      const data = readJsonDb();
+      const idx = (data.cineUpdates || []).findIndex(u => u.id === id);
+      if (idx > -1) { data.cineUpdates.splice(idx, 1); removed++; writeJsonDb(data); }
+    }
+  };
+
+  const current = await getCineUpdates();
+  for (const u of current.filter(x => cineUpdateAge(x, now) > maxAgeMs)) {
+    await removeOne(u.id);
+  }
+
+  const fresh = await getCineUpdates();
+  if (fresh.length > maxCount) {
+    for (const u of fresh.slice(maxCount)) await removeOne(u.id);
+  }
+  return removed;
 };
 
 export const createCineUpdate = async (updateData, user) => {
@@ -3871,7 +4002,8 @@ export const createCineUpdate = async (updateData, user) => {
     category: updateData.category || 'News',
     movieName: updateData.movieName || '',
     imageUrl: updateData.imageUrl || '',
-    timestamp: 'Just now',
+    timestamp: updateData.timestamp || 'Just now',
+    createdAt: updateData.createdAt || new Date().toISOString(),
     likes: 0,
     likedBy: []
   };
@@ -3997,4 +4129,71 @@ export const getLeaderboard = async () => {
       followerCount: (u.followers || []).length
     }))
     .sort((a, b) => b.reviewCount - a.reviewCount || b.followerCount - a.followerCount);
+};
+
+// ─── ANALYTICS (Admin) ───
+
+export const getAnalytics = async () => {
+  const movies = await getMovies();
+  const users = await getUsers();
+  const threads = await getCommunityThreads();
+
+  const reviewCounts = {};
+  const reviewLikes = {};
+  let recentReviews = [];
+
+  for (const movie of movies) {
+    if (!movie.reviews) continue;
+    for (const review of movie.reviews) {
+      const u = review.user;
+      if (u) {
+        reviewCounts[u] = (reviewCounts[u] || 0) + 1;
+        reviewLikes[u] = (reviewLikes[u] || 0) + (review.likes || 0);
+      }
+      recentReviews.push({ ...review, movieTitle: movie.title, movieId: movie.id, moviePoster: movie.posterUrl });
+    }
+  }
+
+  recentReviews = recentReviews.sort((a, b) => {
+    const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return tb - ta;
+  }).slice(0, 10);
+
+  const totalViews = movies.reduce((s, m) => s + (m.views || 0), 0);
+  const totalLikes = movies.reduce((s, m) => s + (m.reviews || []).reduce((x, r) => x + (r.likes || 0), 0), 0);
+
+  const topMoviesByViews = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 8).map(m => ({
+    id: m.id, title: m.title, posterUrl: m.posterUrl, releaseYear: m.releaseYear, views: m.views || 0, rating: m.rating || 0
+  }));
+
+  const topMoviesByReviews = [...movies].sort((a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0)).slice(0, 8).map(m => ({
+    id: m.id, title: m.title, posterUrl: m.posterUrl, releaseYear: m.releaseYear, reviewCount: m.reviews?.length || 0, rating: m.rating || 0
+  }));
+
+  const topCritics = Object.keys(reviewCounts).map(username => {
+    const u = users.find(x => x.username === username);
+    return {
+      username,
+      role: u?.role || 'Reviewer',
+      avatarUrl: u?.avatarUrl || '',
+      reviewCount: reviewCounts[username],
+      totalLikes: reviewLikes[username] || 0
+    };
+  }).sort((a, b) => b.reviewCount - a.reviewCount || b.totalLikes - a.totalLikes).slice(0, 8);
+
+  return {
+    totals: {
+      movies: movies.length,
+      users: users.length,
+      reviews: Object.values(reviewCounts).reduce((s, n) => s + n, 0),
+      likes: totalLikes,
+      views: totalViews,
+      threads: threads.length
+    },
+    topMoviesByViews,
+    topMoviesByReviews,
+    topCritics,
+    recentReviews
+  };
 };
