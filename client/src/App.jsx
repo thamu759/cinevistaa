@@ -2991,7 +2991,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* QUIZ VIEW */}
         {activeView === 'quiz' && (
-          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+          <div className="main-content game-view">
             <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
               <QuizGame movies={movies} onViewMovie={handleViewMovie} />
             </Suspense>
@@ -3000,7 +3000,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* SPIN WHEEL VIEW */}
         {activeView === 'wheel' && (
-          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '900px', margin: '0 auto' }}>
+          <div className="main-content game-view">
             <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
               <SpinWheel movies={movies} onViewMovie={handleViewMovie} />
             </Suspense>
@@ -3009,7 +3009,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* BLIND FRAME VIEW */}
         {activeView === 'blind-frame' && (
-          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+          <div className="main-content game-view">
             <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
               <BlindFrame movies={movies} onViewMovie={handleViewMovie} />
             </Suspense>
@@ -3018,7 +3018,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* MOOD MATCHER VIEW */}
         {activeView === 'mood-matcher' && (
-          <div className="main-content" style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+          <div className="main-content game-view">
             <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
               <MoodMatcher movies={movies} onViewMovie={handleViewMovie} />
             </Suspense>

@@ -7296,6 +7296,17 @@ a {
   box-shadow: 0 10px 30px rgba(201,163,70,0.4);
 }
 
+/* ── Game views: full-width immersive, no boxed container ── */
+.main-content.game-view {
+  max-width: none;
+  padding: 0;
+}
+
+.main-content.game-view .quiz-wrap,
+.main-content.game-view .cflip-wrap {
+  border-radius: 0;
+}
+
 /* ── Luxury card entrance + sheen sweep ── */
 @keyframes luxCardIn {
   0% {
