@@ -105,7 +105,23 @@ export default function SpinWheel({ movies, onViewMovie }) {
                         : 'none',
                     }}
                   >
-                    <div className="cflip-back-diamond" />
+                    <svg className="cflip-corner cflip-corner-tl" viewBox="0 0 24 24" fill="none">
+                      <path d="M1 8v-7h7M1 8c4.5 0 8 3.5 8 8M8 1c0 4.5 3.5 8 8 8" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+                    <svg className="cflip-corner cflip-corner-tr" viewBox="0 0 24 24" fill="none">
+                      <path d="M23 8V1h-7M23 8c-4.5 0-8 3.5-8 8M16 1c0 4.5-3.5 8-8 8" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+                    <svg className="cflip-corner cflip-corner-bl" viewBox="0 0 24 24" fill="none">
+                      <path d="M1 16v7h7M1 16c4.5 0 8-3.5 8-8M8 23c0-4.5 3.5-8 8-8" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+                    <svg className="cflip-corner cflip-corner-br" viewBox="0 0 24 24" fill="none">
+                      <path d="M23 16v7h-7M23 16c-4.5 0-8-3.5-8-8M16 23c0-4.5-3.5-8-8-8" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+                    </svg>
+                    <div className="cflip-emblem">
+                      <span className="cflip-emblem-ring" />
+                      <span className="cflip-emblem-diamond" />
+                      <Film size={20} className="cflip-emblem-icon" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -116,7 +132,9 @@ export default function SpinWheel({ movies, onViewMovie }) {
                 <div className="cflip-card-front">
                   <div className="cflip-card-pattern" />
                   <div className="cflip-card-front-logo">
-                    <Film size={22} />
+                    <div className="cflip-front-emblem">
+                      <Film size={22} />
+                    </div>
                   </div>
                 </div>
                 <div className="cflip-card-back-face">
