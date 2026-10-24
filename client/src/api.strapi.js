@@ -6,7 +6,7 @@ export function isStrapiConfigured() {
 
 async function strapiFetch(path, options = {}) {
   if (!STRAPI_URL) throw new Error('VITE_STRAPI_URL not configured');
-  const url = \\/api\\;
+  const url = `${STRAPI_URL}/api${path}`;
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ async function strapiFetch(path, options = {}) {
     ...options
   });
   if (!res.ok) {
-    throw new Error(\Strapi request failed: \\);
+    throw new Error(`Strapi request failed: ${res.status} ${res.statusText}`);
   }
   return res.json();
 }
@@ -50,7 +50,7 @@ export async function fetchStrapiArticles() {
 }
 
 export async function fetchStrapiArticleBySlug(slug) {
-  const json = await strapiFetch(\/articles?filters[slug][\]=\&populate=*\);
+  const json = await strapiFetch(`/articles?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
   const list = normalizeList(json);
   return list[0] || null;
 }
