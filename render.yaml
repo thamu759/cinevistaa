@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: strapi
     buildCommand: npm install && npm run build
-    startCommand: mkdir -p public/uploads && node server.js
+    startCommand: mkdir -p public/uploads && npm run start
     autoDeploy: true
     envVars:
       - key: NODE_ENV
