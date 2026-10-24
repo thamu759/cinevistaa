@@ -1,5 +1,5 @@
 [build]
-  command = "cd client && npm run build"
+  command = "cd client && npm install --include=dev && npx vite build"
   publish = "client/dist"
 
 [context.production.environment]
