@@ -7,10 +7,9 @@ module.exports = [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'connect-src': ["'self'", 'http:', 'https:'],
-          'img-src': ["'self'", 'data:', 'blob:', 'market-assets.strapi.io'],
-          'media-src': ["'self'", 'data:', 'blob:'],
-          'frame-src': ["'self'", 'data:', 'blob:'],
+          'connect-src': ["'self'", 'https:'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+          'media-src': ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
           upgradeInsecureRequests: null,
         },
       },
@@ -19,7 +18,12 @@ module.exports = [
   {
     name: 'strapi::cors',
     config: {
-      origin: ['https://cinevistaa.netlify.app', 'http://localhost:5173'],
+      origin: [
+        'https://cinevistaa.netlify.app',
+        'https://cinevistaa.in',
+        'https://www.cinevistaa.in',
+        'http://localhost:5173'
+      ],
       headers: '*',
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
     },
