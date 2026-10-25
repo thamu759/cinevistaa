@@ -1,56 +1,49 @@
-const STRAPI_URL = (import.meta.env.VITE_STRAPI_URL || '').replace(/\/$/, '');
+const STRAPI_URL = import.meta.env.VITE_STRAPI_URL ? import.meta.env.VITE_STRAPI_URL.replace(/\/$/, '') : '';
 
 export function isStrapiConfigured() {
   return Boolean(STRAPI_URL);
 }
 
-async function strapiFetch(path, options = {}) {
-  if (!STRAPI_URL) throw new Error('VITE_STRAPI_URL not configured');
-  const url = \\/api\\;
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    ...options
-  });
-  if (!res.ok) {
-    throw new Error(\Strapi request failed: \\);
+async function strapiFetch(endpoint) {
+  if (!STRAPI_URL) {
+    throw new Error('Strapi URL not configured');
   }
+
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${STRAPI_URL}/api${path}`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Strapi request failed: ${res.status}`);
+  }
+
   return res.json();
 }
 
-function normalize(article) {
-  if (!article) return null;
-  const attrs = article.attributes || article;
-  const id = attrs.slug || article.slug || attrs.id || article.id;
+function normalizeArticle(item) {
+  const attrs = item.attributes || item;
   return {
-    id,
+    id: attrs.slug || item.id,
     title: attrs.title || '',
     excerpt: attrs.excerpt || '',
     content: attrs.content || '',
     author: attrs.author || 'thiraipedia Editorial',
-    date: attrs.date || (attrs.publishedAt ? new Date(attrs.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''),
-    readTime: attrs.readTime || '',
-    category: attrs.category || ''
+    date: attrs.date || (attrs.publishedAt ? attrs.publishedAt.slice(0, 10) : ''),
+    readTime: attrs.readTime || '4 min read',
+    category: attrs.category || 'General',
+    slug: attrs.slug || ''
   };
 }
 
-function normalizeList(payload) {
-  const data = payload?.data || payload || [];
-  if (Array.isArray(data)) {
-    return data.map(normalize).filter(Boolean);
-  }
-  return [];
-}
-
 export async function fetchStrapiArticles() {
-  const json = await strapiFetch('/articles?populate=*&sort=publishedAt:desc');
-  return normalizeList(json);
+  const json = await strapiFetch('/articles?populate=*');
+  const list = Array.isArray(json?.data) ? json.data : [];
+  return list.map(normalizeArticle);
 }
 
 export async function fetchStrapiArticleBySlug(slug) {
-  const json = await strapiFetch(\/articles?filters[slug][\]=\&populate=*\);
-  const list = normalizeList(json);
-  return list[0] || null;
+  const json = await strapiFetch(`/articles?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+  const list = Array.isArray(json?.data) ? json.data : [];
+  if (list.length === 0) return null;
+  return normalizeArticle(list[0]);
 }
