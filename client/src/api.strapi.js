@@ -1,4 +1,6 @@
-const STRAPI_URL = import.meta.env.VITE_STRAPI_URL ? import.meta.env.VITE_STRAPI_URL.replace(/\/$/, '') : '';
+const STRAPI_URL = import.meta.env.VITE_STRAPI_URL
+  ? import.meta.env.VITE_STRAPI_URL.replace(/\/$/, '')
+  : '';
 
 export function isStrapiConfigured() {
   return Boolean(STRAPI_URL);
