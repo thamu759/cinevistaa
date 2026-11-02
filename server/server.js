@@ -85,7 +85,7 @@ if (process.env.NODE_ENV === 'staging') {
 }
 
 const app = express();
-const PORT = systemPort || process.env.PORT || (process.env.NODE_ENV === 'staging' ? 5001 : 5000);
+const PORT = systemPort || process.env.PORT || (process.env.RENDER ? 10000 : (process.env.NODE_ENV === 'staging' ? 5001 : 5000));
 
 // Middleware
 app.use(compression());
