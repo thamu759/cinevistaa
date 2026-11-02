@@ -14,15 +14,13 @@ services:
         value: staging
       - key: PORT
         value: 10000
-      - key: DB_FILE
-        value: db.staging.json
-      - key: CORS_ORIGIN
-        value: https://staging--ereaa.netlify.app,https://staging--cinevistaa.netlify.app,https://staging.cinevistaa.in,http://localhost:5174
+      - key: MONGO_URI
+        value: mongodb://thamotharan1163_db_user:thamu123@ac-8h0ronu-shard-00-00.spp5enj.mongodb.net:27017,ac-8h0ronu-shard-00-01.spp5enj.mongodb.net:27017,ac-8h0ronu-shard-00-02.spp5enj.mongodb.net:27017/?ssl=true&replicaSet=atlas-j8n346-shard-0&authSource=admin&appName=Cluster0
       - key: TMDB_API_KEY
-        sync: false
+        value: cdef1e87093b92da3dcf8e7032daf61c
       - key: TMDB_ACCESS_TOKEN
-        sync: false
+        value: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjZGVmMWU4NzA5M2I5MmRhM2RjZjhlNzAzMmRhZjYxYyIsIm5iZiI6MTczODczMzA1NC41ODUsInN1YiI6IjY3YTJmNWZlYmViMTdjODc2YTlmZDA3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Jg9n03AKYUJwAxNLPoWazyJf_QHXiEBNmtY6idwMWC8
       - key: OPENAI_API_KEY
         sync: false
-      - key: MONGO_URI
-        sync: false
+      - key: CORS_ORIGIN
+        value: https://staging--ereaa.netlify.app,https://staging--cinevistaa.netlify.app,https://staging.cinevistaa.in,http://localhost:5174
