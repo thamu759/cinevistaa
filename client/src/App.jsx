@@ -1630,6 +1630,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             )}
           </div>
           <div className="nav-actions">
+            <button className={`nav-cinema-btn ${cinemaSoundOn ? 'nav-cinema-btn--active' : ''}`} onClick={handleToggleSound} title={cinemaSoundOn ? 'Cinema Audio FX: ON' : 'Cinema Audio FX: OFF'} aria-label="Toggle Cinema Audio">
+              {cinemaSoundOn ? (<div style={{ display: 'flex', alignItems: 'center' }}><Volume2 size={16} /><div className="nav-sound-waves"><span className="sound-bar" /><span className="sound-bar" /><span className="sound-bar" /></div></div>) : (<VolumeX size={16} />)}
+            </button>
+            <button className={`nav-cinema-btn ${filmGrainOn ? 'nav-cinema-btn--active' : ''}`} onClick={handleToggleFilmGrain} title={filmGrainOn ? '35mm Film Grain: ON' : '35mm Film Grain: OFF'} aria-label="Toggle Film Grain">
+              <Film size={16} />
+            </button>
             <button className="hamburger-btn" onClick={() => setIsMobileMenuOpen(prev => !prev)} aria-label="Menu">
               <List size={22} />
             </button>
@@ -1820,6 +1826,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       key={movie.id} 
                       className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
                     >
+                      <div className="hero-ambient-glow" aria-hidden="true" />
                       <div 
                         className="hero-backdrop" 
                         style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
@@ -1931,6 +1938,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 onViewAll={() => navigateTo('tamil-cinema')}
               />
             )}
+
+            {/* MOVIE VERSUS BATTLE DUEL */}
+            <Suspense fallback={null}>
+              <MovieVersusBattle />
+            </Suspense>
 
             {malayalamMovies.length > 0 && (
               <MovieSection

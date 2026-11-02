@@ -292,3 +292,4 @@ function MovieVersusBattle() {
 }
 
 export default memo(MovieVersusBattle);
+

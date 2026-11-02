@@ -101,3 +101,4 @@ function FloatingReactions({ movieId, movieTitle, compact = false }) {
 }
 
 export default memo(FloatingReactions);
+

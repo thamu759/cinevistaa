@@ -154,6 +154,9 @@ export default function MovieDetailsView({
                 movie={selectedMovie}
                 variant="icon"
               />
+              <button className="btn-ticket-stub" onClick={() => setIsTicketModalOpen(true)} title="Collect Vintage Cinema Ticket Stub">
+                <Ticket size={16} /> Ticket Stub
+              </button>
               {currentUser && (
                 <div className="hero-actions-btn-wrapper">
                   <button className="btn-secondary" onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}>
@@ -189,6 +192,7 @@ export default function MovieDetailsView({
                 </div>
               )}
             </div>
+            <FloatingReactions movieId={selectedMovie.id} movieTitle={selectedMovie.title} />
           </div>
         </div>
 
@@ -452,6 +456,11 @@ export default function MovieDetailsView({
         })()}
 
       </div>
+      <CinemaTicketModal
+        isOpen={isTicketModalOpen}
+        onClose={() => setIsTicketModalOpen(false)}
+        movie={selectedMovie}
+      />
     </div>
   );
 }
