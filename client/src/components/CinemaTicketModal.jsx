@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Download, Share2, X, Check, Ticket, Star, Sparkles, Film } from 'lucide-react';
+import { Download, Share2, X, Check, Star, ShieldCheck, Award } from 'lucide-react';
 import { proxyImageUrl } from '../api';
 import { playTicketTear, playPopcornPop } from '../utils/cinemaAudio';
 
@@ -13,7 +13,6 @@ export default function CinemaTicketModal({ isOpen, onClose, movie, userRating =
   useEffect(() => {
     if (isOpen) {
       playTicketTear();
-      // Generate random vintage ticket number and seat
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
       const randomRow = rows[Math.floor(Math.random() * rows.length)];
@@ -33,21 +32,21 @@ export default function CinemaTicketModal({ isOpen, onClose, movie, userRating =
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(ticketRef.current, {
-        scale: 2.5,
+        scale: 3,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: null,
+        backgroundColor: '#0a0b0e',
         logging: false,
       });
 
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.download = `${(movie?.title || 'movie').replace(/[^a-zA-Z0-9]/g, '_')}_cinema_ticket.png`;
+      link.download = `${(movie?.title || 'movie').replace(/[^a-zA-Z0-9]/g, '_')}_collectors_pass.png`;
       link.href = dataUrl;
       link.click();
       playPopcornPop();
     } catch (err) {
-      console.error('Failed to download ticket stub:', err);
+      console.error('Failed to export pass:', err);
     } finally {
       setDownloading(false);
     }
@@ -61,24 +60,23 @@ export default function CinemaTicketModal({ isOpen, onClose, movie, userRating =
       if (navigator.share) {
         const html2canvas = (await import('html2canvas')).default;
         const canvas = await html2canvas(ticketRef.current, {
-          scale: 2,
+          scale: 2.5,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: null,
+          backgroundColor: '#0a0b0e',
           logging: false,
         });
 
         canvas.toBlob(async (blob) => {
           if (!blob) return;
-          const file = new File([blob], `${movie?.title || 'movie'}_ticket.png`, { type: 'image/png' });
+          const file = new File([blob], `${movie?.title || 'movie'}_pass.png`, { type: 'image/png' });
           try {
             await navigator.share({
-              title: `${movie?.title || 'Film'} Cinema Ticket Stub | ThiraiPedia`,
-              text: `Check out my movie ticket stub for ${movie?.title || 'this film'} on ThiraiPedia!`,
+              title: `${movie?.title || 'Film'} Collector's Pass | ThiraiPedia`,
+              text: `Collector's Cinema Pass for ${movie?.title || 'this film'} on ThiraiPedia.`,
               files: [file],
             });
           } catch (e) {
-            // Share canceled or fallback to clipboard
             fallbackShare();
           }
         }, 'image/png');
@@ -106,129 +104,137 @@ export default function CinemaTicketModal({ isOpen, onClose, movie, userRating =
   }).toUpperCase();
 
   return (
-    <div className="modal-overlay ticket-modal-overlay" onClick={onClose}>
-      <div className="ticket-modal-container" onClick={e => e.stopPropagation()}>
-        {/* Top Controls */}
-        <div className="ticket-modal-header">
-          <div className="ticket-modal-badge">
-            <Ticket size={16} />
-            <span>COLLECTOR'S TICKET STUB</span>
+    <div className="modal-overlay luxury-ticket-overlay" onClick={onClose}>
+      <div className="luxury-ticket-modal" onClick={e => e.stopPropagation()}>
+        {/* Top Header */}
+        <div className="luxury-ticket-top">
+          <div className="luxury-ticket-pill">
+            <Award size={14} />
+            <span>PREMIERE ARCHIVE • COLLECTOR'S PASS</span>
           </div>
-          <button className="ticket-modal-close" onClick={onClose} aria-label="Close">
-            <X size={20} />
+          <button className="luxury-modal-close" onClick={onClose} aria-label="Close">
+            <X size={18} />
           </button>
         </div>
 
-        {/* Vintage Physical Ticket Body */}
-        <div className="ticket-stub-wrapper">
-          <div ref={ticketRef} className="vintage-ticket-card">
-            {/* Cutout notches */}
-            <div className="ticket-notch notch-left-top" />
-            <div className="ticket-notch notch-left-bottom" />
-            <div className="ticket-notch notch-right-top" />
-            <div className="ticket-notch notch-right-bottom" />
-            <div className="ticket-perforation-line" />
+        {/* Physical Pass Canvas */}
+        <div className="luxury-pass-outer">
+          <div ref={ticketRef} className="luxury-pass-card">
+            {/* Fine Cutouts */}
+            <div className="pass-notch notch-top" />
+            <div className="pass-notch notch-bottom" />
+            <div className="pass-divider-line" />
 
-            {/* Ticket Left: Main Pass */}
-            <div className="ticket-main-section">
-              <div className="ticket-theatre-header">
-                <span className="theatre-brand-name">THIRAIPEDIA PREMIERE CINEMA</span>
-                <span className="theatre-brand-sub">★ IMMERSIVE FILM EXPERIENCE ★</span>
+            {/* Left Main Body */}
+            <div className="pass-main-body">
+              <div className="pass-header-strip">
+                <div className="pass-brand-lockup">
+                  <span className="pass-brand-name">THIRAIPEDIA</span>
+                  <span className="pass-brand-tag">CRITERION CINEMA ARCHIVE</span>
+                </div>
+                <div className="pass-tier-badge">
+                  <ShieldCheck size={12} />
+                  <span>VIP PASS</span>
+                </div>
               </div>
 
-              <div className="ticket-film-body">
-                <img
-                  src={proxyImageUrl(movie.posterUrl, 'w300')}
-                  alt={movie.title}
-                  className="ticket-poster-img"
-                  crossOrigin="anonymous"
-                />
-                <div className="ticket-film-details">
-                  <div className="ticket-admit-tag">ADMIT ONE • GENERAL RESERVED</div>
-                  <h2 className="ticket-film-title">{movie.title}</h2>
-                  <div className="ticket-film-meta">
+              <div className="pass-content-split">
+                <div className="pass-poster-frame">
+                  <img
+                    src={proxyImageUrl(movie.posterUrl, 'w300')}
+                    alt={movie.title}
+                    className="pass-poster-img"
+                    crossOrigin="anonymous"
+                  />
+                  <div className="pass-poster-sheen" />
+                </div>
+
+                <div className="pass-meta-block">
+                  <div className="pass-admit-text">PREMIERE SCREENING • RESERVED SEAT</div>
+                  <h2 className="pass-title">{movie.title}</h2>
+                  <div className="pass-specs">
                     <span>{movie.year || '2024'}</span>
-                    <span>•</span>
+                    <span className="dot">•</span>
                     <span>{movie.language || 'TAMIL'}</span>
-                    <span>•</span>
-                    <span>{movie.genre?.split('/')[0]?.trim() || 'CINEMA'}</span>
+                    <span className="dot">•</span>
+                    <span>{movie.genre?.split('/')[0]?.trim() || 'FEATURE'}</span>
                   </div>
 
-                  <div className="ticket-rating-box">
-                    <div className="ticket-stars">
+                  <div className="pass-rating-display">
+                    <div className="pass-stars">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          size={14}
-                          fill={i < Math.round(displayRating / 2) ? '#fbbf24' : '#4b5563'}
-                          color={i < Math.round(displayRating / 2) ? '#fbbf24' : '#4b5563'}
+                          size={13}
+                          fill={i < Math.round(displayRating / 2) ? '#d4af37' : 'rgba(255,255,255,0.1)'}
+                          color={i < Math.round(displayRating / 2) ? '#d4af37' : 'rgba(255,255,255,0.1)'}
                         />
                       ))}
                     </div>
-                    <span className="ticket-score">{displayRating.toFixed(1)} / 10</span>
+                    <span className="pass-score-val">{displayRating.toFixed(1)} / 10</span>
                   </div>
 
                   {userReview && (
-                    <div className="ticket-user-quote">
-                      "{userReview.slice(0, 90)}{userReview.length > 90 ? '...' : ''}"
+                    <div className="pass-review-excerpt">
+                      "{userReview.slice(0, 95)}{userReview.length > 95 ? '...' : ''}"
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="ticket-footer-strip">
-                <div className="ticket-cell">
-                  <span className="cell-label">DATE</span>
-                  <span className="cell-val">{showDate}</span>
+              <div className="pass-specs-grid">
+                <div className="pass-spec-item">
+                  <span className="spec-k">DATE ISSUED</span>
+                  <span className="spec-v">{showDate}</span>
                 </div>
-                <div className="ticket-cell">
-                  <span className="cell-label">SCREEN</span>
-                  <span className="cell-val">{seatInfo.screen}</span>
+                <div className="pass-spec-item">
+                  <span className="spec-k">THEATRE</span>
+                  <span className="spec-v">SCREEN {seatInfo.screen}</span>
                 </div>
-                <div className="ticket-cell">
-                  <span className="cell-label">ROW / SEAT</span>
-                  <span className="cell-val">{seatInfo.row} - {seatInfo.seat}</span>
+                <div className="pass-spec-item">
+                  <span className="spec-k">SEATING</span>
+                  <span className="spec-v">{seatInfo.row} - {seatInfo.seat}</span>
                 </div>
-                <div className="ticket-cell">
-                  <span className="cell-label">CATEGORY</span>
-                  <span className="cell-val">PREMIUM BOX</span>
+                <div className="pass-spec-item">
+                  <span className="spec-k">AUDIENCE CLASS</span>
+                  <span className="spec-v">PRIME LOUNGE</span>
                 </div>
               </div>
             </div>
 
-            {/* Ticket Right: Tear-off Stub */}
-            <div className="ticket-stub-section">
-              <div className="stub-theatre-title">THIRAIPEDIA</div>
-              <div className="stub-stamp">VERIFIED CRITIC</div>
-              <div className="stub-film-abbr">{movie.title}</div>
-              <div className="stub-seat-display">
-                <span className="stub-screen">SCR {seatInfo.screen}</span>
-                <span className="stub-seat">{seatInfo.row}{seatInfo.seat}</span>
+            {/* Right Tear Stub */}
+            <div className="pass-stub-body">
+              <div className="stub-header-code">THIRAIPEDIA</div>
+              <div className="stub-gold-seal">OFFICIAL ENTRY</div>
+              <div className="stub-film-code">{movie.title}</div>
+              <div className="stub-seat-large">
+                <span className="seat-scr">SCR {seatInfo.screen}</span>
+                <span className="seat-num">{seatInfo.row}{seatInfo.seat}</span>
               </div>
-              <div className="stub-barcode-box">
-                <div className="stub-barcode-lines" />
-                <span className="stub-serial">{ticketNumber}</span>
+              <div className="stub-barcode-container">
+                <div className="stub-minimal-barcode" />
+                <span className="stub-serial-text">{ticketNumber}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="ticket-modal-actions">
+        <div className="luxury-pass-actions">
           <button
-            className="ticket-action-btn ticket-action-primary"
+            className="luxury-action-btn luxury-action-gold"
             onClick={handleDownload}
             disabled={downloading}
           >
-            <Download size={18} />
-            <span>{downloading ? 'Printing Ticket...' : 'Download Ticket (HD PNG)'}</span>
+            <Download size={16} />
+            <span>{downloading ? 'Rendering HD Pass...' : 'Download Collector\'s Pass (HD)'}</span>
           </button>
           <button
-            className="ticket-action-btn ticket-action-secondary"
+            className="luxury-action-btn luxury-action-outline"
             onClick={handleShare}
           >
-            {copied ? <Check size={18} color="#10b981" /> : <Share2 size={18} />}
-            <span>{copied ? 'Link Copied!' : 'Share Stub'}</span>
+            {copied ? <Check size={16} color="#10b981" /> : <Share2 size={16} />}
+            <span>{copied ? 'Link Copied' : 'Share Pass'}</span>
           </button>
         </div>
       </div>

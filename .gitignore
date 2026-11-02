@@ -100,3 +100,4 @@ server/.tmdb_cache/
 
 server/db.staging.json
 server/db.staging.json.tmp
+server/.img_cache/

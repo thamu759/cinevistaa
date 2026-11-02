@@ -1,3 +1,5 @@
+import { Mail, MessageSquare, Clock, Smartphone } from 'lucide-react';
+
 export default function ContactPage({ onNavigate }) {
   return (
     <div className="legal-page">
@@ -10,28 +12,36 @@ export default function ContactPage({ onNavigate }) {
       </div>
       <div className="legal-page-content">
         <div className="contact-card">
-          <div className="contact-card-icon">✉️</div>
+          <div className="contact-card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Mail size={22} color="var(--color-accent-gold)" />
+          </div>
           <div>
             <h3>Email</h3>
             <a href="mailto:support@thiraipedia.com">support@thiraipedia.com</a>
           </div>
         </div>
         <div className="contact-card">
-          <div className="contact-card-icon">💬</div>
+          <div className="contact-card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <MessageSquare size={22} color="var(--color-accent-gold)" />
+          </div>
           <div>
             <h3>Community Forum</h3>
             <button className="btn-link" onClick={() => onNavigate('community')}>Post in the Community Forum →</button>
           </div>
         </div>
         <div className="contact-card">
-          <div className="contact-card-icon">🕐</div>
+          <div className="contact-card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Clock size={22} color="var(--color-accent-gold)" />
+          </div>
           <div>
             <h3>Response Time</h3>
             <p>We typically reply within 24 hours.</p>
           </div>
         </div>
         <div className="contact-card">
-          <div className="contact-card-icon">📱</div>
+          <div className="contact-card-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Smartphone size={22} color="var(--color-accent-gold)" />
+          </div>
           <div>
             <h3>Social</h3>
             <div className="contact-socials">
