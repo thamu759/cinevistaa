@@ -657,7 +657,7 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
               </select>
             )}
             <span onClick={() => setAddForm(prev => ({ ...prev, isUpcoming: !prev.isUpcoming }))} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.55rem', borderRadius: '5px', cursor: 'pointer', background: addForm.isUpcoming ? 'rgba(52,211,153,0.1)' : 'rgba(255,255,255,0.02)', border: addForm.isUpcoming ? '1px solid rgba(52,211,153,0.25)' : '1px solid rgba(255,255,255,0.04)', color: addForm.isUpcoming ? '#34d399' : 'rgba(148,163,184,0.35)', transition: 'all 0.15s ease', userSelect: 'none' }}>
-              Upcoming
+              🆕 Upcoming
             </span>
           </div>
         </div>
@@ -811,7 +811,7 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
                 </select>
               )}
               <span onClick={() => setEditingMovie(prev => prev ? { ...prev, isUpcoming: !prev.isUpcoming } : prev)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.55rem', borderRadius: '5px', cursor: 'pointer', background: editingMovie?.isUpcoming ? 'rgba(52,211,153,0.1)' : 'rgba(255,255,255,0.02)', border: editingMovie?.isUpcoming ? '1px solid rgba(52,211,153,0.25)' : '1px solid rgba(255,255,255,0.04)', color: editingMovie?.isUpcoming ? '#34d399' : 'rgba(148,163,184,0.35)', transition: 'all 0.15s ease', userSelect: 'none' }}>
-                Upcoming
+                🆕 Upcoming
               </span>
             </div>
           </div>
