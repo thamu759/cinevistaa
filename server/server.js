@@ -78,13 +78,14 @@ import {
 import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const systemPort = process.env.PORT;
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 if (process.env.NODE_ENV === 'staging') {
-  dotenv.config({ path: path.resolve(__dirname, '.env.staging'), override: true });
+  dotenv.config({ path: path.resolve(__dirname, '.env.staging') });
 }
 
 const app = express();
-const PORT = process.env.PORT || (process.env.NODE_ENV === 'staging' ? 5001 : 5000);
+const PORT = systemPort || process.env.PORT || (process.env.NODE_ENV === 'staging' ? 5001 : 5000);
 
 // Middleware
 app.use(compression());

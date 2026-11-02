@@ -11,6 +11,7 @@
   command = "cd client && npm install --include=dev && node ./node_modules/vite/bin/vite.js build --mode staging"
   [context.staging.environment]
     VITE_APP_ENV = "staging"
+    VITE_API_URL = "https://cinevistaa-staging.onrender.com/api"
 
 [[redirects]]
   from = "https://www.cinevistaa.in/*"
