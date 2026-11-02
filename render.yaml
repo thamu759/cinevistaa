@@ -26,29 +26,3 @@ services:
         sync: false
       - key: MONGO_URI
         sync: false
-
-  # ─── THIRAIPEDIA PRODUCTION BACKEND (BRANCH: main) ───
-  - type: web
-    name: cinevistaa
-    runtime: node
-    plan: free
-    rootDir: server
-    buildCommand: npm install
-    startCommand: node server.js
-    autoDeploy: true
-    branch: main
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10000
-      - key: CORS_ORIGIN
-        value: https://cinevistaa.in,https://www.cinevistaa.in,https://ereaa.netlify.app,http://localhost:5173
-      - key: TMDB_API_KEY
-        sync: false
-      - key: TMDB_ACCESS_TOKEN
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: MONGO_URI
-        sync: false
