@@ -4,7 +4,7 @@ import {
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
-  Users, Send, Volume2, Maximize, List,
+  Users, Send, Volume2, VolumeX, Maximize, List,
   AlertTriangle, RefreshCw, Bell, BellOff
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
@@ -70,6 +70,8 @@ const BlindFrame = lazy(() => import('./components/BlindFrame'));
 const MoodMatcher = lazy(() => import('./components/MoodMatcher'));
 const CineUpdates = lazy(() => import('./components/CineUpdates'));
 const ReviewSharePopup = lazy(() => import('./components/ReviewSharePopup'));
+const MovieVersusBattle = lazy(() => import('./components/MovieVersusBattle'));
+import { isCinemaSoundEnabled, toggleCinemaSound } from './utils/cinemaAudio';
 
 const LANG_MAP = {
   'TA': 'TAMIL', 'TAMIL': 'TAMIL',
@@ -88,6 +90,23 @@ const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/200
 const PRE_ROLL_VIDEO_SRC = 'https://player.vimeo.com/video/1197439817?h=1ea764d599&autoplay=1&controls=0&title=0&byline=0&portrait=0&autopause=0'; // Pre-roll video/embed URL
 
 export default function App() {
+  const [cinemaSoundOn, setCinemaSoundOn] = useState(() => isCinemaSoundEnabled());
+  const [filmGrainOn, setFilmGrainOn] = useState(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('tp_film_grain') === 'true' : false;
+  });
+
+  const handleToggleSound = () => {
+    const next = toggleCinemaSound();
+    setCinemaSoundOn(next);
+  };
+
+  const handleToggleFilmGrain = () => {
+    const next = !filmGrainOn;
+    setFilmGrainOn(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tp_film_grain', next ? 'true' : 'false');
+    }
+  };
   // App Navigation & Router State
   const [activeView, setActiveView] = useState('home'); // 'home', 'movie-details', 'profile'
   const [selectedMovieId, setSelectedMovieId] = useState(null);

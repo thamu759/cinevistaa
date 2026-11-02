@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, Trash2, Edit3, Send, Tv, Film, Bell, BellOff } from 'lucide-react';
 import ShareButton from './ShareButton';
+import CinemaTicketModal from './CinemaTicketModal';
+import FloatingReactions from './FloatingReactions';
+import { Ticket } from 'lucide-react';
 import { useToast } from '../context/ToastContext.jsx';
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
@@ -35,6 +38,7 @@ export default function MovieDetailsView({
   userOttAlerts, onToggleOttAlert
 }) {
   const { showToast } = useToast();
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState({});
   const [replyTexts, setReplyTexts] = useState({});
   const [animatingReviewId, setAnimatingReviewId] = useState(null);
