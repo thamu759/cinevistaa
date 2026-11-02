@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging --port 5174",
     "build": "vite build",
+    "build:staging": "vite build --mode staging",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:staging": "vite preview --mode staging --port 5174",
     "test": "vitest run",
     "test:watch": "vitest"
   },

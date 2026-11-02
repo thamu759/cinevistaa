@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Shield, Film, MessageSquare, Database, Check, Plus, Search, X,
   Trash2, Users, Star, Sparkles, ChevronLeft, ChevronRight,
-  Activity, RefreshCw, BarChart3, Save, Edit, Newspaper
+  Activity, RefreshCw, BarChart3, Save, Edit, Newspaper, Layout
 } from 'lucide-react';
+import SiteCmsTab from './SiteCmsTab';
 
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 import {
@@ -98,6 +99,7 @@ export default function AdminPanel({ currentUser }) {
           { id: 'movies', label: 'Movies', icon: Film },
           { id: 'users', label: 'Users', icon: Users },
           { id: 'cine-updates', label: 'Cine Updates', icon: Newspaper },
+          { id: 'site-cms', label: 'Site CMS', icon: Layout },
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -121,6 +123,9 @@ export default function AdminPanel({ currentUser }) {
       )}
       {activeTab === 'cine-updates' && (
         <CineUpdatesTab showSuccess={showSuccess} />
+      )}
+      {activeTab === 'site-cms' && (
+        <SiteCmsTab showSuccess={showSuccess} showToast={showToast} />
       )}
 
     </div>

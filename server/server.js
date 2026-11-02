@@ -66,15 +66,25 @@ import {
   removeFromWatchlist,
   mergeWatchlist,
   loginWithGoogle,
-  getAnalytics
+  getAnalytics,
+  getSiteSettings,
+  updateSiteSettings,
+  getCmsPages,
+  getCmsPageBySlug,
+  createCmsPage,
+  updateCmsPage,
+  deleteCmsPage
 } from './db.js';
 import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
+if (process.env.NODE_ENV === 'staging') {
+  dotenv.config({ path: path.resolve(__dirname, '.env.staging'), override: true });
+}
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || (process.env.NODE_ENV === 'staging' ? 5001 : 5000);
 
 // Middleware
 app.use(compression());
@@ -1320,6 +1330,136 @@ app.post('/api/cine-updates/:id/like', async (req, res) => {
   }
 });
 
+// ─── CMS SITE SETTINGS & DYNAMIC PAGES ENDPOINTS ───
+
+// Public: Get site settings
+app.get('/api/cms/settings', async (req, res) => {
+  try {
+    const settings = await getSiteSettings();
+    res.json(settings);
+  } catch (error) {
+    console.error("Error getting CMS settings:", error);
+    res.status(500).json({ error: "Server error fetching site settings" });
+  }
+});
+
+// Admin: Update site settings
+app.put('/api/cms/settings', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const updated = await updateSiteSettings(req.body);
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating CMS settings:", error);
+    res.status(400).json({ error: error.message || "Failed to update site settings" });
+  }
+});
+
+// Public / Admin: Get all pages (public gets published only, admin gets all)
+app.get('/api/cms/pages', async (req, res) => {
+  try {
+    let isAdmin = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const verified = await verifyToken(authHeader.split(' ')[1]);
+      if (verified && verified.role === 'admin') isAdmin = true;
+    }
+
+    const pages = await getCmsPages({ publishedOnly: !isAdmin });
+    res.json(pages);
+  } catch (error) {
+    console.error("Error fetching CMS pages:", error);
+    res.status(500).json({ error: "Server error fetching pages" });
+  }
+});
+
+// Public: Get single page by slug
+app.get('/api/cms/pages/:slug', async (req, res) => {
+  try {
+    const page = await getCmsPageBySlug(req.params.slug);
+    if (!page) {
+      return res.status(404).json({ error: "Page not found" });
+    }
+    res.json(page);
+  } catch (error) {
+    console.error("Error getting CMS page:", error);
+    res.status(500).json({ error: "Server error fetching page" });
+  }
+});
+
+// Admin: Create new page
+app.post('/api/cms/pages', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const created = await createCmsPage(req.body);
+    res.status(201).json(created);
+  } catch (error) {
+    console.error("Error creating CMS page:", error);
+    res.status(400).json({ error: error.message || "Failed to create page" });
+  }
+});
+
+// Admin: Update page
+app.put('/api/cms/pages/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const updated = await updateCmsPage(req.params.id, req.body);
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating CMS page:", error);
+    res.status(400).json({ error: error.message || "Failed to update page" });
+  }
+});
+
+// Admin: Delete page
+app.delete('/api/cms/pages/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const success = await deleteCmsPage(req.params.id);
+    if (!success) return res.status(404).json({ error: "Page not found" });
+    res.json({ message: "Page deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting CMS page:", error);
+    res.status(400).json({ error: error.message || "Failed to delete page" });
+  }
+});
+
 // Static page content API
 const pagesContent = {
   privacy: {
@@ -1574,7 +1714,8 @@ app.use((err, req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`thiraipedia Server running on port ${PORT}`);
+  const envTag = process.env.NODE_ENV === 'staging' ? ' [STAGING ENVIRONMENT]' : '';
+  console.log(`thiraipedia Server running on port ${PORT}${envTag}`);
 });
 
 // ─── CINE PULSE AUTO-REFRESH ───

@@ -817,3 +817,89 @@ export const toggleCineUpdateLike = async (updateId) => {
   }
   return response.json();
 };
+
+
+// ─── CMS SITE SETTINGS & PAGES ───
+
+export const fetchSiteSettings = async () => {
+  const response = await fetch(`${API_BASE_URL}/cms/settings`);
+  if (!response.ok) throw new Error('Failed to fetch site settings');
+  return response.json();
+};
+
+export const updateSiteSettings = async (settings) => {
+  const response = await fetch(`${API_BASE_URL}/cms/settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(settings),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to update site settings');
+  }
+  return response.json();
+};
+
+export const fetchCmsPages = async () => {
+  const response = await fetch(`${API_BASE_URL}/cms/pages`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) throw new Error('Failed to fetch CMS pages');
+  return response.json();
+};
+
+export const fetchCmsPageBySlug = async (slug) => {
+  const response = await fetch(`${API_BASE_URL}/cms/pages/${encodeURIComponent(slug)}`);
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Page not found');
+  }
+  return response.json();
+};
+
+export const createCmsPage = async (pageData) => {
+  const response = await fetch(`${API_BASE_URL}/cms/pages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(pageData),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to create page');
+  }
+  return response.json();
+};
+
+export const updateCmsPage = async (id, pageData) => {
+  const response = await fetch(`${API_BASE_URL}/cms/pages/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(pageData),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to update page');
+  }
+  return response.json();
+};
+
+export const deleteCmsPage = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/cms/pages/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || 'Failed to delete page');
+  }
+  return response.json();
+};

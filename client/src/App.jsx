@@ -43,9 +43,12 @@ import {
   fetchWatchlist,
   addMovieToWatchlist,
   removeMovieFromWatchlist,
-  mergeWatchlist
+  mergeWatchlist,
+  fetchSiteSettings,
+  fetchCmsPages
 } from './api';
 import AdminPanel from './components/AdminPanel';
+import DynamicCmsPage from './components/DynamicCmsPage';
 import Modal from './components/Modal';
 import Footer from './components/Footer';
 import MovieDetailsView from './components/MovieDetailsView';
@@ -106,6 +109,10 @@ export default function App() {
   const [selectedGenre, setSelectedGenre] = useState('');
   const [sortOption, setSortOption] = useState('rating');
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [cmsPages, setCmsPages] = useState([]);
+  const [selectedPageSlug, setSelectedPageSlug] = useState('');
+  const [isAnnouncementDismissed, setIsAnnouncementDismissed] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [releaseFilterMonth, setReleaseFilterMonth] = useState('');
   const [releaseFilterYear, setReleaseFilterYear] = useState('');
@@ -1055,6 +1062,8 @@ const preRollTimerRef = useRef(null);
     if (path === '/cine-updates') return { view: 'cine-updates' };
     if (path === '/actor') return { view: 'actor' };
     if (path === '/list-detail') return { view: 'list-detail' };
+    const cmsPageMatch = path.match(/^\/page\/(.+)$/);
+    if (cmsPageMatch) return { view: 'cms-page', pageSlug: cmsPageMatch[1] };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
     const articleMatch = path.match(/^\/article\/(.+)$/);
@@ -1087,6 +1096,8 @@ const preRollTimerRef = useRef(null);
     if (view === 'cine-updates') return '/cine-updates';
     if (view === 'actor') return '/actor';
     if (view === 'list-detail') return '/list-detail';
+    if (view === 'cms-page' && movieId) return `/page/${movieId}`;
+    if (view === 'cms-page' && movieId) return `/page/${movieId}`;
     if (view === 'article-detail' && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
@@ -1094,15 +1105,18 @@ const preRollTimerRef = useRef(null);
 
   const navigateTo = (view, options = {}) => {
     setVisibleCount(LOAD_STEP);
-    const { movieId, articleId, replace = false } = options;
-    const nextPath = pathForView(view, movieId || articleId);
+    const { movieId, articleId, pageSlug, replace = false } = options;
+    const nextPath = pathForView(view, movieId || articleId || pageSlug);
     navigate(nextPath, { replace });
     window.scrollTo({ top: 0, behavior: 'instant' });
     setActiveView(view);
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
+      setSelectedPageSlug('');
     } else if (view === 'article-detail') {
       setSelectedArticleId(articleId);
+    } else if (view === 'cms-page') {
+      setSelectedPageSlug(pageSlug || movieId || '');
     } else {
       setSelectedMovieId(null);
       setSelectedArticleId(null);
@@ -1111,7 +1125,8 @@ const preRollTimerRef = useRef(null);
 
   useEffect(() => {
     const path = location.pathname.replace(/\/+$/, '') || '/';
-    const { view, movieId, articleId } = getRouteFromPath(path);
+    const { view, movieId, articleId, pageSlug } = getRouteFromPath(path);
+    if (pageSlug) setSelectedPageSlug(pageSlug);
     setActiveView(view);
     if (view === 'cine-updates') {
       setShowCineReels(true);
@@ -1459,6 +1474,34 @@ const handleDeleteReview = useCallback(async (reviewId) => {
   return (
     <div className="app-container">
       <ScrollRestoration />
+
+      {/* CMS TOP ANNOUNCEMENT BAR */}
+      {siteSettings?.announcement?.enabled && !isAnnouncementDismissed && (
+        <div className="announcement-bar">
+          <div className="announcement-content">
+            <span className="announcement-badge">{siteSettings.announcement.badge || 'TRENDING'}</span>
+            <span className="announcement-text">{siteSettings.announcement.text}</span>
+            {siteSettings.announcement.link && (
+              <a
+                href={siteSettings.announcement.link}
+                className="announcement-link"
+                onClick={(e) => {
+                  if (siteSettings.announcement.link.startsWith('/')) {
+                    e.preventDefault();
+                    navigateTo(siteSettings.announcement.link.replace(/^\//, ''));
+                  }
+                }}
+              >
+                Check it out →
+              </a>
+            )}
+          </div>
+          <button className="announcement-dismiss" onClick={() => setIsAnnouncementDismissed(true)} aria-label="Dismiss announcement">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
@@ -1529,6 +1572,32 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             >
               <span className="nav-pulse-dot" /> Cine Pulse
             </button>
+
+            
+            {/* Dynamic CMS Pages in Navbar */}
+            {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
+              <Link
+                key={p.slug}
+                className={`nav-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
+                to={`/page/${p.slug}`}
+                onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+              >
+                {p.title}
+              </Link>
+            ))}
+
+            
+            {/* Dynamic CMS Pages in Navbar */}
+            {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
+              <Link
+                key={p.slug}
+                className={`nav-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
+                to={`/page/${p.slug}`}
+                onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+              >
+                {p.title}
+              </Link>
+            ))}
 
             {currentUser && currentUser.role === 'admin' && (
               <Link 
@@ -1969,12 +2038,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             </section>
 
             {/* CURATED SELECTION (Staff Picks) */}
-            {featuredStaffPick && (
+            {featuredStaffPick && siteSettings?.sections?.showStaffPicks !== false && (
               <section className="staff-picks-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                   <div>
                     <p className="section-meta">Curated Selection</p>
-                    <h2 className="section-title">Staff Picks</h2>
+                    <h2 className="section-title">{siteSettings?.sections?.staffPicksTitle || "Staff Picks"}</h2>
                   </div>
             {currentUser && currentUser.role === 'admin' && (
                     <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.85rem' }} onClick={() => setShowCurateModal(true)}>
@@ -2045,10 +2114,10 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             )}
 
             {/* TRENDING NOW */}
-            {trendingMovies.length > 0 && (
+            {trendingMovies.length > 0 && siteSettings?.sections?.showTrending !== false && (
               <MovieSection
                 subtitle="Trending"
-                title="Trending Now"
+                title={siteSettings?.sections?.trendingTitle || "Trending Now"}
                 movies={trendingMovies}
                 onMovieClick={handleViewMovie}
                 scrollRef={trendingScrollRef}
@@ -2056,10 +2125,10 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             )}
 
             {/* RECOMMENDED FOR YOU */}
-            {recommendedMovies.length > 0 && (
+            {recommendedMovies.length > 0 && siteSettings?.sections?.showRecommended !== false && (
               <MovieSection
                 subtitle="For You"
-                title="Recommended For You"
+                title={siteSettings?.sections?.recommendedTitle || "Recommended For You"}
                 movies={recommendedMovies}
                 onMovieClick={handleViewMovie}
                 scrollRef={recommendedScrollRef}
@@ -2067,10 +2136,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             )}
 
             {/* FUN SECTION: Quiz & Spin Wheel Promo */}
+            {siteSettings?.sections?.showGames !== false && (
             <section className="fun-promo-section">
               <div className="fun-promo-header">
                 <p className="section-meta">Play & Explore</p>
-                <h2 className="section-title">Fun Activities</h2>
+                <h2 className="section-title">{siteSettings?.sections?.gamesTitle || "Fun Activities"}</h2>
               </div>
               <div className="fun-promo-grid">
                 <div className="fun-promo-card quiz-promo" onClick={() => navigateTo('quiz')}>
@@ -2219,6 +2289,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 </div>
               </div>
             </section>
+            )}
 
           </div>
         )}
@@ -3065,10 +3136,11 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* LEGAL PAGES */}
         <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
-          {activeView === 'privacy' && <LegalPage page="privacy" onNavigate={navigateTo} />}
-          {activeView === 'terms' && <LegalPage page="terms" onNavigate={navigateTo} />}
+          {activeView === 'privacy' && <DynamicCmsPage slug="privacy" onNavigate={navigateTo} />}
+          {activeView === 'terms' && <DynamicCmsPage slug="terms" onNavigate={navigateTo} />}
           {activeView === 'contact' && <ContactPage onNavigate={navigateTo} />}
-          {activeView === 'about' && <AboutPage onNavigate={navigateTo} />}
+          {activeView === 'about' && <DynamicCmsPage slug="about" onNavigate={navigateTo} />}
+          {activeView === 'cms-page' && <DynamicCmsPage slug={selectedPageSlug} onNavigate={navigateTo} />}
           {activeView === 'articles' && <ArticlesPage onNavigate={navigateTo} />}
           {activeView === 'article-detail' && selectedArticleId && <ArticleDetail articleId={selectedArticleId} onNavigate={navigateTo} />}
         </Suspense>
@@ -3079,7 +3151,17 @@ const handleDeleteReview = useCallback(async (reviewId) => {
         onNavigate={navigateTo}
         onLoadLeaderboard={loadLeaderboard}
         onLoadLists={loadAllLists}
+        siteSettings={siteSettings}
+        cmsPages={cmsPages}
       />
+
+      {/* STAGING ENVIRONMENT WATERMARK BADGE */}
+      {(import.meta.env.VITE_APP_ENV === 'staging' || (typeof window !== 'undefined' && (window.location.port === '5174' || window.location.hostname.includes('staging')))) && (
+        <div className="staging-env-pill" title="You are viewing the Staging Environment">
+          <span className="staging-pulse-dot" />
+          <span>STAGING ENVIRONMENT</span>
+        </div>
+      )}
 
       {/* MODAL - WRITE REVIEW */}
       <Modal isOpen={isWriteReviewOpen && !!selectedMovie} onClose={() => setIsWriteReviewOpen(false)} width="520px">

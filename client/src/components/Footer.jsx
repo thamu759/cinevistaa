@@ -14,15 +14,32 @@ const InstagramIcon = () => (
   </svg>
 );
 
-export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
+const TwitterIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+  </svg>
+);
+
+const YoutubeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" />
+  </svg>
+);
+
+export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, siteSettings, cmsPages = [] }) {
   const { showToast } = useToast();
+
+  const footerSettings = siteSettings?.footer || {};
+  const customFooterPages = cmsPages.filter(p => p.showInFooter && p.isPublished !== false);
+
   return (
     <footer className="footer-container">
       <div className="footer">
         <div className="footer-brand">
           <h3 className="footer-brand-title">Thirai<span>Pedia</span></h3>
           <p className="footer-brand-desc">
-            Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.
+            {footerSettings.tagline || 'Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.'}
           </p>
         </div>
         <div className="footer-column">
@@ -37,20 +54,28 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
           </ul>
         </div>
         <div className="footer-column">
-          <span className="footer-column-title">Legal</span>
+          <span className="footer-column-title">Legal & Guidelines</span>
           <ul className="footer-links">
             <li><a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }}>Privacy Policy</a></li>
             <li><a href="/terms" onClick={(e) => { e.preventDefault(); onNavigate('terms'); }}>Terms of Service</a></li>
-            <li><a href="/cookie" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }}>Cookie Policy</a></li>
+            <li><a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a></li>
+            {/* Custom CMS pages mapped in footer */}
+            {customFooterPages
+              .filter(p => !['about', 'privacy', 'terms', 'contact'].includes(p.slug))
+              .map(p => (
+                <li key={p.slug}>
+                  <a href={`/page/${p.slug}`} onClick={(e) => { e.preventDefault(); onNavigate('cms-page', { pageSlug: p.slug }); }}>
+                    {p.title}
+                  </a>
+                </li>
+              ))}
           </ul>
         </div>
         <div className="footer-column">
           <span className="footer-column-title">Connect</span>
           <ul className="footer-links">
-            <li><a href="/newsletter" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Newsletter</a></li>
             <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact Support</a></li>
-            <li><a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a></li>
-            <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Contact</a></li>
+            <li><a href="/newsletter" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>Newsletter</a></li>
           </ul>
         </div>
       </div>
@@ -66,7 +91,7 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
               <span>Google Play</span>
             </button>
           </div>
-          <span>&copy; {new Date().getFullYear()} thiraipedia. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} {footerSettings.copyright || 'thiraipedia. All rights reserved.'}</span>
           <div className="footer-tmdb-attribution">
             <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg"
               alt="TMDB" style={{ height: '14px', width: 'auto', opacity: 0.6 }} />
@@ -78,8 +103,14 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists }) {
         </div>
         <div className="footer-socials">
           <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', opacity: 0.7 }}>Follow us</span>
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="footer-social-link"><FacebookIcon /></a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link"><InstagramIcon /></a>
+          <a href={footerSettings.facebookUrl || "https://facebook.com"} target="_blank" rel="noopener noreferrer" className="footer-social-link"><FacebookIcon /></a>
+          <a href={footerSettings.instagramUrl || "https://instagram.com"} target="_blank" rel="noopener noreferrer" className="footer-social-link"><InstagramIcon /></a>
+          {footerSettings.twitterUrl && (
+            <a href={footerSettings.twitterUrl} target="_blank" rel="noopener noreferrer" className="footer-social-link"><TwitterIcon /></a>
+          )}
+          {footerSettings.youtubeUrl && (
+            <a href={footerSettings.youtubeUrl} target="_blank" rel="noopener noreferrer" className="footer-social-link"><YoutubeIcon /></a>
+          )}
         </div>
       </div>
     </footer>

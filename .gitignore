@@ -97,3 +97,6 @@ flutter_app/coverage/
 # NOTE: server/db.json IS committed on purpose so movie data ships with every deploy
 server/db.json.backup-*
 server/.tmdb_cache/
+
+server/db.staging.json
+server/db.staging.json.tmp

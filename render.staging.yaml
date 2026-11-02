@@ -1,0 +1,24 @@
+# Render Blueprint for ThiraiPedia STAGING Environment
+services:
+  - type: web
+    name: thiraipedia-backend-staging
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node staging.js
+    autoDeploy: true
+    branch: staging
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: DB_FILE
+        value: db.staging.json
+      # Optional: To use a separate staging MongoDB, specify MONGO_URI in Render dashboard
+      - key: CORS_ORIGIN
+        value: https://staging--cinevistaa.netlify.app,https://staging.cinevistaa.in,http://localhost:5174
+

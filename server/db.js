@@ -9,8 +9,12 @@ import { generateSynopsisWithAI, generateRatingWithAI } from './openai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
+if (process.env.NODE_ENV === 'staging') {
+  dotenv.config({ path: path.resolve(__dirname, '.env.staging'), override: true });
+}
 
-const DB_FILE = path.resolve(__dirname, 'db.json');
+const dbFilename = process.env.DB_FILE || (process.env.NODE_ENV === 'staging' ? 'db.staging.json' : 'db.json');
+const DB_FILE = path.resolve(__dirname, dbFilename);
 let useMongoDB = false;
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
@@ -2215,20 +2219,113 @@ const initialCommunityThreads = [
   }
 ];
 
+
+export const defaultSiteSettings = {
+  announcement: {
+    enabled: true,
+    badge: 'TRENDING',
+    text: 'Leo, The Greatest of All Time & Manjummel Boys reviews are trending! Check out our curated critique.',
+    link: '/new-releases'
+  },
+  heroBanner: {
+    enabled: true,
+    badge: 'Cine Pulse',
+    title: 'Pulse\nMovie Updates',
+    subtitle: 'Swipe through the latest cinema news, rumors, and breaking updates — pulse style!',
+    buttonText: 'Watch Pulse',
+    buttonAction: 'cine-pulse',
+    backdropUrl: ''
+  },
+  sections: {
+    showStaffPicks: true,
+    staffPicksTitle: "Staff Picks & Editor's Choice",
+    showTrending: true,
+    trendingTitle: 'Trending Now',
+    showRecommended: true,
+    recommendedTitle: 'Recommended For You',
+    showGames: true,
+    gamesTitle: 'Fun Activities'
+  },
+  footer: {
+    tagline: 'Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.',
+    copyright: 'thiraipedia. All rights reserved.',
+    facebookUrl: 'https://facebook.com',
+    instagramUrl: 'https://instagram.com',
+    twitterUrl: 'https://twitter.com',
+    youtubeUrl: ''
+  }
+};
+
+export const defaultCmsPages = [
+  {
+    id: 'page-about',
+    slug: 'about',
+    title: 'About ThiraiPedia',
+    subtitle: 'Devoting the cinematic experience',
+    content: "## Our Mission\nThiraiPedia is built for movie enthusiasts who believe cinema is more than entertainment — it is an art form. We provide a platform for honest, curated reviews and thoughtful critique.\n\n## What We Offer\nFrom the latest blockbusters to regional cinema in Tamil and Malayalam, our community rates and reviews films across languages and genres. Track your watchlist, follow critics, and discover your next favourite film.\n\n## Our Community\nWe believe the best film criticism comes from passionate audiences. Whether you are a casual viewer or a dedicated cinephile, your voice matters here. Join thousands of critics who share their perspectives every day.\n\n## Powered by TMDB\nMovie data and images on ThiraiPedia are provided by The Movie Database (TMDB). This product uses the TMDB API but is not endorsed or certified by TMDB.",
+    showInNavbar: false,
+    showInFooter: true,
+    isPublished: true,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'page-privacy',
+    slug: 'privacy',
+    title: 'Privacy Policy',
+    subtitle: 'Last updated: May 2026',
+    content: "## Information We Collect\nWhen you create an account on ThiraiPedia, we collect your username, email address, and a hashed password. You may optionally provide an avatar URL and bio.\n\n## How We Use Your Data\nYour information is used to identify you as a critic, display your reviews and profile publicly, and allow other users to engage with your content. We do not sell or share your personal data with third parties.\n\n## Reviews & Ratings\nReviews, ratings, and lists you create are visible to all users. You may delete your own reviews at any time.\n\n## Cookies\nWe use localStorage to store your login token, watchlist, and autoplay preference. No cookies are served from third-party domains.\n\n## Data Retention\nYour data is retained until you request account deletion. Contact us at support@thiraipedia.com to delete your account.\n\n## TMDB Attribution\nMovie poster and backdrop images are sourced from TMDB. TMDB does not endorse this application.",
+    showInNavbar: false,
+    showInFooter: true,
+    isPublished: true,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'page-terms',
+    slug: 'terms',
+    title: 'Terms of Service',
+    subtitle: 'Last updated: May 2026',
+    content: '## Acceptance\nBy using ThiraiPedia, you agree to these terms. If you do not agree, do not use the service.\n\n## User Accounts\nYou are responsible for maintaining the confidentiality of your login credentials. You must be at least 13 years old to create an account.\n\n## Content Guidelines\nReviews and forum posts must not contain hate speech, harassment, or illegal content. We reserve the right to remove content and ban users who violate this policy.\n\n## Intellectual Property\nMovie data and images are provided by TMDB under their terms. User-generated content remains the property of its author.\n\n## Service Availability\nWe strive to keep the service running but do not guarantee uninterrupted availability. We may modify or discontinue features at any time.\n\n## Limitation of Liability\nThiraiPedia is provided "as is" without warranties. We are not liable for damages arising from use of the service.',
+    showInNavbar: false,
+    showInFooter: true,
+    isPublished: true,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'page-critic-guidelines',
+    slug: 'critic-guidelines',
+    title: 'Critic Guidelines & Rating Code',
+    subtitle: 'Standards for honest and constructive film critique',
+    content: '## The ThiraiPedia Critic Standard\nAt ThiraiPedia, critique is viewed as a form of art appreciation. We value depth, nuance, and balanced observations.\n\n### 1. Critique the Craft, Not Just the Plot\nGo beyond simple synopsis. Talk about direction, pacing, soundscapes, cinematography, performances, and screenplay structure.\n\n### 2. Avoid Spoilers\nNever reveal critical plot twists, climaxes, or surprise cameos without explicit spoiler warnings.\n\n### 3. Fair Rating Scale (1 to 10)\n- **9-10**: Masterpiece / Essential cinema\n- **7-8**: Highly recommended / Strong craft\n- **5-6**: Decent watch with noticeable flaws\n- **3-4**: Underwhelming / Weak execution\n- **1-2**: Critical failure in direction & writing',
+    showInNavbar: true,
+    showInFooter: true,
+    isPublished: true,
+    updatedAt: new Date().toISOString()
+  }
+];
+
 const readJsonDb = () => {
   const allSeedMovies = [...tamilPriorityMovies, ...malayalamMovies, ...initialMovies];
   if (_jsonDbCache) return _jsonDbCache;
   if (!fs.existsSync(DB_FILE)) {
-    writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
+    if (process.env.NODE_ENV === 'staging' && fs.existsSync(path.resolve(__dirname, 'db.json'))) {
+      try {
+        fs.copyFileSync(path.resolve(__dirname, 'db.json'), DB_FILE);
+      } catch (_) {
+        writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
+      }
+    } else {
+      writeJsonDb({ movies: allSeedMovies, users: [], communityThreads: initialCommunityThreads });
+    }
   }
   try {
     const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
     const parsed = JSON.parse(fileContent);
-    if (!parsed.users) parsed.users = [];
-    if (!parsed.communityThreads) {
-      parsed.communityThreads = initialCommunityThreads;
-      writeJsonDb(parsed);
-    }
+    let dirty = false;
+    if (!parsed.users) { parsed.users = []; dirty = true; }
+    if (!parsed.communityThreads) { parsed.communityThreads = initialCommunityThreads; dirty = true; }
+    if (!parsed.siteSettings) { parsed.siteSettings = defaultSiteSettings; dirty = true; }
+    if (!parsed.cmsPages) { parsed.cmsPages = defaultCmsPages; dirty = true; }
+    if (dirty) { writeJsonDb(parsed); }
     _jsonDbCache = parsed;
     return parsed;
   } catch (err) {
@@ -4198,4 +4295,228 @@ export const getAnalytics = async () => {
     topCritics,
     recentReviews
   };
+};
+
+
+// ─── CMS SITE SETTINGS & PAGES ───
+
+let SiteSettingsModel;
+try {
+  const siteSettingsSchema = new mongoose.Schema({
+    id: { type: String, default: 'global_settings', unique: true },
+    announcement: {
+      enabled: { type: Boolean, default: true },
+      badge: { type: String, default: 'TRENDING' },
+      text: { type: String, default: '' },
+      link: { type: String, default: '' }
+    },
+    heroBanner: {
+      enabled: { type: Boolean, default: true },
+      badge: { type: String, default: 'Cine Pulse' },
+      title: { type: String, default: 'Pulse\nMovie Updates' },
+      subtitle: { type: String, default: '' },
+      buttonText: { type: String, default: 'Watch Pulse' },
+      buttonAction: { type: String, default: 'cine-pulse' },
+      backdropUrl: { type: String, default: '' }
+    },
+    sections: {
+      showStaffPicks: { type: Boolean, default: true },
+      staffPicksTitle: { type: String, default: "Staff Picks & Editor's Choice" },
+      showTrending: { type: Boolean, default: true },
+      trendingTitle: { type: String, default: 'Trending Now' },
+      showRecommended: { type: Boolean, default: true },
+      recommendedTitle: { type: String, default: 'Recommended For You' },
+      showGames: { type: Boolean, default: true },
+      gamesTitle: { type: String, default: 'Fun Activities' }
+    },
+    footer: {
+      tagline: { type: String, default: '' },
+      copyright: { type: String, default: '' },
+      facebookUrl: { type: String, default: '' },
+      instagramUrl: { type: String, default: '' },
+      twitterUrl: { type: String, default: '' },
+      youtubeUrl: { type: String, default: '' }
+    }
+  }, { timestamps: true });
+  SiteSettingsModel = mongoose.model('SiteSettings', siteSettingsSchema);
+} catch (e) {}
+
+let CmsPageModel;
+try {
+  const cmsPageSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    slug: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    subtitle: { type: String, default: '' },
+    content: { type: String, default: '' },
+    showInNavbar: { type: Boolean, default: false },
+    showInFooter: { type: Boolean, default: false },
+    isPublished: { type: Boolean, default: true },
+    updatedAt: { type: String, default: '' }
+  }, { timestamps: true });
+  CmsPageModel = mongoose.model('CmsPage', cmsPageSchema);
+} catch (e) {}
+
+export const getSiteSettings = async () => {
+  if (useMongoDB && SiteSettingsModel) {
+    const doc = await SiteSettingsModel.findOne({ id: 'global_settings' });
+    if (doc) {
+      const obj = typeof doc.toObject === 'function' ? doc.toObject() : doc;
+      return {
+        ...defaultSiteSettings,
+        ...obj,
+        announcement: { ...defaultSiteSettings.announcement, ...(obj.announcement || {}) },
+        heroBanner: { ...defaultSiteSettings.heroBanner, ...(obj.heroBanner || {}) },
+        sections: { ...defaultSiteSettings.sections, ...(obj.sections || {}) },
+        footer: { ...defaultSiteSettings.footer, ...(obj.footer || {}) }
+      };
+    }
+  }
+
+  const data = readJsonDb();
+  const current = data.siteSettings || {};
+  return {
+    ...defaultSiteSettings,
+    ...current,
+    announcement: { ...defaultSiteSettings.announcement, ...(current.announcement || {}) },
+    heroBanner: { ...defaultSiteSettings.heroBanner, ...(current.heroBanner || {}) },
+    sections: { ...defaultSiteSettings.sections, ...(current.sections || {}) },
+    footer: { ...defaultSiteSettings.footer, ...(current.footer || {}) }
+  };
+};
+
+export const updateSiteSettings = async (newSettings = {}) => {
+  const current = await getSiteSettings();
+  const merged = {
+    ...current,
+    ...newSettings,
+    announcement: { ...current.announcement, ...(newSettings.announcement || {}) },
+    heroBanner: { ...current.heroBanner, ...(newSettings.heroBanner || {}) },
+    sections: { ...current.sections, ...(newSettings.sections || {}) },
+    footer: { ...current.footer, ...(newSettings.footer || {}) }
+  };
+
+  if (useMongoDB && SiteSettingsModel) {
+    await SiteSettingsModel.findOneAndUpdate(
+      { id: 'global_settings' },
+      { ...merged, id: 'global_settings' },
+      { upsert: true, new: true }
+    );
+  }
+
+  const data = readJsonDb();
+  data.siteSettings = merged;
+  writeJsonDb(data);
+
+  return merged;
+};
+
+export const getCmsPages = async ({ publishedOnly = false } = {}) => {
+  let pages = [];
+  if (useMongoDB && CmsPageModel) {
+    const query = publishedOnly ? { isPublished: true } : {};
+    const docs = await CmsPageModel.find(query).sort({ updatedAt: -1 });
+    pages = docs.map(d => (typeof d.toObject === 'function' ? d.toObject() : d));
+  } else {
+    const data = readJsonDb();
+    pages = data.cmsPages || defaultCmsPages;
+    if (publishedOnly) {
+      pages = pages.filter(p => p.isPublished !== false);
+    }
+  }
+  return pages;
+};
+
+export const getCmsPageBySlug = async (slug) => {
+  if (!slug) return null;
+  const cleanSlug = String(slug).toLowerCase().trim();
+  if (useMongoDB && CmsPageModel) {
+    const doc = await CmsPageModel.findOne({ slug: cleanSlug });
+    if (doc) return typeof doc.toObject === 'function' ? doc.toObject() : doc;
+  }
+  const pages = await getCmsPages();
+  return pages.find(p => p.slug === cleanSlug || p.id === cleanSlug) || null;
+};
+
+export const createCmsPage = async (pageData) => {
+  const { title, subtitle = '', content = '', showInNavbar = false, showInFooter = false, isPublished = true } = pageData;
+  if (!title) {
+    throw new Error('Title is required');
+  }
+  let slug = (pageData.slug || title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (!slug) slug = 'page-' + Date.now();
+
+  const existing = await getCmsPageBySlug(slug);
+  if (existing) {
+    slug = slug + '-' + Date.now().toString().slice(-4);
+  }
+
+  const id = 'page-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+  const newPage = {
+    id,
+    slug,
+    title,
+    subtitle,
+    content,
+    showInNavbar: Boolean(showInNavbar),
+    showInFooter: Boolean(showInFooter),
+    isPublished: Boolean(isPublished),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (useMongoDB && CmsPageModel) {
+    const created = await CmsPageModel.create(newPage);
+    return typeof created.toObject === 'function' ? created.toObject() : created;
+  }
+
+  const data = readJsonDb();
+  if (!data.cmsPages) data.cmsPages = [...defaultCmsPages];
+  data.cmsPages.unshift(newPage);
+  writeJsonDb(data);
+
+  return newPage;
+};
+
+export const updateCmsPage = async (idOrSlug, pageData) => {
+  const updatedAt = new Date().toISOString();
+
+  if (useMongoDB && CmsPageModel) {
+    const updated = await CmsPageModel.findOneAndUpdate(
+      { $or: [{ id: idOrSlug }, { slug: idOrSlug }] },
+      { ...pageData, updatedAt },
+      { new: true }
+    );
+    if (updated) return typeof updated.toObject === 'function' ? updated.toObject() : updated;
+  }
+
+  const data = readJsonDb();
+  if (!data.cmsPages) data.cmsPages = [...defaultCmsPages];
+  const idx = data.cmsPages.findIndex(p => p.id === idOrSlug || p.slug === idOrSlug);
+  if (idx === -1) {
+    throw new Error('Page not found');
+  }
+
+  data.cmsPages[idx] = {
+    ...data.cmsPages[idx],
+    ...pageData,
+    updatedAt
+  };
+  writeJsonDb(data);
+  return data.cmsPages[idx];
+};
+
+export const deleteCmsPage = async (idOrSlug) => {
+  if (useMongoDB && CmsPageModel) {
+    await CmsPageModel.findOneAndDelete({ $or: [{ id: idOrSlug }, { slug: idOrSlug }] });
+  }
+
+  const data = readJsonDb();
+  if (!data.cmsPages) data.cmsPages = [...defaultCmsPages];
+  const initialLen = data.cmsPages.length;
+  data.cmsPages = data.cmsPages.filter(p => p.id !== idOrSlug && p.slug !== idOrSlug);
+  if (data.cmsPages.length !== initialLen) {
+    writeJsonDb(data);
+    return true;
+  }
+  return false;
 };

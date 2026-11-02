@@ -1221,5 +1221,91 @@
       "likes": 21,
       "replies": []
     }
+  ],
+  "siteSettings": {
+    "announcement": {
+      "enabled": true,
+      "badge": "TRENDING",
+      "text": "Leo, The Greatest of All Time & Manjummel Boys reviews are trending! Check out our curated critique.",
+      "link": "/new-releases"
+    },
+    "heroBanner": {
+      "enabled": true,
+      "badge": "Cine Pulse",
+      "title": "Pulse\nMovie Updates",
+      "subtitle": "Swipe through the latest cinema news, rumors, and breaking updates — pulse style!",
+      "buttonText": "Watch Pulse",
+      "buttonAction": "cine-pulse",
+      "backdropUrl": ""
+    },
+    "sections": {
+      "showStaffPicks": true,
+      "staffPicksTitle": "Staff Picks & Editor's Choice",
+      "showTrending": true,
+      "trendingTitle": "Trending Now",
+      "showRecommended": true,
+      "recommendedTitle": "Recommended For You",
+      "showGames": false,
+      "gamesTitle": "Fun Activities"
+    },
+    "footer": {
+      "tagline": "Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.",
+      "copyright": "thiraipedia. All rights reserved.",
+      "facebookUrl": "https://facebook.com",
+      "instagramUrl": "https://instagram.com",
+      "twitterUrl": "https://twitter.com",
+      "youtubeUrl": ""
+    },
+    "_id": "6ae851e19a8779359916ea22",
+    "id": "global_settings",
+    "__v": 0,
+    "createdAt": "2026-11-02T09:03:35.290Z",
+    "updatedAt": "2026-11-02T09:03:35.290Z"
+  },
+  "cmsPages": [
+    {
+      "id": "page-about",
+      "slug": "about",
+      "title": "About ThiraiPedia",
+      "subtitle": "Devoting the cinematic experience",
+      "content": "## Our Mission\nThiraiPedia is built for movie enthusiasts who believe cinema is more than entertainment — it is an art form. We provide a platform for honest, curated reviews and thoughtful critique.\n\n## What We Offer\nFrom the latest blockbusters to regional cinema in Tamil and Malayalam, our community rates and reviews films across languages and genres. Track your watchlist, follow critics, and discover your next favourite film.\n\n## Our Community\nWe believe the best film criticism comes from passionate audiences. Whether you are a casual viewer or a dedicated cinephile, your voice matters here. Join thousands of critics who share their perspectives every day.\n\n## Powered by TMDB\nMovie data and images on ThiraiPedia are provided by The Movie Database (TMDB). This product uses the TMDB API but is not endorsed or certified by TMDB.",
+      "showInNavbar": false,
+      "showInFooter": true,
+      "isPublished": true,
+      "updatedAt": "2026-11-02T08:45:17.624Z"
+    },
+    {
+      "id": "page-privacy",
+      "slug": "privacy",
+      "title": "Privacy Policy",
+      "subtitle": "Last updated: May 2026",
+      "content": "## Information We Collect\nWhen you create an account on ThiraiPedia, we collect your username, email address, and a hashed password. You may optionally provide an avatar URL and bio.\n\n## How We Use Your Data\nYour information is used to identify you as a critic, display your reviews and profile publicly, and allow other users to engage with your content. We do not sell or share your personal data with third parties.\n\n## Reviews & Ratings\nReviews, ratings, and lists you create are visible to all users. You may delete your own reviews at any time.\n\n## Cookies\nWe use localStorage to store your login token, watchlist, and autoplay preference. No cookies are served from third-party domains.\n\n## Data Retention\nYour data is retained until you request account deletion. Contact us at support@thiraipedia.com to delete your account.\n\n## TMDB Attribution\nMovie poster and backdrop images are sourced from TMDB. TMDB does not endorse this application.",
+      "showInNavbar": false,
+      "showInFooter": true,
+      "isPublished": true,
+      "updatedAt": "2026-11-02T08:45:17.634Z"
+    },
+    {
+      "id": "page-terms",
+      "slug": "terms",
+      "title": "Terms of Service",
+      "subtitle": "Last updated: May 2026",
+      "content": "## Acceptance\nBy using ThiraiPedia, you agree to these terms. If you do not agree, do not use the service.\n\n## User Accounts\nYou are responsible for maintaining the confidentiality of your login credentials. You must be at least 13 years old to create an account.\n\n## Content Guidelines\nReviews and forum posts must not contain hate speech, harassment, or illegal content. We reserve the right to remove content and ban users who violate this policy.\n\n## Intellectual Property\nMovie data and images are provided by TMDB under their terms. User-generated content remains the property of its author.\n\n## Service Availability\nWe strive to keep the service running but do not guarantee uninterrupted availability. We may modify or discontinue features at any time.\n\n## Limitation of Liability\nThiraiPedia is provided \"as is\" without warranties. We are not liable for damages arising from use of the service.",
+      "showInNavbar": false,
+      "showInFooter": true,
+      "isPublished": true,
+      "updatedAt": "2026-11-02T08:45:17.634Z"
+    },
+    {
+      "id": "page-critic-guidelines",
+      "slug": "critic-guidelines",
+      "title": "Critic Guidelines & Rating Code",
+      "subtitle": "Standards for honest and constructive film critique",
+      "content": "## The ThiraiPedia Critic Standard\nAt ThiraiPedia, critique is viewed as a form of art appreciation. We value depth, nuance, and balanced observations.\n\n### 1. Critique the Craft, Not Just the Plot\nGo beyond simple synopsis. Talk about direction, pacing, soundscapes, cinematography, performances, and screenplay structure.\n\n### 2. Avoid Spoilers\nNever reveal critical plot twists, climaxes, or surprise cameos without explicit spoiler warnings.\n\n### 3. Fair Rating Scale (1 to 10)\n- **9-10**: Masterpiece / Essential cinema\n- **7-8**: Highly recommended / Strong craft\n- **5-6**: Decent watch with noticeable flaws\n- **3-4**: Underwhelming / Weak execution\n- **1-2**: Critical failure in direction & writing",
+      "showInNavbar": true,
+      "showInFooter": true,
+      "isPublished": true,
+      "updatedAt": "2026-11-02T08:45:17.634Z"
+    }
   ]
 }

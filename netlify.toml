@@ -6,6 +6,12 @@
 [build.environment]
   NODE_VERSION = "22.23.4"
 
+# Staging branch configuration
+[context.staging]
+  command = "cd client && npm install --include=dev && node ./node_modules/vite/bin/vite.js build --mode staging"
+  [context.staging.environment]
+    VITE_APP_ENV = "staging"
+
 [[redirects]]
   from = "https://www.cinevistaa.in/*"
   to = "https://cinevistaa.in/:splat"
