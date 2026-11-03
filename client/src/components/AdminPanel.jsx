@@ -30,13 +30,6 @@ export default function AdminPanel({ currentUser }) {
   const [isLoading, setIsLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [syncingMovies, setSyncingMovies] = useState(false);
-  const [fixingImages, setFixingImages] = useState(false);
-  const [showSyncModal, setShowSyncModal] = useState(false);
-  const [syncLanguages, setSyncLanguages] = useState(['ta', 'ml', 'te']);
-  const [syncMaxPerLang, setSyncMaxPerLang] = useState(10);
-  const [syncNowPlaying, setSyncNowPlaying] = useState(true);
-  const [syncResult, setSyncResult] = useState(null);
 
   const showSuccess = (msg) => {
     setSuccessMsg(msg);
@@ -212,6 +205,13 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
   const [showHeroModal, setShowHeroModal] = useState(false);
   const [heroSearch, setHeroSearch] = useState('');
   const [heroLoading, setHeroLoading] = useState(false);
+  const [syncingMovies, setSyncingMovies] = useState(false);
+  const [fixingImages, setFixingImages] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncLanguages, setSyncLanguages] = useState(['ta', 'ml', 'te']);
+  const [syncMaxPerLang, setSyncMaxPerLang] = useState(10);
+  const [syncNowPlaying, setSyncNowPlaying] = useState(true);
+  const [syncResult, setSyncResult] = useState(null);
 
   useEffect(() => {
     if (!editTmdbQuery.trim()) { setEditTmdbResults([]); return; }
@@ -516,6 +516,11 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
           className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0, background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', borderColor: '#d97706' }}>
           <RefreshCw size={13} className={syncingMovies ? 'spin-anim' : ''} />
           {syncingMovies ? 'Syncing...' : 'Auto-Sync Movies'}
+        </button>
+        <button onClick={handleFixMissingImages} disabled={fixingImages}
+          className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>
+          <Sparkles size={13} className={fixingImages ? 'spin-anim' : ''} />
+          {fixingImages ? 'Searching Google...' : 'Fix Missing Posters'}
         </button>
         <button className="btn-primary" onClick={() => setShowAddModal(true)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>

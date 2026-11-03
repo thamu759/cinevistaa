@@ -375,7 +375,7 @@ app.post('/api/movies', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -432,7 +432,7 @@ app.delete('/api/movies/bulk', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -464,7 +464,7 @@ app.delete('/api/movies/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -489,7 +489,7 @@ app.post('/api/admin/auto-sync-movies', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -511,7 +511,7 @@ app.post('/api/admin/fix-missing-images', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -532,7 +532,7 @@ app.post('/api/admin/refresh-posters', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -553,7 +553,7 @@ app.post('/api/admin/seed-reviews/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -575,7 +575,7 @@ app.put('/api/movies/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -600,7 +600,7 @@ app.get('/api/admin/users', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -621,7 +621,7 @@ app.delete('/api/admin/users/bulk', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -653,7 +653,7 @@ app.delete('/api/admin/users/:username', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -678,7 +678,7 @@ app.patch('/api/admin/users/:username/role', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -708,7 +708,7 @@ app.delete('/api/admin/threads/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -733,7 +733,7 @@ app.patch('/api/movies/:id/curate', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1217,7 +1217,7 @@ app.post('/api/cine-updates', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1237,7 +1237,7 @@ app.delete('/api/cine-updates', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1258,7 +1258,7 @@ app.delete('/api/cine-updates/bulk', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1288,7 +1288,7 @@ app.delete('/api/cine-updates/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1310,7 +1310,7 @@ app.post('/api/seeds/trivia', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin only." });
     }
 
@@ -1332,7 +1332,7 @@ app.post('/api/seeds/news', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin only." });
     }
 
@@ -1353,7 +1353,7 @@ app.put('/api/cine-updates/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1403,7 +1403,7 @@ app.put('/api/cms/settings', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1456,7 +1456,7 @@ app.post('/api/cms/pages', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1477,7 +1477,7 @@ app.put('/api/cms/pages/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1498,7 +1498,7 @@ app.delete('/api/cms/pages/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
@@ -1700,7 +1700,7 @@ app.post('/api/admin/blogs', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
     }
 
@@ -1721,7 +1721,7 @@ app.delete('/api/admin/blogs/:id', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
     }
 
