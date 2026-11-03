@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 
-import { generateSynopsisWithAI, generateRatingWithAI } from './openai.js';
+import { generateSynopsisWithAI, generateRatingWithAI, generateBlogWithAI } from './openai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -4860,4 +4860,309 @@ export const deleteCmsPage = async (idOrSlug) => {
     return true;
   }
   return false;
+};
+
+
+// ─── BLOG & SEO ARTICLES ENGINE ───
+
+let BlogPostModel;
+try {
+  const blogPostSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    excerpt: { type: String, required: true },
+    content: { type: String, required: true },
+    coverImage: { type: String, default: '' },
+    category: { type: String, default: 'Editorial' },
+    tags: [{ type: String }],
+    author: { type: String, default: 'ThiraiPedia Editorial' },
+    readTime: { type: String, default: '5 min read' },
+    date: { type: String, default: '' },
+    publishedAt: { type: String, default: () => new Date().toISOString() },
+    views: { type: Number, default: 0 },
+    seoKeywords: [{ type: String }],
+    featured: { type: Boolean, default: false }
+  });
+  BlogPostModel = mongoose.model('BlogPost', blogPostSchema);
+} catch (e) {}
+
+const defaultBlogPosts = [
+  {
+    id: 'art-of-film-criticism',
+    title: 'The Art of Film Criticism: Beyond Good or Bad',
+    excerpt: 'Movie criticism is more than assigning ratings. Learn how to analyse cinematography, screenplay, and performances like a professional critic.',
+    content: `Film criticism is often misunderstood as simply deciding whether a movie is "good" or "bad." In reality, meaningful criticism is a craft that combines technical knowledge, cultural awareness, and personal perspective.
+
+At ThiraiPedia, we believe every review should go beyond surface-level judgment. A well-written critique examines multiple dimensions of a film — the visual language, narrative structure, sound design, and performances.
+
+## 1. Context and Intent
+When writing a review, start with context. What was the filmmaker trying to achieve? Consider genre conventions, budget constraints, and cultural background. A low-budget independent film should not be judged by the same standards as a big-budget spectacle.
+
+## 2. Technical Craft
+Next, analyse the craft:
+- **Cinematography**: How does camera movement affect the emotional mood?
+- **Screenplay**: Are character arcs organic and well-paced?
+- **Sound Design**: Does the background score elevate or overwhelm the scene?
+
+## 3. Honest Perspective
+Finally, offer your honest reaction. The best criticism is personal yet deeply informed. Tell readers why the film moved you — or why it fell flat. Your unique perspective is what makes your review valuable to the cinephile community.`,
+    author: 'ThiraiPedia Editorial',
+    date: 'Nov 1, 2026',
+    publishedAt: '2026-11-01T10:00:00.000Z',
+    readTime: '5 min read',
+    category: 'Film Criticism',
+    coverImage: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200&auto=format&fit=crop',
+    tags: ['Film Criticism', 'Cinema Craft', 'Movie Analysis', 'Screenplay'],
+    seoKeywords: ['how to write film reviews', 'film criticism guide', 'cinematography analysis', 'movie critique'],
+    featured: true,
+    views: 142
+  },
+  {
+    id: 'tamil-cinema-evolution',
+    title: 'Tamil Cinema: The Golden Age of Author-Driven Storytelling',
+    excerpt: 'From experimental non-linear narratives to pan-Indian blockbusters, Tamil cinema is leading a creative renaissance. An in-depth analysis of Kollywood modern masters.',
+    content: `Tamil cinema has always been a powerhouse of Indian filmmaking, but the current decade has ushered in what many critics call a revolutionary golden age. Visionaries like Pa. Ranjith, Vetrimaaran, Mari Selvaraj, and Lokesh Kanagaraj have fundamentally pushed the boundaries of both mainstream and parallel cinema.
+
+## The Shift to Grounded Realism and Social Themes
+What makes this era distinct is the fearless diversity of storytelling. We have mass-market entertainers that carry razor-sharp socio-political commentary alongside intimate character studies that play like world-class thrillers.
+
+## Pan-Indian Reach and OTT Catalysts
+The emergence of OTT platforms has played a transformative role. Tamil films now reach audiences across Europe, North America, and East Asia on the day of release. Titles like *Jai Bhim*, *Soorarai Pottru*, and *Super Deluxe* have captured global audiences beyond linguistic boundaries.
+
+## World-Class Technical Benchmarks
+Advanced color grading, immersive Dolby Atmos sound design, and cutting-edge visual effects are now industry standard even in mid-budget projects. Tamil cinema is no longer simply regional entertainment — it is an influential cultural force commanding international acclaim.`,
+    author: 'ThiraiPedia Editorial',
+    date: 'Oct 28, 2026',
+    publishedAt: '2026-10-28T10:00:00.000Z',
+    readTime: '4 min read',
+    category: 'Regional Cinema',
+    coverImage: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1200&auto=format&fit=crop',
+    tags: ['Tamil Cinema', 'Kollywood', 'Vetrimaaran', 'Lokesh Kanagaraj', 'Pa Ranjith'],
+    seoKeywords: ['Tamil cinema golden age', 'best Kollywood directors', 'Tamil movies OTT', 'Indian cinema trends'],
+    featured: false,
+    views: 298
+  },
+  {
+    id: 'malayalam-cinema-storytelling',
+    title: 'Why Malayalam Cinema Leads Indian Storytelling in Craft and Character Depth',
+    excerpt: 'Malayalam films consistently deliver the most authentic, compelling narratives in contemporary cinema. Exploring the Mollywood formula of realism and character study.',
+    content: `When film enthusiasts debate the most exciting film movement in modern Indian cinema, Malayalam cinema inevitably takes center stage. The Kerala film industry has earned a distinguished reputation for placing narrative integrity and realistic human drama above star-centric spectacles.
+
+## Rooted Characters and Authentic Conflicts
+What sets Mollywood apart is an unwavering commitment to realism. Masterpieces like *The Great Indian Kitchen*, *Kumbalangi Nights*, and *Bramayugam* find intense drama in domestic and existential conflicts. The characters feel tangible, the dialects resonate naturally, and the climaxes never feel unearned.
+
+## Collaborative Screenwriting Culture
+In the Malayalam industry, screenwriters are celebrated as primary auteurs. Directors collaborate meticulously with writers to produce layered, multi-dimensional screenplays that reward repeat viewings. Even commercial comedies maintain a standard of writing that surpasses typical tropes.
+
+## Fearless Genre Innovation
+Another crowning strength is effortless genre fluidity. A single film can traverse black comedy, psychological thriller, and coming-of-age drama without losing tonal balance. This fearless artistic liberty is sustained by an audience that genuinely values craft.`,
+    author: 'ThiraiPedia Editorial',
+    date: 'Oct 22, 2026',
+    publishedAt: '2026-10-22T10:00:00.000Z',
+    readTime: '5 min read',
+    category: 'Regional Cinema',
+    coverImage: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1200&auto=format&fit=crop',
+    tags: ['Malayalam Cinema', 'Mollywood', 'Kumbalangi Nights', 'Film Writing', 'Realism'],
+    seoKeywords: ['why Malayalam cinema is best', 'Mollywood storytelling', 'best Malayalam movies', 'Indian realistic cinema'],
+    featured: false,
+    views: 312
+  },
+  {
+    id: 'ott-revolution-box-office',
+    title: 'How OTT Streaming Disrupted Indian Box Office Windows and Theatrical Runs',
+    excerpt: 'The battle between theatrical exclusivity and streaming premiere windows has rewritten distribution rules across Tamil, Telugu, and Hindi cinema.',
+    content: `The explosion of streaming giants like Netflix, Prime Video, Disney+ Hotstar, and regional platforms like Aha has profoundly restructured Indian film exhibition.
+
+## The Shrinking Theatrical Window
+Historically, movies enjoyed an 8-to-12 week exclusive theatrical window. Today, that window has compressed to 4 weeks or even simultaneous premieres in select markets. Audiences are increasingly selective about theatrical visits, reserving ticket purchases for massive audiovisual spectacles while watching dramas at home.
+
+## Data-Driven Greenlighting and Micro-Audiences
+Streaming platforms operate with detailed telemetry, knowing precisely when viewers pause, resume, or rewatch scenes. This granular feedback loop has empowered niche genres like true-crime thrillers, mockumentaries, and anthologies that rarely received multiplex distribution.
+
+## The New Hybrid Ecosystem
+Rather than eliminating cinema halls, OTT has forced theatres to reinvent themselves into luxury community experiences featuring IMAX, 4DX, and Dolby Atmos screens, while streaming provides global permanence for cinematic archives.`,
+    author: 'ThiraiPedia Editorial',
+    date: 'Oct 15, 2026',
+    publishedAt: '2026-10-15T10:00:00.000Z',
+    readTime: '4 min read',
+    category: 'Box Office',
+    coverImage: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=1200&auto=format&fit=crop',
+    tags: ['OTT Releases', 'Box Office', 'Streaming Trends', 'Theatrical Windows'],
+    seoKeywords: ['OTT vs Theatrical release', 'Indian box office trends', 'Netflix Prime Video Tamil', 'streaming windows'],
+    featured: false,
+    views: 185
+  }
+];
+
+export const getBlogPosts = async (query = {}) => {
+  const { category, search } = query;
+  let posts = [];
+
+  if (useMongoDB && BlogPostModel) {
+    let mongoQuery = {};
+    if (category && category !== 'All') {
+      mongoQuery.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    }
+    if (search) {
+      mongoQuery.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { excerpt: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+    const docs = await BlogPostModel.find(mongoQuery).sort({ publishedAt: -1 });
+    if (docs.length === 0 && !category && !search) {
+      await BlogPostModel.insertMany(defaultBlogPosts);
+      posts = defaultBlogPosts;
+    } else {
+      posts = docs.map(d => (typeof d.toObject === 'function' ? d.toObject() : d));
+    }
+  } else {
+    const data = readJsonDb();
+    if (!data.blogPosts || data.blogPosts.length === 0) {
+      data.blogPosts = [...defaultBlogPosts];
+      writeJsonDb(data);
+    }
+    posts = [...data.blogPosts];
+    if (category && category !== 'All') {
+      posts = posts.filter(p => (p.category || '').toLowerCase() === category.toLowerCase());
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      posts = posts.filter(p =>
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.excerpt || '').toLowerCase().includes(q) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(q))
+      );
+    }
+    posts.sort((a, b) => new Date(b.publishedAt || b.date).getTime() - new Date(a.publishedAt || a.date).getTime());
+  }
+
+  return posts;
+};
+
+export const getBlogPostBySlug = async (slug) => {
+  if (!slug) return null;
+
+  if (useMongoDB && BlogPostModel) {
+    const post = await BlogPostModel.findOneAndUpdate(
+      { $or: [{ id: slug }, { title: new RegExp(`^${slug.replace(/-/g, ' ')}$`, 'i') }] },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (post) return typeof post.toObject === 'function' ? post.toObject() : post;
+  } else {
+    const data = readJsonDb();
+    if (!data.blogPosts) data.blogPosts = [...defaultBlogPosts];
+    const post = data.blogPosts.find(p => p.id === slug || p.id === slug.toLowerCase());
+    if (post) {
+      post.views = (post.views || 0) + 1;
+      writeJsonDb(data);
+      return post;
+    }
+  }
+
+  const def = defaultBlogPosts.find(p => p.id === slug);
+  return def || null;
+};
+
+export const createBlogPost = async (postData) => {
+  const cleanTitle = (postData.title || '').trim();
+  if (!cleanTitle) throw new Error('Title is required');
+
+  const slug = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const newPost = {
+    id: slug,
+    title: cleanTitle,
+    excerpt: postData.excerpt || cleanTitle,
+    content: postData.content || '',
+    coverImage: postData.coverImage || '',
+    category: postData.category || 'Editorial',
+    tags: Array.isArray(postData.tags) ? postData.tags : (postData.tags ? postData.tags.split(',').map(s => s.trim()) : ['Cinema']),
+    author: postData.author || 'ThiraiPedia Editorial',
+    readTime: postData.readTime || '5 min read',
+    date: dateStr,
+    publishedAt: now.toISOString(),
+    views: 0,
+    seoKeywords: Array.isArray(postData.seoKeywords) ? postData.seoKeywords : [],
+    featured: Boolean(postData.featured)
+  };
+
+  if (useMongoDB && BlogPostModel) {
+    const created = new BlogPostModel(newPost);
+    await created.save();
+    return typeof created.toObject === 'function' ? created.toObject() : created;
+  } else {
+    const data = readJsonDb();
+    if (!data.blogPosts) data.blogPosts = [...defaultBlogPosts];
+    data.blogPosts.unshift(newPost);
+    writeJsonDb(data);
+    return newPost;
+  }
+};
+
+export const deleteBlogPost = async (id) => {
+  if (useMongoDB && BlogPostModel) {
+    const res = await BlogPostModel.deleteOne({ id });
+    return res.deletedCount > 0;
+  } else {
+    const data = readJsonDb();
+    if (!data.blogPosts) return false;
+    const idx = data.blogPosts.findIndex(p => p.id === id);
+    if (idx === -1) return false;
+    data.blogPosts.splice(idx, 1);
+    writeJsonDb(data);
+    return true;
+  }
+};
+
+export const generateAutoBlogPost = async () => {
+  const movies = await getMovies();
+  if (!movies || movies.length === 0) {
+    throw new Error('No movies available to generate blog post from.');
+  }
+
+  const candidate = movies[Math.floor(Math.random() * Math.min(30, movies.length))];
+  console.log(`[Auto Blog Generator] Generating SEO article for "${candidate.title}"...`);
+
+  let blogData = null;
+  try {
+    blogData = await generateBlogWithAI(candidate);
+  } catch (e) {
+    console.warn('[Auto Blog Generator] AI generation failed, using cinematic template fallback:', e.message);
+  }
+
+  if (!blogData) {
+    const title = `${candidate.title}: Critical Analysis, Box Office Impact, and Streaming Verdict`;
+    const excerpt = `An in-depth critical breakdown of ${candidate.title} (${candidate.releaseYear}), directed by ${candidate.director || 'acclaimed filmmakers'}. Explore its narrative craft and streaming guide.`;
+    const content = `## Overview: Why ${candidate.title} Stands Out in Modern Indian Cinema\n\nReleased in ${candidate.releaseYear || 'recent times'}, **${candidate.title}** has captured substantial audience acclaim. Directed with precision by ${candidate.director || 'visionary directors'}, this ${candidate.language || 'Indian'} production presents a masterclass in ${candidate.genre || 'cinematic storytelling'}.\n\n## Narrative Architecture & Screenplay Craft\n\n${candidate.description || 'The film explores gripping, layered narrative arcs that challenge conventional genre tropes.'}\n\nWhat sets this film apart is its refusal to rely solely on formulaic spectacle. Instead, the emotional core remains firmly anchored in character motivations, creating a story that resonates long after the end credits roll.\n\n## Technical Benchmarks: Visuals & Sound Design\n\nVisually, ${candidate.title} leverages atmospheric framing and purposeful lighting to construct an unforgettable aesthetic tone. Paired with a dynamic musical score, every sequence carries dramatic weight and cinematic momentum.\n\n## OTT Streaming & Watch Guide\n\nFor cinephiles looking to experience or rewatch ${candidate.title}, it is available across leading regional streaming platforms. Make sure to watch in full original resolution with surround sound for the intended immersive theatrical impact.\n\n## Final Verdict\n\n**${candidate.title}** stands as a compelling testament to the rising ambition of modern Indian regional cinema. Whether you are a dedicated film student or an ardent fan of quality drama, it is a must-watch title in your cinema catalog.`;
+
+    blogData = {
+      title,
+      excerpt,
+      category: 'Movie Analysis',
+      readTime: '5 min read',
+      tags: [candidate.language || 'Tamil Cinema', candidate.genre || 'Drama', 'Movie Review', 'Box Office'],
+      content
+    };
+  }
+
+  const coverImage = candidate.backdropUrl || candidate.posterUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200&auto=format&fit=crop';
+
+  const createdPost = await createBlogPost({
+    title: blogData.title,
+    excerpt: blogData.excerpt,
+    content: blogData.content,
+    category: blogData.category || 'Movie Analysis',
+    tags: blogData.tags || [candidate.language || 'Cinema', 'Analysis'],
+    coverImage,
+    seoKeywords: [candidate.title, `${candidate.title} review`, `${candidate.title} box office`, `${candidate.language} movies`],
+    featured: false
+  });
+
+  console.log(`[Auto Blog Generator] Successfully published automated SEO post: "${createdPost.title}"`);
+  return createdPost;
 };

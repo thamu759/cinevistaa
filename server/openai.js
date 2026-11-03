@@ -134,4 +134,40 @@ Respond with ONLY valid JSON (no markdown):
   return null;
 };
 
-export { generateSynopsisWithAI, generateRatingWithAI, generateLocalizedTrivia };
+const generateBlogWithAI = async (movie) => {
+  if (!openai || !movie) return null;
+  const langName = movie.language || 'Indian';
+  const prompt = `You are an expert film journalist and SEO content writer for ThiraiPedia. Write a comprehensive, SEO-optimized blog article about the film "${movie.title}" (${langName} Cinema, ${movie.releaseYear || ''}).
+Director: ${movie.director || 'Visionary Filmmakers'}
+Genre: ${movie.genre || 'Drama'}
+Overview: ${movie.description || ''}
+
+Respond with ONLY valid JSON with this exact structure:
+{
+  "title": "SEO-optimized catchy headline (60-70 characters) including movie name",
+  "excerpt": "Compelling 150-160 character meta description for Google search results",
+  "category": "One of: Box Office, Movie Analysis, Regional Cinema, OTT Spotlight, Film Craft",
+  "readTime": "5 min read",
+  "tags": ["Tamil Cinema", "Box Office", "Review", "OTT"],
+  "content": "Full in-depth 600-800 word article in clean Markdown with ## subheadings, analysis of storytelling, direction, performances, cultural impact, and concluding verdict."
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1800,
+      temperature: 0.7,
+    });
+    const text = response.choices[0]?.message?.content?.trim();
+    if (!text) return null;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    return JSON.parse(jsonMatch[0]);
+  } catch (err) {
+    console.warn('[OpenAI] Blog generation failed:', err.message);
+  }
+  return null;
+};
+
+export { generateSynopsisWithAI, generateRatingWithAI, generateLocalizedTrivia, generateBlogWithAI };

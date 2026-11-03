@@ -75,7 +75,12 @@ import {
   getCmsPageBySlug,
   createCmsPage,
   updateCmsPage,
-  deleteCmsPage
+  deleteCmsPage,
+  getBlogPosts,
+  getBlogPostBySlug,
+  createBlogPost,
+  deleteBlogPost,
+  generateAutoBlogPost
 } from './db.js';
 import { seedTriviaUpdates, seedNewsUpdates } from './generateTrivia.js';
 
@@ -1635,6 +1640,98 @@ app.get('/api/ott-alerts/check', async (req, res) => {
   }
 });
 
+
+// ─── BLOG & SEO ARTICLE ENDPOINTS ───
+
+// Public: Get all blog posts with optional filtering
+app.get('/api/blogs', async (req, res) => {
+  try {
+    const { category, search, limit } = req.query;
+    const posts = await getBlogPosts({ category, search, limit });
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch blog posts' });
+  }
+});
+
+// Public: Get single blog post by slug or ID (increments views)
+app.get('/api/blogs/:slug', async (req, res) => {
+  try {
+    const post = await getBlogPostBySlug(req.params.slug);
+    if (!post) {
+      return res.status(404).json({ error: 'Blog post not found' });
+    }
+    res.json(post);
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch blog post' });
+  }
+});
+
+// Admin: Trigger automated AI SEO blog generation
+app.post('/api/admin/blogs/generate', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Access denied. No authentication token provided.' });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    }
+
+    const post = await generateAutoBlogPost();
+    res.status(201).json({ success: true, post });
+  } catch (error) {
+    console.error('Error auto-generating blog post:', error);
+    res.status(500).json({ error: error.message || 'Failed to generate blog post' });
+  }
+});
+
+// Admin: Manually create a blog post
+app.post('/api/admin/blogs', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Access denied. No authentication token provided.' });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    }
+
+    const post = await createBlogPost(req.body);
+    res.status(201).json(post);
+  } catch (error) {
+    console.error('Error creating blog post:', error);
+    res.status(400).json({ error: error.message || 'Failed to create blog post' });
+  }
+});
+
+// Admin: Delete a blog post
+app.delete('/api/admin/blogs/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Access denied. No authentication token provided.' });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+    }
+
+    const deleted = await deleteBlogPost(req.params.id);
+    res.json({ success: deleted });
+  } catch (error) {
+    console.error('Error deleting blog post:', error);
+    res.status(500).json({ error: error.message || 'Failed to delete blog post' });
+  }
+});
+
 // ─── CRAWLER DETECTION & SPA STATIC SERVING ───
 
 const clientDist = path.resolve(__dirname, '..', 'client', 'dist');
@@ -1710,6 +1807,71 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
+
+// Check for crawlers on article/blog pages and serve custom SEO tags & JSON-LD
+app.get(['/article/:id', '/blog/:id'], async (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  if (!crawlerPattern.test(ua)) {
+    return res.sendFile(indexHtmlPath);
+  }
+
+  try {
+    const post = await getBlogPostBySlug(req.params.id);
+    if (!post) return res.sendFile(indexHtmlPath);
+
+    const title = `${post.title} — ThiraiPedia`;
+    const desc = (post.excerpt || post.content || '').slice(0, 160).replace(/"/g, "'");
+    const img = post.coverImage || 'https://www.cinevistaa.in/logo192.png';
+    const postUrl = `https://www.cinevistaa.in/article/${post.id}`;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <meta name="description" content="${desc}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${desc}">
+  <meta property="og:image" content="${img}">
+  <meta property="og:url" content="${postUrl}">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="${post.publishedAt || ''}">
+  <meta property="article:author" content="${post.author || 'ThiraiPedia'}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${desc}">
+  <meta name="twitter:image" content="${img}">
+  <script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": desc,
+    "image": [img],
+    "datePublished": post.publishedAt || new Date().toISOString(),
+    "author": {
+      "@type": "Organization",
+      "name": post.author || "ThiraiPedia Editorial"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ThiraiPedia",
+      "url": "https://www.cinevistaa.in"
+    },
+    "mainEntityOfPage": postUrl
+  })}</script>
+</head>
+<body>
+  <h1>${post.title}</h1>
+  <p>${desc}</p>
+</body>
+</html>`;
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=7200');
+    res.send(html);
+  } catch {
+    res.sendFile(indexHtmlPath);
+  }
+});
+
 // robots.txt
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -1723,15 +1885,25 @@ Sitemap: https://www.cinevistaa.in/sitemap.xml`);
 // sitemap.xml
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const movies = await getMovies();
+    const [movies, posts] = await Promise.all([
+      getMovies().catch(() => []),
+      getBlogPosts().catch(() => [])
+    ]);
     const now = new Date().toISOString().split('T')[0];
     const urls = [
       `  <url><loc>https://www.cinevistaa.in/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/articles</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/blog</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/new-releases</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/tamil-cinema</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/malayalam-cinema</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`,
+      `  <url><loc>https://www.cinevistaa.in/community</loc><changefreq>daily</changefreq><priority>0.7</priority></url>`,
       `  <url><loc>https://www.cinevistaa.in/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
       `  <url><loc>https://www.cinevistaa.in/contact</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>`,
       `  <url><loc>https://www.cinevistaa.in/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
       `  <url><loc>https://www.cinevistaa.in/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>`,
-      ...movies.map(m => `  <url><loc>https://www.cinevistaa.in/movie/${m.id}</loc><lastmod>${m.updatedAt ? new Date(m.updatedAt).toISOString().split('T')[0] : now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`)
+      ...movies.map(m => `  <url><loc>https://www.cinevistaa.in/movie/${m.id}</loc><lastmod>${m.updatedAt ? new Date(m.updatedAt).toISOString().split('T')[0] : now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
+      ...posts.map(p => `  <url><loc>https://www.cinevistaa.in/article/${p.id}</loc><lastmod>${p.publishedAt ? new Date(p.publishedAt).toISOString().split('T')[0] : now}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`)
     ];
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1814,3 +1986,35 @@ const autoSyncMoviesBackground = async () => {
 // Initial sync 30s after server boot, then every 6 hours
 setTimeout(() => { autoSyncMoviesBackground(); }, 30 * 1000);
 setInterval(autoSyncMoviesBackground, MOVIE_SYNC_INTERVAL_MS);
+
+// ─── BLOG AUTO-GENERATOR BACKGROUND ENGINE ───
+// Automatically generates an SEO-rich critical analysis blog post every 24 hours
+const BLOG_GEN_INTERVAL_MS = 24 * 60 * 60 * 1000;
+let blogGenRunning = false;
+
+const autoGenerateBlogBackground = async () => {
+  if (blogGenRunning) return;
+  blogGenRunning = true;
+  try {
+    console.log('[Blog Auto-Generator] Running scheduled AI SEO article generation...');
+    const post = await generateAutoBlogPost();
+    console.log(`[Blog Auto-Generator] Successfully published new SEO article: "${post.title}"`);
+  } catch (err) {
+    console.warn('[Blog Auto-Generator] Background generation failed:', err.message);
+  } finally {
+    blogGenRunning = false;
+  }
+};
+
+// Initial check 45s after boot: if fewer than 5 posts exist, auto-generate one!
+setTimeout(async () => {
+  try {
+    const existing = await getBlogPosts();
+    if (!existing || existing.length < 5) {
+      await autoGenerateBlogBackground();
+    }
+  } catch (e) {
+    console.warn('[Blog Auto-Generator] Initial check failed:', e.message);
+  }
+}, 45 * 1000);
+setInterval(autoGenerateBlogBackground, BLOG_GEN_INTERVAL_MS);

@@ -929,3 +929,67 @@ export const fixMissingMoviePosters = async () => {
   }
   return await response.json();
 };
+
+export const fetchBlogPosts = async (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.category && params.category !== 'All') query.append('category', params.category);
+  if (params.search) query.append('search', params.search);
+  if (params.limit) query.append('limit', params.limit);
+
+  const url = `${API_BASE_URL}/blogs${query.toString() ? '?' + query.toString() : ''}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to fetch articles');
+  }
+  return await response.json();
+};
+
+export const fetchBlogPostBySlug = async (slug) => {
+  const response = await fetch(`${API_BASE_URL}/blogs/${encodeURIComponent(slug)}`);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Article not found');
+  }
+  return await response.json();
+};
+
+export const generateAutoBlogPostApi = async () => {
+  const response = await fetch(`${API_BASE_URL}/admin/blogs/generate`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to generate AI blog post');
+  }
+  return await response.json();
+};
+
+export const createBlogPostApi = async (postData) => {
+  const response = await fetch(`${API_BASE_URL}/admin/blogs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(postData),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create blog post');
+  }
+  return await response.json();
+};
+
+export const deleteBlogPostApi = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/admin/blogs/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to delete blog post');
+  }
+  return await response.json();
+};

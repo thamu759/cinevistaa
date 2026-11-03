@@ -1054,7 +1054,7 @@ const preRollTimerRef = useRef(null);
     if (path === '/terms') return { view: 'terms' };
     if (path === '/contact') return { view: 'contact' };
     if (path === '/about') return { view: 'about' };
-    if (path === '/articles') return { view: 'articles' };
+    if (path === '/articles' || path === '/blog') return { view: 'articles' };
     if (path === '/quiz') return { view: 'quiz' };
     if (path === '/wheel') return { view: 'wheel' };
     if (path === '/blind-frame') return { view: 'blind-frame' };
@@ -1066,8 +1066,8 @@ const preRollTimerRef = useRef(null);
     if (cmsPageMatch) return { view: 'cms-page', pageSlug: cmsPageMatch[1] };
     const movieMatch = path.match(/^\/movie\/(.+)$/);
     if (movieMatch) return { view: 'movie-details', movieId: movieMatch[1] };
-    const articleMatch = path.match(/^\/article\/(.+)$/);
-    if (articleMatch) return { view: 'article-detail', movieId: articleMatch[1] };
+    const articleMatch = path.match(/^\/(?:article|blog)\/(.+)$/);
+    if (articleMatch) return { view: 'article-detail', articleId: articleMatch[1], movieId: articleMatch[1] };
     return { view: 'home' };
   };
 
@@ -1098,7 +1098,7 @@ const preRollTimerRef = useRef(null);
     if (view === 'list-detail') return '/list-detail';
     if (view === 'cms-page' && movieId) return `/page/${movieId}`;
     if (view === 'cms-page' && movieId) return `/page/${movieId}`;
-    if (view === 'article-detail' && movieId) return `/article/${movieId}`;
+    if ((view === 'article-detail' || view === 'article') && movieId) return `/article/${movieId}`;
     if (view === 'movie-details' && movieId) return `/movie/${movieId}`;
     return '/';
   };
@@ -1113,8 +1113,9 @@ const preRollTimerRef = useRef(null);
     if (view === 'movie-details') {
       setSelectedMovieId(movieId);
       setSelectedPageSlug('');
-    } else if (view === 'article-detail') {
-      setSelectedArticleId(articleId);
+    } else if (view === 'article-detail' || view === 'article') {
+      setSelectedArticleId(articleId || movieId);
+      setActiveView('article-detail');
     } else if (view === 'cms-page') {
       setSelectedPageSlug(pageSlug || movieId || '');
     } else {
@@ -1572,6 +1573,15 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             >
               <span className="nav-pulse-dot" /> Cine Pulse
             </button>
+
+            <Link
+              className={`nav-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
+              to="/articles"
+              onClick={() => { setIsMobileMenuOpen(false); }}
+            >
+              Articles
+            </Link>
+
 
             
             {/* Dynamic CMS Pages in Navbar */}
