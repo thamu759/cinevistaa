@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } fro
 import { useNavigate, useLocation, Link, ScrollRestoration } from 'react-router-dom';
 import { 
   Play, Pause, Plus, Search, Star, User, Film,
-  ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight,
+  ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight, ChevronDown, Compass, Bookmark, Calendar, Award, Gamepad2, Layers,
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List,
   AlertTriangle, RefreshCw, Bell, BellOff
@@ -133,6 +133,8 @@ export default function App() {
 
   // Mobile Menu State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -1510,6 +1512,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             Thirai<span>Pedia</span>
           </div>
           <div className={`nav-links ${isMobileMenuOpen ? 'nav-links--open' : ''}`}>
+            {/* Core 1: Movies */}
             <Link 
               className={`nav-link ${activeView === 'home' ? 'active' : ''}`}
               to="/"
@@ -1518,54 +1521,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               Movies
             </Link>
 
-            <Link 
-              className={`nav-link ${activeView === 'watchlist' ? 'active' : ''}`}
-              to="/watchlist"
-              onClick={() => { setIsMobileMenuOpen(false); }}
-            >
-              Watchlist
-            </Link>
-
-            <Link 
-              className={`nav-link ${activeView === 'coming-soon' ? 'active' : ''}`}
-              to="/coming-soon"
-              onClick={() => { setIsMobileMenuOpen(false); }}
-            >
-              Coming Soon
-            </Link>
-
-            <Link 
-              className={`nav-link ${activeView === 'leaderboard' ? 'active' : ''}`}
-              to="/leaderboard"
-              onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}
-            >
-              Top Critics
-            </Link>
-
-            <Link
-              className={`nav-link ${activeView === 'lists' ? 'active' : ''}`}
-              to="/lists"
-              onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}
-            >
-              Lists
-            </Link>
-
-            <Link
-              className={`nav-link ${activeView === 'ott-calendar' ? 'active' : ''}`}
-              to="/ott-calendar"
-              onClick={() => { setIsMobileMenuOpen(false); }}
-            >
-              OTT Calendar
-            </Link>
-
-            <Link
-              className={`nav-link ${activeView === 'community' ? 'active' : ''}`}
-              to="/community"
-              onClick={() => { setIsMobileMenuOpen(false); }}
-            >
-              Community
-            </Link>
-
+            {/* Core 2: Cine Pulse */}
             <button
               className={`nav-link cine-updates-link ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
               onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
@@ -1574,6 +1530,16 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               <span className="nav-pulse-dot" /> Cine Pulse
             </button>
 
+            {/* Core 3: Community */}
+            <Link 
+              className={`nav-link ${activeView === 'community' ? 'active' : ''}`}
+              to="/community"
+              onClick={() => { setIsMobileMenuOpen(false); }}
+            >
+              Community
+            </Link>
+
+            {/* Core 4: Articles */}
             <Link
               className={`nav-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
               to="/articles"
@@ -1582,20 +1548,134 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               Articles
             </Link>
 
-
-            
-            {/* Dynamic CMS Pages in Navbar */}
-            {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
-              <Link
-                key={p.slug}
-                className={`nav-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
-                to={`/page/${p.slug}`}
-                onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+            {/* Desktop Explore Luxury Dropdown */}
+            <div className="nav-dropdown-wrapper desktop-only-dropdown" ref={moreMenuRef}>
+              <button
+                type="button"
+                className={`nav-link nav-more-trigger ${isMoreMenuOpen || ['coming-soon', 'ott-calendar', 'leaderboard', 'lists', 'watchlist', 'quiz', 'wheel', 'blind-frame', 'mood-matcher'].includes(activeView) ? 'active' : ''}`}
+                onClick={() => setIsMoreMenuOpen(prev => !prev)}
+                aria-expanded={isMoreMenuOpen}
               >
-                {p.title}
-              </Link>
-            ))}
+                <span>Explore</span>
+                <ChevronDown size={14} className={`dropdown-chevron ${isMoreMenuOpen ? 'open' : ''}`} />
+              </button>
 
+              {isMoreMenuOpen && (
+                <div className="luxury-nav-dropdown">
+                  <div className="luxury-dropdown-grid">
+                    {/* Col 1: Releases & Cinema */}
+                    <div className="luxury-dropdown-col">
+                      <span className="luxury-dropdown-col-title">Cinema & Releases</span>
+                      <Link to="/coming-soon" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Calendar size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Coming Soon</strong>
+                          <small>Upcoming theatrical debuts</small>
+                        </div>
+                      </Link>
+                      <Link to="/ott-calendar" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Film size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>OTT Calendar</strong>
+                          <small>Digital streaming premieres</small>
+                        </div>
+                      </Link>
+                      <Link to="/lists" className="luxury-dropdown-item" onClick={() => { loadAllLists(); setIsMoreMenuOpen(false); }}>
+                        <Layers size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Curated Lists</strong>
+                          <small>Thematic film collections</small>
+                        </div>
+                      </Link>
+                    </div>
+
+                    {/* Col 2: Critics & Watchlist */}
+                    <div className="luxury-dropdown-col">
+                      <span className="luxury-dropdown-col-title">Critics & Library</span>
+                      <Link to="/leaderboard" className="luxury-dropdown-item" onClick={() => { loadLeaderboard(); setIsMoreMenuOpen(false); }}>
+                        <Award size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Top Critics</strong>
+                          <small>Rankings & top reviewers</small>
+                        </div>
+                      </Link>
+                      <Link to="/watchlist" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Bookmark size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Watchlist</strong>
+                          <small>Saved movies to stream</small>
+                        </div>
+                      </Link>
+                      {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
+                        <Link
+                          key={p.slug}
+                          className="luxury-dropdown-item"
+                          to={`/page/${p.slug}`}
+                          onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMoreMenuOpen(false); }}
+                        >
+                          <Compass size={16} className="luxury-dropdown-icon" />
+                          <div>
+                            <strong>{p.title}</strong>
+                            <small>Special editorial section</small>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Col 3: Interactive Cine Hub */}
+                    <div className="luxury-dropdown-col">
+                      <span className="luxury-dropdown-col-title">Cine Hub & Games</span>
+                      <Link to="/quiz" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Gamepad2 size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Movie Quiz</strong>
+                          <small>Test your cinema knowledge</small>
+                        </div>
+                      </Link>
+                      <Link to="/wheel" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Play size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Card Flix</strong>
+                          <small>Flip cards to pick your film</small>
+                        </div>
+                      </Link>
+                      <Link to="/blind-frame" className="luxury-dropdown-item" onClick={() => setIsMoreMenuOpen(false)}>
+                        <Eye size={16} className="luxury-dropdown-icon" />
+                        <div>
+                          <strong>Blind Frame</strong>
+                          <small>Guess blurred cinema shots</small>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Drawer Sub-Menu Section */}
+            <div className="mobile-only-section">
+              <div className="mobile-drawer-label">EXPLORE & DISCOVER</div>
+              <Link className="nav-link" to="/coming-soon" onClick={() => setIsMobileMenuOpen(false)}>Coming Soon</Link>
+              <Link className="nav-link" to="/ott-calendar" onClick={() => setIsMobileMenuOpen(false)}>OTT Calendar</Link>
+              <Link className="nav-link" to="/lists" onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}>Curated Lists</Link>
+              <Link className="nav-link" to="/leaderboard" onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}>Top Critics</Link>
+              <Link className="nav-link" to="/watchlist" onClick={() => setIsMobileMenuOpen(false)}>Watchlist</Link>
+              <Link className="nav-link" to="/quiz" onClick={() => setIsMobileMenuOpen(false)}>Movie Quiz</Link>
+              <Link className="nav-link" to="/wheel" onClick={() => setIsMobileMenuOpen(false)}>Card Flix</Link>
+              <Link className="nav-link" to="/blind-frame" onClick={() => setIsMobileMenuOpen(false)}>Blind Frame</Link>
+              {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
+                <Link
+                  key={p.slug}
+                  className="nav-link"
+                  to={`/page/${p.slug}`}
+                  onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+                >
+                  {p.title}
+                </Link>
+              ))}
+            </div>
+
+            {/* Admin Control Link */}
             {currentUser && currentUser.role === 'admin' && (
               <Link 
                 className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}
