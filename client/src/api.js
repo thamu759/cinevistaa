@@ -369,6 +369,19 @@ export const refreshMoviePosters = async () => {
   return response.json();
 };
 
+export const autoSyncMovies = async (options = {}) => {
+  const response = await fetch(`${API_BASE_URL}/admin/auto-sync-movies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(options),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to auto-sync movies');
+  }
+  return response.json();
+};
+
 export const updateMovie = async (movieId, movieData) => {
   const token = localStorage.getItem('mc_token');
   const headers = { 'Content-Type': 'application/json' };

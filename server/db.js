@@ -3015,6 +3015,224 @@ export const deleteMovie = async (movieId) => {
 };
 
 
+export const autoSyncTmdbMovies = async (options = {}) => {
+  if (!hasTmdbCredentials()) {
+    console.warn('[Movie Auto-Sync] TMDB credentials missing, skipping sync.');
+    return { synced: 0, skipped: 0, errors: 0, movies: [] };
+  }
+
+  const languages = options.languages || ['ta', 'ml', 'te'];
+  const maxPerLanguage = options.maxPerLanguage || 10;
+  const syncNowPlaying = options.syncNowPlaying !== false;
+
+  const existingMovies = await getMovies();
+  const existingSlugs = new Set(
+    existingMovies.map(m => m.id || (m.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
+  );
+  const existingTmdbIds = new Set(
+    existingMovies.filter(m => m.tmdbId).map(m => String(m.tmdbId))
+  );
+
+  const newlyAdded = [];
+  let skippedCount = 0;
+  let errorCount = 0;
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const langMap = {
+    ta: 'Tamil',
+    ml: 'Malayalam',
+    te: 'Telugu',
+    hi: 'Hindi',
+    en: 'English',
+    kn: 'Kannada'
+  };
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  for (const lang of languages) {
+    try {
+      const url = buildTmdbUrl('discover/movie', {
+        with_original_language: lang,
+        sort_by: 'primary_release_date.desc',
+        'primary_release_date.lte': todayStr,
+        include_adult: 'false',
+        page: 1
+      });
+
+      const response = await fetch(url, { headers: getTmdbHeaders() });
+      if (!response.ok) {
+        console.warn(`[Movie Auto-Sync] Failed to fetch discover for ${lang}: HTTP ${response.status}`);
+        continue;
+      }
+      const data = await response.json();
+      const results = (data.results || []).slice(0, maxPerLanguage);
+
+      for (const rawMovie of results) {
+        if (!rawMovie.title) continue;
+        const slug = rawMovie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const tmdbIdStr = String(rawMovie.id);
+
+        if (existingSlugs.has(slug) || existingTmdbIds.has(tmdbIdStr)) {
+          skippedCount++;
+          continue;
+        }
+
+        try {
+          await sleep(150);
+          const [fullDetails, credits, logo, providers] = await Promise.all([
+            fetchTmdbMovieDetailsFull(rawMovie.id),
+            fetchTmdbMovieCredits(rawMovie.id),
+            fetchTmdbMovieLogo(rawMovie.id),
+            fetchTmdbWatchProviders(rawMovie.id)
+          ]);
+
+          const releaseDate = rawMovie.release_date || fullDetails?.releaseDate || '';
+          const releaseYear = releaseDate ? parseInt(releaseDate.split('-')[0]) : new Date().getFullYear();
+          const langName = langMap[lang] || 'Tamil';
+
+          const primaryOtt = (providers && providers.length > 0) ? {
+            platform: providers[0].provider_name || '',
+            releaseDate: '',
+            url: ''
+          } : undefined;
+
+          const moviePayload = {
+            title: rawMovie.title,
+            description: rawMovie.overview && rawMovie.overview.trim().length > 15
+              ? rawMovie.overview
+              : `${rawMovie.title} is a ${langName} film directed by ${fullDetails?.director || 'renowned filmmakers'} released in ${releaseYear}.`,
+            posterUrl: rawMovie.poster_path
+              ? `${TMDB_IMAGE_BASE_URL}/w780${rawMovie.poster_path}`
+              : (rawMovie.backdrop_path ? `${TMDB_IMAGE_BASE_URL}/w780${rawMovie.backdrop_path}` : '/assets/placeholder.jpg'),
+            backdropUrl: rawMovie.backdrop_path
+              ? `${TMDB_IMAGE_BASE_URL}/original${rawMovie.backdrop_path}`
+              : (rawMovie.poster_path ? `${TMDB_IMAGE_BASE_URL}/original${rawMovie.poster_path}` : '/assets/placeholder.jpg'),
+            titleLogoUrl: logo || '',
+            releaseDate: releaseDate || `${releaseYear}-01-01`,
+            releaseYear,
+            language: langName,
+            genre: fullDetails?.genre || 'Drama',
+            director: fullDetails?.director || 'Unknown Director',
+            writer: fullDetails?.writer || 'Unknown Writer',
+            studio: fullDetails?.studio || 'Cinema Studio',
+            runtime: fullDetails?.runtime || '2h 10m',
+            trailerUrl: fullDetails?.trailerUrl || '',
+            trailerChannelName: fullDetails?.trailerChannelName || '',
+            ott: primaryOtt,
+            cast: credits || [],
+            criticScore: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) / 10 : 7.0,
+            audienceScore: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) : 70,
+            rating: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) / 10 : 7.0,
+            isHero: false,
+            isStaffPick: false,
+            staffPickType: '',
+            isUpcoming: false,
+            tmdbId: rawMovie.id
+          };
+
+          const created = await createMovie(moviePayload);
+          existingSlugs.add(slug);
+          existingTmdbIds.add(tmdbIdStr);
+          newlyAdded.push(created);
+          console.log(`[Movie Auto-Sync] Ingested: "${created.title}" (${langName}, ${releaseYear})`);
+        } catch (itemErr) {
+          console.warn(`[Movie Auto-Sync] Error ingesting "${rawMovie.title}":`, itemErr.message);
+          errorCount++;
+        }
+      }
+    } catch (langErr) {
+      console.warn(`[Movie Auto-Sync] Error in ${lang} discover:`, langErr.message);
+      errorCount++;
+    }
+  }
+
+  // Also Discover Now Playing in Theaters (India Region)
+  if (syncNowPlaying) {
+    try {
+      const nowPlayingUrl = buildTmdbUrl('movie/now_playing', {
+        region: 'IN',
+        page: 1
+      });
+      const res = await fetch(nowPlayingUrl, { headers: getTmdbHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        const results = (data.results || []).slice(0, 8);
+        for (const rawMovie of results) {
+          if (!rawMovie.title) continue;
+          const slug = rawMovie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const tmdbIdStr = String(rawMovie.id);
+
+          if (existingSlugs.has(slug) || existingTmdbIds.has(tmdbIdStr)) {
+            skippedCount++;
+            continue;
+          }
+
+          try {
+            await sleep(150);
+            const [fullDetails, credits, logo] = await Promise.all([
+              fetchTmdbMovieDetailsFull(rawMovie.id),
+              fetchTmdbMovieCredits(rawMovie.id),
+              fetchTmdbMovieLogo(rawMovie.id)
+            ]);
+
+            const releaseDate = rawMovie.release_date || fullDetails?.releaseDate || '';
+            const releaseYear = releaseDate ? parseInt(releaseDate.split('-')[0]) : new Date().getFullYear();
+            const langName = langMap[rawMovie.original_language] || 'Tamil';
+
+            const moviePayload = {
+              title: rawMovie.title,
+              description: rawMovie.overview && rawMovie.overview.trim().length > 15
+                ? rawMovie.overview
+                : `${rawMovie.title} is currently running in theatres.`,
+              posterUrl: rawMovie.poster_path ? `${TMDB_IMAGE_BASE_URL}/w780${rawMovie.poster_path}` : '/assets/placeholder.jpg',
+              backdropUrl: rawMovie.backdrop_path ? `${TMDB_IMAGE_BASE_URL}/original${rawMovie.backdrop_path}` : '/assets/placeholder.jpg',
+              titleLogoUrl: logo || '',
+              releaseDate: releaseDate || `${releaseYear}-01-01`,
+              releaseYear,
+              language: langName,
+              genre: fullDetails?.genre || 'Action / Drama',
+              director: fullDetails?.director || 'Unknown Director',
+              writer: fullDetails?.writer || 'Unknown Writer',
+              studio: fullDetails?.studio || 'Theatrical Release',
+              runtime: fullDetails?.runtime || '2h 15m',
+              trailerUrl: fullDetails?.trailerUrl || '',
+              trailerChannelName: fullDetails?.trailerChannelName || '',
+              cast: credits || [],
+              criticScore: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) / 10 : 7.2,
+              audienceScore: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) : 75,
+              rating: rawMovie.vote_average ? Math.round(rawMovie.vote_average * 10) / 10 : 7.2,
+              isHero: false,
+              isStaffPick: false,
+              staffPickType: '',
+              isUpcoming: false,
+              tmdbId: rawMovie.id
+            };
+
+            const created = await createMovie(moviePayload);
+            existingSlugs.add(slug);
+            existingTmdbIds.add(tmdbIdStr);
+            newlyAdded.push(created);
+            console.log(`[Movie Auto-Sync] Ingested Now Playing: "${created.title}"`);
+          } catch (itemErr) {
+            errorCount++;
+          }
+        }
+      }
+    } catch (nowErr) {
+      console.warn('[Movie Auto-Sync] Error in now_playing:', nowErr.message);
+    }
+  }
+
+  console.log(`[Movie Auto-Sync] Completed: Added ${newlyAdded.length} new movies, skipped ${skippedCount} existing.`);
+  return {
+    synced: newlyAdded.length,
+    skipped: skippedCount,
+    errors: errorCount,
+    movies: newlyAdded
+  };
+};
+
 export const curateMovie = async (movieId, curationData) => {
   const { isHero, isStaffPick, staffPickType } = curationData;
 

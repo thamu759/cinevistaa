@@ -9,7 +9,7 @@ import SiteCmsTab from './SiteCmsTab';
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 import {
   fetchMovies, addMovie, deleteMovie, updateMovie,
-  refreshMoviePosters, proxyImageUrl,
+  refreshMoviePosters, autoSyncMovies, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
   bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate, deleteAllCineUpdates,
@@ -29,6 +29,12 @@ export default function AdminPanel({ currentUser }) {
   const [isLoading, setIsLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [syncingMovies, setSyncingMovies] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncLanguages, setSyncLanguages] = useState(['ta', 'ml', 'te']);
+  const [syncMaxPerLang, setSyncMaxPerLang] = useState(10);
+  const [syncNowPlaying, setSyncNowPlaying] = useState(true);
+  const [syncResult, setSyncResult] = useState(null);
 
   const showSuccess = (msg) => {
     setSuccessMsg(msg);
@@ -385,6 +391,28 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
     setLoading(false);
   };
 
+  const handleAutoSync = async () => {
+    if (syncLanguages.length === 0 && !syncNowPlaying) {
+      showToast('Please select at least one language or Now Playing', 'error');
+      return;
+    }
+    setSyncingMovies(true);
+    setSyncResult(null);
+    try {
+      const res = await autoSyncMovies({
+        languages: syncLanguages,
+        maxPerLanguage: syncMaxPerLang,
+        syncNowPlaying: syncNowPlaying
+      });
+      setSyncResult(res);
+      showSuccess(`Auto-sync complete: ${res.synced} new movies added, ${res.skipped} already in library.`);
+      await loadMovies();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+    setSyncingMovies(false);
+  };
+
   const handleBulkAdd = async () => {
     const titles = bulkInput.split('\n').filter(t => t.trim());
     if (titles.length === 0) return;
@@ -465,6 +493,11 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
             </button>
           )}
         </div>
+        <button onClick={() => { setShowSyncModal(true); setSyncResult(null); }} disabled={syncingMovies}
+          className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0, background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', borderColor: '#d97706' }}>
+          <RefreshCw size={13} className={syncingMovies ? 'spin-anim' : ''} />
+          {syncingMovies ? 'Syncing...' : 'Auto-Sync Movies'}
+        </button>
         <button className="btn-primary" onClick={() => setShowAddModal(true)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.85rem', fontSize: '0.78rem', flexShrink: 0 }}>
           <Plus size={14} /> Add Movie
@@ -667,6 +700,101 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
           <button onClick={handleAddMovie} disabled={loading || !addForm.title.trim()}
             className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
             <Plus size={14} /> {loading ? 'Adding...' : 'Add Movie'}
+          </button>
+        </div>
+      </Modal>
+
+      {/* Auto-Sync Movies Modal */}
+      <Modal isOpen={showSyncModal} onClose={() => { if (!syncingMovies) setShowSyncModal(false); }} title="Automated Movie Discovery & Sync (TMDB)" width="540px">
+        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+          Automatically discovers the latest releases from TMDB, extracts HD posters, trailers, full cast & crew, directors, genres, and OTT streaming providers, and saves them directly to your library without duplicate entries.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '1rem' }}>
+          <div>
+            <label className="admin-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Target Regional Industries</label>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {[
+                { id: 'ta', label: 'Kollywood (Tamil)' },
+                { id: 'ml', label: 'Mollywood (Malayalam)' },
+                { id: 'te', label: 'Tollywood (Telugu)' },
+                { id: 'hi', label: 'Bollywood (Hindi)' }
+              ].map(lang => (
+                <label key={lang.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', cursor: 'pointer', background: syncLanguages.includes(lang.id) ? 'rgba(217,119,6,0.15)' : 'rgba(255,255,255,0.03)', border: syncLanguages.includes(lang.id) ? '1px solid #d97706' : '1px solid rgba(255,255,255,0.08)', padding: '0.35rem 0.65rem', borderRadius: '6px' }}>
+                  <input
+                    type="checkbox"
+                    checked={syncLanguages.includes(lang.id)}
+                    onChange={e => {
+                      if (e.target.checked) setSyncLanguages(prev => [...prev, lang.id]);
+                      else setSyncLanguages(prev => prev.filter(x => x !== lang.id));
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span>{lang.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-main)' }}>Now Playing in Theatres</span>
+              <p style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', margin: 0 }}>Sync Indian box-office current theatrical runs</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={syncNowPlaying}
+              onChange={e => setSyncNowPlaying(e.target.checked)}
+              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-text-main)' }}>Batch Size Per Language</span>
+              <p style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', margin: 0 }}>Max newly discovered titles per category</p>
+            </div>
+            <select
+              value={syncMaxPerLang}
+              onChange={e => setSyncMaxPerLang(Number(e.target.value))}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.3rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem' }}
+            >
+              <option value={5}>5 titles</option>
+              <option value={10}>10 titles</option>
+              <option value={15}>15 titles</option>
+              <option value={20}>20 titles</option>
+            </select>
+          </div>
+        </div>
+
+        {syncResult && (
+          <div style={{ marginTop: '1rem', padding: '0.85rem', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: '8px', fontSize: '0.78rem' }}>
+            <div style={{ fontWeight: 700, color: '#34d399', marginBottom: '0.3rem' }}>
+              ✓ Auto-Sync Completed Successfully
+            </div>
+            <div style={{ color: 'var(--color-text-muted)', fontSize: '0.72rem' }}>
+              Added: <strong>{syncResult.synced}</strong> new movies | Skipped: <strong>{syncResult.skipped}</strong> already in library
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+          <button
+            onClick={() => setShowSyncModal(false)}
+            className="btn-secondary"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}
+            disabled={syncingMovies}
+          >
+            Close
+          </button>
+          <button
+            onClick={handleAutoSync}
+            disabled={syncingMovies}
+            className="btn-primary"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', borderColor: '#d97706' }}
+          >
+            <RefreshCw size={14} className={syncingMovies ? 'spin-anim' : ''} />
+            {syncingMovies ? 'Discovering & Ingesting...' : 'Run Auto-Sync Now'}
           </button>
         </div>
       </Modal>

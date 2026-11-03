@@ -27,6 +27,7 @@ import {
   addCommunityReply,
   deleteCommunityThread,
   refreshMovieImages,
+  autoSyncTmdbMovies,
   getUsers,
   deleteUser,
   updateUserRole,
@@ -470,6 +471,28 @@ app.delete('/api/movies/:id', async (req, res) => {
   } catch (error) {
     console.error("Error deleting movie:", error);
     res.status(500).json({ error: "Server error deleting movie" });
+  }
+});
+
+// Auto-Sync latest releases from TMDB (Tamil, Malayalam, Telugu, etc.)
+app.post('/api/admin/auto-sync-movies', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const { languages = ['ta', 'ml', 'te'], maxPerLanguage = 10, syncNowPlaying = true } = req.body || {};
+    const result = await autoSyncTmdbMovies({ languages, maxPerLanguage, syncNowPlaying });
+    res.json(result);
+  } catch (error) {
+    console.error("Error in auto-sync movies:", error);
+    res.status(500).json({ error: error.message || "Server error auto-syncing movies" });
   }
 });
 
@@ -1740,3 +1763,30 @@ const autoRefreshCineUpdates = async () => {
 
 setTimeout(() => { autoRefreshCineUpdates(); }, 15 * 1000);
 setInterval(autoRefreshCineUpdates, CINE_REFRESH_INTERVAL_MS);
+
+// ─── MOVIE AUTO-SYNC BACKGROUND ENGINE ───
+// Automatically ingests new Kollywood, Mollywood & Tollywood releases every 6 hours
+const MOVIE_SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000;
+let movieSyncRunning = false;
+
+const autoSyncMoviesBackground = async () => {
+  if (movieSyncRunning) return;
+  movieSyncRunning = true;
+  try {
+    console.log('[Movie Auto-Sync] Running scheduled movie discovery (Tamil, Malayalam, Telugu)...');
+    const result = await autoSyncTmdbMovies({
+      languages: ['ta', 'ml', 'te'],
+      maxPerLanguage: 8,
+      syncNowPlaying: true
+    });
+    console.log(`[Movie Auto-Sync] Done: +${result.synced} new movies added, ${result.skipped} existing.`);
+  } catch (err) {
+    console.warn('[Movie Auto-Sync] Background sync failed:', err.message);
+  } finally {
+    movieSyncRunning = false;
+  }
+};
+
+// Initial sync 30s after server boot, then every 6 hours
+setTimeout(() => { autoSyncMoviesBackground(); }, 30 * 1000);
+setInterval(autoSyncMoviesBackground, MOVIE_SYNC_INTERVAL_MS);
