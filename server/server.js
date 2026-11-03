@@ -28,6 +28,7 @@ import {
   deleteCommunityThread,
   refreshMovieImages,
   autoSyncTmdbMovies,
+  fixMissingMovieImages,
   getUsers,
   deleteUser,
   updateUserRole,
@@ -493,6 +494,27 @@ app.post('/api/admin/auto-sync-movies', async (req, res) => {
   } catch (error) {
     console.error("Error in auto-sync movies:", error);
     res.status(500).json({ error: error.message || "Server error auto-syncing movies" });
+  }
+});
+
+// Fix missing movie posters via Google/Web Image Search (Admin Only)
+app.post('/api/admin/fix-missing-images', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Access denied. No authentication token provided." });
+    }
+    const token = authHeader.split(' ')[1];
+    const verified = await verifyToken(token);
+    if (!verified || verified.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const result = await fixMissingMovieImages();
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("Error fixing missing images:", error);
+    res.status(500).json({ error: error.message || "Server error fixing missing images" });
   }
 });
 
@@ -1780,6 +1802,8 @@ const autoSyncMoviesBackground = async () => {
       syncNowPlaying: true
     });
     console.log(`[Movie Auto-Sync] Done: +${result.synced} new movies added, ${result.skipped} existing.`);
+    // Also auto-fix any movies missing images via Google/Web search
+    await fixMissingMovieImages();
   } catch (err) {
     console.warn('[Movie Auto-Sync] Background sync failed:', err.message);
   } finally {

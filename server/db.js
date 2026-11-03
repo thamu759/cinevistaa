@@ -342,6 +342,81 @@ const fetchTmdbMovieTrailer = async (tmdbId) => {
   }
 };
 
+export const fetchWebMoviePoster = async (title, year, language) => {
+  if (!title) return null;
+
+  const cleanTitle = title.replace(/[^a-zA-Z0-9s]/g, '').trim();
+  const query = `${cleanTitle} ${year || ''} ${language || ''} movie poster hd`.trim();
+
+  // 1. Google Custom Search (if credentials provided in env)
+  if (process.env.GOOGLE_API_KEY && process.env.GOOGLE_CSE_ID) {
+    try {
+      const gUrl = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${process.env.GOOGLE_CSE_ID}&key=${process.env.GOOGLE_API_KEY}&searchType=image&num=1`;
+      const gRes = await fetch(gUrl);
+      if (gRes.ok) {
+        const gData = await gRes.json();
+        if (gData.items && gData.items[0]?.link) {
+          console.log(`[Google Image Fallback] Found via Google API: "${title}" -> ${gData.items[0].link}`);
+          return gData.items[0].link;
+        }
+      }
+    } catch (gErr) {
+      console.warn(`[Google Image Fallback] Google API error for "${title}":`, gErr.message);
+    }
+  }
+
+  // 2. High-speed direct Web Image Search (Bing API / Scraper)
+  try {
+    const bingUrl = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2&first=1`;
+    const res = await fetch(bingUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+      }
+    });
+    if (res.ok) {
+      const html = await res.text();
+      const match = html.match(/murl&quot;:&quot;(https?:\/\/[^&]+?\.(?:jpg|jpeg|png|webp))/i);
+      if (match && match[1]) {
+        console.log(`[Google/Web Image Fallback] Found poster for "${title}": ${match[1]}`);
+        return match[1];
+      }
+    }
+  } catch (bingErr) {
+    // continue to DuckDuckGo fallback
+  }
+
+  // 3. DuckDuckGo Image Search Fallback
+  try {
+    const ddgRes = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&t=h_&iar=images&iax=images&ia=images`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    if (ddgRes.ok) {
+      const html = await ddgRes.text();
+      const vqdMatch = html.match(/vqd=["']?([^"'\s&]+)/);
+      if (vqdMatch) {
+        const vqd = vqdMatch[1];
+        const imgRes = await fetch(`https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${vqd}&f=,,,`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://duckduckgo.com/'
+          }
+        });
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          if (imgData.results && imgData.results.length > 0 && imgData.results[0].image) {
+            console.log(`[Google/Web Image Fallback] DDG poster match for "${title}": ${imgData.results[0].image}`);
+            return imgData.results[0].image;
+          }
+        }
+      }
+    }
+  } catch (ddgErr) {
+    // continue
+  }
+
+  return null;
+};
+
 const enrichMovieWithTmdbImages = async (movie) => {
   const localFallbackMovie = applyLocalHdImageFallback(movie);
   const images = await fetchTmdbMovieImages(movie);
@@ -3014,6 +3089,54 @@ export const deleteMovie = async (movieId) => {
   }
 };
 
+
+export const fixMissingMovieImages = async () => {
+  const allMovies = await getMovies();
+  const missing = allMovies.filter(m =>
+    !m.posterUrl ||
+    m.posterUrl.includes('placeholder') ||
+    m.posterUrl.trim() === '' ||
+    m.posterUrl === '/assets/placeholder.jpg'
+  );
+
+  console.log(`[Google Image Fallback] Found ${missing.length} movies with missing or placeholder posters.`);
+  let fixedCount = 0;
+
+  for (const movie of missing) {
+    try {
+      const webPoster = await fetchWebMoviePoster(movie.title, movie.releaseYear, movie.language);
+      if (webPoster) {
+        if (useMongoDB) {
+          await MovieModel.updateOne(
+            { id: movie.id },
+            {
+              $set: {
+                posterUrl: webPoster,
+                backdropUrl: (!movie.backdropUrl || movie.backdropUrl.includes('placeholder')) ? webPoster : movie.backdropUrl
+              }
+            }
+          );
+        } else {
+          const data = readJsonDb();
+          const idx = data.movies.findIndex(m => m.id === movie.id);
+          if (idx !== -1) {
+            data.movies[idx].posterUrl = webPoster;
+            if (!data.movies[idx].backdropUrl || data.movies[idx].backdropUrl.includes('placeholder')) {
+              data.movies[idx].backdropUrl = webPoster;
+            }
+            writeJsonDb(data);
+          }
+        }
+        fixedCount++;
+        console.log(`[Google Image Fallback] Successfully set poster for "${movie.title}": ${webPoster}`);
+      }
+    } catch (err) {
+      console.warn(`[Google Image Fallback] Failed for "${movie.title}":`, err.message);
+    }
+  }
+
+  return { totalScanned: missing.length, fixed: fixedCount };
+};
 
 export const autoSyncTmdbMovies = async (options = {}) => {
   if (!hasTmdbCredentials()) {

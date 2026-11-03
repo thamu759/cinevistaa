@@ -916,3 +916,16 @@ export const deleteCmsPage = async (id) => {
   }
   return response.json();
 };
+
+
+export const fixMissingMoviePosters = async () => {
+  const response = await fetch(`${API_BASE_URL}/admin/fix-missing-images`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to fix missing images');
+  }
+  return await response.json();
+};

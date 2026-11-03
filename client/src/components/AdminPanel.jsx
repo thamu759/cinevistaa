@@ -9,7 +9,7 @@ import SiteCmsTab from './SiteCmsTab';
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2716%27 fill=%27%2394a3b8%27/%3E%3Cellipse cx=%2750%27 cy=%2780%27 rx=%2728%27 ry=%2722%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 import {
   fetchMovies, addMovie, deleteMovie, updateMovie,
-  refreshMoviePosters, autoSyncMovies, proxyImageUrl,
+  refreshMoviePosters, autoSyncMovies, fixMissingMoviePosters, proxyImageUrl,
   fetchUsers, deleteUser as deleteUserApi, updateUserRole,
   searchTmdbMovies, fetchTmdbCredits, fetchTmdbMovieDetails,
   bulkAddMovies, fetchCineUpdates, createCineUpdate, updateCineUpdate, deleteCineUpdate, deleteAllCineUpdates,
@@ -30,6 +30,7 @@ export default function AdminPanel({ currentUser }) {
   const [usersLoading, setUsersLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [syncingMovies, setSyncingMovies] = useState(false);
+  const [fixingImages, setFixingImages] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [syncLanguages, setSyncLanguages] = useState(['ta', 'ml', 'te']);
   const [syncMaxPerLang, setSyncMaxPerLang] = useState(10);
@@ -389,6 +390,19 @@ function MoviesTab({ movies, setMovies, isLoading, showSuccess, showToast, loadM
       showSuccess('Movie added.');
     } catch (err) { showToast(err.message, 'error'); }
     setLoading(false);
+  };
+
+  const handleFixMissingImages = async () => {
+    setFixingImages(true);
+    showToast('Searching Google & Web for missing movie posters...', 'info');
+    try {
+      const res = await fixMissingMoviePosters();
+      showSuccess(`Scanned ${res.totalScanned} movies: ${res.fixed} missing posters found & set via Google/Web!`);
+      await loadMovies();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+    setFixingImages(false);
   };
 
   const handleAutoSync = async () => {
