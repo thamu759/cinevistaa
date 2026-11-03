@@ -10,9 +10,9 @@ export const KNOWN_MOVIE_LOGOS = {
   bladerunner2049: 'https://image.tmdb.org/t/p/w500/gUoDt6GggEFXVzdyDTyF8ggrEm8.png',
   'blade-runner-2049': 'https://image.tmdb.org/t/p/w500/gUoDt6GggEFXVzdyDTyF8ggrEm8.png',
   leo: 'https://image.tmdb.org/t/p/w500/lQijgtGf04ftXEvyuj647BB5TTE.png',
-  jailer: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
-  jailer2: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
-  'jailer-2': 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  jailer: 'https://image.tmdb.org/t/p/w500/b2gG5OorQLWGhz8TTA6TYsfImzL.png',
+  jailer2: 'https://image.tmdb.org/t/p/w500/b2gG5OorQLWGhz8TTA6TYsfImzL.png',
+  'jailer-2': 'https://image.tmdb.org/t/p/w500/b2gG5OorQLWGhz8TTA6TYsfImzL.png',
   goat: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
   thegreatestofalltime: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
   'the-greatest-of-all-time': 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
@@ -20,7 +20,7 @@ export const KNOWN_MOVIE_LOGOS = {
   manjummelboys: 'https://image.tmdb.org/t/p/w500/vAndItVk0PTGIs9xd4nPOpYL8ey.png',
   'manjummel-boys': 'https://image.tmdb.org/t/p/w500/vAndItVk0PTGIs9xd4nPOpYL8ey.png',
   kanguva: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
-  vettaiyan: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  vettaiyan: 'https://image.tmdb.org/t/p/w500/zr3qHlfh6NwhaV1ZabPPlc2OShu.png',
   master: 'https://image.tmdb.org/t/p/w500/lQijgtGf04ftXEvyuj647BB5TTE.png'
 };
 
