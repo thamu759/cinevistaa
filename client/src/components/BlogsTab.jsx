@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Trash2, ExternalLink, Search, BookOpen, Eye, Calendar, Clock, RefreshCw } from 'lucide-react';
-import { fetchBlogPosts, generateAutoBlogPostApi, deleteBlogPostApi } from '../api';
+import { Sparkles, Trash2, ExternalLink, Search, BookOpen, Eye, Calendar, Clock, RefreshCw, AlertCircle, CheckCircle2, Film } from 'lucide-react';
+import { fetchBlogPosts, generateAutoBlogPostApi, deleteBlogPostApi, fetchMovies } from '../api';
 import { useToast } from '../context/ToastContext.jsx';
 import ConfirmModal from './ConfirmModal';
 
 export default function BlogsTab({ showSuccess }) {
   const [blogs, setBlogs] = useState([]);
+  const [moviesList, setMoviesList] = useState([]);
+  const [selectedMovieId, setSelectedMovieId] = useState('');
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [genStatusText, setGenStatusText] = useState('');
+  const [genError, setGenError] = useState('');
+  const [latestGenerated, setLatestGenerated] = useState(null);
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState(null);
   const { showToast } = useToast();
@@ -25,24 +30,47 @@ export default function BlogsTab({ showSuccess }) {
     }
   };
 
+  const loadMovieList = async () => {
+    try {
+      const data = await fetchMovies();
+      const list = Array.isArray(data) ? data : (data?.movies || []);
+      setMoviesList(list);
+    } catch (e) {
+      console.warn('Could not load movie list for blog generator:', e.message);
+    }
+  };
+
   useEffect(() => {
     loadBlogs();
+    loadMovieList();
   }, []);
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setGenError('');
+    setLatestGenerated(null);
+    setGenStatusText('Analyzing movie narrative with OpenAI and formulating SEO analysis...');
+
     try {
-      const result = await generateAutoBlogPostApi();
+      const movieIdParam = selectedMovieId ? selectedMovieId : null;
+      const result = await generateAutoBlogPostApi(movieIdParam);
+
       if (result.success && result.post) {
-        showSuccess(`Generated SEO article: "${result.post.title}"`);
+        setLatestGenerated(result.post);
+        if (showSuccess) showSuccess(`Generated SEO article: "${result.post.title}"`);
         showToast('AI Article successfully generated and published!');
         await loadBlogs();
+      } else {
+        throw new Error('Server returned unexpected response.');
       }
     } catch (err) {
       console.error('Error auto-generating article:', err);
-      showToast(err.message || 'Failed to generate AI article');
+      const msg = err.message || 'Failed to generate AI article. Please verify server connection.';
+      setGenError(msg);
+      showToast(msg);
     } finally {
       setGenerating(false);
+      setGenStatusText('');
     }
   };
 
@@ -50,7 +78,8 @@ export default function BlogsTab({ showSuccess }) {
     if (!deleteId) return;
     try {
       await deleteBlogPostApi(deleteId);
-      showSuccess('Article deleted successfully');
+      if (showSuccess) showSuccess('Article deleted successfully');
+      showToast('Article deleted');
       setBlogs(prev => prev.filter(b => b.id !== deleteId));
     } catch (err) {
       showToast(err.message || 'Failed to delete article');
@@ -69,44 +98,107 @@ export default function BlogsTab({ showSuccess }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* SEO Info Banner */}
+      {/* Generator Control Card */}
       <div style={{
-        padding: '1.25rem 1.5rem',
-        borderRadius: '12px',
-        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(20, 24, 33, 0.6))',
+        padding: '1.5rem',
+        borderRadius: '16px',
+        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(20, 24, 33, 0.75))',
         border: '1px solid rgba(212, 175, 55, 0.25)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem'
+        flexDirection: 'column',
+        gap: '1.25rem'
       }}>
-        <div style={{ maxWidth: '680px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-accent-gold)', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-            <Sparkles size={16} /> Automated SEO & AI Cinema Journal
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: 'var(--color-accent-gold)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.35rem' }}>
+              <Sparkles size={18} /> Automated SEO & AI Cinema Journal
+            </div>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--color-text-muted)', lineHeight: 1.5, maxWidth: '680px' }}>
+              Generates an in-depth 600-800 word critical essay, box office impact review, and streaming guide. All published articles automatically sync to <code>/sitemap.xml</code> and inject schema.org <code>BlogPosting</code> JSON-LD for rapid Google search indexing.
+            </p>
           </div>
-          <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-            Automated articles are generated with OpenAI, analyzing top movies in your database. Every published article automatically syncs to <code>/sitemap.xml</code> and injects <code>BlogPosting</code> JSON-LD schema for Google indexing.
-          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {/* Movie selection */}
+            <div style={{ position: 'relative' }}>
+              <select
+                value={selectedMovieId}
+                onChange={e => setSelectedMovieId(e.target.value)}
+                disabled={generating}
+                style={{
+                  padding: '0.65rem 1rem',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'var(--color-text-main)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  maxWidth: '240px'
+                }}
+              >
+                <option value="">Any Unreviewed Movie (Auto AI)</option>
+                {moviesList.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.title} ({m.releaseYear || 'Movie'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1.35rem',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {generating ? <RefreshCw size={16} className="spin" /> : <Sparkles size={16} />}
+              {generating ? 'Generating AI Article...' : 'Generate AI Article'}
+            </button>
+          </div>
         </div>
 
-        <button
-          onClick={handleGenerate}
-          disabled={generating}
-          className="btn-primary"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.65rem 1.25rem',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            whiteSpace: 'nowrap'
-          }}
-        >
-          {generating ? <RefreshCw size={16} className="spin" /> : <Sparkles size={16} />}
-          {generating ? 'Generating AI Article...' : 'Generate AI Article'}
-        </button>
+        {/* Live Progress Info */}
+        {generating && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.25)', color: 'var(--color-accent-gold)', fontSize: '0.85rem' }}>
+            <RefreshCw size={15} className="spin" />
+            <span>{genStatusText || 'Generating article... This may take 10-20 seconds.'}</span>
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {genError && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', fontSize: '0.85rem' }}>
+            <AlertCircle size={16} />
+            <span>{genError}</span>
+          </div>
+        )}
+
+        {/* Success Alert with Link */}
+        {latestGenerated && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', padding: '0.85rem 1rem', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)', color: '#22c55e', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <CheckCircle2 size={16} />
+              <span>Published: <strong>{latestGenerated.title}</strong></span>
+            </div>
+            <a
+              href={`/article/${latestGenerated.id}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: '#22c55e', textDecoration: 'underline', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+            >
+              Open Article <ExternalLink size={13} />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Control Bar */}

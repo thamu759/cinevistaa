@@ -954,10 +954,14 @@ export const fetchBlogPostBySlug = async (slug) => {
   return await response.json();
 };
 
-export const generateAutoBlogPostApi = async () => {
+export const generateAutoBlogPostApi = async (movieId = null) => {
   const response = await fetch(`${API_BASE_URL}/admin/blogs/generate`, {
     method: 'POST',
-    headers: authHeaders(),
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify({ movieId }),
   });
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));

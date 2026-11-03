@@ -1596,19 +1596,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               </Link>
             ))}
 
-            
-            {/* Dynamic CMS Pages in Navbar */}
-            {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
-              <Link
-                key={p.slug}
-                className={`nav-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
-                to={`/page/${p.slug}`}
-                onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
-              >
-                {p.title}
-              </Link>
-            ))}
-
             {currentUser && currentUser.role === 'admin' && (
               <Link 
                 className={`nav-link ${activeView === 'admin' ? 'active' : ''}`}

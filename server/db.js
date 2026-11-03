@@ -5070,7 +5070,24 @@ export const createBlogPost = async (postData) => {
   const cleanTitle = (postData.title || '').trim();
   if (!cleanTitle) throw new Error('Title is required');
 
-  const slug = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  let baseSlug = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (!baseSlug) baseSlug = `article-${Date.now().toString(36)}`;
+  let slug = baseSlug;
+
+  if (useMongoDB && BlogPostModel) {
+    let counter = 1;
+    while (await BlogPostModel.findOne({ id: slug })) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+  } else {
+    const data = readJsonDb();
+    if (!data.blogPosts) data.blogPosts = [...defaultBlogPosts];
+    let counter = 1;
+    while (data.blogPosts.some(p => p.id === slug)) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+  }
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -5119,13 +5136,27 @@ export const deleteBlogPost = async (id) => {
   }
 };
 
-export const generateAutoBlogPost = async () => {
+export const generateAutoBlogPost = async (targetMovieId = null) => {
   const movies = await getMovies();
   if (!movies || movies.length === 0) {
     throw new Error('No movies available to generate blog post from.');
   }
 
-  const candidate = movies[Math.floor(Math.random() * Math.min(30, movies.length))];
+  let candidate = null;
+  if (targetMovieId) {
+    candidate = movies.find(m => m.id === targetMovieId);
+  }
+
+  if (!candidate) {
+    const existing = await getBlogPosts();
+    const existingTitles = new Set((existing || []).map(p => (p.title || '').toLowerCase()));
+    const unreviewed = movies.filter(m => {
+      const t = m.title.toLowerCase();
+      return !Array.from(existingTitles).some(et => et.includes(t));
+    });
+    const pool = unreviewed.length > 0 ? unreviewed : movies;
+    candidate = pool[Math.floor(Math.random() * Math.min(25, pool.length))];
+  }
   console.log(`[Auto Blog Generator] Generating SEO article for "${candidate.title}"...`);
 
   let blogData = null;

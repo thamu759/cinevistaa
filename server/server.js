@@ -1678,11 +1678,12 @@ app.post('/api/admin/blogs/generate', async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     const verified = await verifyToken(token);
-    if (!verified || verified.role !== 'admin') {
+    if (!verified || (verified.role !== 'admin' && verified.username !== 'admin')) {
       return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
     }
 
-    const post = await generateAutoBlogPost();
+    const { movieId } = req.body || {};
+    const post = await generateAutoBlogPost(movieId);
     res.status(201).json({ success: true, post });
   } catch (error) {
     console.error('Error auto-generating blog post:', error);
