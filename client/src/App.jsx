@@ -1056,6 +1056,9 @@ const preRollTimerRef = useRef(null);
     if (path === '/terms') return { view: 'terms' };
     if (path === '/contact') return { view: 'contact' };
     if (path === '/about') return { view: 'about' };
+    if (path === '/newsletter') return { view: 'newsletter' };
+    if (path === '/critic-guidelines' || path === '/guidelines') return { view: 'cms-page', pageSlug: 'critic-guidelines' };
+    if (path === '/faq') return { view: 'cms-page', pageSlug: 'faq' };
     if (path === '/articles' || path === '/blog') return { view: 'articles' };
     if (path === '/quiz') return { view: 'quiz' };
     if (path === '/wheel') return { view: 'wheel' };
@@ -1090,6 +1093,7 @@ const preRollTimerRef = useRef(null);
     if (view === 'terms') return '/terms';
     if (view === 'contact') return '/contact';
     if (view === 'about') return '/about';
+    if (view === 'newsletter') return '/newsletter';
     if (view === 'articles') return '/articles';
     if (view === 'quiz') return '/quiz';
     if (view === 'wheel') return '/wheel';
@@ -3217,7 +3221,8 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           {activeView === 'terms' && <DynamicCmsPage slug="terms" onNavigate={navigateTo} />}
           {activeView === 'contact' && <ContactPage onNavigate={navigateTo} />}
           {activeView === 'about' && <DynamicCmsPage slug="about" onNavigate={navigateTo} />}
-          {activeView === 'cms-page' && <DynamicCmsPage slug={selectedPageSlug} onNavigate={navigateTo} />}
+          {activeView === 'newsletter' && <DynamicCmsPage slug="newsletter" onNavigate={navigateTo} />}
+          {activeView === 'cms-page' && <DynamicCmsPage slug={selectedPageSlug || 'about'} onNavigate={navigateTo} />}
           {activeView === 'articles' && <ArticlesPage onNavigate={navigateTo} />}
           {activeView === 'article-detail' && selectedArticleId && <ArticleDetail articleId={selectedArticleId} onNavigate={navigateTo} />}
         </Suspense>

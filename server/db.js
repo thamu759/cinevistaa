@@ -4758,6 +4758,15 @@ export const getCmsPages = async ({ publishedOnly = false } = {}) => {
     const query = publishedOnly ? { isPublished: true } : {};
     const docs = await CmsPageModel.find(query).sort({ updatedAt: -1 });
     pages = docs.map(d => (typeof d.toObject === 'function' ? d.toObject() : d));
+    if (pages.length === 0) {
+      try {
+        await CmsPageModel.insertMany(defaultCmsPages.map(p => ({ ...p })));
+        const reloaded = await CmsPageModel.find(query).sort({ updatedAt: -1 });
+        pages = reloaded.map(d => (typeof d.toObject === 'function' ? d.toObject() : d));
+      } catch (e) {
+        pages = [...defaultCmsPages];
+      }
+    }
   } else {
     const data = readJsonDb();
     pages = data.cmsPages || defaultCmsPages;
@@ -4776,7 +4785,9 @@ export const getCmsPageBySlug = async (slug) => {
     if (doc) return typeof doc.toObject === 'function' ? doc.toObject() : doc;
   }
   const pages = await getCmsPages();
-  return pages.find(p => p.slug === cleanSlug || p.id === cleanSlug) || null;
+  const found = pages.find(p => p.slug === cleanSlug || p.id === cleanSlug);
+  if (found) return found;
+  return defaultCmsPages.find(p => p.slug === cleanSlug || p.id === cleanSlug) || null;
 };
 
 export const createCmsPage = async (pageData) => {
