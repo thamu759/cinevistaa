@@ -500,11 +500,21 @@ export const fetchWatchProviders = async (tmdbId) => {
   }
 };
 
-export const fetchTmdbLogo = async (tmdbId) => {
-  const response = await fetch(`${API_BASE_URL}/tmdb/logo/${tmdbId}`);
-  if (!response.ok) return null;
-  const data = await response.json();
-  return data.logoUrl || null;
+export const fetchTmdbLogo = async (tmdbId, title = '', movieId = '') => {
+  try {
+    const params = new URLSearchParams();
+    if (tmdbId) params.append('tmdbId', tmdbId);
+    if (title) params.append('title', title);
+    if (movieId) params.append('movieId', movieId);
+    const query = params.toString() ? '?' + params.toString() : '';
+    const idParam = tmdbId || movieId || encodeURIComponent(title || 'movie');
+    const response = await fetch(`${API_BASE_URL}/tmdb/logo/${idParam}${query}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.logoUrl || null;
+  } catch (e) {
+    return null;
+  }
 };
 
 export const fetchTmdbMovieDetails = async (tmdbId) => {

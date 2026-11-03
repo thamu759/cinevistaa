@@ -1102,7 +1102,9 @@ app.get('/api/tmdb/details/:tmdbId', async (req, res) => {
 // TMDB logo endpoint (fetches movie title logo)
 app.get('/api/tmdb/logo/:tmdbId', async (req, res) => {
   try {
-    const logoUrl = await fetchTmdbMovieLogo(req.params.tmdbId);
+    const { tmdbId } = req.params;
+    const { title, movieId } = req.query;
+    const logoUrl = await fetchTmdbMovieLogo(tmdbId, title || movieId);
     if (!logoUrl) return res.json({ logoUrl: null });
     res.json({ logoUrl });
   } catch (error) {

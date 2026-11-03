@@ -45,11 +45,45 @@ const upgradeTamilMdbImageUrl = (url, targetSize) => {
   return url.replace(/\/175x245\//, `/${targetSize}/`);
 };
 
-const applyLocalHdImageFallback = (movie) => ({
-  ...movie,
-  posterUrl: upgradeTamilMdbImageUrl(movie.posterUrl, '600x840'),
-  backdropUrl: upgradeTamilMdbImageUrl(movie.backdropUrl, '1024xa')
-});
+export const CURATED_MOVIE_LOGOS = {
+  vikram: 'https://image.tmdb.org/t/p/w500/803y6O9H2q2Jj5SkbRTysZ2zlmx.png',
+  vikram2022: 'https://image.tmdb.org/t/p/w500/803y6O9H2q2Jj5SkbRTysZ2zlmx.png',
+  kaithi: 'https://image.tmdb.org/t/p/w500/fijhfw58jGeKtjfs1Iqk0euWpco.png',
+  jaibhim: 'https://image.tmdb.org/t/p/w500/tBk7iP4CTEbB2XdLrwfA5ReM2Wu.png',
+  'jai-bhim': 'https://image.tmdb.org/t/p/w500/tBk7iP4CTEbB2XdLrwfA5ReM2Wu.png',
+  bladerunner2049: 'https://image.tmdb.org/t/p/w500/gUoDt6GggEFXVzdyDTyF8ggrEm8.png',
+  'blade-runner-2049': 'https://image.tmdb.org/t/p/w500/gUoDt6GggEFXVzdyDTyF8ggrEm8.png',
+  leo: 'https://image.tmdb.org/t/p/w500/lQijgtGf04ftXEvyuj647BB5TTE.png',
+  jailer: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  jailer2: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  'jailer-2': 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  goat: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
+  thegreatestofalltime: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
+  'the-greatest-of-all-time': 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
+  aavesham: 'https://image.tmdb.org/t/p/w500/vAndItVk0PTGIs9xd4nPOpYL8ey.png',
+  manjummelboys: 'https://image.tmdb.org/t/p/w500/vAndItVk0PTGIs9xd4nPOpYL8ey.png',
+  'manjummel-boys': 'https://image.tmdb.org/t/p/w500/vAndItVk0PTGIs9xd4nPOpYL8ey.png',
+  kanguva: 'https://image.tmdb.org/t/p/w500/xvXJfGKjHHe1m4Usye198DCw7iJ.png',
+  vettaiyan: 'https://image.tmdb.org/t/p/w500/okWLFUeEfYak5iSXeqHL8472Uju.png',
+  master: 'https://image.tmdb.org/t/p/w500/lQijgtGf04ftXEvyuj647BB5TTE.png'
+};
+
+const applyLocalHdImageFallback = (movie) => {
+  let titleLogoUrl = movie.titleLogoUrl;
+  if (!titleLogoUrl) {
+    const cleanKey = (movie.title || movie.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (CURATED_MOVIE_LOGOS[cleanKey]) {
+      titleLogoUrl = CURATED_MOVIE_LOGOS[cleanKey];
+    }
+  }
+
+  return {
+    ...movie,
+    titleLogoUrl,
+    posterUrl: upgradeTamilMdbImageUrl(movie.posterUrl, '600x840'),
+    backdropUrl: upgradeTamilMdbImageUrl(movie.backdropUrl, '1024xa')
+  };
+};
 
 const needsTmdbImageRefresh = (movie) => {
   if (!movie) return false;
@@ -232,20 +266,57 @@ export const fetchTmdbWatchProviders = async (tmdbId) => {
   }
 };
 
-export const fetchTmdbMovieLogo = async (tmdbId) => {
-  if (!hasTmdbCredentials() || !tmdbId) return null;
-
+export const fetchTmdbMovieLogo = async (tmdbId, title = '') => {
   try {
-    const url = buildTmdbUrl(`movie/${tmdbId}/images`, { include_image_language: 'en,null' });
+    const cleanKey = (title || (isNaN(Number(tmdbId)) ? String(tmdbId) : '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (CURATED_MOVIE_LOGOS[cleanKey]) {
+      return CURATED_MOVIE_LOGOS[cleanKey];
+    }
+
+    if (!hasTmdbCredentials()) return null;
+
+    let resolvedId = (tmdbId && /^\d+$/.test(String(tmdbId).trim())) ? String(tmdbId).trim() : null;
+
+    if (!resolvedId && (title || isNaN(Number(tmdbId)))) {
+      const q = title || String(tmdbId);
+      const searchUrl = buildTmdbUrl('search/movie', { query: q });
+      const searchRes = await fetch(searchUrl, { headers: getTmdbHeaders() });
+      if (searchRes.ok) {
+        const searchJson = await searchRes.json();
+        if (searchJson.results && searchJson.results.length > 0) {
+          resolvedId = String(searchJson.results[0].id);
+        }
+      }
+    }
+
+    if (!resolvedId) return null;
+
+    const url = buildTmdbUrl(`movie/${resolvedId}/images`, { include_image_language: 'en,ta,ml,te,hi,kn,null' });
     const response = await fetch(url, { headers: getTmdbHeaders() });
-    if (!response.ok) return null;
-    const json = await response.json();
-    const logos = json.logos || [];
-    const preferred = logos.find(l => l.iso_639_1 === 'en') || logos[0];
-    if (!preferred) return null;
+    let logos = [];
+    if (response.ok) {
+      const json = await response.json();
+      logos = json.logos || [];
+    }
+
+    if (logos.length === 0) {
+      const fallbackUrl = buildTmdbUrl(`movie/${resolvedId}/images`);
+      const fallbackRes = await fetch(fallbackUrl, { headers: getTmdbHeaders() });
+      if (fallbackRes.ok) {
+        const fallbackJson = await fallbackRes.json();
+        logos = fallbackJson.logos || [];
+      }
+    }
+
+    if (logos.length === 0) return null;
+
+    const preferred = logos.find(l => l.iso_639_1 === 'en') ||
+                      logos.find(l => ['ta', 'ml', 'te', 'hi', 'kn'].includes(l.iso_639_1)) ||
+                      logos[0];
+    if (!preferred || !preferred.file_path) return null;
     return `https://image.tmdb.org/t/p/w500${preferred.file_path}`;
   } catch (error) {
-    console.warn(`TMDB logo lookup failed for ID "${tmdbId}":`, error.message);
+    console.warn(`TMDB logo lookup failed for "${tmdbId}":`, error.message);
     return null;
   }
 };
