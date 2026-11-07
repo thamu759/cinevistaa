@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, Link, ScrollRestoration } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { 
   Play, Pause, Plus, Search, Star, User, Film,
   ThumbsUp, MessageSquare, X, ChevronLeft, ChevronRight, ChevronDown, Compass, Bookmark, Calendar, Award, Gamepad2, Layers,
@@ -1704,257 +1705,260 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           </div>
         </nav>
 
-        {/* MODERN MOBILE NAVIGATION DRAWER */}
-        <div className={`mobile-drawer-portal ${isMobileMenuOpen ? 'open' : ''}`}>
-          <div 
-            className="mobile-drawer-backdrop" 
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-label="Close menu backdrop"
-          />
-          <aside className="mobile-drawer-panel" aria-label="Mobile Navigation Sidebar">
-            {/* Drawer Header */}
-            <div className="mobile-drawer-header">
-              <div className="mobile-drawer-brand" onClick={() => { navigateTo('home'); setIsMobileMenuOpen(false); }}>
-                Thirai<span>Pedia</span>
-              </div>
-              <button 
-                type="button" 
-                className="mobile-drawer-close-btn" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Close navigation menu"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* User Profile / Guest Sign-In Card */}
-            {currentUser ? (
-              <div className="mobile-drawer-user-card">
-                <div className="mobile-drawer-user-info" onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}>
-                  <img src={currentUser.avatarUrl || userProfile.avatarUrl} alt="Avatar" className="mobile-drawer-avatar" />
-                  <div className="mobile-drawer-user-details">
-                    <span className="mobile-drawer-username">{currentUser.username}</span>
-                    <span className="mobile-drawer-user-role">{currentUser.role === 'admin' ? 'Administrator' : 'Cinema Critic'}</span>
-                  </div>
-                </div>
-                <div className="mobile-drawer-user-actions">
-                  <button 
-                    type="button" 
-                    className="mobile-drawer-action-btn"
-                    onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}
-                  >
-                    <User size={14} /> Profile
-                  </button>
-                  <button 
-                    type="button" 
-                    className="mobile-drawer-action-btn logout"
-                    onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
-                  >
-                    <LogOut size={14} /> Logout
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="mobile-drawer-guest-card">
-                <div className="mobile-drawer-guest-text">
-                  <strong>Welcome to ThiraiPedia</strong>
-                  <p>Save movies to your watchlist, rate cinema & join the discussions.</p>
+        {/* MODERN MOBILE NAVIGATION DRAWER (MOUNTED TO BODY VIA PORTAL) */}
+        {isMobileMenuOpen && typeof document !== 'undefined' && createPortal(
+          <div className="mobile-drawer-portal open">
+            <div 
+              className="mobile-drawer-backdrop" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Close menu backdrop"
+            />
+            <aside className="mobile-drawer-panel" aria-label="Mobile Navigation Sidebar">
+              {/* Drawer Header (Fixed at top) */}
+              <div className="mobile-drawer-header">
+                <div className="mobile-drawer-brand" onClick={() => { navigateTo('home'); setIsMobileMenuOpen(false); }}>
+                  Thirai<span>Pedia</span>
                 </div>
                 <button 
-                  type="button"
-                  className="mobile-drawer-login-btn"
-                  onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }}
+                  type="button" 
+                  className="mobile-drawer-close-btn" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  aria-label="Close navigation menu"
                 >
-                  <LogIn size={16} /> Sign In / Register
+                  <X size={20} />
                 </button>
               </div>
-            )}
 
-            {/* Quick Search Bar */}
-            <div className="mobile-drawer-search-wrapper">
-              <button 
-                type="button" 
-                className="mobile-drawer-search-bar" 
-                onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }}
-              >
-                <Search size={16} />
-                <span>Search movies, stars, directors...</span>
-              </button>
-            </div>
+              {/* Single Unified Scrollable Body */}
+              <div className="mobile-drawer-scroll-body">
+                {/* User Profile / Guest Sign-In Card */}
+                {currentUser ? (
+                  <div className="mobile-drawer-user-card">
+                    <div className="mobile-drawer-user-info" onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}>
+                      <img src={currentUser.avatarUrl || userProfile.avatarUrl} alt="Avatar" className="mobile-drawer-avatar" />
+                      <div className="mobile-drawer-user-details">
+                        <span className="mobile-drawer-username">{currentUser.username}</span>
+                        <span className="mobile-drawer-user-role">{currentUser.role === 'admin' ? 'Administrator' : 'Cinema Critic'}</span>
+                      </div>
+                    </div>
+                    <div className="mobile-drawer-user-actions">
+                      <button 
+                        type="button" 
+                        className="mobile-drawer-action-btn"
+                        onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}
+                      >
+                        <User size={14} /> Profile
+                      </button>
+                      <button 
+                        type="button" 
+                        className="mobile-drawer-action-btn logout"
+                        onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                      >
+                        <LogOut size={14} /> Logout
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mobile-drawer-guest-card">
+                    <div className="mobile-drawer-guest-text">
+                      <strong>Welcome to ThiraiPedia</strong>
+                      <p>Save movies to your watchlist, rate cinema & join the discussions.</p>
+                    </div>
+                    <button 
+                      type="button"
+                      className="mobile-drawer-login-btn"
+                      onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }}
+                    >
+                      <LogIn size={16} /> Sign In / Register
+                    </button>
+                  </div>
+                )}
 
-            {/* Drawer Scrollable Navigation Content */}
-            <div className="mobile-drawer-nav-content">
-              {/* Group 1: Core Channels */}
-              <div className="mobile-drawer-group">
-                <div className="mobile-drawer-group-title">MAIN CHANNELS</div>
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'home' ? 'active' : ''}`}
-                  to="/"
-                  onClick={() => { setSelectedGenre(''); setSortOption('popular'); setIsMobileMenuOpen(false); }}
-                >
-                  <Film size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Movies</span>
-                </Link>
-
-                <button
-                  type="button"
-                  className={`mobile-drawer-link cine-pulse-mobile ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
-                  onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
-                >
-                  <Zap size={18} className="mobile-drawer-link-icon pulse-gold" />
-                  <span className="mobile-drawer-link-text">Cine Pulse</span>
-                  <span className="mobile-drawer-pulse-tag">LIVE</span>
-                </button>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'community' ? 'active' : ''}`}
-                  to="/community"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Users size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Community</span>
-                </Link>
-
-                <Link
-                  className={`mobile-drawer-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
-                  to="/articles"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Newspaper size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Articles & News</span>
-                </Link>
-              </div>
-
-              {/* Group 2: Cinema & Releases */}
-              <div className="mobile-drawer-group">
-                <div className="mobile-drawer-group-title">CINEMA & RELEASES</div>
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'coming-soon' ? 'active' : ''}`}
-                  to="/coming-soon"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Calendar size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Coming Soon</span>
-                </Link>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'ott-calendar' ? 'active' : ''}`}
-                  to="/ott-calendar"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Tv size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">OTT Calendar</span>
-                </Link>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'lists' ? 'active' : ''}`}
-                  to="/lists"
-                  onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}
-                >
-                  <Layers size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Curated Lists</span>
-                </Link>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'watchlist' ? 'active' : ''}`}
-                  to="/watchlist"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Bookmark size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">My Watchlist</span>
-                  {watchlist && watchlist.length > 0 && (
-                    <span className="mobile-drawer-count-badge">{watchlist.length}</span>
-                  )}
-                </Link>
-              </div>
-
-              {/* Group 3: Interactive Cine Hub */}
-              <div className="mobile-drawer-group">
-                <div className="mobile-drawer-group-title">CINE HUB & GAMES</div>
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'quiz' ? 'active' : ''}`}
-                  to="/quiz"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Gamepad2 size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Movie Quiz</span>
-                </Link>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'wheel' ? 'active' : ''}`}
-                  to="/wheel"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Sparkles size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Card Flix</span>
-                </Link>
-
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'blind-frame' ? 'active' : ''}`}
-                  to="/blind-frame"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Eye size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Blind Frame</span>
-                </Link>
-              </div>
-
-              {/* Group 4: Critics & Editorial */}
-              <div className="mobile-drawer-group">
-                <div className="mobile-drawer-group-title">CRITICS & EDITORIAL</div>
-                <Link 
-                  className={`mobile-drawer-link ${activeView === 'leaderboard' ? 'active' : ''}`}
-                  to="/leaderboard"
-                  onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}
-                >
-                  <Award size={18} className="mobile-drawer-link-icon" />
-                  <span className="mobile-drawer-link-text">Top Critics</span>
-                </Link>
-
-                {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
-                  <Link
-                    key={p.slug}
-                    className={`mobile-drawer-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
-                    to={`/page/${p.slug}`}
-                    onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+                {/* Quick Search Bar */}
+                <div className="mobile-drawer-search-wrapper">
+                  <button 
+                    type="button" 
+                    className="mobile-drawer-search-bar" 
+                    onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }}
                   >
-                    <Compass size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">{p.title}</span>
-                  </Link>
-                ))}
-              </div>
+                    <Search size={16} />
+                    <span>Search movies, stars, directors...</span>
+                  </button>
+                </div>
 
-              {/* Group 5: Admin Panel (if admin) */}
-              {currentUser && (currentUser.role === 'admin' || currentUser.username === 'admin') && (
-                <div className="mobile-drawer-group admin-group">
-                  <div className="mobile-drawer-group-title">ADMINISTRATION</div>
+                {/* Group 1: Core Channels */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">MAIN CHANNELS</div>
                   <Link 
-                    className={`mobile-drawer-link admin-link ${activeView === 'admin' ? 'active' : ''}`}
-                    to="/admin"
+                    className={`mobile-drawer-link ${activeView === 'home' ? 'active' : ''}`}
+                    to="/"
+                    onClick={() => { setSelectedGenre(''); setSortOption('popular'); setIsMobileMenuOpen(false); }}
+                  >
+                    <Film size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Movies</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    className={`mobile-drawer-link cine-pulse-mobile ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
+                    onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
+                  >
+                    <Zap size={18} className="mobile-drawer-link-icon pulse-gold" />
+                    <span className="mobile-drawer-link-text">Cine Pulse</span>
+                    <span className="mobile-drawer-pulse-tag">LIVE</span>
+                  </button>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'community' ? 'active' : ''}`}
+                    to="/community"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <ShieldCheck size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Admin Control</span>
+                    <Users size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Community</span>
+                  </Link>
+
+                  <Link
+                    className={`mobile-drawer-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
+                    to="/articles"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Newspaper size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Articles & News</span>
                   </Link>
                 </div>
-              )}
-            </div>
 
-            {/* Drawer Footer */}
-            <div className="mobile-drawer-footer">
-              <div className="mobile-drawer-footer-links">
-                <Link to="/page/about" onClick={() => { setSelectedPageSlug('about'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>About</Link>
-                <span>&bull;</span>
-                <Link to="/contact" onClick={() => { navigateTo('contact'); setIsMobileMenuOpen(false); }}>Contact</Link>
-                <span>&bull;</span>
-                <Link to="/page/privacy" onClick={() => { setSelectedPageSlug('privacy'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>Privacy</Link>
-                <span>&bull;</span>
-                <Link to="/page/terms" onClick={() => { setSelectedPageSlug('terms'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>Terms</Link>
+                {/* Group 2: Cinema & Releases */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">CINEMA & RELEASES</div>
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'coming-soon' ? 'active' : ''}`}
+                    to="/coming-soon"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Calendar size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Coming Soon</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'ott-calendar' ? 'active' : ''}`}
+                    to="/ott-calendar"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Tv size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">OTT Calendar</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'lists' ? 'active' : ''}`}
+                    to="/lists"
+                    onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}
+                  >
+                    <Layers size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Curated Lists</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'watchlist' ? 'active' : ''}`}
+                    to="/watchlist"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Bookmark size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">My Watchlist</span>
+                    {watchlist && watchlist.length > 0 && (
+                      <span className="mobile-drawer-count-badge">{watchlist.length}</span>
+                    )}
+                  </Link>
+                </div>
+
+                {/* Group 3: Interactive Cine Hub */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">CINE HUB & GAMES</div>
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'quiz' ? 'active' : ''}`}
+                    to="/quiz"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Gamepad2 size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Movie Quiz</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'wheel' ? 'active' : ''}`}
+                    to="/wheel"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Sparkles size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Card Flix</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'blind-frame' ? 'active' : ''}`}
+                    to="/blind-frame"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Eye size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Blind Frame</span>
+                  </Link>
+                </div>
+
+                {/* Group 4: Critics & Editorial */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">CRITICS & EDITORIAL</div>
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'leaderboard' ? 'active' : ''}`}
+                    to="/leaderboard"
+                    onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}
+                  >
+                    <Award size={18} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Top Critics</span>
+                  </Link>
+
+                  {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
+                    <Link
+                      key={p.slug}
+                      className={`mobile-drawer-link ${activeView === 'cms-page' && selectedPageSlug === p.slug ? 'active' : ''}`}
+                      to={`/page/${p.slug}`}
+                      onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
+                    >
+                      <Compass size={18} className="mobile-drawer-link-icon" />
+                      <span className="mobile-drawer-link-text">{p.title}</span>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Group 5: Admin Panel (if admin) */}
+                {currentUser && (currentUser.role === 'admin' || currentUser.username === 'admin') && (
+                  <div className="mobile-drawer-group admin-group">
+                    <div className="mobile-drawer-group-title">ADMINISTRATION</div>
+                    <Link 
+                      className={`mobile-drawer-link admin-link ${activeView === 'admin' ? 'active' : ''}`}
+                      to="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <ShieldCheck size={18} className="mobile-drawer-link-icon" />
+                      <span className="mobile-drawer-link-text">Admin Control</span>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Drawer Footer */}
+                <div className="mobile-drawer-footer">
+                  <div className="mobile-drawer-footer-links">
+                    <Link to="/page/about" onClick={() => { setSelectedPageSlug('about'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>About</Link>
+                    <span>&bull;</span>
+                    <Link to="/contact" onClick={() => { navigateTo('contact'); setIsMobileMenuOpen(false); }}>Contact</Link>
+                    <span>&bull;</span>
+                    <Link to="/page/privacy" onClick={() => { setSelectedPageSlug('privacy'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>Privacy</Link>
+                    <span>&bull;</span>
+                    <Link to="/page/terms" onClick={() => { setSelectedPageSlug('terms'); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}>Terms</Link>
+                  </div>
+                  <div className="mobile-drawer-tagline">ThiraiPedia &copy; 2026 &bull; Crafted for Cinema Lovers</div>
+                </div>
               </div>
-              <div className="mobile-drawer-tagline">ThiraiPedia &copy; 2026 &bull; Crafted for Cinema Lovers</div>
-            </div>
-          </aside>
-        </div>
+            </aside>
+          </div>,
+          document.body
+        )}
 
         {/* IMDb-Style Expandable Search Overlay */}
         <div className={`search-overlay ${isSearchOpen ? 'search-overlay--open' : ''}`} ref={searchOverlayRef}>

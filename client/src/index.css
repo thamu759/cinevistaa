@@ -159,6 +159,9 @@ a {
 .hamburger-btn:hover {
   color: var(--color-text-main);
 }
+.mobile-drawer-portal {
+  display: none !important;
+}
 .search-trigger {
   color: var(--color-text-muted);
   cursor: pointer;
@@ -4303,30 +4306,18 @@ a {
     display: block !important;
     position: fixed;
     inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    visibility: hidden;
-    transition: visibility 0.32s ease;
-  }
-
-  .mobile-drawer-portal.open {
+    z-index: 99999;
     pointer-events: auto;
-    visibility: visible;
   }
 
   .mobile-drawer-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(4, 5, 8, 0.72);
+    background: rgba(4, 5, 8, 0.76);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    opacity: 0;
-    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: drawerFadeIn 0.25s ease-out forwards;
     cursor: pointer;
-  }
-
-  .mobile-drawer-portal.open .mobile-drawer-backdrop {
-    opacity: 1;
   }
 
   /* Sliding Drawer Panel */
@@ -4341,18 +4332,31 @@ a {
     background: linear-gradient(180deg, rgba(16, 18, 27, 0.98) 0%, rgba(9, 10, 15, 0.99) 100%);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
-    border-right: 1px solid rgba(251, 191, 36, 0.18);
-    box-shadow: 12px 0 45px rgba(0, 0, 0, 0.75);
+    border-right: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 14px 0 45px rgba(0, 0, 0, 0.85);
     display: flex;
     flex-direction: column;
-    transform: translateX(-100%);
-    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 10000;
+    z-index: 100000;
     overflow: hidden;
+    animation: drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .mobile-drawer-portal.open .mobile-drawer-panel {
-    transform: translateX(0);
+  @keyframes drawerSlideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes drawerFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   /* Header */
@@ -4400,9 +4404,35 @@ a {
     color: #ef4444;
   }
 
+  /* Unified Drawer Scroll Body */
+  .mobile-drawer-scroll-body,
+  .mobile-drawer-nav-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 0.85rem 0.95rem 2.5rem;
+  }
+
+  .mobile-drawer-scroll-body::-webkit-scrollbar,
+  .mobile-drawer-nav-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .mobile-drawer-scroll-body::-webkit-scrollbar-thumb,
+  .mobile-drawer-nav-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  }
+
   /* User Card */
   .mobile-drawer-user-card {
-    margin: 0.85rem 1rem 0;
+    margin: 0;
     padding: 0.85rem 0.95rem;
     border-radius: 14px;
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -4492,7 +4522,7 @@ a {
 
   /* Guest Card */
   .mobile-drawer-guest-card {
-    margin: 0.85rem 1rem 0;
+    margin: 0;
     padding: 0.95rem;
     border-radius: 14px;
     background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(20, 22, 33, 0.8) 100%);
@@ -4540,7 +4570,7 @@ a {
 
   /* Search Pill */
   .mobile-drawer-search-wrapper {
-    padding: 0.75rem 1rem 0.25rem;
+    padding: 0;
     flex-shrink: 0;
   }
 
@@ -4567,26 +4597,6 @@ a {
     color: var(--color-text-main, #f8fafc);
   }
 
-  /* Nav Scrollable Content */
-  .mobile-drawer-nav-content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding: 0.6rem 0.85rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-  }
-
-  .mobile-drawer-nav-content::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .mobile-drawer-nav-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-  }
 
   .mobile-drawer-group {
     display: flex;
@@ -4690,12 +4700,12 @@ a {
 
   /* Drawer Footer */
   .mobile-drawer-footer {
-    padding: 0.85rem 1.15rem 1.15rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(5, 6, 9, 0.45);
+    margin-top: 0.5rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.45rem;
     flex-shrink: 0;
   }
 
