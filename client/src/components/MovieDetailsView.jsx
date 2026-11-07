@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   Play, Plus, Check, List, Star, ThumbsUp, MessageSquare, 
-  Trash2, Edit3, Send, Tv, Film, Bell, BellOff, Share2, Sparkles
+  Trash2, Edit3, Send, Tv, Film, Bell, BellOff, Share2
 } from 'lucide-react';
 import MovieLogo from './MovieLogo';
 import MovieCard from './MovieCard';
@@ -121,56 +121,132 @@ export default function MovieDetailsView({
         <div className="movie-details-backdrop-overlay" />
       </div>
 
-      <div className="main-content" style={{ position: 'relative' }}>
+      <div className="main-content movie-details-main-content">
         {/* HEADER HERO SECTION */}
         <div className="details-wrapper">
-          {/* POSTER CARD (OBSIDIAN MATTE / HAIRLINE BORDER) */}
-          <div className="details-poster-box">
-            <img 
-              src={proxyImageUrl(selectedMovie.posterUrl, 'original')} 
-              alt={selectedMovie.title} 
-              className="details-poster-img" 
-            />
-            {selectedMovie.certification && (
-              <span className="details-poster-cert-badge">{selectedMovie.certification}</span>
-            )}
-          </div>
-
-          {/* MAIN INFO COLUMN */}
-          <div className="details-main-info">
-            {/* UNIFIED METADATA CHIPS ROW */}
-            <div className="details-meta-row">
-              {releaseYear && <span className="details-meta-pill">{releaseYear}</span>}
-              {selectedMovie.runtime && (
-                <>
-                  <span className="details-meta-dot">&bull;</span>
-                  <span className="details-meta-item">{selectedMovie.runtime}</span>
-                </>
-              )}
-              {selectedMovie.language && (
-                <>
-                  <span className="details-meta-dot">&bull;</span>
-                  <span className="details-meta-item">{formatLang(selectedMovie.language)}</span>
-                </>
-              )}
+          {/* TOP LEAD ROW: POSTER + METADATA & TITLE */}
+          <div className="details-header-lead">
+            <div className="details-poster-box">
+              <img 
+                src={proxyImageUrl(selectedMovie.posterUrl, 'original')} 
+                alt={selectedMovie.title} 
+                className="details-poster-img" 
+              />
               {selectedMovie.certification && (
-                <>
-                  <span className="details-meta-dot">&bull;</span>
-                  <span className="details-meta-cert">{selectedMovie.certification}</span>
-                </>
+                <span className="details-poster-cert-badge">{selectedMovie.certification}</span>
               )}
+            </div>
+
+            <div className="details-lead-info">
+              {/* UNIFIED METADATA CHIPS ROW */}
+              <div className="details-meta-row">
+                {releaseYear && <span className="details-meta-pill">{releaseYear}</span>}
+                {selectedMovie.runtime && (
+                  <>
+                    <span className="details-meta-dot">&bull;</span>
+                    <span className="details-meta-item">{selectedMovie.runtime}</span>
+                  </>
+                )}
+                {selectedMovie.language && (
+                  <>
+                    <span className="details-meta-dot">&bull;</span>
+                    <span className="details-meta-item">{formatLang(selectedMovie.language)}</span>
+                  </>
+                )}
+                {selectedMovie.certification && (
+                  <>
+                    <span className="details-meta-dot">&bull;</span>
+                    <span className="details-meta-cert">{selectedMovie.certification}</span>
+                  </>
+                )}
+                {genres.length > 0 && (
+                  <div className="details-genres-list desktop-only-genres">
+                    {genres.map(g => (
+                      <span key={g} className="details-genre-chip">{g}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* MOVIE LOGO / EDITORIAL TITLE */}
+              <div className="details-logo-container">
+                <MovieLogo movie={selectedMovie} />
+              </div>
+
+              {/* MOBILE GENRES (COMPACT ROW BELOW TITLE) */}
               {genres.length > 0 && (
-                <div className="details-genres-list">
+                <div className="details-genres-list mobile-only-genres">
                   {genres.map(g => (
                     <span key={g} className="details-genre-chip">{g}</span>
                   ))}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* MOVIE LOGO / EDITORIAL TITLE */}
-            <div className="details-logo-container">
-              <MovieLogo movie={selectedMovie} />
+          {/* INTERACTIVE COLUMN: ACTION BUTTONS & METRICS */}
+          <div className="details-interactive-col">
+            {/* ACTION BUTTONS (ERGONOMIC MOBILE & DESKTOP STANDARD) */}
+            <div className="details-action-buttons">
+              <button className="btn-action-primary" onClick={onWatchTrailer}>
+                <Play size={16} fill="currentColor" /> Watch Trailer
+              </button>
+
+              <div className="details-secondary-actions-bar">
+                <button
+                  className={`btn-action-secondary ${watchlist.includes(selectedMovie.id) ? 'btn-action-secondary--active' : ''}`}
+                  onClick={(e) => onToggleWatchlist(selectedMovie.id, e)}
+                  title={watchlist.includes(selectedMovie.id) ? 'In Watchlist' : 'Add to Watchlist'}
+                >
+                  {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
+                  <span>{watchlist.includes(selectedMovie.id) ? 'In Watchlist' : 'Watchlist'}</span>
+                </button>
+
+                {currentUser && (
+                  <div className="hero-actions-btn-wrapper">
+                    <button 
+                      className="btn-action-secondary" 
+                      onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}
+                      title="Add to Custom List"
+                    >
+                      <List size={16} />
+                      <span>Lists</span>
+                    </button>
+                    {showListMenu && (
+                      <div className="hero-actions-dropdown">
+                        {userLists.length === 0 ? (
+                          <div style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#94a3b8' }}>
+                            No lists yet. Create one from the Lists page.
+                          </div>
+                        ) : (
+                          userLists.map(l => (
+                            <div 
+                              key={l.id} 
+                              onClick={async () => {
+                                try {
+                                  await addMovieToList(l.id, selectedMovie.id);
+                                  setShowListMenu(false);
+                                } catch (e) { showToast(e.message, 'error'); }
+                              }} 
+                              className="actions-dropdown-item"
+                            >
+                              {l.name}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    {showListMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowListMenu(false)} />}
+                  </div>
+                )}
+
+                <ShareButton
+                  title={selectedMovie.title}
+                  text={`Check out ${selectedMovie.title} on thiraipedia`}
+                  movie={selectedMovie}
+                  variant="icon"
+                />
+              </div>
             </div>
 
             {/* PRESTIGE CRITIQUE METRICS (LETTERBOXD / ROTTEN TOMATOES STANDARD) */}
@@ -183,7 +259,7 @@ export default function MovieDetailsView({
                 </div>
                 <div className="metric-card-body">
                   <div className="metric-value-row">
-                    <Star size={16} className="metric-star-icon" fill="currentColor" />
+                    <Star size={15} className="metric-star-icon" fill="currentColor" />
                     <span className="metric-primary-num">
                       {selectedMovie.criticScore ? selectedMovie.criticScore.toFixed(1) : (selectedMovie.rating ? selectedMovie.rating.toFixed(1) : '—')}
                     </span>
@@ -207,7 +283,7 @@ export default function MovieDetailsView({
                 </div>
                 <div className="metric-card-body">
                   <div className="metric-value-row">
-                    <ThumbsUp size={15} className="metric-thumbs-icon" />
+                    <ThumbsUp size={14} className="metric-thumbs-icon" />
                     <span className="metric-primary-num">
                       {selectedMovie.audienceScore ? `${selectedMovie.audienceScore}%` : '88%'}
                     </span>
@@ -215,12 +291,12 @@ export default function MovieDetailsView({
                   <span className="metric-card-subtext">
                     {selectedMovie.reviews && selectedMovie.reviews.length > 0
                       ? `${selectedMovie.reviews.length} community ${selectedMovie.reviews.length === 1 ? 'review' : 'reviews'}`
-                      : 'Based on verified cinephiles'}
+                      : 'Verified cinephiles'}
                   </span>
                 </div>
               </div>
 
-              {/* OTT Streaming Direct Pill (if available) */}
+              {/* OTT Streaming Direct Banner (if available) */}
               {selectedMovie.ott?.platform && (
                 <div className="details-metric-card ott-preview-card">
                   <div className="metric-card-top">
@@ -229,7 +305,7 @@ export default function MovieDetailsView({
                       {isOttUpcoming ? 'Upcoming' : 'Streaming Now'}
                     </span>
                   </div>
-                  <div className="metric-card-body">
+                  <div className="metric-card-body ott-body-layout">
                     <div className="metric-value-row">
                       <Tv size={15} className="metric-tv-icon" />
                       <a
@@ -241,73 +317,22 @@ export default function MovieDetailsView({
                         {selectedMovie.ott.platform}
                       </a>
                     </div>
-                    <span className="metric-card-subtext">
-                      {selectedMovie.ott.releaseDate 
-                        ? (isOttUpcoming 
-                            ? `From ${new Date(selectedMovie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                            : 'Subscription Stream')
-                        : 'Official Distributor'}
-                    </span>
+                    {selectedMovie.ott.releaseDate && isOttUpcoming && (
+                      <span className="ott-mobile-date">
+                        from {new Date(selectedMovie.ott.releaseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    )}
+                    {isOttUpcoming && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onToggleOttAlert(selectedMovie, e); }}
+                        className={`ott-alert-pill ${isOttAlertSet ? 'ott-alert-pill--active' : ''}`}
+                        title={isOttAlertSet ? 'Remove release alert' : 'Notify me on streaming release'}
+                      >
+                        {isOttAlertSet ? <BellOff size={11} /> : <Bell size={11} />}
+                        <span>{isOttAlertSet ? 'Alert Set' : 'Notify'}</span>
+                      </button>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* APPLE TV+ CINEMATIC ACTION BUTTONS */}
-            <div className="details-action-buttons">
-              <button className="btn-action-primary" onClick={onWatchTrailer}>
-                <Play size={16} fill="currentColor" /> Watch Trailer
-              </button>
-
-              <button
-                className={`btn-action-secondary ${watchlist.includes(selectedMovie.id) ? 'btn-action-secondary--active' : ''}`}
-                onClick={(e) => onToggleWatchlist(selectedMovie.id, e)}
-              >
-                {watchlist.includes(selectedMovie.id) ? <Check size={16} /> : <Plus size={16} />}
-                <span>{watchlist.includes(selectedMovie.id) ? 'In Watchlist' : 'Add to Watchlist'}</span>
-              </button>
-
-              <ShareButton
-                title={selectedMovie.title}
-                text={`Check out ${selectedMovie.title} on thiraipedia`}
-                movie={selectedMovie}
-                variant="icon"
-              />
-
-              {currentUser && (
-                <div className="hero-actions-btn-wrapper">
-                  <button 
-                    className="btn-action-secondary" 
-                    onClick={() => { loadUserLists(); setShowListMenu(prev => !prev); }}
-                  >
-                    <List size={16} />
-                    <span>Lists</span>
-                  </button>
-                  {showListMenu && (
-                    <div className="hero-actions-dropdown">
-                      {userLists.length === 0 ? (
-                        <div style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#94a3b8' }}>
-                          No lists yet. Create one from the Lists page.
-                        </div>
-                      ) : (
-                        userLists.map(l => (
-                          <div 
-                            key={l.id} 
-                            onClick={async () => {
-                              try {
-                                await addMovieToList(l.id, selectedMovie.id);
-                                setShowListMenu(false);
-                              } catch (e) { showToast(e.message, 'error'); }
-                            }} 
-                            className="actions-dropdown-item"
-                          >
-                            {l.name}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                  {showListMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowListMenu(false)} />}
                 </div>
               )}
             </div>
@@ -475,7 +500,7 @@ export default function MovieDetailsView({
               </p>
             </div>
             <button 
-              className="btn-action-primary" 
+              className="btn-action-primary write-review-btn" 
               onClick={() => { 
                 if (!currentUser) { 
                   setAuthTab('login'); 
