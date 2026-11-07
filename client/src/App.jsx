@@ -934,12 +934,12 @@ const preRollTimerRef = useRef(null);
   }, [movies, watchlist]);
 
   // Reset index if out of range when list changes
-  const heroTotalSlides = heroMovies.length + 1;
+  const heroTotalSlides = heroMovies.length + (cineUpdates && cineUpdates.length > 0 ? 1 : 0);
   useEffect(() => {
-    if (currentHeroIndex >= heroTotalSlides && heroMovies.length > 0) {
+    if (currentHeroIndex >= heroTotalSlides && heroTotalSlides > 0) {
       setCurrentHeroIndex(0);
     }
-  }, [heroMovies.length, currentHeroIndex, heroTotalSlides]);
+  }, [heroTotalSlides, currentHeroIndex]);
 
   // Hero touch swipe handlers
   const handleHeroTouchStart = (e) => {
@@ -2070,7 +2070,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       <div className="fade-in" key={activeView + (selectedMovieId || selectedArticleId || '')}>
         {activeView === 'home' && (
           <div className="main-content">
-            {/* HERO CAROUSEL */}
+            {/* HERO CAROUSEL (APPLE TV+ / PRIME VIDEO CINEMATIC STANDARD) */}
             {heroMovies.length > 0 && (
               <header className="hero"
                 ref={heroRef}
@@ -2083,55 +2083,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   className="hero-track"
                   style={{ '--track-offset': `${-(currentHeroIndex * 100)}%` }}
                 >
-                {/* CINE PULSE PROMO SLIDE — always first */}
-                <div
-                  key="cine-reels-promo"
-                  className={`hero-slide ${currentHeroIndex === 0 ? 'hero-slide--active' : ''}`}
-                >
-                  <div
-                    className="hero-backdrop"
-                    style={{
-                      backgroundImage: cineUpdates[0]?.imageUrl
-                        ? `url(${proxyImageUrl(cineUpdates[0].imageUrl, 'original')})`
-                        : 'none',
-                      filter: 'brightness(0.4) saturate(1.3)',
-                    }}
-                  />
-                  <div className="hero-backdrop" style={{
-                    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0f0f23 100%)',
-                    opacity: 0.7,
-                  }} />
-                  <div className="reels-promo-glow" />
-                  <div className="hero-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
-                      <span className="cine-reels-live-dot" />
-                      <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--color-accent-gold)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        Cine Pulse
-                      </span>
-                    </div>
-                    <h2 style={{
-                      fontSize: 'clamp(1.5rem, 3.5vw, 2.4rem)', fontWeight: 800,
-                      color: '#fff', margin: '0 0 0.5rem', lineHeight: 1.15,
-                      maxWidth: '600px', fontFamily: 'var(--font-sans)'
-                    }}>
-                      Pulse<br />Movie Updates
-                    </h2>
-                    <p style={{
-                      fontSize: 'clamp(0.85rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
-                      margin: '0 0 0.75rem', lineHeight: 1.6, maxWidth: '450px'
-                    }}>
-                      Swipe through the latest cinema news, rumors, and breaking updates — pulse style!
-                    </p>
-                    <div className="hero-actions">
-                      <button className="btn-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                        <Play size={16} fill="black" /> Watch Pulse
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
+                {/* Blockbuster Hero Films - Promoted Front & Center */}
                 {heroMovies.map((movie, index) => {
-                  const isActive = index + 1 === currentHeroIndex;
+                  const isActive = index === currentHeroIndex;
+                  const displayGenres = movie.genre
+                    ? movie.genre.split('/').map(g => g.trim()).filter(g => g.toLowerCase() !== 'tamil').slice(0, 2).join(' / ') || movie.genre
+                    : '';
+
                   return (
                     <div 
                       key={movie.id} 
@@ -2141,89 +2099,145 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         className="hero-backdrop" 
                         style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
                       />
-                      <div className="hero-rating-badge hero-rating-badge--corner">
-                        <span className="hero-tag-fav">FEATURED</span>
-                        <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                        <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
-                      </div>
                       <div className="hero-content">
-                          <MovieLogo movie={movie} />
-                          <div className="hero-rating-badge hero-rating-badge--in-flow">
-                            <span className="hero-tag-fav">FEATURED</span>
-                            <Star size={12} fill="var(--color-accent-gold)" color="var(--color-accent-gold)" />
-                            <span className="hero-rating-val">{movie.rating.toFixed(1)}</span>
-                          </div>
-                          <p className="hero-description">{movie.description}</p>
-                          <div className="hero-actions">
-                            <button className="btn-primary" onClick={() => handleViewMovie(movie.id)}>
-                              <Play size={16} fill="black" /> Watch Trailer
-                            </button>
-                            <button 
-                              className="btn-secondary" 
-                              onClick={(e) => handleToggleWatchlist(movie.id, e)}
-                            >
-                              {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
-                              {watchlist.includes(movie.id) ? 'My Watchlist' : 'My List'}
-                            </button>
-                          </div>
+                        <MovieLogo movie={movie} />
+                        <div className="hero-meta-row">
+                          <span className="hero-meta-badge">FEATURED</span>
+                          {movie.releaseYear && <span className="hero-meta-item">{movie.releaseYear}</span>}
+                          {movie.runtime && (
+                            <>
+                              <span className="hero-meta-dot">&bull;</span>
+                              <span className="hero-meta-item">{movie.runtime}</span>
+                            </>
+                          )}
+                          {displayGenres && (
+                            <>
+                              <span className="hero-meta-dot">&bull;</span>
+                              <span className="hero-meta-item">{displayGenres}</span>
+                            </>
+                          )}
+                          {movie.rating > 0 && (
+                            <>
+                              <span className="hero-meta-dot">&bull;</span>
+                              <span className="hero-meta-rating">
+                                <Star size={13} fill="currentColor" /> {movie.rating.toFixed(1)}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <p className="hero-description">{movie.description}</p>
+                        <div className="hero-actions">
+                          <button className="btn-hero-primary" onClick={() => handleViewMovie(movie.id)}>
+                            <Play size={16} fill="currentColor" /> Watch Trailer
+                          </button>
+                          <button 
+                            className="btn-hero-secondary" 
+                            onClick={(e) => handleToggleWatchlist(movie.id, e)}
+                            aria-label="Toggle watchlist"
+                          >
+                            {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
+                            {watchlist.includes(movie.id) ? 'In Watchlist' : 'Add to List'}
+                          </button>
+                          <button 
+                            className="btn-hero-ghost" 
+                            onClick={() => handleViewMovie(movie.id)}
+                          >
+                            Details
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+
+                {/* Cine Pulse Dispatch Feature Slide (Final Slide) */}
+                {cineUpdates && cineUpdates.length > 0 && (
+                  <div
+                    key="cine-pulse-dispatch"
+                    className={`hero-slide ${currentHeroIndex === heroMovies.length ? 'hero-slide--active' : ''}`}
+                  >
+                    <div
+                      className="hero-backdrop"
+                      style={{
+                        backgroundImage: cineUpdates[0]?.imageUrl
+                          ? `url(${proxyImageUrl(cineUpdates[0].imageUrl, 'original')})`
+                          : 'none',
+                      }}
+                    />
+                    <div className="hero-content">
+                      <div className="hero-meta-row">
+                        <span className="hero-meta-badge">CINE PULSE</span>
+                        <span className="hero-meta-item">Real-Time Kollywood Dispatch</span>
+                      </div>
+                      <h2 className="hero-title hero-title--dispatch">
+                        Breaking Cinema Buzz &amp; Updates
+                      </h2>
+                      <p className="hero-description">
+                        {cineUpdates[0]?.title || 'Swipe through the latest Kollywood cinema news, rumors, and breaking production updates.'}
+                      </p>
+                      <div className="hero-actions">
+                        <button className="btn-hero-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
+                          <Play size={16} fill="currentColor" /> Watch Pulse
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 </div>
 
                 {/* Left Arrow */}
-                {heroMovies.length >= 1 && currentHeroIndex > 0 && (
+                {heroTotalSlides > 1 && (
                   <button 
                     className="hero-nav-btn hero-nav-btn--left"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentHeroIndex(prev => (prev - 1 + heroMovies.length + 1) % (heroMovies.length + 1));
+                      setCurrentHeroIndex(prev => (prev - 1 + heroTotalSlides) % heroTotalSlides);
                     }}
                     aria-label="Previous slide"
                   >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft size={22} />
                   </button>
                 )}
 
                 {/* Right Arrow */}
-                {heroMovies.length >= 1 && currentHeroIndex < heroMovies.length && (
+                {heroTotalSlides > 1 && (
                   <button 
                     className="hero-nav-btn hero-nav-btn--right"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentHeroIndex(prev => (prev + 1) % (heroMovies.length + 1));
+                      setCurrentHeroIndex(prev => (prev + 1) % heroTotalSlides);
                     }}
                     aria-label="Next slide"
                   >
-                    <ChevronRight size={24} />
+                    <ChevronRight size={22} />
                   </button>
                 )}
 
-                {/* Indicator Dots */}
-                {heroMovies.length >= 1 && (
+                {/* Segmented Progress Indicators */}
+                {heroTotalSlides > 1 && (
                   <div className="hero-indicators">
-                    {/* Cine Pulse promo dot — always first */}
-                    <button
-                      className={`hero-indicator-dot ${currentHeroIndex === 0 ? 'hero-indicator-dot--active' : ''}`}
-                      style={{ background: currentHeroIndex === 0 ? 'var(--color-accent-gold)' : undefined }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentHeroIndex(0);
-                      }}
-                      aria-label="Go to Cine Pulse"
-                    />
                     {heroMovies.map((_, index) => (
                       <button
                         key={index}
-                        className={`hero-indicator-dot ${index + 1 === currentHeroIndex ? 'hero-indicator-dot--active' : ''}`}
+                        className={`hero-indicator-bar ${index === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setCurrentHeroIndex(index + 1);
+                          setCurrentHeroIndex(index);
                         }}
-                        aria-label={`Go to slide ${index + 2}`}
+                        aria-label={`Go to slide ${index + 1}`}
                       />
                     ))}
+                    {cineUpdates && cineUpdates.length > 0 && (
+                      <button
+                        key="cine-pulse-indicator"
+                        className={`hero-indicator-bar ${heroMovies.length === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentHeroIndex(heroMovies.length);
+                        }}
+                        aria-label="Go to Cine Pulse"
+                      />
+                    )}
                   </div>
                 )}
               </header>
