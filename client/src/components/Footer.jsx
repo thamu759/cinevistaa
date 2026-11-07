@@ -1,4 +1,5 @@
 import { useToast } from '../context/ToastContext.jsx';
+import brandLogo from '../assets/Thiraipedia White Logo with Yellow.png';
 
 const FacebookIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -37,7 +38,9 @@ export default function Footer({ onNavigate, onLoadLeaderboard, onLoadLists, sit
     <footer className="footer-container">
       <div className="footer">
         <div className="footer-brand">
-          <h3 className="footer-brand-title">Thirai<span>Pedia</span></h3>
+          <div className="footer-logo-wrap" onClick={() => onNavigate('home')} style={{ cursor: 'pointer', display: 'inline-block' }}>
+            <img src={brandLogo} alt="ThiraiPedia" className="brand-logo-img brand-logo-img--footer" />
+          </div>
           <p className="footer-brand-desc">
             {footerSettings.tagline || 'Devoting the cinematic experience through curated storytelling and premium critique. Formulating reviews for true enthusiasts.'}
           </p>

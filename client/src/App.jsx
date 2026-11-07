@@ -59,6 +59,7 @@ import MovieGrid, { LoadingGrid } from './components/MovieGrid';
 import MovieSection from './components/MovieSection';
 import MovieLogo from './components/MovieLogo';
 import WelcomePopup from './components/WelcomePopup';
+import brandLogo from './assets/Thiraipedia White Logo with Yellow.png';
 
 const LegalPage = lazy(() => import('./components/LegalPage'));
 const ContactPage = lazy(() => import('./components/ContactPage'));
@@ -1531,8 +1532,8 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       {/* NAVIGATION HEADER */}
       <div className="navbar-container">
         <nav className="navbar">
-          <div className="logo" onClick={() => { navigateTo('home'); }}>
-            Thirai<span>Pedia</span>
+          <div className="logo brand-logo-wrap" onClick={() => { navigateTo('home'); }}>
+            <img src={brandLogo} alt="ThiraiPedia" className="brand-logo-img" />
           </div>
           <div className="nav-links desktop-only-nav">
             {/* Core 1: Movies */}
@@ -1716,8 +1717,8 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <aside className="mobile-drawer-panel" aria-label="Mobile Navigation Sidebar">
               {/* Drawer Header (Fixed at top) */}
               <div className="mobile-drawer-header">
-                <div className="mobile-drawer-brand" onClick={() => { navigateTo('home'); setIsMobileMenuOpen(false); }}>
-                  Thirai<span>Pedia</span>
+                <div className="mobile-drawer-brand brand-logo-wrap" onClick={() => { navigateTo('home'); setIsMobileMenuOpen(false); }}>
+                  <img src={brandLogo} alt="ThiraiPedia" className="brand-logo-img brand-logo-img--drawer" />
                 </div>
                 <button 
                   type="button" 

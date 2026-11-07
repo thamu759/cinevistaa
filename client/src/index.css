@@ -96,10 +96,47 @@ a {
   cursor: pointer;
   font-size: 1.5rem;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
 }
 .logo span {
   color: var(--color-accent-gold);
   text-shadow: 0 0 10px #fbbf244d;
+}
+
+/* Official Brand Logo */
+.brand-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.brand-logo-img {
+  height: 36px;
+  width: auto;
+  max-width: 175px;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.brand-logo-wrap:hover .brand-logo-img,
+.footer-logo-wrap:hover .brand-logo-img {
+  opacity: 0.92;
+  transform: scale(1.02);
+}
+
+.brand-logo-img--drawer {
+  height: 30px;
+  max-width: 150px;
+}
+
+.brand-logo-img--footer {
+  height: 40px;
+  max-width: 190px;
+  margin-bottom: 0.75rem;
+  display: block;
 }
 .nav-links {
   align-items: center;
@@ -5086,6 +5123,11 @@ a {
 
   .logo {
     font-size: 1.15rem;
+  }
+
+  .brand-logo-img {
+    height: 28px;
+    max-width: 140px;
   }
 
   .nav-actions {
