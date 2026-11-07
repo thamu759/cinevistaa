@@ -18,11 +18,13 @@ export function LoadingGrid({ count = 8 }) {
 
 export function EmptyState({ icon: Icon = Film, title, message, action }) {
   return (
-    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-      <Icon size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-      {title && <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>{title}</p>}
-      {message && <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6 }}>{message}</p>}
-      {action}
+    <div className="cine-empty-state">
+      <div className="cine-empty-state-icon">
+        <Icon size={28} />
+      </div>
+      {title && <h3 className="cine-empty-state-title">{title}</h3>}
+      {message && <p className="cine-empty-state-desc">{message}</p>}
+      {action && <div className="cine-empty-state-action">{action}</div>}
     </div>
   );
 }

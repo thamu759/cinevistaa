@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
 import ShareCard from './ShareCard';
 
-export default function ShareButton({ title, text, url, variant = 'icon', label, movie }) {
+export default function ShareButton({ title, text, url, variant = 'icon', label, movie, className, wrapperClassName }) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -88,10 +88,17 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
     : { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--color-border)', borderRadius: '8px', color: 'var(--color-text-muted)', cursor: 'pointer' };
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={handleShare} style={btnStyle} aria-label="Share" title="Share" disabled={capturing}>
+    <div className={wrapperClassName} style={wrapperClassName ? { position: 'relative' } : { position: 'relative', display: 'inline-block' }}>
+      <button 
+        onClick={handleShare} 
+        className={className} 
+        style={className ? undefined : btnStyle} 
+        aria-label="Share" 
+        title="Share" 
+        disabled={capturing}
+      >
         {capturing ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Share2 size={16} />}
-        {variant === 'text' && (label || 'Share')}
+        {(variant === 'text' || label) && <span>{label || 'Share'}</span>}
       </button>
 
       {showMenu && (

@@ -89,9 +89,12 @@ export default function MoodMatcher({ movies, onViewMovie }) {
 
   if (candidates.length === 0) {
     return (
-      <div className="cflip-empty">
-        <Sparkles size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-        <p>Not enough movies with genre data. Add some first!</p>
+      <div className="cine-empty-state" style={{ margin: '3rem auto' }}>
+        <div className="cine-empty-state-icon">
+          <Sparkles size={26} />
+        </div>
+        <h3 className="cine-empty-state-title">No Matching Moods</h3>
+        <p className="cine-empty-state-desc">We couldn't locate films matching this mood profile. Try selecting another mood or genre combination.</p>
       </div>
     );
   }

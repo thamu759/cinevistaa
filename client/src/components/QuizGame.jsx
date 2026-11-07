@@ -149,9 +149,12 @@ export default function QuizGame({ movies, onViewMovie }) {
 
   if (questions.length < 3) {
     return (
-      <div className="quiz-empty">
-        <Brain size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-        <p>Not enough movies to generate a quiz. Add more movies!</p>
+      <div className="cine-empty-state" style={{ margin: '3rem auto' }}>
+        <div className="cine-empty-state-icon">
+          <Brain size={26} />
+        </div>
+        <h3 className="cine-empty-state-title">Quiz Unready</h3>
+        <p className="cine-empty-state-desc">Not enough catalog data is available to generate trivia questions at this moment. Check back soon.</p>
       </div>
     );
   }

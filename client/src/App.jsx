@@ -7,7 +7,8 @@ import {
   Edit3, Check, Info, Lock, Mail, Eye, EyeOff,
   Users, Send, Volume2, Maximize, List,
   AlertTriangle, RefreshCw, Bell, BellOff,
-  Tv, Zap, Newspaper, ShieldCheck, LogOut, LogIn, Sparkles
+  Tv, Zap, Newspaper, ShieldCheck, LogOut, LogIn, Sparkles,
+  ExternalLink, Flame
 } from 'lucide-react';
 import { useToast } from './context/ToastContext.jsx'
 import {
@@ -59,6 +60,10 @@ import MovieGrid, { LoadingGrid } from './components/MovieGrid';
 import MovieSection from './components/MovieSection';
 import MovieLogo from './components/MovieLogo';
 import WelcomePopup from './components/WelcomePopup';
+import ProfileView from './components/ProfileView';
+import EditProfileModal from './components/EditProfileModal';
+import CineShowcasePromo from './components/CineShowcasePromo';
+import AuthModal from './components/AuthModal';
 import brandLogo from './assets/Thiraipedia White Logo with Yellow.png';
 
 const LegalPage = lazy(() => import('./components/LegalPage'));
@@ -261,6 +266,49 @@ export default function App() {
   const searchInputRef = useRef(null);
   const searchOverlayRef = useRef(null);
 
+  // Sticky Navbar Scrolled State with Hysteresis & rAF throttling (Zero glitch/chatter)
+  const [isScrolled, setIsScrolled] = useState(false);
+  const isScrolledRef = useRef(false);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollPos = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || window.scrollY || 0;
+
+          const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+          // Adaptive hysteresis thresholds:
+          // Mobile: scroll down past 40px to compact, scroll up past 15px to expand
+          // Desktop: scroll down past 60px to compact, scroll up past 20px to expand
+          const downThreshold = isMobile ? 40 : 60;
+          const upThreshold = isMobile ? 15 : 20;
+
+          if (!isScrolledRef.current && scrollPos > downThreshold) {
+            isScrolledRef.current = true;
+            setIsScrolled(true);
+          } else if (isScrolledRef.current && scrollPos < upThreshold) {
+            isScrolledRef.current = false;
+            setIsScrolled(false);
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // Phase 8 Community Forum State
   const [communityThreads, setCommunityThreads] = useState([]);
   const [isCommunityLoading, setIsCommunityLoading] = useState(false);
@@ -366,30 +414,24 @@ const preRollTimerRef = useRef(null);
        playerRef.current = new window.YT.Player('yt-player', {
          videoId,
          playerVars: {
-           controls: 0,
+           controls: 1,
            modestbranding: 1,
            rel: 0,
            showinfo: 0,
            iv_load_policy: 3,
            autoplay: trailerAutoplayPreference ? 1 : 0,
-           playsinline: 1
+           playsinline: 1,
+           origin: typeof window !== 'undefined' ? window.location.origin : undefined
          },
         events: {
           onReady: (e) => {
             setTrailerPlayer(prev => ({ ...prev, duration: e.target.getDuration(), playing: true }));
-            e.target.playVideo();
-            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = setInterval(() => {
-              if (e.target && e.target.getCurrentTime) {
-                setTrailerPlayer(prev => ({ ...prev, currentTime: e.target.getCurrentTime() }));
-              }
-            }, 250);
+            if (trailerAutoplayPreference) {
+              e.target.playVideo();
+            }
           },
           onStateChange: (e) => {
-            setTrailerPlayer(prev => ({ ...prev, playing: e.data === window.YT.PlayerState.PLAYING, currentTime: e.target.getCurrentTime() }));
-            if (e.data === window.YT.PlayerState.ENDED) {
-              if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-            }
+            setTrailerPlayer(prev => ({ ...prev, playing: e.data === window.YT.PlayerState.PLAYING }));
           }
         }
       });
@@ -483,9 +525,6 @@ const preRollTimerRef = useRef(null);
   const [profileData, setProfileData] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editBio, setEditBio] = useState('');
-  const [editAvatar, setEditAvatar] = useState('');
-  const [editEmail, setEditEmail] = useState('');
   const [profileLoadError, setProfileLoadError] = useState('');
 
   // Actor view state
@@ -556,7 +595,7 @@ const preRollTimerRef = useRef(null);
       setCurrentUser(user);
       setIsAuthModalOpen(false);
       setAuthFormData({ username: '', email: '', password: '' });
-      showToast(user.isNew ? 'Account created successfully!' : 'Login successful!');
+      showToast(user.isNew ? `Welcome to ThiraiPedia, ${user.username || 'critic'}!` : `Welcome back, ${user.username || 'critic'}!`);
       syncWatchlistFromServer();
     } catch (err) {
       setAuthError(err.message || 'Google login failed.');
@@ -614,20 +653,24 @@ const preRollTimerRef = useRef(null);
       fetchUserProfile(currentUser.username)
         .then(data => setProfileData(data))
         .catch(() => setProfileLoadError('Failed to load profile'));
+      loadUserLists();
     }
     fetchPublicUsers()
       .then(data => setAllUsers(data))
       .catch(() => {});
   }, [activeView, currentUser]);
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = async ({ bio, avatarUrl, email }) => {
     try {
-      const updated = await updateUserProfile({ bio: editBio, avatarUrl: editAvatar, email: editEmail });
+      const updated = await updateUserProfile({ bio, avatarUrl, email });
       setProfileData(updated);
       setCurrentUser(prev => prev ? { ...prev, avatarUrl: updated.avatarUrl, email: updated.email } : prev);
       setEditingProfile(false);
+      showToast('Profile updated successfully', 'success');
     } catch (err) {
       setProfileLoadError(err.message);
+      showToast(err.message || 'Failed to update profile', 'error');
+      throw err;
     }
   };
 
@@ -861,6 +904,7 @@ const preRollTimerRef = useRef(null);
 
   useEffect(() => {
     loadNewReleases();
+    loadCineUpdates();
   }, []);
 
   const loadCommunityThreads = useCallback(async () => {
@@ -935,7 +979,8 @@ const preRollTimerRef = useRef(null);
   }, [movies, watchlist]);
 
   // Reset index if out of range when list changes
-  const heroTotalSlides = heroMovies.length + (cineUpdates && cineUpdates.length > 0 ? 1 : 0);
+  const hasCinePulse = Boolean(cineUpdates && cineUpdates.length > 0);
+  const heroTotalSlides = (hasCinePulse ? 1 : 0) + heroMovies.length;
   useEffect(() => {
     if (currentHeroIndex >= heroTotalSlides && heroTotalSlides > 0) {
       setCurrentHeroIndex(0);
@@ -960,14 +1005,14 @@ const preRollTimerRef = useRef(null);
   // Auto-play the hero carousel (rotate slides every 6.5 seconds)
   // Pauses when mouse hovers over the hero
   useEffect(() => {
-    if (heroMovies.length <= 1) return;
+    if (heroTotalSlides <= 1) return;
     const interval = setInterval(() => {
       if (!isHoveringRef.current) {
         setCurrentHeroIndex(prev => (prev + 1) % heroTotalSlides);
       }
     }, 6500);
     return () => clearInterval(interval);
-  }, [heroMovies.length, heroTotalSlides]);
+  }, [heroTotalSlides]);
 
   // Fetch detailed movie info when selected
   useEffect(() => {
@@ -1060,6 +1105,8 @@ const preRollTimerRef = useRef(null);
   const getRouteFromPath = (pathname) => {
     const path = pathname.replace(/\/+$/, '') || '/';
     if (path === '/') return { view: 'home' };
+    if (path === '/login') return { view: 'home', openAuth: 'login' };
+    if (path === '/signup' || path === '/register') return { view: 'home', openAuth: 'register' };
     if (path === '/admin') return { view: 'admin' };
     if (path === '/profile') return { view: 'profile' };
     if (path === '/community') return { view: 'community' };
@@ -1097,6 +1144,8 @@ const preRollTimerRef = useRef(null);
   };
 
   const pathForView = (view, movieId) => {
+    if (view === 'login') return '/login';
+    if (view === 'signup' || view === 'register') return '/signup';
     if (view === 'admin') return '/admin';
     if (view === 'profile') return '/profile';
     if (view === 'community') return '/community';
@@ -1152,8 +1201,12 @@ const preRollTimerRef = useRef(null);
 
   useEffect(() => {
     const path = location.pathname.replace(/\/+$/, '') || '/';
-    const { view, movieId, articleId, pageSlug } = getRouteFromPath(path);
+    const { view, movieId, articleId, pageSlug, openAuth } = getRouteFromPath(path);
     if (pageSlug) setSelectedPageSlug(pageSlug);
+    if (openAuth) {
+      setAuthTab(openAuth);
+      setIsAuthModalOpen(true);
+    }
     setActiveView(view);
     if (view === 'cine-updates') {
       setShowCineReels(true);
@@ -1312,7 +1365,7 @@ const preRollTimerRef = useRef(null);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
-        showToast('Login successful!');
+        showToast(`Welcome back, ${user.username || 'critic'}!`);
         syncWatchlistFromServer();
       } else {
         const user = await registerUser(username, email, password);
@@ -1320,7 +1373,7 @@ const preRollTimerRef = useRef(null);
         setCurrentUser(user);
         setIsAuthModalOpen(false);
         setAuthFormData({ username: '', email: '', password: '' });
-        showToast('Account created successfully!');
+        showToast(`Welcome to ThiraiPedia, ${user.username || 'critic'}!`);
         syncWatchlistFromServer();
       }
     } catch (err) {
@@ -1333,6 +1386,7 @@ const preRollTimerRef = useRef(null);
   const handleLogout = () => {
     localStorage.removeItem('mc_token');
     setCurrentUser(null);
+    showToast('Signed out of your session.');
     navigateTo('home');
   };
 
@@ -1480,13 +1534,6 @@ const handleDeleteReview = useCallback(async (reviewId) => {
   const featuredStaffPick = movies.find(m => m.isStaffPick && m.staffPickType === 'featured') || movies.find(m => m.isStaffPick);
   const gridStaffPicks = movies.filter(m => m.isStaffPick && m.staffPickType === 'grid').slice(0, 3);
 
-  // Profile recent reviews count helper
-  const profileReviews = movies.flatMap(m => 
-    m.reviews
-      .filter(r => r.user === userProfile.name)
-      .map(r => ({ ...r, movieTitle: m.title, moviePoster: m.posterUrl, movieId: m.id }))
-  );
-
   // Filtered new releases by month/year
   const filteredReleases = useMemo(() => {
     if (!releaseFilterMonth && !releaseFilterYear) return newReleasesPage;
@@ -1530,7 +1577,8 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       )}
 
       {/* NAVIGATION HEADER */}
-      <div className="navbar-container">
+      {!showCineReels && activeView !== 'cine-updates' && (
+        <div className={`navbar-container ${isScrolled ? 'navbar-scrolled' : ''}`}>
         <nav className="navbar">
           <div className="logo brand-logo-wrap" onClick={() => { navigateTo('home'); }}>
             <img src={brandLogo} alt="ThiraiPedia" className="brand-logo-img" />
@@ -1549,7 +1597,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <button
               type="button"
               className={`nav-link cine-updates-link ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
-              onClick={() => { loadCineUpdates(); setShowCineReels(true); }}
+              onClick={() => { loadCineUpdates(); setShowCineReels(true); navigateTo('cine-updates'); }}
               style={{ color: 'var(--color-accent-gold)', fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none', font: 'inherit' }}
             >
               <span className="nav-pulse-dot" /> Cine Pulse
@@ -1699,8 +1747,36 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <button className="search-trigger" onClick={toggleSearch} aria-label="Search">
               <Search size={20} />
             </button>
-            <button className="profile-avatar-btn" onClick={() => { if (!currentUser) { setAuthTab('login'); setIsAuthModalOpen(true); } else { navigateTo(activeView === 'profile' ? 'home' : 'profile'); setIsMobileMenuOpen(false); } }}>
-              <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-avatar-circle" />
+            <button 
+              className="profile-avatar-btn" 
+              onClick={() => { 
+                if (!currentUser) { 
+                  setAuthTab('login'); 
+                  setIsAuthModalOpen(true); 
+                } else { 
+                  navigateTo(activeView === 'profile' ? 'home' : 'profile'); 
+                  setIsMobileMenuOpen(false); 
+                } 
+              }}
+              aria-label={currentUser ? `Profile: ${currentUser.username}` : "Sign In"}
+            >
+              {currentUser?.avatarUrl && currentUser.avatarUrl.trim() && currentUser.avatarUrl !== DEFAULT_AVATAR ? (
+                <img 
+                  src={currentUser.avatarUrl} 
+                  alt={currentUser.username || 'Avatar'} 
+                  className="profile-avatar-circle"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }
+                  }}
+                />
+              ) : (
+                <div className="profile-avatar-placeholder" aria-hidden="true">
+                  <User size={18} />
+                </div>
+              )}
               {currentUser && <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginLeft: '0.5rem', fontWeight: 500 }} className="profile-nav-name">{currentUser.username}</span>}
             </button>
           </div>
@@ -1736,7 +1812,18 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 {currentUser ? (
                   <div className="mobile-drawer-user-card">
                     <div className="mobile-drawer-user-info" onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}>
-                      <img src={currentUser.avatarUrl || userProfile.avatarUrl} alt="Avatar" className="mobile-drawer-avatar" />
+                      {currentUser.avatarUrl && currentUser.avatarUrl.trim() && currentUser.avatarUrl !== DEFAULT_AVATAR ? (
+                        <img 
+                          src={currentUser.avatarUrl} 
+                          alt="Avatar" 
+                          className="mobile-drawer-avatar"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="mobile-drawer-avatar profile-avatar-placeholder">
+                          <User size={18} />
+                        </div>
+                      )}
                       <div className="mobile-drawer-user-details">
                         <span className="mobile-drawer-username">{currentUser.username}</span>
                         <span className="mobile-drawer-user-role">{currentUser.role === 'admin' ? 'Administrator' : 'Cinema Critic'}</span>
@@ -1820,7 +1907,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   <button
                     type="button"
                     className={`mobile-drawer-link cine-pulse-mobile ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
-                    onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
+                    onClick={() => { loadCineUpdates(); setShowCineReels(true); navigateTo('cine-updates'); setIsMobileMenuOpen(false); }}
                   >
                     <Zap size={17} className="mobile-drawer-link-icon" />
                     <span className="mobile-drawer-link-text">Cine Pulse</span>
@@ -2007,22 +2094,22 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     ))}
                   </div>
                  ) : searchResults.length === 0 ? (
-                   <div className="search-results-empty">
-                     <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                     <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                       No results found for "{searchQuery}"
+                   <div className="cine-empty-state" style={{ margin: '2rem auto' }}>
+                     <div className="cine-empty-state-icon">
+                       <Search size={24} />
+                     </div>
+                     <h3 className="cine-empty-state-title">No matching films found</h3>
+                     <p className="cine-empty-state-desc">
+                       We couldn't locate films matching "{searchQuery}". Try alternate titles, directors, or actors.
                      </p>
-                     <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6', maxWidth: '400px' }}>
-                       Try different keywords, check spelling, or browse by genre to discover movies.
-                     </p>
-                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                     <div className="cine-empty-state-action" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                        <button onClick={() => { setSearchQuery(''); setSearchResults([]); }}
-                         className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
+                         className="btn-outline" style={{ padding: '0.5rem 1rem' }}>
                          Clear Search
                        </button>
                        <button onClick={() => { setSearchQuery(''); setSearchResults([]); navigateTo('home'); }}
-                         className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
-                         Browse All Movies
+                         className="btn-secondary" style={{ padding: '0.5rem 1rem' }}>
+                         Browse All Films
                        </button>
                      </div>
                    </div>
@@ -2066,13 +2153,14 @@ const handleDeleteReview = useCallback(async (reviewId) => {
           </div>
         </div>
       </div>
+      )}
 
       {/* RENDER ACTIVE VIEW */}
       <div className="fade-in" key={activeView + (selectedMovieId || selectedArticleId || '')}>
         {activeView === 'home' && (
           <div className="main-content">
             {/* HERO CAROUSEL (APPLE TV+ / PRIME VIDEO CINEMATIC STANDARD) */}
-            {heroMovies.length > 0 && (
+            {heroTotalSlides > 0 && (
               <header className="hero"
                 ref={heroRef}
                 onMouseEnter={() => { isHoveringRef.current = true; }}
@@ -2084,106 +2172,127 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   className="hero-track"
                   style={{ '--track-offset': `${-(currentHeroIndex * 100)}%` }}
                 >
-                {/* Blockbuster Hero Films - Promoted Front & Center */}
-                {heroMovies.map((movie, index) => {
-                  const isActive = index === currentHeroIndex;
-                  const displayGenres = movie.genre
-                    ? movie.genre.split('/').map(g => g.trim()).filter(g => g.toLowerCase() !== 'tamil').slice(0, 2).join(' / ') || movie.genre
-                    : '';
-
-                  return (
-                    <div 
-                      key={movie.id} 
-                      className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
+                  {/* ─── 1. CINE PULSE DISPATCH FEATURE SLIDE (FIRST SLIDE) ─── */}
+                  {hasCinePulse && (
+                    <div
+                      key="cine-pulse-dispatch"
+                      className={`hero-slide ${currentHeroIndex === 0 ? 'hero-slide--active' : ''}`}
                     >
-                      <div 
-                        className="hero-backdrop" 
-                        style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
+                      <div
+                        className="hero-backdrop"
+                        style={{
+                          backgroundImage: cineUpdates[0]?.imageUrl
+                            ? `url(${proxyImageUrl(cineUpdates[0].imageUrl, 'original')})`
+                            : 'radial-gradient(ellipse 70% 50% at 50% 20%, rgba(251, 191, 36, 0.08) 0%, #07080b 80%)',
+                        }}
                       />
                       <div className="hero-content">
-                        <MovieLogo movie={movie} />
-                        <div className="hero-meta-row">
-                          <span className="hero-meta-badge">FEATURED</span>
-                          {movie.releaseYear && <span className="hero-meta-item">{movie.releaseYear}</span>}
-                          {movie.runtime && (
-                            <>
-                              <span className="hero-meta-dot">&bull;</span>
-                              <span className="hero-meta-item">{movie.runtime}</span>
-                            </>
-                          )}
-                          {displayGenres && (
-                            <>
-                              <span className="hero-meta-dot">&bull;</span>
-                              <span className="hero-meta-item">{displayGenres}</span>
-                            </>
-                          )}
-                          {movie.rating > 0 && (
-                            <>
-                              <span className="hero-meta-dot">&bull;</span>
-                              <span className="hero-meta-rating">
-                                <Star size={13} fill="currentColor" /> {movie.rating.toFixed(1)}
-                              </span>
-                            </>
-                          )}
+                        <div 
+                          className="hero-styled-title-logo" 
+                          onClick={() => { loadCineUpdates(); setShowCineReels(true); navigateTo('cine-updates'); }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <span className="hero-styled-title-text">CINE PULSE</span>
                         </div>
-                        <p className="hero-description">{movie.description}</p>
+
+                        <div className="hero-meta-row">
+                          <span className="hero-meta-badge" style={{ borderColor: 'rgba(251, 191, 36, 0.35)', color: 'var(--color-accent-gold)' }}>
+                            DISPATCH
+                          </span>
+                          <span className="hero-meta-item">Real-Time Kollywood Buzz</span>
+                          <span className="hero-meta-dot">&bull;</span>
+                          <span className="hero-meta-item">{cineUpdates.length} Updates</span>
+                        </div>
+
+                        <p className="hero-description">
+                          {cineUpdates[0]?.title || 'Swipe through the latest Kollywood cinema news, rumors, and breaking production updates.'}
+                        </p>
+
                         <div className="hero-actions">
-                          <button className="btn-hero-primary" onClick={() => handleViewMovie(movie.id)}>
-                            <Play size={16} fill="currentColor" /> Watch Trailer
+                          <button 
+                            className="btn-hero-primary" 
+                            onClick={() => { loadCineUpdates(); setShowCineReels(true); navigateTo('cine-updates'); }}
+                          >
+                            <Play size={16} fill="currentColor" /> Watch Pulse
                           </button>
                           <button 
                             className="btn-hero-secondary" 
-                            onClick={(e) => handleToggleWatchlist(movie.id, e)}
-                            aria-label="Toggle watchlist"
+                            onClick={() => { loadCineUpdates(); setShowCineReels(true); navigateTo('cine-updates'); }}
                           >
-                            {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
-                            {watchlist.includes(movie.id) ? 'In Watchlist' : 'Add to List'}
-                          </button>
-                          <button 
-                            className="btn-hero-ghost" 
-                            onClick={() => handleViewMovie(movie.id)}
-                          >
-                            Details
+                            All Updates
                           </button>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  )}
 
-                {/* Cine Pulse Dispatch Feature Slide (Final Slide) */}
-                {cineUpdates && cineUpdates.length > 0 && (
-                  <div
-                    key="cine-pulse-dispatch"
-                    className={`hero-slide ${currentHeroIndex === heroMovies.length ? 'hero-slide--active' : ''}`}
-                  >
-                    <div
-                      className="hero-backdrop"
-                      style={{
-                        backgroundImage: cineUpdates[0]?.imageUrl
-                          ? `url(${proxyImageUrl(cineUpdates[0].imageUrl, 'original')})`
-                          : 'none',
-                      }}
-                    />
-                    <div className="hero-content">
-                      <div className="hero-meta-row">
-                        <span className="hero-meta-badge">CINE PULSE</span>
-                        <span className="hero-meta-item">Real-Time Kollywood Dispatch</span>
+                  {/* ─── 2. BLOCKBUSTER HERO FILMS ─── */}
+                  {heroMovies.map((movie, index) => {
+                    const slideIndex = hasCinePulse ? index + 1 : index;
+                    const isActive = slideIndex === currentHeroIndex;
+                    const displayGenres = movie.genre
+                      ? movie.genre.split('/').map(g => g.trim()).filter(g => g.toLowerCase() !== 'tamil').slice(0, 2).join(' / ') || movie.genre
+                      : '';
+
+                    return (
+                      <div 
+                        key={movie.id} 
+                        className={`hero-slide ${isActive ? 'hero-slide--active' : ''}`}
+                      >
+                        <div 
+                          className="hero-backdrop" 
+                          style={{ backgroundImage: `url(${proxyImageUrl(movie.backdropUrl, 'original')})` }}
+                        />
+                        <div className="hero-content">
+                          <MovieLogo movie={movie} />
+                          <div className="hero-meta-row">
+                            <span className="hero-meta-badge">FEATURED</span>
+                            {movie.releaseYear && <span className="hero-meta-item">{movie.releaseYear}</span>}
+                            {movie.runtime && (
+                              <>
+                                <span className="hero-meta-dot">&bull;</span>
+                                <span className="hero-meta-item">{movie.runtime}</span>
+                              </>
+                            )}
+                            {displayGenres && (
+                              <>
+                                <span className="hero-meta-dot">&bull;</span>
+                                <span className="hero-meta-item">{displayGenres}</span>
+                              </>
+                            )}
+                            {movie.rating > 0 && (
+                              <>
+                                <span className="hero-meta-dot">&bull;</span>
+                                <span className="hero-meta-rating">
+                                  <Star size={13} fill="currentColor" /> {movie.rating.toFixed(1)}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <p className="hero-description">{movie.description}</p>
+                          <div className="hero-actions">
+                            <button className="btn-hero-primary" onClick={() => handleViewMovie(movie.id)}>
+                              <Play size={16} fill="currentColor" /> Watch Trailer
+                            </button>
+                            <button 
+                              className="btn-hero-secondary" 
+                              onClick={(e) => handleToggleWatchlist(movie.id, e)}
+                              aria-label="Toggle watchlist"
+                            >
+                              {watchlist.includes(movie.id) ? <Check size={16} /> : <Plus size={16} />}
+                              {watchlist.includes(movie.id) ? 'In Watchlist' : 'Add to List'}
+                            </button>
+                            <button 
+                              className="btn-hero-ghost" 
+                              onClick={() => handleViewMovie(movie.id)}
+                            >
+                              Details
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <h2 className="hero-title hero-title--dispatch">
-                        Breaking Cinema Buzz &amp; Updates
-                      </h2>
-                      <p className="hero-description">
-                        {cineUpdates[0]?.title || 'Swipe through the latest Kollywood cinema news, rumors, and breaking production updates.'}
-                      </p>
-                      <div className="hero-actions">
-                        <button className="btn-hero-primary" onClick={() => { loadCineUpdates(); setShowCineReels(true); }}>
-                          <Play size={16} fill="currentColor" /> Watch Pulse
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    );
+                  })}
                 </div>
 
                 {/* Left Arrow */}
@@ -2217,28 +2326,31 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 {/* Segmented Progress Indicators */}
                 {heroTotalSlides > 1 && (
                   <div className="hero-indicators">
-                    {heroMovies.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`hero-indicator-bar ${index === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentHeroIndex(index);
-                        }}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                    {cineUpdates && cineUpdates.length > 0 && (
+                    {hasCinePulse && (
                       <button
                         key="cine-pulse-indicator"
-                        className={`hero-indicator-bar ${heroMovies.length === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
+                        className={`hero-indicator-bar ${0 === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setCurrentHeroIndex(heroMovies.length);
+                          setCurrentHeroIndex(0);
                         }}
                         aria-label="Go to Cine Pulse"
                       />
                     )}
+                    {heroMovies.map((movie, index) => {
+                      const slideIndex = hasCinePulse ? index + 1 : index;
+                      return (
+                        <button
+                          key={movie.id}
+                          className={`hero-indicator-bar ${slideIndex === currentHeroIndex ? 'hero-indicator-bar--active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentHeroIndex(slideIndex);
+                          }}
+                          aria-label={`Go to slide ${slideIndex + 1}`}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </header>
@@ -2327,66 +2439,20 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               />
             )}
 
-            {/* APP PROMO — Download section with animated cartoon */}
-            <section className="app-promo-section">
-              <div className="app-promo-card">
-                <div className="app-promo-illustration">
-                  <div className="app-promo-char">
-                    <div className="char-body">
-                      <div className="char-eye char-eye-left" />
-                      <div className="char-eye char-eye-right" />
-                      <div className="char-mouth" />
-                    </div>
-                    <div className="char-popcorn">
-                      <div className="popcorn-piece" />
-                      <div className="popcorn-piece" />
-                      <div className="popcorn-piece" />
-                    </div>
-                  </div>
-                  <div className="app-promo-char char-2">
-                    <div className="char-body">
-                      <div className="char-eye char-eye-left" />
-                      <div className="char-eye char-eye-right" />
-                      <div className="char-mouth char-mouth-smile" />
-                    </div>
-                    <div className="char-clapboard">
-                      <div className="clap-line" />
-                      <div className="clap-line" />
-                      <div className="clap-line" />
-                    </div>
-                  </div>
-                </div>
-                <div className="app-promo-content">
-                  <span className="app-promo-badge">Mobile App</span>
-                  <h2 className="app-promo-title">Take ThiraiPedia Everywhere</h2>
-                  <p className="app-promo-desc">Rate movies, write reviews, and discover new films on the go.</p>
-                  <div className="app-promo-stats">
-                    <div className="app-promo-stat">
-                      <span className="app-promo-stat-num">10K+</span>
-                      <span className="app-promo-stat-lbl">Downloads</span>
-                    </div>
-                    <div className="app-promo-stat">
-                      <span className="app-promo-stat-num">4.8</span>
-                      <span className="app-promo-stat-lbl">App Rating</span>
-                    </div>
-                    <div className="app-promo-stat">
-                      <span className="app-promo-stat-num">500+</span>
-                      <span className="app-promo-stat-lbl">Daily Critics</span>
-                    </div>
-                  </div>
-                  <div className="app-promo-buttons">
-                    <button className="app-store-btn" onClick={() => showToast('Available on the App Store soon!')}>
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                      App Store
-                    </button>
-                    <button className="app-store-btn" onClick={() => showToast('Available on Google Play soon!')}>
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 20.5v-17a.5.5 0 0 1 .74-.44l15.53 8.5a.5.5 0 0 1 0 .88l-15.53 8.5A.5.5 0 0 1 3 20.5z"/></svg>
-                      Google Play
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
+            {/* CINEPHILE SHOWCASE PROMO — Real data community spotlight */}
+            <CineShowcasePromo
+              movies={movies}
+              allUsers={allUsers}
+              currentUser={currentUser}
+              onMovieClick={handleViewMovie}
+              onJoinClick={() => {
+                setAuthTab('register');
+                setIsAuthModalOpen(true);
+              }}
+              onExploreClick={() => navigateTo('top-rated')}
+              onDiaryClick={() => navigateTo('profile')}
+              onListsClick={() => navigateTo('lists')}
+            />
 
             {/* CURATED SELECTION (Staff Picks) */}
             {featuredStaffPick && siteSettings?.sections?.showStaffPicks !== false && (
@@ -2673,31 +2739,30 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             )}
              {newReleasesPageLoading ? (
                <LoadingGrid count={8} />
-              ) : filteredReleases.length === 0 ? (
-               <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                 <Film size={48} style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                 <p style={{ marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                   No new releases found
-                 </p>
-                 <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                   Check back soon for the latest hit movies, or explore our full catalog using the 
-                   genre and sort filters above.
-                 </p>
-                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                   <button onClick={() => { setSelectedGenre(''); setSortOption('popular'); navigateTo('home'); }}
-                     className="btn-outline" style={{ padding: '0.6rem 1.2rem', border: '1px solid var(--color-border)' }}>
-                     Browse All Movies
-                   </button>
-                    <button onClick={() => navigateTo('coming-soon')}
-                      className="btn-secondary" style={{ padding: '0.6rem 1.2rem' }}>
-                      See Coming Soon
-                    </button>
-                 </div>
-               </div>
-              ) : (
+             ) : (
                <MovieGrid
                  movies={filteredReleases}
                  onMovieClick={handleViewMovie}
+                 emptyTitle="No releases match your filters"
+                 emptyMessage="Try adjusting the selected year or month filters above to find films."
+                 emptyAction={
+                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                     <button
+                       onClick={() => { setReleaseFilterMonth(''); setReleaseFilterYear(''); }}
+                       className="btn-outline"
+                       style={{ padding: '0.5rem 1rem' }}
+                     >
+                       Reset Filters
+                     </button>
+                     <button
+                       onClick={() => navigateTo('coming-soon')}
+                       className="btn-secondary"
+                       style={{ padding: '0.5rem 1rem' }}
+                     >
+                       Upcoming Releases
+                     </button>
+                   </div>
+                 }
                  visibleCount={visibleCount}
                  totalCount={filteredReleases.length}
                  onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
@@ -2717,7 +2782,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <MovieGrid
               movies={tamilMovies}
               onMovieClick={handleViewMovie}
-              emptyTitle="No Tamil movies found."
+              emptyTitle="No Tamil films in this collection"
+              emptyMessage="We are continuously cataloging Tamil releases. Check back soon for new additions."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('home')} style={{ padding: '0.5rem 1rem' }}>
+                  Explore All Cinema
+                </button>
+              }
               visibleCount={visibleCount}
               totalCount={tamilMovies.length}
               onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
@@ -2736,7 +2807,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <MovieGrid
               movies={malayalamMovies}
               onMovieClick={handleViewMovie}
-              emptyTitle="No Malayalam movies found."
+              emptyTitle="No Malayalam films in this collection"
+              emptyMessage="Malayalam cinema catalog is expanding with critically acclaimed masterworks and festival favorites."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('home')} style={{ padding: '0.5rem 1rem' }}>
+                  Explore All Cinema
+                </button>
+              }
               visibleCount={visibleCount}
               totalCount={malayalamMovies.length}
               onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
@@ -2756,8 +2833,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               movies={topRatedPage}
               onMovieClick={handleViewMovie}
               loading={topRatedPageLoading}
-              emptyTitle="No top rated movies yet"
-              emptyMessage="Movies with a rating of 7 or higher will appear here."
+              emptyTitle="No top rated films yet"
+              emptyMessage="Films with community scores of 7.0 or higher will appear in this prestige tier."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('home')} style={{ padding: '0.5rem 1rem' }}>
+                  Browse All Films
+                </button>
+              }
               visibleCount={visibleCount}
               totalCount={topRatedPage.length}
               onLoadMore={() => setVisibleCount(prev => prev + LOAD_STEP)}
@@ -2777,7 +2859,12 @@ const handleDeleteReview = useCallback(async (reviewId) => {
               movies={movies.filter(m => watchlist.includes(m.id))}
               onMovieClick={handleViewMovie}
               emptyTitle="Your watchlist is empty"
-              emptyMessage={"Start building your personal collection by browsing movies and clicking the '+ Add to Watchlist' button on any movie card."}
+              emptyMessage="Curate your personal cinema queue. Bookmark must-watch films by clicking the + button on any movie card."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('top-rated')} style={{ padding: '0.5rem 1rem' }}>
+                  Explore Top Rated
+                </button>
+              }
             />
           </div>
         )}
@@ -2793,8 +2880,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <MovieGrid
               movies={movies.filter(m => m.isUpcoming)}
               onMovieClick={handleViewMovie}
-              emptyTitle="No upcoming releases scheduled."
-              emptyMessage="Check back later for new additions."
+              emptyTitle="No upcoming releases scheduled"
+              emptyMessage="Our release calendar is currently being synchronized. Check back for fresh theatrical and digital dates."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('home')} style={{ padding: '0.5rem 1rem' }}>
+                  Back to Cinema Home
+                </button>
+              }
             />
           </div>
         )}
@@ -2822,7 +2914,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                 <MovieGrid
                   movies={actorMovies}
                   onMovieClick={handleViewMovie}
-                  emptyTitle="No movies found for this actor."
+                  emptyTitle={`No films indexed for ${selectedActor}`}
+                  emptyMessage="We haven't indexed credits for this artist yet. Explore other filmographies in the library."
+                  emptyAction={
+                    <button className="btn-secondary" onClick={() => { setSelectedActor(null); navigateTo('home'); }} style={{ padding: '0.5rem 1rem' }}>
+                      Browse All Films
+                    </button>
+                  }
                 />
               );
             })()}
@@ -2860,144 +2958,29 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
         {/* PROFILE VIEW */}
         {activeView === 'profile' && (
-          <div className="main-content profile-view slide-up">
-            
-            {/* Header info box */}
-            <div className="profile-card glass-panel">
-              <div className="profile-main-row">
-                <img src={currentUser ? currentUser.avatarUrl : userProfile.avatarUrl} alt="Avatar" className="profile-info-avatar" />
-                <div className="profile-bio-box">
-                  <span className="profile-badge-gold">{currentUser ? currentUser.role : userProfile.role}</span>
-                  <h1 className="profile-name">{currentUser ? currentUser.username : userProfile.name}</h1>
-                  <p className="profile-quote">"{currentUser ? (profileData?.bio || 'thiraipedia Film Critic') : userProfile.bio}"</p>
-                  {currentUser && profileData && (
-                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.followers || []).length}</strong> followers</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}><strong style={{ color: 'var(--color-text-main)' }}>{(profileData.following || []).length}</strong> following</span>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  {currentUser && (
-                    <button className="btn-primary" style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }} onClick={() => { setEditingProfile(true); setEditBio(profileData?.bio || ''); setEditAvatar(currentUser.avatarUrl || ''); setEditEmail(profileData?.email || ''); }}>
-                      EDIT PROFILE
-                    </button>
-                  )}
-                  {currentUser ? (
-                    <button className="btn-secondary" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={handleLogout}>
-                      LOGOUT
-                    </button>
-                  ) : (
-                    <button className="btn-secondary" onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); }}>
-                      LOG IN / REGISTER
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Stats values */}
-              <div className="profile-stats-grid">
-                <div className="stat-box glass-panel">
-                  <span className="stat-val">{profileReviews.length + 1}</span>
-                  <span className="stat-lbl">Reviews Written</span>
-                </div>
-                <div className="stat-box glass-panel">
-                  <span className="stat-val">{profileData ? (profileData.followers || []).length : userProfile.followers}</span>
-                  <span className="stat-lbl">Followers</span>
-                </div>
-                <div className="stat-box glass-panel">
-                  <span className="stat-val">{userProfile.accuracy}</span>
-                  <span className="stat-lbl">Critique Accuracy</span>
-                </div>
-                <div className="stat-box glass-panel">
-                  <span className="stat-val">{userProfile.listsCount}</span>
-                  <span className="stat-lbl">Lists Curated</span>
-                </div>
-              </div>
-            </div>
-
-            {/* All Users / Follow */}
-            {currentUser && allUsers.length > 0 && (
-              <section style={{ marginTop: '2rem' }}>
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Critics to Follow</h2>
-                <div className="profile-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))' }}>
-                  {allUsers.filter(u => u.username !== currentUser.username).map(u => (
-                    <div key={u.username} className="stat-box glass-panel" style={{ padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                        <img src={u.avatarUrl || DEFAULT_AVATAR} alt={u.username} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                        <div style={{ minWidth: 0 }}>
-                          <p style={{ fontSize: '0.82rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.username}</p>
-                          <p style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{(u.followers || []).length} followers</p>
-                        </div>
-                      </div>
-                      {(profileData?.following || []).includes(u.username) ? (
-                        <button className="btn-secondary" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }} onClick={() => handleUnfollow(u.username)}>Following</button>
-                      ) : (
-                        <button className="btn-primary" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }} onClick={() => handleFollow(u.username)}>Follow</button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="movies-section" style={{ marginTop: '2.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem' }}>My Watchlist</h2>
-                <span className="critique-movie-link" onClick={() => showToast("Already viewing all records")}>View All <ChevronRight size={12} /></span>
-              </div>
-              <MovieGrid
-                movies={movies.filter(m => watchlist.includes(m.id))}
-                onMovieClick={handleViewMovie}
-                emptyTitle="Your watchlist is empty"
-                emptyMessage={"Browse movies and click '+ Add to Watchlist' to save entries."}
-              />
-            </section>
-
-            {/* Recent reviews written by this user */}
-            <section style={{ marginTop: '3.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Recent Reviews</h2>
-              
-              <div className="user-reviews-list">
-                {/* Default pre-seeded review of this user */}
-                <div className="user-review-card glass-panel" style={{ display: 'flex', gap: '1.5rem' }}>
-                  <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=150" alt="movie" style={{ width: '80px', height: '110px', objectFit: 'cover', borderRadius: '6px' }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <h3 style={{ fontSize: '1.1rem', cursor: 'pointer' }} onClick={() => handleViewMovie('interstellar')}>Interstellar</h3>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Written on: Oct 28, 2023</span>
-                      </div>
-                      <span className="review-score-badge">★ 8.0/10</span>
-                    </div>
-                    <p style={{ marginTop: '0.75rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                      "Nolan weaves a brilliant narrative that balances hard space science with profound human emotion. The visual effects remain awe-inspiring a decade later."
-                    </p>
-                  </div>
-                </div>
-
-                {/* Dynamically entered user reviews */}
-                {profileReviews.map((rev, idx) => (
-                  <div key={idx} className="user-review-card glass-panel" style={{ display: 'flex', gap: '1.5rem' }}>
-                    <img src={rev.moviePoster} alt="movie" style={{ width: '80px', height: '110px', objectFit: 'cover', borderRadius: '6px' }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <h3 style={{ fontSize: '1.1rem', cursor: 'pointer' }} onClick={() => handleViewMovie(rev.movieId)}>{rev.movieTitle}</h3>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Written: Just now</span>
-                        </div>
-                        <span className="review-score-badge">★ {rev.rating.toFixed(1)}/10</span>
-                      </div>
-                      <p style={{ marginTop: '0.75rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                        "{rev.text}"
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </section>
-          </div>
+          <ProfileView
+            currentUser={currentUser}
+            userProfile={userProfile}
+            profileData={profileData}
+            movies={movies}
+            watchlist={watchlist}
+            userLists={userLists}
+            allUsers={allUsers}
+            onViewMovie={handleViewMovie}
+            onEditProfile={() => setEditingProfile(true)}
+            onLogout={handleLogout}
+            onOpenAuth={() => {
+              setAuthTab('login');
+              setIsAuthModalOpen(true);
+            }}
+            onFollow={handleFollow}
+            onUnfollow={handleUnfollow}
+            onViewList={handleViewList}
+            loadUserLists={loadUserLists}
+            onNavigate={navigateTo}
+            proxyImageUrl={proxyImageUrl}
+            showToast={showToast}
+          />
         )}
 
         {/* LEADERBOARD VIEW */}
@@ -3170,7 +3153,13 @@ const handleDeleteReview = useCallback(async (reviewId) => {
             <MovieGrid
               movies={movies.filter(m => selectedList.movieIds.includes(m.id))}
               onMovieClick={handleViewMovie}
-              emptyTitle="No movies in this list yet."
+              emptyTitle="No films in this collection"
+              emptyMessage="This curated selection does not have any active entries yet."
+              emptyAction={
+                <button className="btn-secondary" onClick={() => navigateTo('home')} style={{ padding: '0.5rem 1rem' }}>
+                  Discover Films
+                </button>
+              }
             />
           </div>
         )}
@@ -3448,14 +3437,17 @@ const handleDeleteReview = useCallback(async (reviewId) => {
         )}
 
         {/* CINE UPDATES REELS OVERLAY */}
-        {showCineReels && (
+        {(showCineReels || activeView === 'cine-updates') && (
           <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>Loading...</div>}>
             <CineUpdates
               updates={cineUpdates}
               onLike={handleCineUpdateLike}
               onShare={handleCineUpdateShare}
               currentUser={currentUser}
-              onBack={() => setShowCineReels(false)}
+              onBack={() => {
+                setShowCineReels(false);
+                navigateTo('home');
+              }}
               onNavigate={navigateTo}
             />
           </Suspense>
@@ -3499,16 +3491,18 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       </div>
 
       {/* FOOTER SECTION */}
-      <Footer
-        onNavigate={navigateTo}
-        onLoadLeaderboard={loadLeaderboard}
-        onLoadLists={loadAllLists}
-        siteSettings={siteSettings}
-        cmsPages={cmsPages}
-      />
+      {!showCineReels && activeView !== 'cine-updates' && (
+        <Footer
+          onNavigate={navigateTo}
+          onLoadLeaderboard={loadLeaderboard}
+          onLoadLists={loadAllLists}
+          siteSettings={siteSettings}
+          cmsPages={cmsPages}
+        />
+      )}
 
       {/* STAGING ENVIRONMENT WATERMARK BADGE */}
-      {(import.meta.env.VITE_APP_ENV === 'staging' || (typeof window !== 'undefined' && (window.location.port === '5174' || window.location.hostname.includes('staging')))) && (
+      {!showCineReels && activeView !== 'cine-updates' && (import.meta.env.VITE_APP_ENV === 'staging' || (typeof window !== 'undefined' && (window.location.port === '5174' || window.location.hostname.includes('staging')))) && (
         <div className="staging-env-pill" title="You are viewing the Staging Environment">
           <span className="staging-pulse-dot" />
           <span>STAGING ENVIRONMENT</span>
@@ -3567,134 +3561,159 @@ const handleDeleteReview = useCallback(async (reviewId) => {
 
 
       {/* TRAILER MODAL POPUP */}
-      <Modal isOpen={showTrailer} onClose={() => setShowTrailer(false)} width="800px">
-        <div style={{ padding: '0.25rem 0' }}>
-           <div className="trailer-header-info" style={{ padding: '0 0.25rem 0.75rem' }}>
-             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{selectedMovie?.title}</h2>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-               <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{selectedMovie?.trailerChannelName || 'YouTube'}</span>
-               <span style={{ fontSize: '0.6rem', color: 'rgba(148,163,184,0.4)' }}>·</span>
-               <span style={{ fontSize: '0.68rem', color: 'var(--color-accent-gold)', fontWeight: 600 }}>Official Trailer</span>
-             </div>
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-               <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-                 <input
-                   type="checkbox"
-                   checked={trailerAutoplayPreference}
-                   onChange={(e) => {
-                     setTrailerAutoplayPreference(e.target.checked);
-                     localStorage.setItem('mc_trailer_autoplay', e.target.checked);
-                   }}
-                 />
-                 <span>Autoplay trailer</span>
-               </label>
-             </div>
+      <Modal isOpen={showTrailer} onClose={() => setShowTrailer(false)} className="trailer-modal-dialog" width="960px">
+        <div className="trailer-cinema-root">
+          <div className="trailer-cinema-header">
+            <div className="trailer-header-meta">
+              <div className="trailer-title-row">
+                <h2 className="trailer-film-title">{selectedMovie?.title}</h2>
+                <span className="trailer-badge-pill">Official Trailer</span>
+              </div>
+              <div className="trailer-sub-row">
+                {(selectedMovie?.releaseYear || (selectedMovie?.releaseDate ? new Date(selectedMovie.releaseDate).getFullYear() : null)) && (
+                  <span className="trailer-meta-item">
+                    {selectedMovie?.releaseYear || new Date(selectedMovie.releaseDate).getFullYear()}
+                  </span>
+                )}
+                {selectedMovie?.language && (
+                  <>
+                    <span className="trailer-meta-dot">•</span>
+                    <span className="trailer-meta-item">{selectedMovie.language.toUpperCase()}</span>
+                  </>
+                )}
+                {selectedMovie?.trailerChannelName && (
+                  <>
+                    <span className="trailer-meta-dot">•</span>
+                    <span className="trailer-channel-tag">
+                      <Tv size={12} /> {selectedMovie.trailerChannelName}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
-           {selectedMovie?.trailerUrl ? (
-             <div style={{ position: 'relative' }}>
-               {/* Pre-roll ad overlay */}
-               {trailerPreRoll && (
-                 <div className="preroll-overlay">
-                    {PRE_ROLL_VIDEO_SRC ? (
-                      <>
-                        {PRE_ROLL_VIDEO_SRC.includes('player.vimeo.com') ? (
-                          <iframe
-                            title="pre-roll"
-                            src={PRE_ROLL_VIDEO_SRC}
-                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allow="autoplay; fullscreen; picture-in-picture"
-                            allowFullScreen
-                          />
-                        ) : (
-                          <video
-                            ref={preRollVideoRef}
-                            src={PRE_ROLL_VIDEO_SRC}
-                            muted
-                            playsInline
-                            autoPlay
-                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                            onEnded={() => {
-                              if (preRollTimerRef.current) clearInterval(preRollTimerRef.current);
-                              setTrailerPreRoll(false);
-                            }}
-                          />
-                        )}
-                        <div className="preroll-content" style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', padding: 0, gap: 0 }}>
-                          <button className="preroll-skip-btn" onClick={() => {
-                            if (preRollVideoRef.current && typeof preRollVideoRef.current.pause === 'function') {
-                              preRollVideoRef.current.pause();
-                              preRollVideoRef.current.currentTime = 0;
-                            }
+
+            <div className="trailer-header-actions">
+              <button
+                type="button"
+                className={`trailer-autoplay-toggle ${trailerAutoplayPreference ? 'active' : ''}`}
+                onClick={() => {
+                  const next = !trailerAutoplayPreference;
+                  setTrailerAutoplayPreference(next);
+                  localStorage.setItem('mc_trailer_autoplay', next);
+                }}
+                title={trailerAutoplayPreference ? "Autoplay is ON" : "Autoplay is OFF"}
+                aria-label="Toggle autoplay trailer"
+              >
+                <span className="trailer-autoplay-label">Autoplay</span>
+                <span className="trailer-toggle-switch">
+                  <span className="trailer-toggle-knob" />
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {selectedMovie?.trailerUrl ? (
+            <div className="trailer-stage">
+              {/* Pre-roll ad overlay */}
+              {trailerPreRoll && (
+                <div className="preroll-overlay">
+                  {PRE_ROLL_VIDEO_SRC ? (
+                    <>
+                      {PRE_ROLL_VIDEO_SRC.includes('player.vimeo.com') ? (
+                        <iframe
+                          title="pre-roll"
+                          src={PRE_ROLL_VIDEO_SRC}
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          ref={preRollVideoRef}
+                          src={PRE_ROLL_VIDEO_SRC}
+                          muted
+                          playsInline
+                          autoPlay
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                          onEnded={() => {
                             if (preRollTimerRef.current) clearInterval(preRollTimerRef.current);
                             setTrailerPreRoll(false);
-                          }}>
-                            Skip Ad
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                     <>
-                       <div className="preroll-content">
-                         <div className="preroll-badge">Ad</div>
-                         <div className="preroll-icon"><Film size={26} /></div>
-                         <p className="preroll-text">Sponsored Content</p>
-                         <p className="preroll-sub">This ad will end in 5 seconds</p>
-                         <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>
-                           Skip Ad
-                         </button>
-                       </div>
-                       <div className="preroll-timer">
-                         <div className="preroll-timer-bar" />
-                       </div>
-                     </>
-                   )}
-                 </div>
-               )}
-             <div
-              ref={playerContainerRef}
-              className="trailer-player-wrapper"
-              style={{ position: 'relative', paddingBottom: '56.25%', borderRadius: '12px', overflow: 'hidden', background: '#000', cursor: 'pointer' }}
-            >
-              {/* progress bar (top edge) */}
+                          }}
+                        />
+                      )}
+                      <div className="preroll-content" style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', padding: 0, gap: 0, zIndex: 10 }}>
+                        <button className="preroll-skip-btn" onClick={() => {
+                          if (preRollVideoRef.current && typeof preRollVideoRef.current.pause === 'function') {
+                            preRollVideoRef.current.pause();
+                            preRollVideoRef.current.currentTime = 0;
+                          }
+                          if (preRollTimerRef.current) clearInterval(preRollTimerRef.current);
+                          setTrailerPreRoll(false);
+                        }}>
+                          Skip Ad
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="preroll-content">
+                        <div className="preroll-badge">Ad</div>
+                        <div className="preroll-icon"><Film size={26} /></div>
+                        <p className="preroll-text">Sponsored Content</p>
+                        <p className="preroll-sub">This ad will end in 5 seconds</p>
+                        <button className="preroll-skip-btn" onClick={() => setTrailerPreRoll(false)}>
+                          Skip Ad
+                        </button>
+                      </div>
+                      <div className="preroll-timer">
+                        <div className="preroll-timer-bar" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               <div
-                onClick={seekTo}
-                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.1)', zIndex: 10, cursor: 'pointer' }}
-              >
-                <div style={{ width: `${trailerPlayer.duration ? (trailerPlayer.currentTime / trailerPlayer.duration) * 100 : 0}%`, height: '100%', background: 'var(--color-accent-gold)', transition: 'width 0.1s linear' }} />
-              </div>
-              {/* custom controls overlay */}
-              <div className="trailer-controls-overlay" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.6rem 0.75rem', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', zIndex: 10, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <button onClick={togglePlay} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.2rem', display: 'flex' }}>
-                  {trailerPlayer.playing ? <Pause size={18} fill="#fff" /> : <Play size={18} fill="#fff" />}
-                </button>
-                {/* progress bar */}
-                <div
-                  onClick={seekTo}
-                  style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', cursor: 'pointer', position: 'relative' }}
-                >
-                  <div style={{ width: `${trailerPlayer.duration ? (trailerPlayer.currentTime / trailerPlayer.duration) * 100 : 0}%`, height: '100%', background: '#fff', borderRadius: '2px', transition: 'width 0.1s linear' }} />
-                </div>
-                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums', minWidth: '55px' }}>
-                  {formatTime(trailerPlayer.currentTime)} / {formatTime(trailerPlayer.duration)}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Volume2 size={14} color="rgba(255,255,255,0.7)" />
-                  <input type="range" min="0" max="100" value={trailerPlayer.volume}
-                    onChange={setVolume}
-                    style={{ width: '50px', height: '3px', accentColor: '#fff', cursor: 'pointer' }}
-                  />
-                </div>
-                <button onClick={toggleFullscreen} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.2rem', display: 'flex' }}>
-                  <Maximize size={14} />
-                </button>
-              </div>
-            </div>
+                ref={playerContainerRef}
+                className="trailer-player-wrapper"
+              />
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
-              <p style={{ marginBottom: '0.5rem' }}>No trailer available for this film.</p>
-              <p style={{ fontSize: '0.85rem' }}>Add a YouTube link in the admin panel.</p>
+            <div className="trailer-empty-state">
+              <div className="trailer-empty-icon">
+                <Film size={22} />
+              </div>
+              <h3 className="trailer-empty-title">No Official Trailer Available</h3>
+              <p className="trailer-empty-desc">We couldn't locate an official trailer stream for this title yet.</p>
+            </div>
+          )}
+
+          {selectedMovie?.trailerUrl && (
+            <div className="trailer-cinema-footer">
+              <div className="trailer-footer-credits">
+                {selectedMovie?.director && (
+                  <span className="trailer-director-credit">
+                    Directed by <strong>{selectedMovie.director}</strong>
+                  </span>
+                )}
+                {selectedMovie?.genre && (
+                  <div className="trailer-genres-list">
+                    {selectedMovie.genre.split('/').slice(0, 3).map((g, idx) => (
+                      <span key={idx} className="trailer-genre-chip">{g.trim()}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <a
+                href={selectedMovie.trailerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="trailer-yt-button"
+              >
+                <span>Watch on YouTube</span>
+                <ExternalLink size={13} />
+              </a>
             </div>
           )}
         </div>
@@ -3739,232 +3758,33 @@ const handleDeleteReview = useCallback(async (reviewId) => {
       </Modal>
 
       {/* PROFILE EDIT MODAL */}
-      <Modal isOpen={editingProfile} onClose={() => setEditingProfile(false)} width="480px">
-        <div style={{ padding: '0.5rem 0' }}>
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Edit Profile</h3>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label className="admin-label">Bio</label>
-              <textarea className="admin-textarea" rows={3} value={editBio} onChange={e => setEditBio(e.target.value)} placeholder="Tell other critics about yourself..." />
-            </div>
-            <div>
-              <label className="admin-label">Avatar URL</label>
-              <input className="admin-input" value={editAvatar} onChange={e => setEditAvatar(e.target.value)} placeholder="https://..." />
-            </div>
-            <div>
-              <label className="admin-label">Email</label>
-              <input className="admin-input" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="email@example.com" />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-            <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }} onClick={() => setEditingProfile(false)}>Cancel</button>
-            <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }} onClick={handleSaveProfile}>Save Changes</button>
-          </div>
-        </div>
-      </Modal>
+      <EditProfileModal
+        isOpen={editingProfile}
+        onClose={() => setEditingProfile(false)}
+        currentUser={currentUser}
+        profileData={profileData}
+        onSave={handleSaveProfile}
+      />
 
-      {/* MODAL - LOGIN / REGISTER */}
-      {isAuthModalOpen && (
-        <div className="modal-overlay" onClick={() => { if (!isAuthLoading) { setIsAuthModalOpen(false); setAuthError(''); } }}>
-          <div className="modal-content-panel auth-card-premium" style={{ maxWidth: '400px', padding: '1.75rem' }} onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-btn" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', zIndex: 10 }} onClick={() => { setIsAuthModalOpen(false); setAuthError(''); }} disabled={isAuthLoading}>
-              <X size={18} />
-            </button>
-
-            {/* Header */}
-            <div className="auth-header-ticket">
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
-                {authTab === 'login' ? 'Login' : 'Sign Up'}
-              </h2>
-            </div>
-
-            {/* Tabs */}
-            <div className="auth-capsule-tabs">
-              <button 
-                type="button" 
-                className={`auth-capsule-tab ${authTab === 'login' ? 'auth-capsule-tab--active' : ''}`}
-                onClick={() => { if (!isAuthLoading) setTabAndClearForm('login'); }}
-                disabled={isAuthLoading}
-              >
-                Login
-              </button>
-              <button 
-                type="button" 
-                className={`auth-capsule-tab ${authTab === 'register' ? 'auth-capsule-tab--active' : ''}`}
-                onClick={() => { if (!isAuthLoading) setTabAndClearForm('register'); }}
-                disabled={isAuthLoading}
-              >
-                Sign Up
-              </button>
-            </div>
-
-            {GOOGLE_CLIENT_ID && (
-              <>
-                <div style={{ margin: '1rem 0 0.5rem' }}>
-                  <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', minHeight: '44px' }} />
-                </div>
-                <div className="auth-divider" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  margin: '0.5rem 0 1rem',
-                  color: 'var(--color-text-muted)',
-                  fontSize: '0.72rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em'
-                }}>
-                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                  or
-                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                </div>
-              </>
-            )}
-
-            <form onSubmit={handleAuthSubmit}>
-              <div className="modal-body" style={{ padding: '0 0.25rem' }}>
-                {authError && (
-                  <div className="auth-error-box" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    background: 'rgba(239, 68, 68, 0.08)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#f87171',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    fontSize: '0.8rem',
-                    marginBottom: '1rem',
-                    lineHeight: 1.4
-                  }}>
-                    <Info size={14} style={{ flexShrink: 0 }} />
-                    <span>{authError}</span>
-                  </div>
-                )}
-
-                <div className="auth-field-wrapper">
-                  <User size={16} className="auth-field-icon" />
-                  <input 
-                    type="text" 
-                    className="auth-field-input" 
-                    placeholder="Username"
-                    value={authFormData.username}
-                    onChange={(e) => setAuthFormData({ ...authFormData, username: e.target.value })}
-                    required 
-                    disabled={isAuthLoading}
-                  />
-                </div>
-
-                {authTab === 'register' && (
-                  <div className="auth-field-wrapper">
-                    <Mail size={16} className="auth-field-icon" />
-                    <input 
-                      type="email" 
-                      className="auth-field-input" 
-                      placeholder="Email"
-                      value={authFormData.email || ''}
-                      onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
-                      required={authTab === 'register'} 
-                      disabled={isAuthLoading}
-                    />
-                  </div>
-                )}
-
-                <div className="auth-field-wrapper" style={{ position: 'relative' }}>
-                  <Lock size={16} className="auth-field-icon" />
-                  <input 
-                    type={showPassword ? 'text' : 'password'} 
-                    className="auth-field-input" 
-                    placeholder="Password"
-                    value={authFormData.password}
-                    onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
-                    required 
-                    disabled={isAuthLoading}
-                  />
-                  <button
-                    type="button"
-                    style={{
-                      position: 'absolute',
-                      right: '1rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--color-text-muted)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 0,
-                      zIndex: 10
-                    }}
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isAuthLoading}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-
-                {authTab === 'register' && (
-                  <div className="auth-password-strength" style={{
-                    fontSize: '0.75rem',
-                    color: authFormData.password.length >= 6 ? 'var(--color-accent-gold)' : 'var(--color-text-muted)',
-                    marginTop: '-0.75rem',
-                    marginBottom: '1.25rem',
-                    paddingLeft: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    transition: 'color 0.3s ease'
-                  }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      background: authFormData.password.length >= 6 ? 'var(--color-accent-gold)' : '#475569',
-                      boxShadow: authFormData.password.length >= 6 ? '0 0 8px var(--color-accent-gold)' : 'none',
-                      transition: 'all 0.3s ease'
-                    }} />
-                    <span>{authFormData.password.length >= 6 ? 'Password okay' : 'Min 6 characters'}</span>
-                  </div>
-                )}
-
-                <button 
-                  type="submit" 
-                  className="btn-primary btn-auth-submit"
-                  disabled={isAuthLoading}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    opacity: isAuthLoading ? 0.8 : 1
-                  }}
-                >
-                  {isAuthLoading ? (
-                    <>
-                      <span className="auth-spinner" />
-                      <span>Loading...</span>
-                    </>
-                  ) : (
-                    <span>{authTab === 'login' ? 'Login' : 'Sign Up'}</span>
-                  )}
-                </button>
-
-                <p className="auth-footer-toggle">
-                  {authTab === 'login' ? "Don't have an account?" : "Already have an account?"}
-                  <span 
-                    onClick={() => { if (!isAuthLoading) setTabAndClearForm(authTab === 'login' ? 'register' : 'login'); }}
-                  >
-                    {authTab === 'login' ? 'Sign Up' : 'Login'}
-                  </span>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* MODAL - AUTHENTICATION (SIGN IN / SIGN UP) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthError('');
+        }}
+        authTab={authTab}
+        onTabChange={(tab) => setTabAndClearForm(tab)}
+        formData={authFormData}
+        onFormChange={(field, val) => setAuthFormData(prev => ({ ...prev, [field]: val }))}
+        error={authError}
+        isLoading={isAuthLoading}
+        showPassword={showPassword}
+        onToggleShowPassword={() => setShowPassword(prev => !prev)}
+        onSubmit={handleAuthSubmit}
+        googleClientId={GOOGLE_CLIENT_ID}
+        googleBtnRef={googleBtnRef}
+      />
     </div>
   );
 }

@@ -105,9 +105,12 @@ export default function BlindFrame({ movies, onViewMovie }) {
 
   if (candidates.length < 4) {
     return (
-      <div className="cflip-empty">
-        <Eye size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-        <p>Not enough movies. Add more with posters!</p>
+      <div className="cine-empty-state" style={{ margin: '3rem auto' }}>
+        <div className="cine-empty-state-icon">
+          <Eye size={26} />
+        </div>
+        <h3 className="cine-empty-state-title">Not Enough Films</h3>
+        <p className="cine-empty-state-desc">Blind Frame needs at least 4 indexed films with high-resolution poster artwork to initiate a round.</p>
       </div>
     );
   }

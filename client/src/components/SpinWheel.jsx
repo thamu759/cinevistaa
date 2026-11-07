@@ -47,9 +47,12 @@ export default function SpinWheel({ movies, onViewMovie }) {
 
   if (candidates.length === 0) {
     return (
-      <div className="cflip-empty">
-        <Film size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-        <p>No movies available. Add some first!</p>
+      <div className="cine-empty-state" style={{ margin: '3rem auto' }}>
+        <div className="cine-empty-state-icon">
+          <Film size={26} />
+        </div>
+        <h3 className="cine-empty-state-title">No Films Available</h3>
+        <p className="cine-empty-state-desc">There are no qualifying films in the library matching your criteria for the wheel.</p>
       </div>
     );
   }

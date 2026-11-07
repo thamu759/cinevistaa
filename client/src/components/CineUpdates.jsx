@@ -19,40 +19,48 @@ const getYouTubeEmbedUrl = (url) => {
 
 export default function CineUpdates({ updates = [], onLike, onShare, currentUser, onBack, onNavigate }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchDelta, setTouchDelta] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [likedAnim, setLikedAnim] = useState(null);
   const [doubleTapHeart, setDoubleTapHeart] = useState(null);
   const containerRef = useRef(null);
-  const touchStartY = useRef(null);
+  const trackRef = useRef(null);
+  const slideRefs = useRef([]);
   const lastTapRef = useRef(0);
+  const isScrollingRef = useRef(false);
 
   const update = updates[currentIndex];
 
+  const scrollToIndex = useCallback((index) => {
+    if (index < 0 || index >= updates.length) return;
+    const target = slideRefs.current[index];
+    if (target) {
+      isScrollingRef.current = true;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setCurrentIndex(index);
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 450);
+    }
+  }, [updates.length]);
+
   const goNext = useCallback(() => {
-    if (isTransitioning || currentIndex >= updates.length - 1) return;
-    setIsTransitioning(true);
-    setCurrentIndex(prev => prev + 1);
-    setTimeout(() => setIsTransitioning(false), 400);
-  }, [currentIndex, updates.length, isTransitioning]);
+    scrollToIndex(currentIndex + 1);
+  }, [currentIndex, scrollToIndex]);
 
   const goPrev = useCallback(() => {
-    if (isTransitioning || currentIndex <= 0) return;
-    setIsTransitioning(true);
-    setCurrentIndex(prev => prev - 1);
-    setTimeout(() => setIsTransitioning(false), 400);
-  }, [currentIndex, isTransitioning]);
+    scrollToIndex(currentIndex - 1);
+  }, [currentIndex, scrollToIndex]);
 
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
         goNext();
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
         goPrev();
       } else if (e.key === 'Escape') {
+        e.preventDefault();
         onBack?.();
       }
     };
@@ -60,62 +68,79 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goNext, goPrev, onBack]);
 
-  // Mouse wheel support (desktop)
+  // Smooth wheel navigation for desktop with inertial throttle
   useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let isThrottled = false;
     const handleWheel = (e) => {
-      if (e.deltaY > 0) {
-        goNext();
-      } else if (e.deltaY < 0) {
-        goPrev();
+      e.preventDefault();
+      if (isThrottled) return;
+
+      if (Math.abs(e.deltaY) > 20) {
+        isThrottled = true;
+        if (e.deltaY > 0) {
+          scrollToIndex(currentIndex + 1);
+        } else {
+          scrollToIndex(currentIndex - 1);
+        }
+        setTimeout(() => {
+          isThrottled = false;
+        }, 420);
       }
     };
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, [goNext, goPrev]);
 
-  const handleTouchStart = (e) => {
-    touchStartY.current = e.touches[0].clientY;
-    setTouchStart(e.touches[0].clientY);
-    setTouchDelta(0);
-  };
+    track.addEventListener('wheel', handleWheel, { passive: false });
+    return () => track.removeEventListener('wheel', handleWheel);
+  }, [currentIndex, scrollToIndex]);
 
-  const handleTouchMove = (e) => {
-    if (!touchStart) return;
-    e.preventDefault();
-    const delta = touchStart - e.touches[0].clientY;
-    setTouchDelta(delta);
-  };
+  // IntersectionObserver for native hardware-accelerated scroll-snap tracking
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || updates.length === 0 || typeof IntersectionObserver === 'undefined') return;
 
-  const handleTouchEnd = () => {
-    if (!touchStart) return;
-    const absDelta = Math.abs(touchDelta);
-    const velocity = absDelta / 150;
-    if (absDelta > 50 || velocity > 0.5) {
-      if (touchDelta > 0) {
-        goNext();
-      } else {
-        goPrev();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const idx = Number(entry.target.getAttribute('data-index'));
+            if (!isNaN(idx) && !isScrollingRef.current) {
+              setCurrentIndex(idx);
+            }
+          }
+        });
+      },
+      {
+        root: track,
+        threshold: 0.5,
       }
-    } else if (absDelta < 10) {
-      // Double-tap detection
-      const now = Date.now();
-      if (now - lastTapRef.current < 300 && update) {
-        handleLike(update.id);
-        setDoubleTapHeart(update.id);
-        setTimeout(() => setDoubleTapHeart(null), 700);
-      }
-      lastTapRef.current = now;
-    }
-    setTouchStart(null);
-    setTouchDelta(0);
-  };
+    );
+
+    slideRefs.current.forEach((slide) => {
+      if (slide) observer.observe(slide);
+    });
+
+    return () => observer.disconnect();
+  }, [updates]);
 
   const handleLike = (id) => {
     setLikedAnim(id);
     setTimeout(() => setLikedAnim(null), 350);
     onLike?.(id);
+  };
+
+  const handleSlideClick = (e, item) => {
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('iframe')) return;
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      handleLike(item.id);
+      setDoubleTapHeart(item.id);
+      setTimeout(() => setDoubleTapHeart(null), 700);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   const handleShare = async (item) => {
@@ -124,7 +149,7 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
         await navigator.share({
           title: item.title,
           text: `${item.title} — ${item.body}`,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch {}
     } else {
@@ -134,151 +159,201 @@ export default function CineUpdates({ updates = [], onLike, onShare, currentUser
 
   if (!updates || updates.length === 0) {
     return (
-      <div className="cine-reels-empty">
-        <Film size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
-        <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>No Cine Updates Yet</p>
-        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Check back later for the latest movie news and rumors!</p>
-        <button className="btn-secondary" onClick={onBack} style={{ marginTop: '1.5rem' }}>
-          <ChevronLeft size={16} /> Back to Home
-        </button>
+      <div className="cine-reels-container" ref={containerRef}>
+        <div className="cine-reels-header">
+          <button className="cine-reels-back" onClick={onBack} aria-label="Back">
+            <ChevronLeft size={22} />
+          </button>
+          <div className="cine-reels-title">
+            <span className="cine-reels-brand">Cine Pulse</span>
+          </div>
+        </div>
+        <div className="cine-empty-state" style={{ margin: 'auto' }}>
+          <div className="cine-empty-state-icon">
+            <Film size={26} />
+          </div>
+          <h3 className="cine-empty-state-title">No Cine Pulse Updates Yet</h3>
+          <p className="cine-empty-state-desc">Stay tuned for breaking Kollywood cinema news, rumors, and release scoops.</p>
+          <div className="cine-empty-state-action">
+            <button className="btn-secondary" onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.1rem' }}>
+              <ChevronLeft size={16} /> Back to Cinema Home
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const translateY = touchStart ? -touchDelta : 0;
-
   return (
-    <div
-      className="cine-reels-container"
-      ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="cine-reels-container" ref={containerRef}>
       {/* Header */}
       <div className="cine-reels-header">
-        <button className="cine-reels-back" onClick={onBack}>
+        <button className="cine-reels-back" onClick={onBack} aria-label="Close Cine Pulse">
           <ChevronLeft size={22} />
         </button>
         <div className="cine-reels-title">
-          <span className="cine-reels-brand">Cine Updates</span>
+          <span className="cine-reels-brand">Cine Pulse</span>
+          <span className="cine-reels-count">{currentIndex + 1} / {updates.length}</span>
         </div>
       </div>
 
-      {/* Main reel content */}
-      <div
-        className="cine-reels-content"
-        style={{ transform: touchStart ? `translateY(${translateY}px)` : undefined }}
-      >
-        {updates.map((item, idx) => (
-          <div
-            key={item.id}
-            className={`cine-reel-slide ${idx === currentIndex ? 'cine-reel-active' : ''} ${idx < currentIndex ? 'cine-reel-above' : ''} ${idx > currentIndex ? 'cine-reel-below' : ''}`}
-            style={{ 
-              transition: touchStart ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease',
-              opacity: idx === currentIndex ? 1 : 0,
-              transform: idx === currentIndex ? 'translateY(0) scale(1)' : idx < currentIndex ? 'translateY(-100%) scale(0.95)' : 'translateY(100%) scale(0.95)'
-            }}
-          >
-            {/* Background - rich cinematic gradient */}
-            <div className="cine-reel-bg" style={{
-              background: `
-                radial-gradient(ellipse at 30% 20%, ${CATEGORY_COLORS[item.category] || '#6366f1'}44 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 80%, ${CATEGORY_COLORS[item.category] || '#6366f1'}22 0%, transparent 50%),
-                linear-gradient(180deg, #0a0a14 0%, #12121e 40%, #1a1a2e 100%)
-              `
-            }}>
-              {item.videoUrl ? (() => {
-                const embed = getYouTubeEmbedUrl(item.videoUrl);
-                if (embed) {
-                  return (
-                    <iframe
-                      className="cine-reel-bg-video"
-                      src={`${embed}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&playlist=${encodeURIComponent(embed.split('/').pop())}`}
-                      title={item.title}
-                      style={{ border: 0 }}
-                      allow="autoplay; encrypted-media; picture-in-picture"
-                      allowFullScreen
-                    />
-                  );
-                }
-                return (
-                  <video
-                    className="cine-reel-bg-video"
-                    src={item.videoUrl}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                );
-              })() : (
-                <img
-                  src={item.imageUrl ? proxyImageUrl(item.imageUrl, 'w500') : `https://picsum.photos/seed/${item.id}/800/1200`}
-                  alt=""
-                  className="cine-reel-bg-img"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              )}
-              <div className="cine-reel-overlay" />
-            </div>
-
-            {/* Double-tap heart burst */}
-            <div className={`cine-reel-doubletap-heart ${doubleTapHeart === item.id ? 'cine-reel-doubletap-active' : ''}`}>
-              <Heart size={80} fill="#ef4444" color="#ef4444" />
-            </div>
-
-            {/* Content */}
-            <div className="cine-reel-body">
-              <div className="cine-reel-tag" style={{ background: CATEGORY_COLORS[item.category] || '#6366f1' }}>
-                {item.category || 'News'}
-              </div>
-
-              {item.movieName && (
-                <div className="cine-reel-movie-name">{item.movieName}</div>
-              )}
-
-              <h2 className="cine-reel-headline">{item.title}</h2>
-              <p className="cine-reel-text">{item.body}</p>
-
-              <div className="cine-reel-timestamp">{item.timestamp}</div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="cine-reel-actions">
-              <button
-                className={`cine-reel-action-btn ${likedAnim === item.id ? 'cine-reel-like-pop' : ''}`}
-                onClick={() => handleLike(item.id)}
-                title="Like"
-              >
-                <Heart
-                  size={26}
-                  fill={item.likedBy?.includes(currentUser?.username) ? '#ef4444' : 'none'}
-                  color={item.likedBy?.includes(currentUser?.username) ? '#ef4444' : '#fff'}
-                />
-                <span>{item.likes || 0}</span>
-              </button>
-              <button
-                className="cine-reel-action-btn"
-                onClick={() => handleShare(item)}
-                title="Share"
-              >
-                <Share2 size={24} color="#fff" />
-              </button>
-            </div>
-          </div>
+      {/* Story Dots Progress */}
+      <div className="cine-reels-progress">
+        {updates.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            className={`cine-reels-dot ${i === currentIndex ? 'cine-reels-dot-active' : ''}`}
+            onClick={() => scrollToIndex(i)}
+            aria-label={`Jump to update ${i + 1}`}
+          />
         ))}
       </div>
 
+      {/* Stage Wrapper */}
+      <div className="cine-reels-stage">
+        {/* Main reel content */}
+        <div className="cine-reels-content">
+          <div className="cine-reels-scroll-track" ref={trackRef}>
+            {updates.map((item, idx) => {
+              const isCurrent = idx === currentIndex;
+              return (
+                <section
+                  key={item.id}
+                  ref={(el) => { slideRefs.current[idx] = el; }}
+                  data-index={idx}
+                  className={`cine-reel-slide ${isCurrent ? 'cine-reel-active' : ''}`}
+                  onClick={(e) => handleSlideClick(e, item)}
+                >
+                  {/* Background - rich cinematic gradient */}
+                  <div
+                    className="cine-reel-bg"
+                    style={{
+                      background: `
+                        radial-gradient(ellipse at 30% 20%, ${CATEGORY_COLORS[item.category] || '#6366f1'}44 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 80%, ${CATEGORY_COLORS[item.category] || '#6366f1'}22 0%, transparent 50%),
+                        linear-gradient(180deg, #0a0a14 0%, #12121e 40%, #1a1a2e 100%)
+                      `
+                    }}
+                  >
+                    {item.videoUrl ? (() => {
+                      const embed = getYouTubeEmbedUrl(item.videoUrl);
+                      if (embed) {
+                        return isCurrent ? (
+                          <iframe
+                            className="cine-reel-bg-video"
+                            src={`${embed}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&playlist=${encodeURIComponent(embed.split('/').pop())}`}
+                            title={item.title}
+                            style={{ border: 0 }}
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <div className="cine-reel-bg-img" style={{ background: '#0a0a14' }} />
+                        );
+                      }
+                      return (
+                        <video
+                          className="cine-reel-bg-video"
+                          src={item.videoUrl}
+                          autoPlay={isCurrent}
+                          muted
+                          loop
+                          playsInline
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      );
+                    })() : (
+                      <img
+                        src={item.imageUrl ? proxyImageUrl(item.imageUrl, 'w500') : `https://picsum.photos/seed/${item.id}/800/1200`}
+                        alt=""
+                        className="cine-reel-bg-img"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                        loading={Math.abs(idx - currentIndex) <= 1 ? 'eager' : 'lazy'}
+                      />
+                    )}
+                    <div className="cine-reel-overlay" />
+                  </div>
+
+                  {/* Double-tap heart burst */}
+                  <div className={`cine-reel-doubletap-heart ${doubleTapHeart === item.id ? 'cine-reel-doubletap-active' : ''}`}>
+                    <Heart size={80} fill="#ef4444" color="#ef4444" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="cine-reel-body">
+                    <div className="cine-reel-tag" style={{ background: CATEGORY_COLORS[item.category] || '#6366f1' }}>
+                      {item.category || 'News'}
+                    </div>
+
+                    {item.movieName && (
+                      <div className="cine-reel-movie-name">{item.movieName}</div>
+                    )}
+
+                    <h2 className="cine-reel-headline">{item.title}</h2>
+                    <p className="cine-reel-text">{item.body}</p>
+
+                    <div className="cine-reel-timestamp">{item.timestamp}</div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="cine-reel-actions">
+                    <button
+                      type="button"
+                      className={`cine-reel-action-btn ${likedAnim === item.id ? 'cine-reel-like-pop' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(item.id);
+                      }}
+                      title="Like"
+                      aria-label="Like this update"
+                    >
+                      <Heart
+                        size={26}
+                        fill={item.likedBy?.includes(currentUser?.username) ? '#ef4444' : 'none'}
+                        color={item.likedBy?.includes(currentUser?.username) ? '#ef4444' : '#fff'}
+                      />
+                      <span>{item.likes || 0}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="cine-reel-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShare(item);
+                      }}
+                      title="Share"
+                      aria-label="Share this update"
+                    >
+                      <Share2 size={24} color="#fff" />
+                    </button>
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Desktop nav buttons */}
-        <button className="cine-reels-nav cine-reels-nav-up" onClick={goPrev} disabled={currentIndex === 0} aria-label="Previous">
+        <button
+          type="button"
+          className="cine-reels-nav cine-reels-nav-up"
+          onClick={goPrev}
+          disabled={currentIndex === 0}
+          aria-label="Previous update"
+        >
           <ChevronUp size={24} />
         </button>
-        <button className="cine-reels-nav cine-reels-nav-down" onClick={goNext} disabled={currentIndex >= updates.length - 1} aria-label="Next">
+        <button
+          type="button"
+          className="cine-reels-nav cine-reels-nav-down"
+          onClick={goNext}
+          disabled={currentIndex >= updates.length - 1}
+          aria-label="Next update"
+        >
           <ChevronDown size={24} />
         </button>
-
+      </div>
     </div>
   );
 }
