@@ -4393,14 +4393,12 @@ a {
     top: 0;
     left: 0;
     bottom: 0;
-    width: min(86vw, 345px);
+    width: min(84vw, 320px);
     height: 100vh;
     height: 100dvh;
-    background: linear-gradient(180deg, rgba(16, 18, 27, 0.98) 0%, rgba(9, 10, 15, 0.99) 100%);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border-right: 1px solid rgba(251, 191, 36, 0.2);
-    box-shadow: 14px 0 45px rgba(0, 0, 0, 0.85);
+    background: #090a0f;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.85);
     display: flex;
     flex-direction: column;
     z-index: 100000;
@@ -4428,47 +4426,46 @@ a {
 
   /* Header */
   .mobile-drawer-header {
-    padding: 1rem 1.15rem;
+    padding: 1.1rem 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    background: transparent;
     flex-shrink: 0;
   }
 
   .mobile-drawer-brand {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 800;
     letter-spacing: -0.02em;
     cursor: pointer;
-    color: var(--color-text-main, #f8fafc);
+    color: #ffffff;
   }
 
   .mobile-drawer-brand span {
     color: var(--color-accent-gold, #fbbf24);
-    text-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
   }
 
   .mobile-drawer-close-btn {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--color-text-muted, #94a3b8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .mobile-drawer-close-btn:hover,
   .mobile-drawer-close-btn:active {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.35);
-    color: #ef4444;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   /* Unified Drawer Scroll Body */
@@ -4482,31 +4479,31 @@ a {
     touch-action: pan-y;
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem 2.5rem;
+    gap: 1.1rem;
+    padding: 1rem 1.1rem 3rem;
   }
 
   .mobile-drawer-scroll-body::-webkit-scrollbar,
   .mobile-drawer-nav-content::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
   }
 
   .mobile-drawer-scroll-body::-webkit-scrollbar-thumb,
   .mobile-drawer-nav-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
   }
 
   /* User Card */
   .mobile-drawer-user-card {
     margin: 0;
     padding: 0.85rem 0.95rem;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(251, 191, 36, 0.22);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.65rem;
     flex-shrink: 0;
   }
 
@@ -4518,12 +4515,11 @@ a {
   }
 
   .mobile-drawer-avatar {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--color-accent-gold, #fbbf24);
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
   }
 
@@ -4534,9 +4530,9 @@ a {
   }
 
   .mobile-drawer-username {
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -4544,10 +4540,10 @@ a {
 
   .mobile-drawer-user-role {
     font-size: 0.68rem;
-    color: var(--color-accent-gold, #fbbf24);
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-weight: 600;
   }
 
   .mobile-drawer-user-actions {
@@ -4561,56 +4557,55 @@ a {
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
-    padding: 0.42rem 0.65rem;
+    padding: 0.45rem 0.65rem;
     border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--color-text-main, #f8fafc);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .mobile-drawer-action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
   }
 
   .mobile-drawer-action-btn.logout {
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.25);
-    background: rgba(239, 68, 68, 0.06);
+    color: #94a3b8;
   }
 
   .mobile-drawer-action-btn.logout:hover {
-    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
   }
 
   /* Guest Card */
   .mobile-drawer-guest-card {
     margin: 0;
-    padding: 0.95rem;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(20, 22, 33, 0.8) 100%);
-    border: 1px solid rgba(251, 191, 36, 0.25);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     flex-shrink: 0;
   }
 
   .mobile-drawer-guest-text strong {
     display: block;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #ffffff;
     margin-bottom: 0.2rem;
   }
 
   .mobile-drawer-guest-text p {
-    font-size: 0.75rem;
-    color: var(--color-text-muted, #94a3b8);
+    font-size: 0.74rem;
+    color: #94a3b8;
     margin: 0 0 0.75rem;
-    line-height: 1.35;
+    line-height: 1.4;
   }
 
   .mobile-drawer-login-btn {
@@ -4619,15 +4614,15 @@ a {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.58rem 1rem;
-    border-radius: 10px;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
     font-size: 0.82rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    color: #0b0c10;
+    font-weight: 600;
+    background: #ffffff;
+    color: #07080b;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
   }
 
@@ -4646,11 +4641,11 @@ a {
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    padding: 0.58rem 0.85rem;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--color-text-muted, #94a3b8);
+    padding: 0.55rem 0.85rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #94a3b8;
     font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -4659,37 +4654,41 @@ a {
 
   .mobile-drawer-search-bar:hover,
   .mobile-drawer-search-bar:active {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(251, 191, 36, 0.35);
-    color: var(--color-text-main, #f8fafc);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
   }
 
-
+  /* Navigation Groups */
   .mobile-drawer-group {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
   }
 
+  .mobile-drawer-group + .mobile-drawer-group {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.85rem;
+  }
+
   .mobile-drawer-group-title {
     font-size: 0.64rem;
     font-weight: 700;
-    color: var(--color-accent-gold, #fbbf24);
-    letter-spacing: 0.1em;
+    color: #64748b;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.35rem 0.6rem 0.2rem;
-    opacity: 0.85;
+    padding: 0.25rem 0.55rem 0.3rem;
   }
 
   .mobile-drawer-link {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.62rem 0.75rem;
-    border-radius: 10px;
-    font-size: 0.88rem;
+    padding: 0.58rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.86rem;
     font-weight: 500;
-    color: var(--color-text-main, #f8fafc);
+    color: #cbd5e1;
     text-decoration: none;
     background: transparent;
     border: 1px solid transparent;
@@ -4701,75 +4700,64 @@ a {
 
   .mobile-drawer-link:hover,
   .mobile-drawer-link:active {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
   }
 
   .mobile-drawer-link.active {
-    background: rgba(251, 191, 36, 0.12);
-    border-color: rgba(251, 191, 36, 0.28);
-    color: var(--color-accent-gold, #fbbf24);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
     font-weight: 600;
-    box-shadow: 0 0 14px rgba(251, 191, 36, 0.1);
   }
 
   .mobile-drawer-link-icon {
-    color: var(--color-text-muted, #94a3b8);
+    color: #94a3b8;
     flex-shrink: 0;
     transition: color 0.18s ease;
   }
 
-  .mobile-drawer-link.active .mobile-drawer-link-icon,
-  .mobile-drawer-link-icon.pulse-gold {
-    color: var(--color-accent-gold, #fbbf24);
+  .mobile-drawer-link:hover .mobile-drawer-link-icon,
+  .mobile-drawer-link.active .mobile-drawer-link-icon {
+    color: #ffffff;
   }
 
-  .mobile-drawer-pulse-tag {
+  .mobile-drawer-live-chip {
     margin-left: auto;
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    padding: 0.15rem 0.45rem;
-    border-radius: 6px;
-    background: rgba(251, 191, 36, 0.2);
-    color: var(--color-accent-gold, #fbbf24);
-    border: 1px solid rgba(251, 191, 36, 0.45);
-    animation: pulseBadge 1.8s infinite;
-  }
-
-  @keyframes pulseBadge {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.75; transform: scale(0.96); }
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.12rem 0.45rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .mobile-drawer-count-badge {
     margin-left: auto;
     font-size: 0.68rem;
-    font-weight: 700;
-    padding: 0.1rem 0.5rem;
+    font-weight: 600;
+    padding: 0.1rem 0.45rem;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--color-text-muted, #94a3b8);
+    background: rgba(255, 255, 255, 0.07);
+    color: #94a3b8;
   }
 
   .mobile-drawer-group.admin-group {
-    margin-top: 0.35rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(251, 191, 36, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.85rem;
   }
 
   .mobile-drawer-link.admin-link {
-    color: var(--color-accent-gold, #fbbf24);
-    font-weight: 600;
-    background: rgba(251, 191, 36, 0.06);
-    border-color: rgba(251, 191, 36, 0.2);
+    color: #f1f5f9;
   }
 
   /* Drawer Footer */
   .mobile-drawer-footer {
     margin-top: 0.5rem;
-    padding-top: 0.85rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
@@ -4780,24 +4768,24 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     font-size: 0.72rem;
-    color: var(--color-text-muted, #94a3b8);
+    color: #64748b;
   }
 
   .mobile-drawer-footer-links a {
-    color: var(--color-text-muted, #94a3b8);
+    color: #64748b;
     text-decoration: none;
     transition: color 0.18s ease;
   }
 
   .mobile-drawer-footer-links a:hover {
-    color: var(--color-accent-gold, #fbbf24);
+    color: #cbd5e1;
   }
 
   .mobile-drawer-tagline {
     font-size: 0.64rem;
-    color: rgba(148, 163, 184, 0.55);
+    color: #475569;
     text-align: center;
   }
 

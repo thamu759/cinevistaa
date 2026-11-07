@@ -1725,7 +1725,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   aria-label="Close navigation menu"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
@@ -1747,29 +1747,29 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                         className="mobile-drawer-action-btn"
                         onClick={() => { navigateTo('profile'); setIsMobileMenuOpen(false); }}
                       >
-                        <User size={14} /> Profile
+                        <User size={13} /> Profile
                       </button>
                       <button 
                         type="button" 
                         className="mobile-drawer-action-btn logout"
                         onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
                       >
-                        <LogOut size={14} /> Logout
+                        <LogOut size={13} /> Logout
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="mobile-drawer-guest-card">
                     <div className="mobile-drawer-guest-text">
-                      <strong>Welcome to ThiraiPedia</strong>
-                      <p>Save movies to your watchlist, rate cinema & join the discussions.</p>
+                      <strong>ThiraiPedia Cinema</strong>
+                      <p>Sign in to curate your watchlist, rate films & join community debates.</p>
                     </div>
                     <button 
                       type="button"
                       className="mobile-drawer-login-btn"
                       onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }}
                     >
-                      <LogIn size={16} /> Sign In / Register
+                      <LogIn size={15} /> Sign In or Register
                     </button>
                   </div>
                 )}
@@ -1781,61 +1781,29 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     className="mobile-drawer-search-bar" 
                     onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }}
                   >
-                    <Search size={16} />
-                    <span>Search movies, stars, directors...</span>
+                    <Search size={15} />
+                    <span>Search films, artists, critics...</span>
                   </button>
                 </div>
 
-                {/* Group 1: Core Channels */}
+                {/* Group 1: Cinema & Discover */}
                 <div className="mobile-drawer-group">
-                  <div className="mobile-drawer-group-title">MAIN CHANNELS</div>
+                  <div className="mobile-drawer-group-title">DISCOVER</div>
                   <Link 
                     className={`mobile-drawer-link ${activeView === 'home' ? 'active' : ''}`}
                     to="/"
                     onClick={() => { setSelectedGenre(''); setSortOption('popular'); setIsMobileMenuOpen(false); }}
                   >
-                    <Film size={18} className="mobile-drawer-link-icon" />
+                    <Film size={17} className="mobile-drawer-link-icon" />
                     <span className="mobile-drawer-link-text">Movies</span>
                   </Link>
 
-                  <button
-                    type="button"
-                    className={`mobile-drawer-link cine-pulse-mobile ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
-                    onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
-                  >
-                    <Zap size={18} className="mobile-drawer-link-icon pulse-gold" />
-                    <span className="mobile-drawer-link-text">Cine Pulse</span>
-                    <span className="mobile-drawer-pulse-tag">LIVE</span>
-                  </button>
-
-                  <Link 
-                    className={`mobile-drawer-link ${activeView === 'community' ? 'active' : ''}`}
-                    to="/community"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Users size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Community</span>
-                  </Link>
-
-                  <Link
-                    className={`mobile-drawer-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
-                    to="/articles"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Newspaper size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Articles & News</span>
-                  </Link>
-                </div>
-
-                {/* Group 2: Cinema & Releases */}
-                <div className="mobile-drawer-group">
-                  <div className="mobile-drawer-group-title">CINEMA & RELEASES</div>
                   <Link 
                     className={`mobile-drawer-link ${activeView === 'coming-soon' ? 'active' : ''}`}
                     to="/coming-soon"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Calendar size={18} className="mobile-drawer-link-icon" />
+                    <Calendar size={17} className="mobile-drawer-link-icon" />
                     <span className="mobile-drawer-link-text">Coming Soon</span>
                   </Link>
 
@@ -1844,8 +1812,34 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     to="/ott-calendar"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Tv size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">OTT Calendar</span>
+                    <Tv size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">OTT Releases</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    className={`mobile-drawer-link cine-pulse-mobile ${activeView === 'cine-updates' || showCineReels ? 'active' : ''}`}
+                    onClick={() => { loadCineUpdates(); setShowCineReels(true); setIsMobileMenuOpen(false); }}
+                  >
+                    <Zap size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Cine Pulse</span>
+                    <span className="mobile-drawer-live-chip">Live</span>
+                  </button>
+                </div>
+
+                {/* Group 2: Library & Watchlist */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">MY CINEMA</div>
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'watchlist' ? 'active' : ''}`}
+                    to="/watchlist"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Bookmark size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Watchlist</span>
+                    {watchlist && watchlist.length > 0 && (
+                      <span className="mobile-drawer-count-badge">{watchlist.length}</span>
+                    )}
                   </Link>
 
                   <Link 
@@ -1853,64 +1847,39 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                     to="/lists"
                     onClick={() => { loadAllLists(); setIsMobileMenuOpen(false); }}
                   >
-                    <Layers size={18} className="mobile-drawer-link-icon" />
+                    <Layers size={17} className="mobile-drawer-link-icon" />
                     <span className="mobile-drawer-link-text">Curated Lists</span>
                   </Link>
-
-                  <Link 
-                    className={`mobile-drawer-link ${activeView === 'watchlist' ? 'active' : ''}`}
-                    to="/watchlist"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Bookmark size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">My Watchlist</span>
-                    {watchlist && watchlist.length > 0 && (
-                      <span className="mobile-drawer-count-badge">{watchlist.length}</span>
-                    )}
-                  </Link>
                 </div>
 
-                {/* Group 3: Interactive Cine Hub */}
+                {/* Group 3: Community & Editorial */}
                 <div className="mobile-drawer-group">
-                  <div className="mobile-drawer-group-title">CINE HUB & GAMES</div>
+                  <div className="mobile-drawer-group-title">COMMUNITY & EDITORIAL</div>
                   <Link 
-                    className={`mobile-drawer-link ${activeView === 'quiz' ? 'active' : ''}`}
-                    to="/quiz"
+                    className={`mobile-drawer-link ${activeView === 'community' ? 'active' : ''}`}
+                    to="/community"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Gamepad2 size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Movie Quiz</span>
+                    <Users size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Community Discussions</span>
                   </Link>
 
-                  <Link 
-                    className={`mobile-drawer-link ${activeView === 'wheel' ? 'active' : ''}`}
-                    to="/wheel"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Sparkles size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Card Flix</span>
-                  </Link>
-
-                  <Link 
-                    className={`mobile-drawer-link ${activeView === 'blind-frame' ? 'active' : ''}`}
-                    to="/blind-frame"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Eye size={18} className="mobile-drawer-link-icon" />
-                    <span className="mobile-drawer-link-text">Blind Frame</span>
-                  </Link>
-                </div>
-
-                {/* Group 4: Critics & Editorial */}
-                <div className="mobile-drawer-group">
-                  <div className="mobile-drawer-group-title">CRITICS & EDITORIAL</div>
                   <Link 
                     className={`mobile-drawer-link ${activeView === 'leaderboard' ? 'active' : ''}`}
                     to="/leaderboard"
                     onClick={() => { loadLeaderboard(); setIsMobileMenuOpen(false); }}
                   >
-                    <Award size={18} className="mobile-drawer-link-icon" />
+                    <Award size={17} className="mobile-drawer-link-icon" />
                     <span className="mobile-drawer-link-text">Top Critics</span>
+                  </Link>
+
+                  <Link
+                    className={`mobile-drawer-link ${activeView === 'articles' || activeView === 'article-detail' ? 'active' : ''}`}
+                    to="/articles"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Newspaper size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Articles & Analysis</span>
                   </Link>
 
                   {cmsPages.filter(p => p.showInNavbar && p.isPublished !== false).map(p => (
@@ -1920,10 +1889,41 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       to={`/page/${p.slug}`}
                       onClick={() => { setSelectedPageSlug(p.slug); setActiveView('cms-page'); setIsMobileMenuOpen(false); }}
                     >
-                      <Compass size={18} className="mobile-drawer-link-icon" />
+                      <Compass size={17} className="mobile-drawer-link-icon" />
                       <span className="mobile-drawer-link-text">{p.title}</span>
                     </Link>
                   ))}
+                </div>
+
+                {/* Group 4: Interactive Hub */}
+                <div className="mobile-drawer-group">
+                  <div className="mobile-drawer-group-title">INTERACTIVE HUB</div>
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'quiz' ? 'active' : ''}`}
+                    to="/quiz"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Gamepad2 size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Movie Quiz</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'wheel' ? 'active' : ''}`}
+                    to="/wheel"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Sparkles size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Card Flix</span>
+                  </Link>
+
+                  <Link 
+                    className={`mobile-drawer-link ${activeView === 'blind-frame' ? 'active' : ''}`}
+                    to="/blind-frame"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Eye size={17} className="mobile-drawer-link-icon" />
+                    <span className="mobile-drawer-link-text">Blind Frame</span>
+                  </Link>
                 </div>
 
                 {/* Group 5: Admin Panel (if admin) */}
@@ -1935,7 +1935,7 @@ const handleDeleteReview = useCallback(async (reviewId) => {
                       to="/admin"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <ShieldCheck size={18} className="mobile-drawer-link-icon" />
+                      <ShieldCheck size={17} className="mobile-drawer-link-icon" />
                       <span className="mobile-drawer-link-text">Admin Control</span>
                     </Link>
                   </div>
