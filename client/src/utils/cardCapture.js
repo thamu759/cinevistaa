@@ -62,3 +62,4 @@ export async function captureElementToDataUrl(element) {
     return canvas.toDataURL('image/png');
   }
 }
+

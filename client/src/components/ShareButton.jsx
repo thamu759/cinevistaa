@@ -1,81 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
-import ShareCard from './ShareCard';
-import { captureElementToBlob } from '../utils/cardCapture';
+import { useState } from 'react';
+import { Share2 } from 'lucide-react';
+import ReviewSharePopup from './ReviewSharePopup';
 
 export default function ShareButton({ title, text, url, variant = 'icon', label, movie, className, wrapperClassName }) {
-  const [showMenu, setShowMenu] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [capturing, setCapturing] = useState(false);
-  const menuRef = useRef(null);
-  const cardRef = useRef(null);
-
-  useEffect(() => {
-    if (!showMenu) return;
-    const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showMenu]);
-
-  const fullUrl = url || window.location.href;
-  const shareText = text || `Check out ${title} on thiraipedia`;
-
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try { await navigator.share({ title, text: shareText, url: fullUrl }); return true; } catch {}
-    }
-    return false;
-  };
-
-  const shareCardAsImage = async () => {
-    if (!movie || !cardRef.current) return false;
-    setCapturing(true);
-    try {
-      const blob = await captureElementToBlob(cardRef.current);
-      if (!blob) return false;
-      const file = new File([blob], `${(movie.title || 'movie').toLowerCase().replace(/\s+/g, '-')}-thiraipedia.png`, { type: 'image/png' });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: movie.title, text: shareText });
-      } else {
-        const link = document.createElement('a');
-        link.download = file.name;
-        const blobUrl = URL.createObjectURL(blob);
-        link.href = blobUrl;
-        link.click();
-        URL.revokeObjectURL(blobUrl);
-      }
-      return true;
-    } catch {
-      return false;
-    } finally {
-      setCapturing(false);
-    }
-  };
-
-  const handleShare = async () => {
-    if (capturing) return;
-    if (await shareCardAsImage()) return;
-    if (await handleNativeShare()) return;
-    setShowMenu(true);
-  };
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      setCopied(true);
-      setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
-    } catch {}
-  };
-
-  const shareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(fullUrl)}`, '_blank', 'noopener,width=600,height=400');
-    setShowMenu(false);
-  };
-
-  const shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`, '_blank', 'noopener,width=600,height=400');
-    setShowMenu(false);
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
   const btnStyle = variant === 'text'
     ? { display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--color-border)', borderRadius: '8px', color: 'var(--color-text-main)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }
@@ -84,58 +12,25 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
   return (
     <div className={wrapperClassName} style={wrapperClassName ? { position: 'relative' } : { position: 'relative', display: 'inline-block' }}>
       <button 
-        onClick={handleShare} 
+        onClick={() => setIsOpen(true)} 
         className={className} 
         style={className ? undefined : btnStyle} 
         aria-label="Share" 
         title="Share" 
-        disabled={capturing}
       >
-        {capturing ? <ImageIcon size={16} style={{ animation: 'spin 1s linear infinite' }} /> : copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Share2 size={16} />}
+        <Share2 size={16} />
         {(variant === 'text' || label) && <span>{label || 'Share'}</span>}
       </button>
 
-      {showMenu && (
-        <div ref={menuRef} style={{
-          position: 'absolute', bottom: '100%', right: 0, marginBottom: '0.5rem',
-          background: '#1a1d23', border: '1px solid var(--color-border)',
-          borderRadius: '12px', padding: '0.5rem', minWidth: '180px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 100,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.25rem 0.5rem 0.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Share</span>
-            <button onClick={() => setShowMenu(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
-              <X size={14} />
-            </button>
-          </div>
-
-          <button onClick={copyLink} style={shareBtnStyle}>
-            {copied ? <Check size={16} style={{ color: '#22c55e' }} /> : <Link size={16} />}
-            {copied ? 'Copied!' : 'Copy Link'}
-          </button>
-          <button onClick={shareTwitter} style={shareBtnStyle}>
-            <MessageCircle size={16} />
-            Twitter
-          </button>
-          <button onClick={shareFacebook} style={shareBtnStyle}>
-            <Globe size={16} />
-            Facebook
-          </button>
-        </div>
-      )}
-
-      {movie && (
-        <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 580, height: 840, pointerEvents: 'none', zIndex: -1 }}>
-          <ShareCard movie={movie} cardRef={cardRef} />
-        </div>
+      {isOpen && (
+        <ReviewSharePopup
+          movie={movie}
+          title={title}
+          text={text}
+          url={url}
+          onClose={() => setIsOpen(false)}
+        />
       )}
     </div>
   );
 }
-
-const shareBtnStyle = {
-  display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-  padding: '0.5rem 0.75rem', background: 'none', border: 'none',
-  borderRadius: '8px', color: 'var(--color-text-main)', cursor: 'pointer',
-  fontSize: '0.85rem', textAlign: 'left',
-};

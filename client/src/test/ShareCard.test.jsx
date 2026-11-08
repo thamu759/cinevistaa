@@ -13,41 +13,40 @@ const mockMovie = {
   rating: 8.6,
 };
 
-describe('ShareCard - Luxury Cinema Pass', () => {
-  it('renders official new brand logo and cinema pass header', () => {
+describe('ShareCard - Minimal Cinephile Card', () => {
+  it('renders official new brand logo and thiraipedia.com domain', () => {
     render(<ShareCard movie={mockMovie} />);
 
     // Brand logo
-    const brandLogoImg = screen.getByAltText('ThiraiPedia');
+    const brandLogoImg = screen.getByAltText('Vettaiyan');
     expect(brandLogoImg).toBeInTheDocument();
-    expect(brandLogoImg.src).toContain('Thiraipedia%20White%20Logo%20with%20Yellow');
 
-    // Header & website
-    expect(screen.getByText('CINEMA LOG')).toBeInTheDocument();
-    expect(screen.getByText('THIRAIPEDIA ARCHIVE')).toBeInTheDocument();
-    expect(screen.getByText('THIRAIPEDIA.COM')).toBeInTheDocument();
+    const logo = screen.getByAltText('ThiraiPedia');
+    expect(logo).toBeInTheDocument();
+    expect(logo.src).toContain('Thiraipedia%20White%20Logo%20with%20Yellow');
+
+    // Website link
+    expect(screen.getByText('thiraipedia.com')).toBeInTheDocument();
   });
 
-  it('renders movie title, release year, genres, and director', () => {
+  it('renders film title, release year, and director in clean typography', () => {
     render(<ShareCard movie={mockMovie} />);
 
     expect(screen.getByText('Vettaiyan')).toBeInTheDocument();
-    expect(screen.getByText('2024')).toBeInTheDocument();
-    expect(screen.getByText('ACTION • DRAMA')).toBeInTheDocument();
-    expect(screen.getByText('DIR. T. J. GNANAVEL')).toBeInTheDocument();
+    expect(screen.getByText(/2024/)).toBeInTheDocument();
+    expect(screen.getByText(/Directed by T\. J\. Gnanavel/)).toBeInTheDocument();
   });
 
-  it('renders general movie share with critic and community scores', () => {
+  it('renders brand gold rating stars and 10-point score badge', () => {
     render(<ShareCard movie={mockMovie} />);
 
-    expect(screen.getByText('CRITIC SCORE')).toBeInTheDocument();
-    expect(screen.getByText('8.4 ★')).toBeInTheDocument();
-    expect(screen.getByText('COMMUNITY')).toBeInTheDocument();
-    expect(screen.getByText('8.6 ★')).toBeInTheDocument();
-    expect(screen.getByText('VERIFIED')).toBeInTheDocument();
+    expect(screen.getByText('8.4')).toBeInTheDocument();
+    expect(screen.getByText('/ 10')).toBeInTheDocument();
+    const starEl = screen.getByTestId('star-full');
+    expect(starEl).toBeInTheDocument();
   });
 
-  it('renders review data with reviewer username, rating, and quote', () => {
+  it('renders review data with username, score, and authentic quote', () => {
     const mockReviewData = {
       username: 'anirudh_fan',
       rating: 9,
@@ -56,15 +55,18 @@ describe('ShareCard - Luxury Cinema Pass', () => {
 
     render(<ShareCard movie={mockMovie} reviewData={mockReviewData} />);
 
-    expect(screen.getByText('CRITIC VERDICT')).toBeInTheDocument();
-    expect(screen.getByText('@anirudh_fan')).toBeInTheDocument();
+    expect(screen.getByText('Reviewed by @anirudh_fan')).toBeInTheDocument();
     expect(screen.getByText('9')).toBeInTheDocument();
     expect(screen.getByText(/Superstar Rajinikanth commanding screen presence/)).toBeInTheDocument();
   });
 
-  it('renders cinema pass log serial number', () => {
-    render(<ShareCard movie={mockMovie} />);
+  it('renders synopsis cleanly when no user review is provided', () => {
+    const movieWithDesc = {
+      ...mockMovie,
+      description: 'An honest police officer battles corruption and systemic injustice.',
+    };
+    render(<ShareCard movie={movieWithDesc} />);
 
-    expect(screen.getByText('LOG-000101')).toBeInTheDocument();
+    expect(screen.getByText(/An honest police officer battles corruption/)).toBeInTheDocument();
   });
 });
