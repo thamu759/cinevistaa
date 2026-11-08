@@ -1,133 +1,10 @@
 import { proxyImageUrl } from '../api';
+import brandLogo from '../assets/Thiraipedia White Logo with Yellow.png';
 
-const CARD_WIDTH = 600;
-const CARD_HEIGHT = 800;
+const CARD_WIDTH = 420;
+const CARD_HEIGHT = 620;
 
-const styles = {
-  container: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    position: 'relative',
-    overflow: 'hidden',
-    fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    background: '#0f0f1a',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '2rem',
-    boxSizing: 'border-box',
-  },
-  bgPoster: {
-    position: 'absolute',
-    inset: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    opacity: 0.15,
-    filter: 'blur(20px)',
-    transform: 'scale(1.1)',
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(180deg, rgba(15,15,26,0.3) 0%, rgba(15,15,26,0.85) 50%, rgba(15,15,26,1) 100%)',
-  },
-  goldenPattern: {
-    position: 'absolute',
-    inset: 0,
-    zIndex: 1,
-    background: 'radial-gradient(circle at 25% 35%, rgba(251,191,36,0.1) 0%, transparent 55%), radial-gradient(circle at 75% 65%, rgba(251,191,36,0.08) 0%, transparent 50%)',
-  },
-  posterOuter: {
-    position: 'relative',
-    zIndex: 2,
-    borderRadius: 14,
-    padding: 2,
-    background: 'linear-gradient(135deg, rgba(251,191,36,0.4), rgba(251,191,36,0.15))',
-    marginBottom: '1.5rem',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-  },
-  posterWrap: {
-    width: 220,
-    height: 330,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  poster: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    display: 'block',
-  },
-  title: {
-    position: 'relative',
-    zIndex: 2,
-    fontSize: '1.6rem',
-    fontWeight: 800,
-    color: '#fff',
-    textAlign: 'center',
-    lineHeight: 1.2,
-    marginBottom: '0.5rem',
-    maxWidth: '80%',
-  },
-  meta: {
-    position: 'relative',
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    marginBottom: '0.75rem',
-  },
-  year: {
-    fontSize: '0.95rem',
-    color: 'rgba(255,255,255,0.5)',
-    fontWeight: 500,
-  },
-  genre: {
-    fontSize: '0.8rem',
-    color: 'rgba(255,255,255,0.4)',
-    padding: '0.15rem 0.5rem',
-    borderRadius: 4,
-    background: 'rgba(255,255,255,0.06)',
-  },
-  rating: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.4rem',
-    position: 'relative',
-    zIndex: 2,
-    marginBottom: '1rem',
-  },
-  star: {
-    color: '#f5c518',
-    fontSize: '1.3rem',
-  },
-  score: {
-    fontSize: '1.1rem',
-    fontWeight: 700,
-    color: '#fff',
-  },
-  scoreMax: {
-    fontSize: '0.85rem',
-    color: 'rgba(255,255,255,0.35)',
-    fontWeight: 400,
-  },
-  branding: {
-    position: 'absolute',
-    bottom: '1.5rem',
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandLogoImg: {
-    height: 28,
-    display: 'block',
-  },
-};
-
-export default function ShareCard({ movie, cardRef }) {
+export default function ShareCard({ movie, reviewData, cardRef }) {
   const posterSrc = movie?.posterUrl
     ? proxyImageUrl(movie.posterUrl, 'w500')
     : '';
@@ -136,54 +13,263 @@ export default function ShareCard({ movie, cardRef }) {
     ? movie.releaseDate.split('-')[0] || movie.releaseYear
     : movie?.releaseYear || '';
 
+  const director = movie?.director || '';
   const genre = movie?.genre ? movie.genre.split('/')[0].trim() : '';
 
-  return (
-    <div ref={cardRef} style={styles.container}>
-      {posterSrc && (
-        <img
-          src={posterSrc}
-          alt=""
-          style={styles.bgPoster}
-          crossOrigin="anonymous"
-        />
-      )}
-      <div style={styles.gradientOverlay} />
-      <div style={styles.goldenPattern} />
+  const metaSubtitle = [releaseYear, director ? `Directed by ${director}` : genre]
+    .filter(Boolean)
+    .join('  ·  ');
 
-      <div style={styles.posterOuter}>
-        <div style={styles.posterWrap}>
+  const rating = reviewData?.rating ?? (movie?.criticScore || movie?.rating || null);
+  const displayScore = rating != null
+    ? (typeof rating === 'number' ? rating.toFixed(rating % 1 === 0 ? 0 : 1) : rating)
+    : null;
+
+  const username = reviewData?.user || reviewData?.username || '';
+  const reviewText = reviewData?.comment || reviewData?.text || '';
+
+  return (
+    <div
+      ref={cardRef}
+      style={{
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+        position: 'relative',
+        background: 'radial-gradient(circle at 50% 12%, rgba(251, 191, 36, 0.05) 0%, transparent 60%), #08090d',
+        fontFamily: '"Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '2rem 1.75rem 1.4rem',
+        boxSizing: 'border-box',
+        color: '#f8fafc',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        overflow: 'hidden',
+      }}
+    >
+      {/* ── Top Section: Poster & Film Header ── */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        {/* Theatrical Poster */}
+        <div
+          style={{
+            width: 140,
+            height: 210,
+            borderRadius: '8px',
+            overflow: 'hidden',
+            background: '#11141f',
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.7)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            flexShrink: 0,
+          }}
+        >
           {posterSrc ? (
-            <img src={posterSrc} alt={movie?.title} style={styles.poster} crossOrigin="anonymous" />
+            <img
+              src={posterSrc}
+              alt={movie?.title || 'Film'}
+              crossOrigin="anonymous"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
           ) : (
-            <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#64748b',
+                fontSize: '0.75rem',
+              }}
+            >
               No Poster
             </div>
           )}
         </div>
+
+        {/* Film Title */}
+        <h2
+          style={{
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            color: '#ffffff',
+            margin: '1.1rem 0 0',
+            textAlign: 'center',
+            lineHeight: 1.25,
+            letterSpacing: '-0.02em',
+            maxWidth: '360px',
+          }}
+        >
+          {movie?.title || 'Untitled'}
+        </h2>
+
+        {/* Subtitle: Year · Director */}
+        {metaSubtitle && (
+          <p
+            style={{
+              fontSize: '0.82rem',
+              color: '#8e95a5',
+              margin: '0.35rem 0 0',
+              textAlign: 'center',
+              fontWeight: 400,
+            }}
+          >
+            {metaSubtitle}
+          </p>
+        )}
       </div>
 
-      <div style={styles.title}>{movie?.title || 'Untitled'}</div>
+      {/* ── Middle Section: Rating & Review ── */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          padding: '0 0.5rem',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Rating Score */}
+        {displayScore && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              marginBottom: reviewText ? '0.45rem' : '0',
+            }}
+          >
+            <span
+              style={{
+                color: '#fbbf24',
+                fontSize: '1.05rem',
+                lineHeight: 1,
+              }}
+              data-testid="star-full"
+            >
+              ★
+            </span>
+            <span
+              style={{
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                color: '#ffffff',
+              }}
+            >
+              {displayScore}
+            </span>
+            <span
+              style={{
+                fontSize: '0.78rem',
+                color: '#64748b',
+                fontWeight: 400,
+              }}
+            >
+              / 10
+            </span>
+          </div>
+        )}
 
-      <div style={styles.meta}>
-        {releaseYear && <span style={styles.year}>{releaseYear}</span>}
-        {genre && <span style={styles.genre}>{genre}</span>}
+        {/* Review Quote */}
+        {reviewText ? (
+          <p
+            style={{
+              fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
+              fontSize: '0.85rem',
+              lineHeight: 1.55,
+              color: '#cbd5e1',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              margin: '0 0 0.25rem',
+              maxWidth: '350px',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            &ldquo;{reviewText}&rdquo;
+          </p>
+        ) : movie?.description ? (
+          <p
+            style={{
+              fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif',
+              fontSize: '0.8rem',
+              lineHeight: 1.5,
+              color: '#8e95a5',
+              textAlign: 'center',
+              margin: '0 0 0.25rem',
+              maxWidth: '350px',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {movie.description}
+          </p>
+        ) : null}
+
+        {/* Reviewer Username */}
+        {username && (
+          <span
+            style={{
+              fontSize: '0.72rem',
+              color: '#64748b',
+              marginTop: '0.2rem',
+              textAlign: 'center',
+            }}
+          >
+            Reviewed by @{username}
+          </span>
+        )}
       </div>
 
-      <div style={styles.rating}>
-        <span style={styles.star}>★</span>
-        <span style={styles.score}>
-          {movie?.criticScore?.toFixed(1) || movie?.rating?.toFixed(1) || '—'}
-        </span>
-        <span style={styles.scoreMax}>/10</span>
-      </div>
-
-      <div style={styles.branding}>
+      {/* ── Bottom Section: Official Logo & Domain ── */}
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.35rem',
+          paddingTop: '0.9rem',
+          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+        }}
+      >
         <img
-          src="https://res.cloudinary.com/di0j4psxz/image/upload/v1780591749/New_Project_3_cn7had.png"
+          src={brandLogo}
           alt="ThiraiPedia"
-          style={styles.brandLogoImg}
+          crossOrigin="anonymous"
+          style={{
+            height: '22px',
+            display: 'block',
+            objectFit: 'contain',
+          }}
         />
+        <span
+          style={{
+            fontSize: '0.66rem',
+            color: '#64748b',
+            letterSpacing: '0.04em',
+          }}
+        >
+          thiraipedia.com
+        </span>
       </div>
     </div>
   );
