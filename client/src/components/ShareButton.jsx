@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Share2, Link, Check, X, Globe, MessageCircle, Image as ImageIcon } from 'lucide-react';
 import ShareCard from './ShareCard';
+import { captureElementToBlob } from '../utils/cardCapture';
 
 export default function ShareButton({ title, text, url, variant = 'icon', label, movie, className, wrapperClassName }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -30,25 +31,18 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
     if (!movie || !cardRef.current) return false;
     setCapturing(true);
     try {
-      const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: false,
-        scale: 2,
-        backgroundColor: '#0f0f1a',
-        logging: false,
-      });
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const blob = await captureElementToBlob(cardRef.current);
       if (!blob) return false;
-      const file = new File([blob], `${movie.title || 'movie'}-thiraipedia.png`, { type: 'image/png' });
+      const file = new File([blob], `${(movie.title || 'movie').toLowerCase().replace(/\s+/g, '-')}-thiraipedia.png`, { type: 'image/png' });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: movie.title, text: shareText });
       } else {
         const link = document.createElement('a');
         link.download = file.name;
-        link.href = URL.createObjectURL(blob);
+        const blobUrl = URL.createObjectURL(blob);
+        link.href = blobUrl;
         link.click();
-        URL.revokeObjectURL(link.href);
+        URL.revokeObjectURL(blobUrl);
       }
       return true;
     } catch {
@@ -131,7 +125,7 @@ export default function ShareButton({ title, text, url, variant = 'icon', label,
       )}
 
       {movie && (
-        <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none', opacity: 0 }}>
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 580, height: 840, pointerEvents: 'none', zIndex: -1 }}>
           <ShareCard movie={movie} cardRef={cardRef} />
         </div>
       )}

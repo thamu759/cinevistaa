@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { Share2, X, Download, Check, MessageCircle, Image as ImageIcon } from 'lucide-react';
+import { Share2, X, Download, Check, MessageCircle, Send, Copy } from 'lucide-react';
 import ShareCard from './ShareCard';
+import { captureElementToBlob } from '../utils/cardCapture';
 
 export default function ReviewSharePopup({ movie, reviewData, onClose }) {
   const [capturing, setCapturing] = useState(false);
@@ -9,29 +10,52 @@ export default function ReviewSharePopup({ movie, reviewData, onClose }) {
   const cardRef = useRef(null);
   const captureRef = useRef(null);
 
-  const shareText = `I rated ${movie?.title} ${reviewData?.rating}/10 on ThiraiPedia!`;
+  const shareText = `I rated ${movie?.title || 'this movie'} ${reviewData?.rating ? `${reviewData.rating}/10` : 'on ThiraiPedia'}!`;
   const fullUrl = window.location.href;
 
   const downloadCard = async () => {
     if (!captureRef.current || capturing) return;
     setCapturing(true);
     try {
-      const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(captureRef.current, {
-        useCORS: true,
-        allowTaint: false,
-        scale: 2,
-        backgroundColor: '#0f0f1a',
-        logging: false,
-      });
+      const blob = await captureElementToBlob(captureRef.current);
+      if (!blob) return;
       const link = document.createElement('a');
-      link.download = `${movie?.title || 'movie'}-review-thiraipedia.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.download = `${(movie?.title || 'movie').toLowerCase().replace(/\s+/g, '-')}-review-thiraipedia.png`;
+      const url = URL.createObjectURL(blob);
+      link.href = url;
       link.click();
+      URL.revokeObjectURL(url);
       setDownloaded(true);
       setTimeout(() => setDownloaded(false), 2000);
     } catch (e) {
       console.error('Download failed:', e);
+    } finally {
+      setCapturing(false);
+    }
+  };
+
+  const shareNativeImage = async () => {
+    if (!captureRef.current || capturing) return;
+    setCapturing(true);
+    try {
+      const blob = await captureElementToBlob(captureRef.current);
+      if (!blob) return;
+      const fileName = `${(movie?.title || 'movie').toLowerCase().replace(/\s+/g, '-')}-review.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: movie?.title || 'Movie Review',
+          text: shareText,
+        });
+      } else {
+        await downloadCard();
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        console.error('Share image failed:', e);
+      }
     } finally {
       setCapturing(false);
     }
@@ -53,86 +77,255 @@ export default function ReviewSharePopup({ movie, reviewData, onClose }) {
     } catch {}
   };
 
+  const canShareFile = typeof navigator !== 'undefined' && !!navigator.canShare;
+
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '0.75rem',
-    }} onClick={onClose}>
-      <div style={{
-        background: 'linear-gradient(145deg, #1a1d23, #0f0f1a)',
-        border: '1px solid rgba(251,191,36,0.2)',
-        borderRadius: '16px', padding: '1.25rem',
-        maxWidth: '400px', width: '100%',
-        maxHeight: '90vh', overflowY: 'auto',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Share2 size={16} style={{ color: 'var(--color-accent-gold)' }} />
-            <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}>Share Your Review</span>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: 'rgba(3, 5, 10, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'linear-gradient(180deg, #121520 0%, #0a0d14 100%)',
+          border: '1px solid rgba(251, 191, 36, 0.28)',
+          borderRadius: '20px',
+          padding: '1.5rem',
+          maxWidth: '420px',
+          width: '100%',
+          maxHeight: '92vh',
+          overflowY: 'auto',
+          boxShadow: '0 24px 80px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'rgba(251, 191, 36, 0.12)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fbbf24',
+              }}
+            >
+              <Share2 size={15} />
+            </div>
+            <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
+              Share Your Verdict
+            </span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '0.25rem' }}>
-            <X size={18} />
+
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255, 255, 255, 0.6)',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+          >
+            <X size={16} />
           </button>
         </div>
 
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', textAlign: 'center', marginBottom: '1rem' }}>
-          Your rating has been posted! Share it with friends.
+        <p style={{ color: '#94a3b8', fontSize: '0.82rem', textAlign: 'center', margin: '0 0 1rem' }}>
+          Your critique has been recorded. Share your custom cinema pass!
         </p>
 
-        <div style={{ borderRadius: '10px', overflow: 'hidden', marginBottom: '1rem', transform: 'scale(0.6)', transformOrigin: 'top center', height: '260px' }}>
-          <ShareCard movie={movie} cardRef={cardRef} />
+        {/* Live Card Preview Box */}
+        <div
+          style={{
+            width: '100%',
+            height: '380px',
+            borderRadius: '14px',
+            overflow: 'hidden',
+            marginBottom: '1.25rem',
+            background: '#07090e',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              transform: 'scale(0.44)',
+              transformOrigin: 'center center',
+              width: 580,
+              height: 840,
+              flexShrink: 0,
+              pointerEvents: 'none',
+            }}
+          >
+            <ShareCard movie={movie} reviewData={reviewData} cardRef={cardRef} />
+          </div>
         </div>
 
-        <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 600, height: 800 }}>
-          <ShareCard movie={movie} cardRef={captureRef} />
+        {/* Hidden full-scale card for high-dpi capture */}
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 580, height: 840, pointerEvents: 'none', zIndex: -1 }}>
+          <ShareCard movie={movie} reviewData={reviewData} cardRef={captureRef} />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button onClick={downloadCard} disabled={capturing} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
-            padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.3)',
-            background: 'rgba(251,191,36,0.1)', color: 'var(--color-accent-gold)',
-            fontWeight: 600, fontSize: '0.85rem', cursor: capturing ? 'not-allowed' : 'pointer',
-          }}>
-            {capturing ? <ImageIcon size={14} style={{ animation: 'spin 1s linear infinite' }} /> : downloaded ? <Check size={14} /> : <Download size={14} />}
-            {capturing ? 'Generating...' : downloaded ? 'Downloaded!' : 'Download Card'}
+        {/* Action Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {/* Primary Action: Share File if supported, otherwise Download */}
+          <button
+            onClick={canShareFile ? shareNativeImage : downloadCard}
+            disabled={capturing}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(251, 191, 36, 0.4)',
+              background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%)',
+              color: '#fbbf24',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: capturing ? 'not-allowed' : 'pointer',
+              transition: 'transform 0.15s, background 0.15s',
+            }}
+          >
+            {capturing ? (
+              <>Generating Pass...</>
+            ) : downloaded ? (
+              <>
+                <Check size={16} /> Saved to Gallery!
+              </>
+            ) : canShareFile ? (
+              <>
+                <Send size={16} /> Share Image to Story / Apps
+              </>
+            ) : (
+              <>
+                <Download size={16} /> Download Cinema Pass (PNG)
+              </>
+            )}
           </button>
 
+          {/* Secondary Quick Share Buttons */}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={shareWhatsApp} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
-              padding: '0.6rem', borderRadius: '8px', border: 'none',
-              background: '#25D366', color: '#fff', fontWeight: 600, fontSize: '0.8rem',
-              cursor: 'pointer',
-            }}>
-              <MessageCircle size={14} />
+            <button
+              onClick={shareWhatsApp}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                padding: '0.65rem 0.5rem',
+                borderRadius: '8px',
+                border: 'none',
+                background: '#25D366',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+              }}
+            >
+              <MessageCircle size={15} />
               WhatsApp
             </button>
-            <button onClick={shareTwitter} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
-              padding: '0.6rem', borderRadius: '8px', border: 'none',
-              background: '#1DA1F2', color: '#fff', fontWeight: 600, fontSize: '0.8rem',
-              cursor: 'pointer',
-            }}>
-              <Share2 size={14} />
-              X
+
+            <button
+              onClick={shareTwitter}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                padding: '0.65rem 0.5rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: '#0f141c',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+              }}
+            >
+              <Share2 size={15} />
+              X / Twitter
             </button>
-            <button onClick={copyLink} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
-              padding: '0.6rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)', color: '#fff', fontWeight: 500, fontSize: '0.8rem',
-              cursor: 'pointer',
-            }}>
-              {copied ? <Check size={14} style={{ color: '#22c55e' }} /> : <Share2 size={14} />}
-              {copied ? 'Copied!' : 'Link'}
+
+            <button
+              onClick={copyLink}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                padding: '0.65rem 0.5rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                color: '#e2e8f0',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+              }}
+            >
+              {copied ? <Check size={15} style={{ color: '#22c55e' }} /> : <Copy size={15} />}
+              {copied ? 'Copied' : 'Link'}
             </button>
           </div>
 
-          <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', textAlign: 'center', marginTop: '0.15rem' }}>
-            thiraipedia — Premium Film Critique
+          {/* Tertiary download button when native share was primary */}
+          {canShareFile && (
+            <button
+              onClick={downloadCard}
+              disabled={capturing}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                fontSize: '0.78rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                padding: '0.35rem',
+                cursor: 'pointer',
+                marginTop: '0.2rem',
+              }}
+            >
+              <Download size={13} /> Or download PNG file
+            </button>
+          )}
+
+          <p style={{ color: 'rgba(255, 255, 255, 0.35)', fontSize: '0.68rem', textAlign: 'center', margin: '0.25rem 0 0' }}>
+            ThiraiPedia &bull; High-Fidelity 2x Cinema Export
           </p>
         </div>
       </div>
